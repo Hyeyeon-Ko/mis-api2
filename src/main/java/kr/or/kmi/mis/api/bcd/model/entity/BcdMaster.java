@@ -1,6 +1,8 @@
 package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
+import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -65,4 +67,18 @@ public class BcdMaster {
         this.status = applyStatus;
     }
 
+    // 승인 -> 승인자, 대응일시, 상태 업데이트
+    public void updateApprove(ApproveRequestDTO approveRequestDTO) {
+        this.approver = approveRequestDTO.getApprover();
+        this.respondDate = approveRequestDTO.getRespondDate();
+        this.status = approveRequestDTO.getStatus();
+    }
+
+    // 반려 -> 반려자, 대응일시, 상태 업데이트
+    public void updateDisapprove(DisapproveRequestDTO disapproveRequestDTO) {
+        this.disapprover = disapproveRequestDTO.getDisapprover();
+        this.rejectReason = disapproveRequestDTO.getRejectReason();
+        this.respondDate = disapproveRequestDTO.getRespondDate();
+        this.status = disapproveRequestDTO.getStatus();
+    }
 }

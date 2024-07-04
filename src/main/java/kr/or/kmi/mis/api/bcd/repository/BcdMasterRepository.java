@@ -17,4 +17,7 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, Long> {
     @Query("SELECT b FROM BcdMaster b WHERE b.status <> :status")
     Optional<List<BcdMaster>> findAllByStatusNotOrderByDraftDateDesc(@Param("status") String status);
 
+    Optional<String> findDrafterByDraftId(Long id);
+    BcdMaster findByDraftId(Long id);
+    List<BcdMaster> findAllByStatus(String status);
 }
