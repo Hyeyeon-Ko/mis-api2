@@ -1,4 +1,4 @@
-package kr.or.kmi.mis.api.bcd.model;
+package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
