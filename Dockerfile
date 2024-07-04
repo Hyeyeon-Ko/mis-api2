@@ -1,5 +1,5 @@
 # Use a base image with JDK and Gradle installed
-FROM gradle:8.8-jdk-alpine AS build
+FROM gradle:8.5-jdk17-alpine AS build
 
 # Set working directory in the container
 WORKDIR /app
