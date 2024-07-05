@@ -20,7 +20,7 @@ before_script:
 
 build:
   stage: build
-  image: gradle:8.4.0-jdk17
+  image: gradle:jdk17
   script:
     - echo "build start!"
     - ./gradlew clean
