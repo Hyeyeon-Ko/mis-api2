@@ -25,7 +25,6 @@ docker-build:
       alias: docker
   script:
     - echo "Docker build start!!"
-    - docker login $REGISTRY_URL
     - docker build -t $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
   tags:
     - mis-runner
