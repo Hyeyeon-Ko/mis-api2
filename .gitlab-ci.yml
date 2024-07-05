@@ -23,7 +23,7 @@ build:
   image: gradle:8.5-jdk17-apline
   script:
     - echo "build start!"
-    - export JAVA_HOME=/opt/javaj/openjdk
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
     - export PATH=$JAVA_HOME/bin:$PATH
     - ./gradlew clean
     - ./gradlew build  # Gradle Wrapper를 통해 빌드
