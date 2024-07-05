@@ -20,7 +20,7 @@ before_script:
 
 build:
   stage: build
-  image: gradle:jdk17
+  image: gradle:jdk17  # Docker Hub의 이미지 사용
   script:
     - echo "build start!"
     - ./gradlew clean
@@ -36,7 +36,7 @@ docker-build:
       alias: docker
   script:
     - echo "Docker build start!"
-    - docker build -t $REGISTRY_URL/mis-api/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker build -t $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
   tags:
     - mis-runner
   dependencies:
@@ -50,8 +50,8 @@ docker-push:
       alias: docker
   script:
     - echo "Docker push start!"
-    - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-    - docker push $REGISTRY_URL/mis-api/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+    - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin "$REGISTRY_URL"
+    - docker push $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
   tags:
     - mis-runner
   dependencies:
@@ -59,10 +59,11 @@ docker-push:
 
 test:
   stage: test
-  image: gradle:8.5-jdk17-alpine
+  image: $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
   script:
     - echo "test start!"
+    - java -jar app.jar
   tags:
     - mis-runner
   dependencies:
-    - build
+    - docker-build
