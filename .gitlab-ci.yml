@@ -24,7 +24,7 @@ docker-build:
   services:
     - name: docker:dind
       alias: docker
-      command: ["--host=tcp://0.0.0.0:2375"]  # DinD 컨테이너가 TCP 소켓을 사용하도록 설정
+      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]  # DinD 컨테이너가 TCP 소켓을 사용하도록 설정
   variables:
     DOCKER_TLS_CERTDIR: ""  # 서비스 섹션에도 TLS 인증서 비활성화 설정 추가
   script:
@@ -39,7 +39,7 @@ docker-push:
   services:
     - name: docker:dind
       alias: docker
-      command: ["--host=tcp://0.0.0.0:2375"]  # DinD 컨테이너가 TCP 소켓을 사용하도록 설정
+      command: ["--tls=false","--host=tcp://0.0.0.0:2375"]  # DinD 컨테이너가 TCP 소켓을 사용하도록 설정
   variables:
     DOCKER_TLS_CERTDIR: ""  # 서비스 섹션에도 TLS 인증서 비활성화 설정 추가
   script:
