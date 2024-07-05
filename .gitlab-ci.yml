@@ -1,12 +1,19 @@
 stages:
   - build
+  - docker-build
+  - docker-push
   - test
 
 variables:
   DOCKER_IMAGE: mis-api
-  SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY  # SSH 개인 키를 GitLab의 환경 변수에서 가져옴
-before_script:
-  - chmod +x gradlew
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_HOST: tcp://docker:2375  # DinD 서비스 주소
+  DOCKER_TLS_VERIFY: "0"
+  DOCKER_CERT_PATH: "/certs/client"
+  REGISTRY_URL: $REGISTRY_URL  # GitLab Container Registry URL
+  REGISTRY_USER: $REGISTRY_USER  # GitLab 사용자 이름
+  REGISTRY_PASSWORD: $REGISTRY_PASSWORD  # Access Token
 
 build:
   stage: build
@@ -17,6 +24,35 @@ build:
   tags:
     - mis-runner
 
+docker-build:
+  stage: docker-build
+  image: docker:stable
+  services:
+    - name: docker:dind
+      alias: docker
+  script:
+    - echo "Docker build start!"
+    - docker build -t $REGISTRY_URL/mis-api/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
+  tags:
+    - mis-runner
+  dependencies:
+    - build
+
+docker-push:
+  stage: docker-push
+  image: docker:stable
+  services:
+    - name: docker:dind
+      alias: docker
+  script:
+    - echo "Docker push start!"
+    - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker push $REGISTRY_URL/mis-api/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+  tags:
+    - mis-runner
+  dependencies:
+    - docker-build
+
 test:
   stage: test
   image: gradle:8.5-jdk17-alpine
@@ -26,4 +62,3 @@ test:
     - mis-runner
   dependencies:
     - build
-
