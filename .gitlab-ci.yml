@@ -1,5 +1,4 @@
 stages:
-  - build
   - docker-build
   - docker-push
   - test
@@ -18,18 +17,6 @@ variables:
 before_script:
   - chmod +x gradlew  # gradlew에 실행 권한 부여
 
-build:
-  stage: build
-  image: gradle:jdk17  
-  script:
-    - echo "build start!"
-    - export JAVA_HOME=/opt/java/openjdk/
-    - export PATH=$JAVA_HOME/bin:$PATH
-    - ./gradlew clean
-    - ./gradlew build  # Gradle Wrapper를 통해 빌드
-  tags:
-    - mis-runner
-
 docker-build:
   stage: docker-build
   image: docker:stable
@@ -41,8 +28,6 @@ docker-build:
     - docker build -t $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
   tags:
     - mis-runner
-  dependencies:
-    - build
 
 docker-push:
   stage: docker-push
