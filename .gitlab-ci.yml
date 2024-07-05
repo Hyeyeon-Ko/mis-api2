@@ -20,9 +20,11 @@ before_script:
 
 build:
   stage: build
-  image: gradle:jdk17
+  image: gradle:8.5-jdk17-apline
   script:
     - echo "build start!"
+    - export JAVA_HOME=/opt/javaj/openjdk
+    - export PATH=$JAVA_HOME/bin:$PATH
     - ./gradlew clean
     - ./gradlew build  # Gradle Wrapper를 통해 빌드
   tags:
