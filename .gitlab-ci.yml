@@ -9,7 +9,6 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375  # DinD 서비스 주소
   DOCKER_TLS_VERIFY: "0"
-  DOCKER_CERT_PATH: "/certs/client"
   REGISTRY_URL: $REGISTRY_URL  # GitLab Container Registry URL
   REGISTRY_USER: $REGISTRY_USER  # GitLab 사용자 이름
   REGISTRY_PASSWORD: $REGISTRY_PASSWORD  # Access Token
