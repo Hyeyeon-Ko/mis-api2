@@ -65,7 +65,7 @@ test:
   stage: test
   image: $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
   script:
-    - echo "Test start!"
+    - echo "Test start!!"
     - java -jar app.jar
   tags:
     - mis-runner
