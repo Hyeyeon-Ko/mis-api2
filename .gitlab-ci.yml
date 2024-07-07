@@ -19,6 +19,8 @@ before_script:
   - export DOCKER_TLS_VERIFY=0
   - export DOCKER_CERT_PATH=""
   - export DOCKER_HOST=unix:///var/run/docker.sock  # 호스트의 Docker 소켓을 사용
+  - mkdir -p /root/.docker  # Docker 디렉터리 생성
+  - echo -n "" > /root/.docker/ca.pem  # 빈 ca.pem 파일 생성
   - echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
   - echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
   - echo "DOCKER_HOST=$DOCKER_HOST"
