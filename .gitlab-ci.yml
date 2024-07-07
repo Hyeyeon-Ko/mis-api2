@@ -37,7 +37,7 @@ docker-push:
   stage: docker-push
   image: docker:stable
   script:
-    - echo "Docker push start!"
+    - echo "Docker push start!!"
     - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin "$REGISTRY_URL"
     - docker push $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
   tags:
