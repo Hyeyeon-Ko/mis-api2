@@ -1,16 +1,22 @@
 # Use a base image with JDK and Gradle installed
 FROM gradle:8.5-jdk21 AS build
 
-# JDK 22 설치
-RUN apt-get update && apt-get install -y openjdk-22-jdk
+# Install dependencies
+RUN apt-get update && apt-get install -y wget
+
+# Download and install JDK 22
+RUN wget https://download.java.net/java/early_access/jdk22/22/GPL/openjdk-22-ea+22_linux-x64_bin.tar.gz \
+    && tar -xzf openjdk-22-ea+22_linux-x64_bin.tar.gz -C /usr/local/ \
+    && mv /usr/local/jdk-22 /usr/local/java-22-openjdk-amd64
+    
+# JDK 22를 사용하도록 Gradle 환경 변수 설정
+ENV JAVA_HOME=/usr/lib/jvm/java-22-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Set working directory in the container
 WORKDIR /app
 COPY . .
 
-# JDK 22를 사용하도록 Gradle 환경 변수 설정
-ENV JAVA_HOME=/usr/lib/jvm/java-22-openjdk-amd64
-ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Copy build.gradle and settings.gradle to install dependencies
 COPY build.gradle .
