@@ -7,7 +7,7 @@ variables:
   DOCKER_IMAGE: mis-api
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: tcp://docker:2375  # DinD 서비스 주소
+  DOCKER_HOST: unix:///var/run/docker.sock  # 호스트의 Docker 소켓을 사용
   DOCKER_TLS_VERIFY: "0"
   DOCKER_CERT_PATH: ""
   REGISTRY_URL: $REGISTRY_URL  # GitLab Container Registry URL
@@ -18,7 +18,7 @@ before_script:
   - chmod +x gradlew  # gradlew에 실행 권한 부여
   - export DOCKER_TLS_VERIFY=0
   - export DOCKER_CERT_PATH=""
-  - export DOCKER_HOST=tcp://docker:2375
+  - export DOCKER_HOST=unix:///var/run/docker.sock  # 호스트의 Docker 소켓을 사용
   - echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
   - echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
   - echo "DOCKER_HOST=$DOCKER_HOST"
@@ -27,14 +27,6 @@ before_script:
 docker-build:
   stage: docker-build
   image: docker:stable
-  services:
-    - name: docker:stable-dind
-      alias: docker
-      command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # DinD 컨테이너가 TCP 소켓을 사용하도록 설정
-  variables:
-    DOCKER_TLS_CERTDIR: ""  # 서비스 섹션에도 TLS 인증서 비활성화 설정 추가
-    DOCKER_TLS_VERIFY: "0"
-    DOCKER_CERT_PATH: ""
   script:
     - echo "Docker build start!!"
     - docker build -t $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
@@ -44,14 +36,6 @@ docker-build:
 docker-push:
   stage: docker-push
   image: docker:stable
-  services:
-    - name: docker:stable-dind
-      alias: docker
-      command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]  # DinD 컨테이너가 TCP 소켓을 사용하도록 설정
-  variables:
-    DOCKER_TLS_CERTDIR: ""  # 서비스 섹션에도 TLS 인증서 비활성화 설정 추가
-    DOCKER_TLS_VERIFY: "0"
-    DOCKER_CERT_PATH: ""
   script:
     - echo "Docker push start!"
     - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin "$REGISTRY_URL"
