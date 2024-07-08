@@ -1,5 +1,5 @@
 # Use a base image with JDK and Gradle installed
-FROM gradle:8.5-jdk21 AS build
+FROM gradle:8.8-jdk22 AS build
 
 # Install dependencies
 RUN apt-get update && apt-get install -y wget
