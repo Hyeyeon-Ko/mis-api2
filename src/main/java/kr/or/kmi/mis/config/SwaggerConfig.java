@@ -29,7 +29,7 @@ public class SwaggerConfig {
         Info info = new Info()
                 .title("Spring Boot 를 이용한 API 확인 Swagger")
                 .version("0.1")
-                .description("RESTfull API 문서입니다. \n 몽골 접수 키오스크 API 입니다.");
+                .description("RESTfull API 문서입니다. 그룹웨어 API 입니다. :)");
         return new OpenAPI()
                 .components(new Components())
                 .info(info);
