@@ -65,11 +65,20 @@ deploy:
     #    if docker ps -a -q -f name=backend; then docker stop backend && docker rm backend; fi &&
     #    docker run -d --name backend $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
     #  "
-    - apk add --no-cache rsync
-    - rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" ./docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER:/
+    #- apk add --no-cache rsync
+    #- rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" ./docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER:/
+    #- ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "
+    #    echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
+    #    cd / &&
+    #    docker-compose pull &&
+    #    docker-compose up -d
+    #  "
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "
         echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
         cd / &&
+        export CI_REGISTRY=$CI_REGISTRY &&
+        export CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE &&
+        export CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME &&
         docker-compose pull &&
         docker-compose up -d
       "
