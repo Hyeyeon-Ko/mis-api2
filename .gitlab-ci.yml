@@ -57,7 +57,7 @@ deploy:
     - chmod 600 ~/.ssh/id_rsa
     - ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
   script:
-    - ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "docker-compose down && docker-compose pull && docker-compose up -d"
+    - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "docker-compose down && docker-compose pull && docker-compose up -d"
   tags:
     - mis-runner
   dependencies:
