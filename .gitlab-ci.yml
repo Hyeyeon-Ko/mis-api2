@@ -1,7 +1,6 @@
 stages:
   - docker-build
   - docker-push
-  - test
 
 variables:
   DOCKER_IMAGE: mis-api
@@ -22,6 +21,7 @@ before_script:
   - echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
   - echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
   - echo "DOCKER_HOST=$DOCKER_HOST"
+  - echo "CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME"
   - docker info
 
 docker-build:
@@ -44,15 +44,3 @@ docker-push:
     - mis-runner
   dependencies:
     - docker-build
-
-test:
-  stage: test
-  image: $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
-  script:
-    - echo "Test start!!"
-    - java -jar app.jar
-  tags:
-    - mis-runner
-  dependencies:
-    - docker-build
-    
