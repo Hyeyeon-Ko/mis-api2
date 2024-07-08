@@ -4,7 +4,7 @@ stages:
   - deploy
 
 variables:
-  DOCKER_IMAGE: mis-api
+  DOCKER_IMAGE: backend
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: unix:///var/run/docker.sock  # 호스트의 Docker 소켓을 사용
@@ -15,6 +15,7 @@ variables:
   REGISTRY_PASSWORD: $REGISTRY_PASSWORD  # Access Token
   DEPLOY_USER: root  # 배포할 사용자 이름
   DEPLOY_SERVER: 101.10.1.87  # 배포할 서버 IP 주소
+  BACKEND_IMAGE: $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
 
 before_script:
   - chmod +x gradlew  # gradlew에 실행 권한 부여
@@ -31,7 +32,7 @@ docker-build:
   image: docker:stable
   script:
     - echo "Docker build start!!"
-    - docker build -t $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker build -t $REGISTRY_URL/$BACKEND_IMAGE .
   tags:
     - mis-runner
 
@@ -41,7 +42,7 @@ docker-push:
   script:
     - echo "Docker push start!!"
     - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin "$REGISTRY_URL"
-    - docker push $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $REGISTRY_URL/$BACKEND_IMAGE
   tags:
     - mis-runner
   dependencies:
@@ -51,17 +52,26 @@ deploy:
   stage: deploy
   image: alpine:latest
   before_script:
+    - apk add --no-cache openssh
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
   script:
+    #- ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "
+    #    echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY && 
+    #    docker pull $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME && 
+    #    if docker ps -a -q -f name=backend; then docker stop backend && docker rm backend; fi &&
+    #    docker run -d --name backend $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+    #  "
+    - apk add --no-cache rsync
+    - rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" docker-compose.yml $DEPLOY_USER@$DEPLOY_SERVER:/
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "
-        echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY && 
-        docker pull $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME && 
-        if docker ps -a -q -f name=backend; then docker stop backend && docker rm backend; fi &&
-        docker run -d --name backend $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+        echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
+        cd / &&
+        docker-compose pull &&
+        docker-compose up -d
       "
   tags:
     - mis-runner
