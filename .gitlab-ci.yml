@@ -52,7 +52,7 @@ deploy:
   script:
     - apk add --no-cache openssh
     - ssh-keyscan 101.10.1.87 >> ~/.ssh/known_hosts
-    - ssh $DEPLOY_USER@101.10.1.87 "docker-compose down && docker-compose pull && docker-compose up -d"
+    - ssh root@101.10.1.87 "docker-compose down && docker-compose pull && docker-compose up -d"
   tags:
     - mis-runner
   dependencies:
