@@ -74,9 +74,9 @@ deploy:
     #    docker-compose up -d
     #  "
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "
-        echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY &&
+        echo $REGISTRY_PASSWORD | docker login -u $REGISTRY_USER --password-stdin $REGISTRY_URL &&
         cd / &&
-        export CI_REGISTRY=$CI_REGISTRY &&
+        export CI_REGISTRY=$REGISTRY_URL &&
         export CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE &&
         export CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME &&
         docker-compose pull &&
