@@ -78,6 +78,7 @@ deploy:
         cd / &&
         export CI_REGISTRY=$REGISTRY_URL &&
         export CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE &&
+        export CI_PROJECT_NAME=$CI_PROJECT_NAME &&
         export CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME &&
         docker-compose pull &&
         docker-compose up -d
@@ -86,4 +87,3 @@ deploy:
     - mis-runner
   dependencies:
     - docker-push
-    
