@@ -1,6 +1,7 @@
 stages:
   - docker-build
   - docker-push
+  - deploy
 
 variables:
   DOCKER_IMAGE: mis-api
@@ -44,3 +45,15 @@ docker-push:
     - mis-runner
   dependencies:
     - docker-build
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - apk add --no-cache openssh
+    - ssh-keyscan 101.10.1.87 >> ~/.ssh/known_hosts
+    - ssh $DEPLOY_USER@101.10.1.87 "docker-compose down && docker-compose pull && docker-compose up -d"
+  tags:
+    - mis-runner
+  dependencies:
+    - docker-push
