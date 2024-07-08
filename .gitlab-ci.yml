@@ -57,7 +57,12 @@ deploy:
     - chmod 600 ~/.ssh/id_rsa
     - ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
   script:
-    - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "docker-compose down && docker-compose pull && docker-compose up -d"
+    # - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "docker-compose down && docker-compose pull && docker-compose up -d"
+    - ssh user@101.10.1.87 "
+        docker login -u $REGISTRY_USER -p $REGISTRY_PASSWORD 101.10.1.100:5000 && 
+        docker pull 101.10.1.100:5000/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME && 
+        docker run -d --name backend 101.10.1.100:5000/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+      "
   tags:
     - mis-runner
   dependencies:
