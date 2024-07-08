@@ -65,8 +65,8 @@ deploy:
     #  "
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "
         echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY && 
-        docker pull $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME && 
-        docker run -d --name backend $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
+        docker pull $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME && 
+        docker run -d --name backend $REGISTRY_URL/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE:$CI_COMMIT_REF_NAME
       "
   tags:
     - mis-runner
