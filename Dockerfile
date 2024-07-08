@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y wget
 
 # Download and install JDK 22
 RUN wget https://download.oracle.com/java/22/latest/jdk-22_linux-aarch64_bin.tar.gz \
-    && tar -xzf openjdk-22-ea+22_linux-x64_bin.tar.gz -C /usr/local/ \
+    && tar -xzf jdk-22_linux-aarch64_bin.tar.gz -C /usr/local/ \
     && mv /usr/local/jdk-22 /usr/local/java-22-openjdk-amd64
     
 # JDK 22를 사용하도록 Gradle 환경 변수 설정
