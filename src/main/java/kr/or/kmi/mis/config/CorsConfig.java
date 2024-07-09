@@ -23,9 +23,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("http://localhost:3000")  // 로컬주소(개발진행시)
+//                        .allowedOriginPatterns("http://localhost:3000")  // 로컬주소(개발진행시)
 //                        .allowedOriginPatterns("http://xxx.xxx.xxx")  // 운영서버 주소
-//                        .allowedOriginPatterns("http://xxx.xxx.xxx:xxx")  // 개발서버 주소
+                        .allowedOriginPatterns("http://101.10.1.87:3000")  // 개발서버 주소
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("Origin", "Content-Type", "Accept", "Authorization")
                         .exposedHeaders("Authorization");
