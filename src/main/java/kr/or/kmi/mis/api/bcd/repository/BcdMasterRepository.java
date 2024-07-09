@@ -6,15 +6,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BcdMasterRepository extends JpaRepository<BcdMaster, Long> {
 
-    Optional<List<BcdMaster>> findByDrafterIdOrderByDraftDateDesc(String drafterId);
+    Optional<List<BcdMaster>> findByDrafterIdAndStatusOrderByDraftDateDesc(String drafterId, @Param("status") String status);
 
-    @Query("SELECT b FROM BcdMaster b WHERE b.status <> :status")
-    Optional<List<BcdMaster>> findAllByStatusNotOrderByDraftDateDesc(@Param("status") String status);
+    Optional<List<BcdMaster>> findByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(String drafterId, Timestamp startDate, Timestamp endDate);
 
+    Optional<List<BcdMaster>> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc(@Param("status") String status, Timestamp startDate, Timestamp endDate);
 }
