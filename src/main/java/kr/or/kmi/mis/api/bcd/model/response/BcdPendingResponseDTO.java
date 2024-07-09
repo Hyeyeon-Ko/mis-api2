@@ -24,8 +24,6 @@ public class BcdPendingResponseDTO {
                 .seqId(bcdMasterResponseDTO.getSeqId())
                 .title(bcdMasterResponseDTO.getTitle())
                 .draftDate(bcdMasterResponseDTO.getDraftDate())
-                .lastUpdateDate(bcdMasterResponseDTO.getLastUpdtDate())
-                .lastUpdateId(bcdMasterResponseDTO.getLastUpdtId())
                 .applyStatus(bcdMasterResponseDTO.getApplyStatus())
                 .build();
     }

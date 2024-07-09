@@ -9,14 +9,15 @@ import lombok.*;
 public class BcdDetailResponseDTO {
 
     private Long draftId;
-    private Long logId;
+    private Long seqId;
+    private String drafter;
     private String userId;
     private String division;
     private String korNm;
     private String engNm;
-    private String center;
-    private String dep;
-    private String team;
+    private String instNm;
+    private String deptNm;
+    private String teamNm;
     private String engTeam;
     private String grade;
     private String engGrade;
@@ -32,14 +33,15 @@ public class BcdDetailResponseDTO {
     public static BcdDetailResponseDTO of(BcdDetail bcdDetail) {
         return BcdDetailResponseDTO.builder()
                 .draftId(bcdDetail.getDraftId())
-                .logId(bcdDetail.getSeqId())
+                .seqId(bcdDetail.getSeqId())
+                .drafter(bcdDetail.getDrafter())
                 .userId(bcdDetail.getUserId())
                 .division(bcdDetail.getDivision())
                 .korNm(bcdDetail.getKorNm())
                 .engNm(bcdDetail.getEngNm())
-                .center(bcdDetail.getInstNm())
-                .dep(bcdDetail.getDeptNm())
-                .team(bcdDetail.getTeamNm())
+                .instNm(bcdDetail.getInstNm())
+                .deptNm(bcdDetail.getDeptNm())
+                .teamNm(bcdDetail.getTeamNm())
                 .engTeam(bcdDetail.getEngTeamNm())
                 .grade(bcdDetail.getGrade())
                 .engGrade(bcdDetail.getEngGrade())
