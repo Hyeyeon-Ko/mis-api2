@@ -78,6 +78,7 @@ public class BcdService {
     @Transactional
     public void cancelBcdApply(Long draftId) {
 
+        // Exception 공통으로 모아서 따로 관리하면 좋을 것 같습니다.
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + draftId));
 

@@ -9,8 +9,8 @@ import lombok.Setter;
 import java.sql.Timestamp;
 
 @Builder
-@Getter
-@Setter
+// getter / setter 동시 사용할거면 @Data 사용하시면 됩니다
+@Data
 @AllArgsConstructor
 public class BcdMasterResponse {
     private Long draftId;

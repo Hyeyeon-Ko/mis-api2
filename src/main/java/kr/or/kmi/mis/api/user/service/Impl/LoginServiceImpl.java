@@ -16,6 +16,9 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
+    // RestTemplate 는 srping 3버전에 사용되었고 현재도 사용중이긴 하나 동기형 방식과 비반응형 클라이언트입니다.
+    // 사용하는 것을 지양합니다. 다른 방식이 있는데 사용하시면 좋을거같아요.
+    // 해당 부분은 꼭 확인하고 다른 방식을 사용해야합니다.
     private final RestTemplate restTemplate;
 
     @Value("${external.login.url}")
