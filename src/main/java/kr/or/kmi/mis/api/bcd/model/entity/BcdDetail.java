@@ -59,7 +59,13 @@ public class BcdDetail {
     private String teamNm;
 
     @Column(length = 20)
+    private String engTeamNm;
+
+    @Column(length = 20)
     private String grade;
+
+    @Column(length = 20)
+    private String engGrade;
 
     @Column(length = 20)
     private String extTel;
@@ -76,12 +82,15 @@ public class BcdDetail {
     @Column(length = 200)
     private String address;
 
+    @Column(length = 200)
+    private String engAddress;
+
     private Integer quantity;
 
     @Builder
     public BcdDetail(Long draftId, String drafter, String drafterId, Timestamp draftDate, String userId, String division,
-                     String korNm, String engNm, String instNm, String deptNm, String teamNm, String grade,
-                     String extTel, String faxTel, String phoneTel, String email, String address, Integer quantity) {
+                     String korNm, String engNm, String instNm, String deptNm, String teamNm, String engTeamNm, String grade, String engGrade,
+                     String extTel, String faxTel, String phoneTel, String email, String address, String engAddress, Integer quantity) {
         this.draftId = draftId;
         this.drafter = drafter;
         this.drafterId = drafterId;
@@ -93,12 +102,15 @@ public class BcdDetail {
         this.instNm = instNm;
         this.deptNm = deptNm;
         this.teamNm = teamNm;
+        this.engTeamNm = engTeamNm;
         this.grade = grade;
+        this.engGrade = engGrade;
         this.extTel = extTel;
         this.faxTel = faxTel;
         this.phoneTel = phoneTel;
         this.email = email;
         this.address = address;
+        this.engAddress = engAddress;
         this.quantity = quantity;
     }
 

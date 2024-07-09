@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.sql.Timestamp;
 
 @Getter
-public class BcdRequest {
+public class BcdRequestDTO {
 
     String drafter;     // 기안자
     //    String drafterId;   // 기안자 사번
