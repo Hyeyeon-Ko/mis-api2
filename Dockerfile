@@ -4,7 +4,6 @@ FROM gradle:8.8-jdk22 AS build
 # Install dependencies
 RUN apt-get update && apt-get install -y wget
 
-
 # Download and install JDK 22
 RUN wget https://download.oracle.com/java/22/latest/jdk-22_linux-x64_bin.tar.gz \
     && tar -xzf jdk-22_linux-x64_bin.tar.gz -C /usr/local/ \
@@ -17,7 +16,6 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 # Set working directory in the container
 WORKDIR /app
 COPY . .
-
 
 # Copy build.gradle and settings.gradle to install dependencies
 COPY build.gradle .
