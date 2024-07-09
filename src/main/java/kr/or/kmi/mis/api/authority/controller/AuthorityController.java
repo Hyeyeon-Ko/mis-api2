@@ -1,11 +1,11 @@
 package kr.or.kmi.mis.api.authority.controller;
 
-import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.MemberListResponseDTO;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
+import kr.or.kmi.mis.cmm.response.ApiResponse;
+import kr.or.kmi.mis.cmm.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,34 +15,31 @@ import java.util.List;
 @RequestMapping("api/auth")
 public class AuthorityController {
 
-    private AuthorityService authorityService;
+    private final AuthorityService authorityService;
 
     /* 권한 관리 페이지 */
     @GetMapping
-    public ResponseEntity<List<AuthorityListResponseDTO>> getAuthorityList() {
-        List<AuthorityListResponseDTO> authorityList = authorityService.getAuthorityList();
-        return ResponseEntity.status(HttpStatus.OK).body(authorityList);
+    public ApiResponse<List<AuthorityListResponseDTO>> getAuthorityList() {
+        return ResponseWrapper.success(authorityService.getAuthorityList());
     }
 
     /* 권한 설정 페이지 */
-//    그룹웨어에서 불러와야 하므로 나중에 구현
-//    @GetMapping("/search")
-//    public ResponseEntity<List<MemberListResponse>> getMemberList(@RequestParam("center") String center) {
-//        List<MemberListResponse> memberList = authorityService.getMemberList(center);
-//        return ResponseEntity.status(HttpStatus.OK).body(memberList);
-//    }
+    @GetMapping("/search")
+    public ApiResponse<List<MemberListResponseDTO>> getMemberList(@RequestParam("center") String center) {
+        return ResponseWrapper.success(authorityService.getMemberList(center));
+    }
 
     /* 권한 추가 */
     @PostMapping("/admin")
-    public ResponseEntity<String> addAdmin(@RequestBody AuthorityRequestDTO authorityRequestDTO) {
-        authorityService.addAdmin(authorityRequestDTO);
-        return new ResponseEntity<>("ok", HttpStatus.OK);
+    public ApiResponse<?> addAdmin(@RequestParam String instCd, @RequestParam String userId, @RequestParam String userRole) {
+        authorityService.addAdmin(instCd, userId, userRole);
+        return ResponseWrapper.success();
     }
 
     /* 권한 취소 */
     @DeleteMapping("/admin")
-    public ResponseEntity<String> deleteAdmin(@RequestParam("authID") Long id) {
+    public ApiResponse<?> deleteAdmin(@RequestParam("authID") Long id) {
         authorityService.deleteAdmin(id);
-        return new ResponseEntity<>("ok", HttpStatus.OK);
+        return ResponseWrapper.success();
     }
 }

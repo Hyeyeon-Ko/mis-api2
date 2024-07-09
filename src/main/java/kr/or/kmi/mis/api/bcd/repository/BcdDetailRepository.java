@@ -21,4 +21,6 @@ public interface BcdDetailRepository extends JpaRepository<BcdDetail, Long> {
     List<Long> findDistinctDraftIdByUserId(String userId);
 
     Optional<BcdDetail> findByDraftIdAndSeqId(Long draftId, Long seqId);
+
+    Optional<Integer> findQuantityByDraftId(Long draftId);
 }

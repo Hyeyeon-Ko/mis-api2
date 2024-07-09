@@ -28,7 +28,7 @@ public class AuthorityRequestDTO {
                 .deptCd(deptCd)
                 .deptNm(deptNm)
                 .email(email)
-                .role("B")
+                .role(role) // 관리자의 역할을 사용자가 선택
                 .createdt(new Timestamp(System.currentTimeMillis()))
                 .build();
     }
