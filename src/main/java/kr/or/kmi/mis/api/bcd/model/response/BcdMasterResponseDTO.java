@@ -1,16 +1,13 @@
 package kr.or.kmi.mis.api.bcd.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp;
 
 @Builder
-@Getter
-@Setter
+// getter / setter 동시 사용할거면 @Data 사용하시면 됩니다
+@Data
 @AllArgsConstructor
 public class BcdMasterResponseDTO {
     private Long draftId;
