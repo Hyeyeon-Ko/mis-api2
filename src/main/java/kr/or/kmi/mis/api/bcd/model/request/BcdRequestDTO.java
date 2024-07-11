@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 public class BcdRequestDTO {
 
     String drafter;     // 기안자
-    //    String drafterId;   // 기안자 사번
+    String drafterId;   // 기안자 사번
     String userId;      // 대상자 사번
     String division;    // 명함구분
     String korNm;
@@ -27,7 +27,7 @@ public class BcdRequestDTO {
     Integer quantity;
 
     // BcdRequest Dto -> BcdMaster Entity
-    public BcdMaster toMasterEntity(String drafterId) {
+    public BcdMaster toMasterEntity() {
         return BcdMaster.builder()
                 .drafterId(drafterId)
                 .drafter(drafter)
@@ -37,11 +37,11 @@ public class BcdRequestDTO {
     }
 
     // BcdRequest Dto -> BcdDetail Entity
-    public BcdDetail toDetailEntity(Long draftId, String drafterId, Timestamp draftDate) {
+    public BcdDetail toDetailEntity(Long draftId, Timestamp draftDate) {
         return BcdDetail.builder()
                 .draftId(draftId)
-                .drafterId(drafterId)
                 .draftDate(draftDate)
+                .drafterId(drafterId)
                 .drafter(drafter)
                 .userId(userId)
                 .division(division)

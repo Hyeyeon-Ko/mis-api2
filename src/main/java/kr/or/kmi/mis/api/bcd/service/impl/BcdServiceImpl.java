@@ -31,49 +31,46 @@ public class BcdServiceImpl implements BcdService {
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
 
-        // todo: 본인/팀원 정보 그룹웨어에서 호출했을 때의 return 값에 따라 넘겨야 할 param 수정 필요
-        // 우선, 로그인 한 세션의 id(사번) 값 -> toMasterEntity에 param으로 넘김
-        // 기안자 사번도 request에 담아올 수 있으면 param 생략 가능
-        // 기안자(drafter), 대상자사번(userId) 데이터 -> request 통해 넘어올 것으로 예상 (확인필요)
-        String drafterId = "2024000001";
-
         // 명함신청
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity(drafterId);
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity();
+        Timestamp draftDate = new Timestamp(System.currentTimeMillis());
+        bcdMaster.updateDate(draftDate);
         bcdMaster = bcdMasterRepository.save(bcdMaster);
 
         // 명함상세
-        BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(bcdMaster.getDraftId(), drafterId, bcdMaster.getDraftDate());
-        bcdDetailRepository.save(bcdDetail);       // todo: bcdMaster > draftId 값 제대로 잘 들어가는지 확인 필요
+        Long draftId = bcdMaster.getDraftId();
+        BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId, draftDate);
+        bcdDetail.updateSeqId(1L);
+        bcdDetailRepository.save(bcdDetail);
 
     }
 
     @Override
     @Transactional
-    public void updateBcd(Long draftId, BcdRequestDTO bcdUpdateRequest) {
+    public void updateBcd(Long draftId, Long seqId, BcdRequestDTO bcdUpdateRequest) {
 
-        //todo: 승인대기 상태 확인 후 -> 신청 가능하도록
-
-        Optional<BcdDetail> existingDetailOpt = bcdDetailRepository.findFirstByDraftIdOrderBySeqIdAsc(draftId);
+        // 가장 첫번째 신청 이력(BcdDetail) 찾음
+        Optional<BcdDetail> existingDetailOpt = bcdDetailRepository.findTopByDraftIdOrderBySeqIdAsc(draftId);
 
         if (existingDetailOpt.isPresent()) {
-            // 신청 이력이 있는 경우
-            // 첫번째 BcdDetail(최초 신청 시 생성) 호출
             //  - 명함신청에 포함되는 정보를 수정한다고 해도, 명함신청 기안자와 기안일시는 변경되면 안됨
             //  - 명함기안자와 명함수정자가 다를 수 있으므로, 각각에 대한 정보를 로그로 남겨둬야 함
             BcdDetail bcdDetail = existingDetailOpt.get();
             Timestamp draftDate = bcdDetail.getDraftDate();
-            String drafterId = bcdDetail.getDrafterId();
-
-            BcdDetail newBcdDetail = bcdUpdateRequest.toDetailEntity(draftId, drafterId, draftDate);
+            BcdDetail newBcdDetail = bcdUpdateRequest.toDetailEntity(draftId, draftDate);
 
             // 명함수정자의 정보와 수정시각 업데이트
-            // todo: 로그인 한 세션의 id(사번) 값
+            // todo: 로그인 한 세션의 id(사번) 값 -> 이름
             String lastUpdtId = "2024000002";
             Timestamp lastUpdtDt = new Timestamp(System.currentTimeMillis());
             newBcdDetail.update(lastUpdtId, lastUpdtDt);
 
+            // seqId 값 설정
+            newBcdDetail.updateSeqId(seqId + 1);
+
             // 명함수정내역 저장
             bcdDetailRepository.save(newBcdDetail);
+
         } else {
             throw new IllegalArgumentException("신청 이력이 없습니다.");
         }
@@ -154,13 +151,29 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public BcdDetailResponseDTO getBcd(Long draftId, Long seqId) {
+    public BcdDetailResponseDTO getBcd(Long draftId) {
 
-        BcdDetail bcdDetail = bcdDetailRepository.findByDraftIdAndSeqId(draftId, seqId)
+        BcdDetail bcdDetail = bcdDetailRepository.findTopByDraftIdOrderBySeqIdDesc(draftId)
                 .orElseThrow(()-> new  IllegalArgumentException("Not Found"));
 
         return BcdDetailResponseDTO.of(bcdDetail);
 
+    }
+
+    @Override
+    public List<BcdPendingResponseDTO> getPendingList() {
+
+        // 1. 승인대기 상태인 신청목록 모두 호출
+        //   - 기안일자 기준 내림차순 정렬
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
+
+        // 2. Detail 테이블의 seqId와 수정자, 수정일시 정보와 매핑해, ResponseDto 형태로 반환
+        List<BcdMasterResponseDTO> bcdPendingLists = mapDetailToMasterResponse(bcdMasters);
+
+        // 3. Detail 테이블의 seqId와 수정자, 수정일시 정보와 매핑해, ResponseDto 형태로 반환
+        return bcdPendingLists.stream()
+                .map(BcdPendingResponseDTO::of)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -193,7 +206,6 @@ public class BcdServiceImpl implements BcdService {
         return myBcdPendingLists.stream()
                 .map(BcdPendingResponseDTO::of)
                 .collect(Collectors.toList());
-
    }
 
     @Override

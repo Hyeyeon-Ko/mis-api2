@@ -2,7 +2,6 @@ package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 
@@ -11,14 +10,15 @@ import java.sql.Timestamp;
 @ToString
 @Entity
 @Table(name = "hrmtbcdd")
-@IdClass(BcdDetail.class)
+@IdClass(DraftSeqPK.class)
 public class BcdDetail {
 
     @Id
+    @Column(name = "draft_id")
     private Long draftId;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "seq_id")
     private Long seqId;
 
     @Column(nullable = false, length = 20)
@@ -33,8 +33,6 @@ public class BcdDetail {
     @Column(length = 20)
     private String lastUpdtId;     // 명함 최종 수정자
 
-    @CreationTimestamp
-    @Column(insertable = false)
     private Timestamp lastUpdtDate;
 
     @Column(length = 20)
@@ -112,6 +110,10 @@ public class BcdDetail {
         this.address = address;
         this.engAddress = engAddress;
         this.quantity = quantity;
+    }
+
+    public void updateSeqId(Long seqId) {
+        this.seqId = seqId;
     }
 
     public void update(String lastUpdtId, Timestamp lastUpdtDt) {

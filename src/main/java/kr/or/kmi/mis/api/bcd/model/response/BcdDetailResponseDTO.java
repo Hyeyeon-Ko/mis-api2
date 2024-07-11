@@ -11,6 +11,7 @@ public class BcdDetailResponseDTO {
     private Long draftId;
     private Long seqId;
     private String drafter;
+    private String drafterId;
     private String userId;
     private String division;
     private String korNm;
@@ -35,6 +36,7 @@ public class BcdDetailResponseDTO {
                 .draftId(bcdDetail.getDraftId())
                 .seqId(bcdDetail.getSeqId())
                 .drafter(bcdDetail.getDrafter())
+                .drafterId(bcdDetail.getDrafterId())
                 .userId(bcdDetail.getUserId())
                 .division(bcdDetail.getDivision())
                 .korNm(bcdDetail.getKorNm())
