@@ -54,6 +54,11 @@ public class Authority {
         this.createdt = createdt;
     }
 
+    // 권한 수정
+    public void modifyAdmin(String role) {
+        this.role = role;
+    }
+
     // 권한 취소 -> 종료일시 기록
     public void deleteAdmin(Timestamp deletedt) {
         this.deletedt = deletedt;

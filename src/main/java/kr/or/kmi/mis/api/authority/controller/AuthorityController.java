@@ -35,9 +35,16 @@ public class AuthorityController {
         return ResponseWrapper.success();
     }
 
+    /*권한 수정*/
+    @PostMapping("/admin/{authId}")
+    public ApiResponse<?> modifyAdmin(@PathVariable Long authId, @RequestParam String userRole) {
+        authorityService.modifyAdmin(authId, userRole);
+        return ResponseWrapper.success();
+    }
+
     /* 권한 취소 */
-    @DeleteMapping("/admin")
-    public ApiResponse<?> deleteAdmin(@RequestParam Long authId) {
+    @DeleteMapping("/admin/{authId}")
+    public ApiResponse<?> deleteAdmin(@PathVariable Long authId) {
         authorityService.deleteAdmin(authId);
         return ResponseWrapper.success();
     }

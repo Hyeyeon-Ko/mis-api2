@@ -39,6 +39,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
 
         // 2. 각 관리자들의 상세 정보 불러오기
+        // todo: 기준자료 생성 완료시 센터코드 -> 센터명으로 받아오기 수정!!!!
         return authorityList.stream()
                 .map(authority -> AuthorityListResponseDTO.builder()
                         .authId(authority.getAuthId())
@@ -66,7 +67,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Override
     public void addAdmin(String userRole, String userId) {
 
-        boolean authorityExists = authorityRepository.findByUserId(userId).isPresent();
+        boolean authorityExists = authorityRepository.findByUserIdAndDeletedtIsNull(userId).isPresent();
 
         if (authorityExists) {
             throw new IllegalStateException("Authority with userId " + userId + " already exists");
@@ -89,6 +90,16 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .build();
 
         authorityRepository.save(authorityInfo);
+    }
+
+    // todo: 관리 종류 추가시 수정 예정!!!!
+    @Override
+    public void modifyAdmin(Long authId, String role) {
+
+        Authority authority = authorityRepository.findByAuthId(authId)
+                .orElseThrow(() -> new EntityNotFoundException("Authority with authId " + authId + " not found"));
+
+        authority.modifyAdmin(role);
     }
 
     @Override

@@ -17,6 +17,7 @@ public class AuthorityListResponseDTO {
 
     @Builder
     public AuthorityListResponseDTO(Long authId, String userId, String hngNm, String userRole, String instCd, String deptNm, String email) {
+        this.authId = authId;
         this.userId = userId;
         this.hngNm = hngNm;
         this.userRole = userRole;

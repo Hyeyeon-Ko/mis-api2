@@ -14,4 +14,6 @@ public interface AuthorityRepository extends JpaRepository<Authority, Long> {
     Optional<Authority> findByAuthId(Long authId);
 
     Optional<Authority> findByUserId(String userId);
+
+    Optional<Authority> findByUserIdAndDeletedtIsNull(String userId);
 }

@@ -15,6 +15,9 @@ public interface AuthorityService {
     /* 권한 추가 */
     void addAdmin(String userRole, String userId);
 
+    /*권한 수정*/
+    void modifyAdmin(Long authId, String role);
+
     /* 권한 취소 */
     void deleteAdmin(Long authId);
 }
