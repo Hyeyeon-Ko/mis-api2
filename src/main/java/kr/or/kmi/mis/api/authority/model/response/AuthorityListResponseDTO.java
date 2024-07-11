@@ -7,20 +7,20 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class AuthorityListResponseDTO {
-
+    private Long authId;
     private String userId;
     private String hngNm;
+    private String userRole;
     private String instCd;
-    private String deptCd;
     private String deptNm;
     private String email;
 
     @Builder
-    public AuthorityListResponseDTO(String userId, String hngNm, String instCd, String deptCd, String deptNm, String email) {
+    public AuthorityListResponseDTO(Long authId, String userId, String hngNm, String userRole, String instCd, String deptNm, String email) {
         this.userId = userId;
         this.hngNm = hngNm;
+        this.userRole = userRole;
         this.instCd = instCd;
-        this.deptCd = deptCd;
         this.deptNm = deptNm;
         this.email = email;
     }

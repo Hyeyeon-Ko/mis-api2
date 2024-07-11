@@ -27,8 +27,9 @@ public class ConfirmServiceImpl implements ConfirmService {
     @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcdDetailInfo(Long id) {
-        String drafter = bcdMasterRepository.findDrafterByDraftId(id)
-                .orElseThrow(() -> new EntityNotFoundException("Drafter not found for draft ID: " + id));
+        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found"));
+        String drafter = bcdMaster.getDrafter();
         BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
@@ -40,7 +41,9 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .instNm(bcdDetail.getInstNm())
                 .deptNm(bcdDetail.getDeptNm())
                 .teamNm(bcdDetail.getTeamNm())
+                .engTeam(bcdDetail.getEngTeamNm())
                 .grade(bcdDetail.getGrade())
+                .engGrade(bcdDetail.getEngGrade())
                 .extTel(bcdDetail.getExtTel())
                 .faxTel(bcdDetail.getFaxTel())
                 .phoneTel(bcdDetail.getPhoneTel())
@@ -53,7 +56,8 @@ public class ConfirmServiceImpl implements ConfirmService {
     /* 승인 */
     @Override
     public void approve(Long id) {
-        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id);
+        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
         // 세션에서 현재 로그인된 사용자 정보(사번, 이름) 가져오기
         String currentUserId = (String) request.getSession().getAttribute("userId");
@@ -72,7 +76,8 @@ public class ConfirmServiceImpl implements ConfirmService {
     /* 반려 */
     @Override
     public void disapprove(Long id, String rejectReason) {
-        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id);
+        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
         // 세션에서 현재 로그인된 사용자 정보(사번, 이름) 가져오기
         String currentUserId = (String) request.getSession().getAttribute("userId");

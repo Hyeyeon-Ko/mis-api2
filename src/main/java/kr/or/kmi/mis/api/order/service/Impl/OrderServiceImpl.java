@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.order.service.Impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,13 +37,16 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderListResponseDTO> getOrderList() {
 
         // 1. 승인상태인 신청건 리스트 불러오기
-        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatus("B");
+        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatus("B")
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster"));
 
-        // 2. 각 신청건의 상세 정보 불러오기 using Streams
+        // 2. 각 신청건의 발주일시 저장 및 상세 정보 불러오기
         return bcdMasterList.stream()
                 .map(bcdMaster -> {
-                    Integer quantity = bcdDetailRepository.findQuantityByDraftId(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new EntityNotFoundException("Quantity not found for draft ID: " + bcdMaster.getDraftId()));
+                    bcdMaster.updateOrderDate(new Timestamp(System.currentTimeMillis()));
+                    BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
+                            .orElseThrow(() -> new EntityNotFoundException("BcdDetail"));
+                    Integer quantity = bcdDetail.getQuantity();
                     return OrderListResponseDTO.builder()
                             .title(bcdMaster.getTitle())
                             .draftDate(bcdMaster.getDraftDate())

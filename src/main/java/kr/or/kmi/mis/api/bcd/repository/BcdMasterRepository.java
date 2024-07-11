@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.bcd.repository;
 
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +21,7 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, Long> {
 
     List<BcdMaster> findAllByStatusOrderByDraftDateDesc(String status);
 
-    Optional<String> findDrafterByDraftId(Long id);
-    BcdMaster findByDraftId(Long id);
-    List<BcdMaster> findAllByStatus(String status);
+    Optional<BcdMaster> findByDraftId(Long id);
+
+    Optional<List<BcdMaster>> findAllByStatus(String status);
 }

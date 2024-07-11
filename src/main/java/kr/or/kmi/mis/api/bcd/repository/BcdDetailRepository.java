@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.bcd.repository;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -22,8 +23,6 @@ public interface BcdDetailRepository extends JpaRepository<BcdDetail, DraftSeqPK
     List<Long> findDistinctDraftIdByUserId(String userId);
 
     List<Long> findDistinctDraftIdByUserIdAndDraftDateBetween(String userId, Timestamp startDate, Timestamp endDate);
-
-    Optional<Integer> findQuantityByDraftId(Long draftId);
 
     List<BcdDetail> findAllByDraftIdIn(List<Long> draftIds);
 }

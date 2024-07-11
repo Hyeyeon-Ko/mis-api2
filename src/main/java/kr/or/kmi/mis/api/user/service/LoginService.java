@@ -5,6 +5,6 @@ import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
 
 public interface LoginService {
 
-    /* 로그인 */
+    /*로그인*/
     LoginResponseDTO login(LoginRequestDTO loginRequestDTO);
 }

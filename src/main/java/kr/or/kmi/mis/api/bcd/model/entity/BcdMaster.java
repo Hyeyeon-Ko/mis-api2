@@ -83,4 +83,10 @@ public class BcdMaster {
         this.respondDate = disapproveRequestDTO.getRespondDate();
         this.status = disapproveRequestDTO.getStatus();
     }
+
+
+    // 발주 -> 발주일시 업데이트
+    public void updateOrderDate(Timestamp deletedt) {
+        this.orderDate = new Timestamp(System.currentTimeMillis());
+    }
 }

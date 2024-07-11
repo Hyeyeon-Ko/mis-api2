@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/bsc/applyList")
 public class ConfirmController {
 
-    private ConfirmService confirmService;
+    private final ConfirmService confirmService;
 
     /* 신청 목록 상세 조회 */
     @GetMapping("/{draftId}")

@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AuthorityRepository extends JpaRepository<Authority, Long> {
-    List<Authority> findAllByRoleAndDeletedtIsNull(String role);
-    Optional<Authority> findByAuthId(Long id);
+
+    List<Authority> findAllByDeletedtIsNull();
+
+    Optional<Authority> findByAuthId(Long authId);
+
+    Optional<Authority> findByUserId(String userId);
 }
