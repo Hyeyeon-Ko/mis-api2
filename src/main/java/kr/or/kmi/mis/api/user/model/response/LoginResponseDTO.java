@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class LoginResponseDTO {
     private String hngNm;
+    private String role;
 }

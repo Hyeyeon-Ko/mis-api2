@@ -23,6 +23,7 @@ public class LoginController {
         if (responseDTO != null) {
             session.setAttribute("userId", loginRequestDTO.getUserId());
             session.setAttribute("hngNm", responseDTO.getHngNm());
+            session.setAttribute("role", responseDTO.getRole());
             return ResponseWrapper.success();
         } else {
             return ResponseWrapper.error();

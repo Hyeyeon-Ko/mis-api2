@@ -1,5 +1,7 @@
 package kr.or.kmi.mis.api.user.service.Impl;
 
+import kr.or.kmi.mis.api.authority.model.entity.Authority;
+import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.user.model.request.LoginRequestDTO;
 import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
 import kr.or.kmi.mis.api.user.service.LoginService;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class LoginServiceImpl implements LoginService {
 
     private final WebClient.Builder webClientBuilder;
+    private final AuthorityRepository authorityRepository;
 
     @Value("${external.login.url}")
     private String externalLoginUrl;
@@ -30,10 +33,23 @@ public class LoginServiceImpl implements LoginService {
                 .block();
 
         assert responseMap != null;
+
         if ("0000".equals(responseMap.get("resultCd"))) {
+
             LoginResponseDTO responseDTO = new LoginResponseDTO();
-            responseDTO.setHngNm((String) responseMap.get("hngNm"));
-            return responseDTO;
+            boolean authorityExists = authorityRepository.findByUserId(loginRequestDTO.getUserId()).isPresent();
+
+            if (authorityExists) {
+                Authority authority = authorityRepository.findByUserId(loginRequestDTO.getUserId()).get();
+                responseDTO.setHngNm((String) responseMap.get("hngnm"));
+                responseDTO.setRole(authority.getRole());
+                return responseDTO;
+            } else {
+                responseDTO.setHngNm((String) responseMap.get("hngnm"));
+                responseDTO.setRole("USER");
+                return responseDTO;
+            }
+
         } else {
             return null;
         }
