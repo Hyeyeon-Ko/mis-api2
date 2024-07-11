@@ -101,27 +101,36 @@ public class AuthorityServiceImpl implements AuthorityService {
         authorityRepository.save(authority);
     }
 
+    // 그룹웨어로부터 정보 불러오기
     private Mono<ResponseData.ResultData> fetchUserInfo(String userId) {
+        // requestData 맵을 생성하고 userId 추가
         Map<String, String> requestData = new HashMap<>();
         requestData.put("userId", userId);
 
+        // WebClient를 사용하여 외부 사용자 정보 API에 POST 요청
         return webClient.post()
-                .uri(externalUserInfoUrl)
-                .bodyValue(requestData)
-                .retrieve()
-                .bodyToMono(String.class)
+                .uri(externalUserInfoUrl)  // 요청을 보낼 URL 설정
+                .bodyValue(requestData)    // 요청 바디에 requestData 설정
+                .retrieve()                // 응답을 받아옴
+                .bodyToMono(String.class)  // 응답을 String으로 변환
                 .flatMap(responseJson -> {
+                    // 응답이 null이면 에러 반환
                     if (responseJson == null) {
-                        return Mono.error(new EntityNotFoundException("User information not found for userId: " + userId));
+                        return Mono.error(new EntityNotFoundException("User response data not found for userId: " + userId));
                     }
                     try {
+                        // 응답 JSON을 ResponseData 객체로 변환
                         ResponseData responseData = objectMapper.readValue(responseJson, ResponseData.class);
+                        // 변환된 ResponseData 객체에서 ResultData를 가져옴
                         ResponseData.ResultData resultData = responseData.getResultData();
+                        // ResultData가 null이면 에러 반환
                         if (resultData == null) {
                             return Mono.error(new EntityNotFoundException("User information not found for userId: " + userId));
                         }
+                        // ResultData가 유효하면 Mono.just로 반환
                         return Mono.just(resultData);
                     } catch (Exception e) {
+                        // JSON 처리 중 에러가 발생하면 RuntimeException 반환
                         return Mono.error(new RuntimeException("Error processing response from groupware API", e));
                     }
                 });
