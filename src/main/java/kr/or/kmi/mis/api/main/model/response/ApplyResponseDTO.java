@@ -4,7 +4,6 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 

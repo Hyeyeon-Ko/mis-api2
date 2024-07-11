@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,7 +103,7 @@ public class BcdServiceImpl implements BcdService {
     public List<BcdMasterResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
 
         //todo: 로그인 한 세션의 id 값 받아오기
-        String userId = "2024000001";
+        String userId = "2024000111";
 
         // 2. 나의 모든 명함신청 내역을 호출한다.
         //  - DrafterId(기안자 사번)로 나의 명함신청 내역을 불러온다.
@@ -117,11 +114,16 @@ public class BcdServiceImpl implements BcdService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         // 2-2. 타인이 신청해준 나의 명함신청 내역
-        //  - 명함대상자가 userId인 명함신청의 pk(draftId)를 조회
-        //  - draftId로 bcdMaster 찾아, 앞선 bcdMasters(2-1)에 추가
-        List<Long> draftList = bcdDetailRepository.findDistinctDraftIdByUserIdAndDraftDateBetween(userId, startDate, endDate);
-        draftList.stream().map(draftId -> bcdMasterRepository.findById(draftId)
-                .orElse(null)).filter(Objects::nonNull).forEach(bcdMasters::add);
+        List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserIdAndDraftDateBetween(userId, startDate, endDate);
+
+        Set<Long> draftIds = bcdDetails.stream()
+                .map(BcdDetail::getDraftId)
+                .collect(Collectors.toSet());
+
+        for (Long draftId : draftIds) {
+            bcdMasterRepository.findById(draftId)
+                    .ifPresent(bcdMasters::add);
+        }
 
         // 3. 신청 내역을 하나씩 꺼내, response dto 와 매핑하여 반환한다.
         return mapDetailToMasterResponse(bcdMasters);
@@ -135,9 +137,7 @@ public class BcdServiceImpl implements BcdService {
                     // -  seqId: 시퀀스 넘버
                     // -  lastUpdateId: 최종 수정자
                     // -  lastUpdateDate: 최종 수정일
-                    Optional<BcdDetail> latestBcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
-                            .stream()
-                            .max(Comparator.comparing(BcdDetail::getDraftDate));
+                    Optional<BcdDetail> latestBcdDetail = bcdDetailRepository.findTopByDraftIdOrderBySeqIdDesc(bcdMaster.getDraftId());
 
                     Long seqId = latestBcdDetail.map(BcdDetail::getSeqId).orElse(null);
                     String lastUpdateId = latestBcdDetail.map(BcdDetail::getLastUpdtId).orElse(null);
@@ -181,27 +181,31 @@ public class BcdServiceImpl implements BcdService {
     public List<BcdPendingResponseDTO> getMyPendingList() {
 
         //todo: 로그인 한 세션의 id 값 받아오기
-        String userId = "2024000001";
+        String userId = "2024000111";
 
         // 2. 나의 모든 명함신청 승인대기 내역을 호출한다.
         //  - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.
         //  - 기안 일자를 기준으로 내림차순 정렬한다.
 
         // 2-1. 내가 신청한 나의 명함신청 승인대기 내역
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndStatusOrderByDraftDateDesc(userId, "A")
+        List<BcdMaster> myBcdMasters = bcdMasterRepository.findByDrafterIdAndStatusOrderByDraftDateDesc(userId, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         // 2-2. 타인이 신청해준 나의 명함신청 승인대기 내역
         //  - 명함대상자가 userId인 명함신청의 pk(draftId)를 조회
         //  - draftId로 bcdMaster 찾아, 앞선 bcdMasters(2-1)에 추가
-        List<Long> draftList = bcdDetailRepository.findDistinctDraftIdByUserId(userId);
-        draftList.stream()
-                .map(draftId -> bcdMasterRepository.findById(draftId)
-                        .filter(bcdMaster -> "A".equals(bcdMaster.getStatus()))
-                        .orElse(null))
-                .filter(Objects::nonNull).forEach(bcdMasters::add);
+        List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
-        List<BcdMasterResponseDTO> myBcdPendingLists = mapDetailToMasterResponse(bcdMasters);
+        Set<Long> draftIds = bcdDetails.stream()
+                .map(BcdDetail::getDraftId)
+                .collect(Collectors.toSet());
+
+        for (Long draftId : draftIds) {
+            bcdMasterRepository.findByDraftIdAndStatus(draftId, "A")
+                    .ifPresent(myBcdMasters::add);
+        }
+
+        List<BcdMasterResponseDTO> myBcdPendingLists = mapDetailToMasterResponse(myBcdMasters);
 
         return myBcdPendingLists.stream()
                 .map(BcdPendingResponseDTO::of)
