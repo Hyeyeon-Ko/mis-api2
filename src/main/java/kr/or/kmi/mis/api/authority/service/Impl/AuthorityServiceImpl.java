@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import utils.WebClientUtils;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final AuthorityRepository authorityRepository;
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
+    private final WebClientUtils webClientUtils;
 
     @Value("${external.userInfo.url}")
     private String externalUserInfoUrl;
@@ -117,6 +119,13 @@ public class AuthorityServiceImpl implements AuthorityService {
         // requestData 맵을 생성하고 userId 추가
         Map<String, String> requestData = new HashMap<>();
         requestData.put("userId", userId);
+
+        String response = webClientUtils.post(
+                "https://api.vitaport.co.kr/api/v1/kmi/setKmiExtExamCheckup",
+                requestData,
+                String.class
+        );
+
 
         // WebClient를 사용하여 외부 사용자 정보 API에 POST 요청
         return webClient.post()
