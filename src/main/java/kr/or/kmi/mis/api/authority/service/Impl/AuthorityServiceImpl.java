@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.authority.service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import utils.WebClientUtils;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -28,8 +28,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     private final AuthorityRepository authorityRepository;
     private final ObjectMapper objectMapper;
+    private final HttpSession httpSession;
     private final WebClient webClient;
-    private final WebClientUtils webClientUtils;
+//    private final WebClientUtils webClientUtils;
 
     @Value("${external.userInfo.url}")
     private String externalUserInfoUrl;
@@ -58,6 +59,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     public String getMemberName(String userId) {
+
+        String sessionUserId = (String) httpSession.getAttribute("userId");
+
+        if (sessionUserId.equals(userId)) {
+            throw new RuntimeException("로그인한 사용자의 userId와 동일합니다");
+        }
 
         ResponseData.ResultData resultData = fetchUserInfo(userId).block();
         if (resultData == null || resultData.getUsernm() == null) {
@@ -120,11 +127,11 @@ public class AuthorityServiceImpl implements AuthorityService {
         Map<String, String> requestData = new HashMap<>();
         requestData.put("userId", userId);
 
-        String response = webClientUtils.post(
-                "https://api.vitaport.co.kr/api/v1/kmi/setKmiExtExamCheckup",
-                requestData,
-                String.class
-        );
+//        String response = webClientUtils.post(
+//                "https://api.vitaport.co.kr/api/v1/kmi/setKmiExtExamCheckup",
+//                requestData,
+//                String.class
+//        );
 
 
         // WebClient를 사용하여 외부 사용자 정보 API에 POST 요청

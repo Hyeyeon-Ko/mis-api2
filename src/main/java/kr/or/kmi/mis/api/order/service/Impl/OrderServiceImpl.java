@@ -43,11 +43,20 @@ public class OrderServiceImpl implements OrderService {
         // 2. 각 신청건의 발주일시 저장 및 상세 정보 불러오기
         return bcdMasterList.stream()
                 .map(bcdMaster -> {
+                    // 발주일시 업데이트
                     bcdMaster.updateOrderDate(new Timestamp(System.currentTimeMillis()));
+
+                    // 상세 정보 불러오기
                     BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
                             .orElseThrow(() -> new EntityNotFoundException("BcdDetail"));
+
+                    // 수량 가져오기
                     Integer quantity = bcdDetail.getQuantity();
+
+                    // OrderListResponseDTO 생성 및 반환
                     return OrderListResponseDTO.builder()
+                            .draftId(bcdDetail.getDraftId())
+                            .instNm(bcdDetail.getInstNm())
                             .title(bcdMaster.getTitle())
                             .draftDate(bcdMaster.getDraftDate())
                             .respondDate(bcdMaster.getRespondDate())
@@ -60,7 +69,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void orderRequest(List<Long> draftIds) throws IOException, MessagingException {
+        // 엑셀 데이터 생성
         byte[] excelData = excelService.generateExcel(draftIds);
+        // 첨부 파일과 함께 이메일 전송
         sendEmailWithAttachment(excelData);
     }
 
@@ -68,13 +79,16 @@ public class OrderServiceImpl implements OrderService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        // 예시 이메일, 제목, 내용
-        helper.setTo("khy33355@gmail.com"); // 수신자 이메일 주소
-        helper.setSubject("발주 요청 엑셀 파일");
-        helper.setText("발주 요청 상세정보가 포함된 엑셀 파일을 첨부합니다.");
+        // 이메일 설정
+        helper.setFrom("gdkimm@kmi.or.kr"); // 발신자 이메일 주소
+        helper.setTo("khy33355@naver.com"); // 수신자 이메일 주소
+        helper.setSubject("발주 요청 엑셀 파일"); // 이메일 제목
+        helper.setText("발주 요청 상세정보가 포함된 엑셀 파일을 첨부합니다."); // 이메일 내용
 
+        // 엑셀 파일 첨부
         helper.addAttachment("order_details.xlsx", new ByteArrayResource(excelData));
 
+        // 이메일 전송
         mailSender.send(message);
     }
 }

@@ -35,6 +35,17 @@ dependencies {
 	/*mariadb*/
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
+	/*excel*/
+	implementation 'org.apache.poi:poi:5.2.2'
+	implementation 'org.apache.poi:poi-ooxml:5.2.2'
+
+	/*mailsender*/
+	implementation group: 'com.sun.mail', name: 'jakarta.mail', version: '2.0.1'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.5.1'
+
+	/*webflux*/
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 	/*querydsl*/
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

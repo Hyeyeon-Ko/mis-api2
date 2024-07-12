@@ -32,24 +32,14 @@ public class LoginServiceImpl implements LoginService {
                 .bodyToMono(Map.class)
                 .block();
 
-        assert responseMap != null;
-
-        if ("0000".equals(responseMap.get("resultCd"))) {
-
+        if (responseMap != null && "0000".equals(responseMap.get("resultCd"))) {
             LoginResponseDTO responseDTO = new LoginResponseDTO();
-            boolean authorityExists = authorityRepository.findByUserId(loginRequestDTO.getUserId()).isPresent();
+            responseDTO.setHngNm((String) responseMap.get("hngnm"));
 
-            if (authorityExists) {
-                Authority authority = authorityRepository.findByUserId(loginRequestDTO.getUserId()).get();
-                responseDTO.setHngNm((String) responseMap.get("hngnm"));
-                responseDTO.setRole(authority.getRole());
-                return responseDTO;
-            } else {
-                responseDTO.setHngNm((String) responseMap.get("hngnm"));
-                responseDTO.setRole("USER");
-                return responseDTO;
-            }
+            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(loginRequestDTO.getUserId()).orElse(null);
+            responseDTO.setRole(authority != null ? authority.getRole() : "USER");
 
+            return responseDTO;
         } else {
             return null;
         }

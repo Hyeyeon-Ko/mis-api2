@@ -61,7 +61,7 @@ public class ConfirmServiceImpl implements ConfirmService {
 
         // 세션에서 현재 로그인된 사용자 정보(사번, 이름) 가져오기
         String currentUserId = (String) request.getSession().getAttribute("userId");
-        String currentUser = (String) request.getSession().getAttribute("hngnm") ;
+        String currentUser = (String) request.getSession().getAttribute("hngnm");
 
         ApproveRequestDTO approveRequest = ApproveRequestDTO.builder()
                 .approverId(currentUserId)
