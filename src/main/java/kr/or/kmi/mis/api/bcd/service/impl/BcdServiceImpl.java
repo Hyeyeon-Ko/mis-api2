@@ -135,15 +135,17 @@ public class BcdServiceImpl implements BcdService {
                 .map(bcdMaster -> {
                     // BcdDetail 중 가장 최근에 생성된 BcdDetail(명함신청 최종 수정본)의 데이터를 가져온다.
                     // -  seqId: 시퀀스 넘버
+                    // -  instNm: 센터명
                     // -  lastUpdateId: 최종 수정자
                     // -  lastUpdateDate: 최종 수정일
                     Optional<BcdDetail> latestBcdDetail = bcdDetailRepository.findTopByDraftIdOrderBySeqIdDesc(bcdMaster.getDraftId());
 
                     Long seqId = latestBcdDetail.map(BcdDetail::getSeqId).orElse(null);
+                    String instNm = latestBcdDetail.map(BcdDetail::getInstNm).orElse(null);
                     String lastUpdateId = latestBcdDetail.map(BcdDetail::getLastUpdtId).orElse(null);
                     Timestamp lastUpdtDt = latestBcdDetail.map(BcdDetail::getLastUpdtDate).orElse(null);
 
-                    return BcdMasterResponseDTO.of(bcdMaster, seqId, lastUpdateId, lastUpdtDt);
+                    return BcdMasterResponseDTO.of(bcdMaster, seqId, instNm, lastUpdateId, lastUpdtDt);
 
                 })
                 .collect(Collectors.toList());
@@ -167,8 +169,9 @@ public class BcdServiceImpl implements BcdService {
         //   - 기안일자 기준 내림차순 정렬
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
 
-        // 2. Detail 테이블의 seqId와 수정자, 수정일시 정보와 매핑해, ResponseDto 형태로 반환
+        // 2. Detail 테이블의 seqId와 수정자, 수정일시, 센터 정보와 매핑해, ResponseDto 형태로 반환
         List<BcdMasterResponseDTO> bcdPendingLists = mapDetailToMasterResponse(bcdMasters);
+
 
         // 3. Detail 테이블의 seqId와 수정자, 수정일시 정보와 매핑해, ResponseDto 형태로 반환
         return bcdPendingLists.stream()
