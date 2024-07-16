@@ -1,5 +1,7 @@
 package kr.or.kmi.mis.api.bcd.model.response;
 
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -9,26 +11,26 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class BcdPendingResponseDTO {
     private Long draftId;
-    private Long seqId;
     private String title;
-    private String instNm;
+    private String instCd;
     private Timestamp draftDate;
     private String drafter;
     private Timestamp lastUpdateDate;   // 최종 수정일시
-    private String lastUpdateId;        // 최종 수정자
+    private String lastUpdater;        // 최종 수정자
     private String applyStatus;
 
     // BcdMaster Entity -> BcdPending response Dto
-    public static BcdPendingResponseDTO of(BcdMasterResponseDTO bcdMasterResponseDTO) {
+    public static BcdPendingResponseDTO of(BcdMaster bcdMaster, BcdDetail bcdDetail) {
 
         return BcdPendingResponseDTO.builder()
-                .draftId(bcdMasterResponseDTO.getDraftId())
-                .seqId(bcdMasterResponseDTO.getSeqId())
-                .title(bcdMasterResponseDTO.getTitle())
-                .instNm(bcdMasterResponseDTO.getInstNm())
-                .draftDate(bcdMasterResponseDTO.getDraftDate())
-                .drafter(bcdMasterResponseDTO.getDrafter())
-                .applyStatus(bcdMasterResponseDTO.getApplyStatus())
+                .draftId(bcdMaster.getDraftId())
+                .instCd(bcdDetail.getInstCd())
+                .title(bcdMaster.getTitle())
+                .draftDate(bcdMaster.getDraftDate())
+                .drafter(bcdMaster.getDrafter())
+                .lastUpdateDate(bcdDetail.getLastupdtDate())
+                .lastUpdater(bcdDetail.getLastUpdtr())
+                .applyStatus(bcdMaster.getStatus())
                 .build();
     }
 }

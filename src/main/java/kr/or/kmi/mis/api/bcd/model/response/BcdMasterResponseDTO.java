@@ -10,32 +10,28 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class BcdMasterResponseDTO {
     private Long draftId;
-    private Long seqId;
+    private String instCd;
     private String title;
     private Timestamp draftDate;
     private Timestamp respondDate;
     private Timestamp orderDate;
     private String drafter;
-    private String instNm;
     private String applyStatus;
     private String lastUpdtId;
     private Timestamp lastUpdtDate;
 
     // BcdMaster Entity -> BcdMaster response Dto
-    public static BcdMasterResponseDTO of(BcdMaster bcdMaster, Long seqId, String instNm, String lastUpdtId, Timestamp lastUpdtDate) {
+    public static BcdMasterResponseDTO of(BcdMaster bcdMaster, String instCd) {
 
         return BcdMasterResponseDTO.builder()
                 .draftId(bcdMaster.getDraftId())
-                .seqId(seqId)
                 .title(bcdMaster.getTitle())
-                .instNm(instNm)
+                .instCd(instCd)
                 .draftDate(bcdMaster.getDraftDate())
                 .respondDate(bcdMaster.getRespondDate())
                 .orderDate(bcdMaster.getOrderDate())
                 .drafter(bcdMaster.getDrafter())
                 .applyStatus(bcdMaster.getStatus())
-                .lastUpdtId(lastUpdtId)
-                .lastUpdtDate(lastUpdtDate)
                 .build();
     }
 

@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.bcd.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
+import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,8 @@ public class BcdController {
 
     @Operation(summary = "modify bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 수정 시 사용")
     @PostMapping(value = "/update")
-    public ResponseEntity<String> updateBcdApply(@RequestParam("draftId") Long draftId, @RequestParam("seqId") Long seqId, @RequestBody BcdRequestDTO bcdUpdateRequest) {
-        bcdService.updateBcd(draftId, seqId, bcdUpdateRequest);
+    public ResponseEntity<String> updateBcdApply(@RequestParam("draftId") Long draftId, @RequestBody BcdUpdateRequestDTO bcdUpdateRequestDTO) {
+        bcdService.updateBcd(draftId, bcdUpdateRequestDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("명함이 수정되었습니다.");

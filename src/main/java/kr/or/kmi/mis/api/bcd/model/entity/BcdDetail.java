@@ -1,7 +1,9 @@
 package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -10,36 +12,23 @@ import java.sql.Timestamp;
 @ToString
 @Entity
 @Table(name = "hrmtbcdd")
-@IdClass(DraftSeqPK.class)
 public class BcdDetail {
 
     @Id
     @Column(name = "draft_id")
     private Long draftId;
 
-    @Id
-    @Column(name = "seq_id")
-    private Long seqId;
-
-    @Column(nullable = false, length = 20)
-    private String drafter;        // 명함 기안자
-
     @Column(length = 20)
-    private String drafterId;
+    private String lastUpdtr;         // 명함 최종 수정자
 
-    @Column(nullable = false)
-    private Timestamp draftDate;
-
-    @Column(length = 20)
-    private String lastUpdtId;     // 명함 최종 수정자
-
-    private Timestamp lastUpdtDate;
-
-    @Column(length = 20)
-    private String userId;       // 명함 대상자 사번
+    @UpdateTimestamp
+    private Timestamp lastupdtDate;   // 명함 최종 수정일
 
     @Column(length = 1)
-    private String division;  // 명함구분 - A:회사정보, B:영문명함
+    private String division;          // 명함구분 - A:회사정보, B:영문명함
+
+    @Column(length = 20)
+    private String userId;            // 명함 대상자 사번
 
     @Column(length = 20)
     private String korNm;
@@ -48,22 +37,16 @@ public class BcdDetail {
     private String engNm;
 
     @Column(length = 100)
-    private String instNm;
+    private String instCd;
 
     @Column(length = 100)
-    private String deptNm;
+    private String deptCd;
 
     @Column(length = 100)
-    private String teamNm;
+    private String teamCd;
 
     @Column(length = 20)
-    private String engTeamNm;
-
-    @Column(length = 20)
-    private String grade;
-
-    @Column(length = 20)
-    private String engGrade;
+    private String gradeCd;
 
     @Column(length = 20)
     private String extTel;
@@ -86,23 +69,18 @@ public class BcdDetail {
     private Integer quantity;
 
     @Builder
-    public BcdDetail(Long draftId, String drafter, String drafterId, Timestamp draftDate, String userId, String division,
-                     String korNm, String engNm, String instNm, String deptNm, String teamNm, String engTeamNm, String grade, String engGrade,
+    public BcdDetail(Long draftId, String division, String userId, String korNm, String engNm,
+                     String instCd, String deptCd, String teamCd, String gradeCd,
                      String extTel, String faxTel, String phoneTel, String email, String address, String engAddress, Integer quantity) {
         this.draftId = draftId;
-        this.drafter = drafter;
-        this.drafterId = drafterId;
-        this.draftDate = draftDate;
-        this.userId = userId;
         this.division = division;
+        this.userId = userId;
         this.korNm = korNm;
         this.engNm = engNm;
-        this.instNm = instNm;
-        this.deptNm = deptNm;
-        this.teamNm = teamNm;
-        this.engTeamNm = engTeamNm;
-        this.grade = grade;
-        this.engGrade = engGrade;
+        this.instCd = instCd;
+        this.deptCd = deptCd;
+        this.teamCd = teamCd;
+        this.gradeCd = gradeCd;
         this.extTel = extTel;
         this.faxTel = faxTel;
         this.phoneTel = phoneTel;
@@ -112,13 +90,20 @@ public class BcdDetail {
         this.quantity = quantity;
     }
 
-    public void updateSeqId(Long seqId) {
-        this.seqId = seqId;
+    public void update(BcdUpdateRequestDTO bcdUpdateRequestDTO, String updtr) {
+        this.lastUpdtr = updtr;
+        this.division = bcdUpdateRequestDTO.getDivision();
+        this.engNm = bcdUpdateRequestDTO.getEngNm();
+        this.instCd = bcdUpdateRequestDTO.getInstCd();
+        this.deptCd = bcdUpdateRequestDTO.getDeptCd();
+        this.teamCd = bcdUpdateRequestDTO.getTeamCd();
+        this.gradeCd = bcdUpdateRequestDTO.getGradeCd();
+        this.extTel = bcdUpdateRequestDTO.getExtTel();
+        this.faxTel = bcdUpdateRequestDTO.getFaxTel();
+        this.phoneTel = bcdUpdateRequestDTO.getPhoneTel();
+        this.email = bcdUpdateRequestDTO.getEmail();
+        this.address = bcdUpdateRequestDTO.getAddress();
+        this.engAddress = bcdUpdateRequestDTO.getEngAddress();
+        this.quantity = bcdUpdateRequestDTO.getQuantity();
     }
-
-    public void update(String lastUpdtId, Timestamp lastUpdtDt) {
-        this.lastUpdtId = lastUpdtId;
-        this.lastUpdtDate = lastUpdtDt;
-    }
-
 }
