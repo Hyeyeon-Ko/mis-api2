@@ -1,9 +1,9 @@
-package kr.or.kmi.mis.api.main.service;
+package kr.or.kmi.mis.api.apply.service;
 
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
-import kr.or.kmi.mis.api.main.model.response.ApplyResponseDTO;
-import kr.or.kmi.mis.api.main.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

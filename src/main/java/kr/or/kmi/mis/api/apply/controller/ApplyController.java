@@ -1,10 +1,11 @@
-package kr.or.kmi.mis.api.main.controller;
+package kr.or.kmi.mis.api.apply.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 
-import kr.or.kmi.mis.api.main.model.response.ApplyResponseDTO;
-import kr.or.kmi.mis.api.main.model.response.PendingResponseDTO;
-import kr.or.kmi.mis.api.main.service.ApplyService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.apply.service.ApplyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Tag(name = "Apply", description = "신청목록 호출 관련 API")
 public class ApplyController {
 
     private final ApplyService applyService;

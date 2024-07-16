@@ -1,4 +1,4 @@
-package kr.or.kmi.mis.api.main.model.response;
+package kr.or.kmi.mis.api.apply.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
 import lombok.AllArgsConstructor;
