@@ -56,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
                     // OrderListResponseDTO 생성 및 반환
                     return OrderListResponseDTO.builder()
                             .draftId(bcdDetail.getDraftId())
-                            .instNm(bcdDetail.getInstNm())
+                            //.instNm(bcdDetail.getInstNm())
                             .title(bcdMaster.getTitle())
                             .draftDate(bcdMaster.getDraftDate())
                             .respondDate(bcdMaster.getRespondDate())

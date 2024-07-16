@@ -71,9 +71,9 @@ public class ExcelServiceImpl implements ExcelService {
 
             // 앞면 정보
             createCell(row, 0, no.getAndIncrement(), thickBorderStyle, centeredStyle);
-            createCell(row, 1, detail.getInstNm(), thinBorderStyle, centeredStyle);
-            createCell(row, 2, detail.getTeamNm(), thinBorderStyle, centeredStyle);
-            createCell(row, 3, detail.getGrade(), thinBorderStyle, centeredStyle);
+            //createCell(row, 1, detail.getInstNm(), thinBorderStyle, centeredStyle);
+            //createCell(row, 2, detail.getTeamNm(), thinBorderStyle, centeredStyle);
+            //createCell(row, 3, detail.getGrade(), thinBorderStyle, centeredStyle);
             createCell(row, 4, detail.getKorNm(), thinBorderStyle, centeredStyle);
             createCell(row, 5, detail.getEngNm(), thinBorderStyle, centeredStyle);
             createCell(row, 6, formatPhoneNumber(detail.getExtTel(), false), thinBorderStyle, centeredStyle);
@@ -93,7 +93,7 @@ public class ExcelServiceImpl implements ExcelService {
             rowBack.setHeight((short) 600); // 세로 너비 설정
 
             createCell(rowBack, 0, "", thickBorderStyle, centeredStyle);
-            createCell(rowBack, 1, detail.getEngTeamNm(), thinBorderStyle, centeredStyle);
+            //createCell(rowBack, 1, detail.getEngTeamNm(), thinBorderStyle, centeredStyle);
             createCell(rowBack, 2, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 3, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 4, detail.getEngNm(), thinBorderStyle, centeredStyle);
