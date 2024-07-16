@@ -33,7 +33,7 @@ public class ConfirmServiceImpl implements ConfirmService {
         BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
-        return BcdDetailResponseDTO.of(bcdDetail);
+        return BcdDetailResponseDTO.of(bcdDetail, drafter);
     }
 
     /* 승인 */

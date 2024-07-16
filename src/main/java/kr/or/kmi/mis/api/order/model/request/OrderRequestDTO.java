@@ -10,4 +10,7 @@ import java.util.List;
 public class OrderRequestDTO {
 
     private List<Long> draftIds;
+    private String emailSubject;
+    private String emailBody;
+    private String fileName;
 }

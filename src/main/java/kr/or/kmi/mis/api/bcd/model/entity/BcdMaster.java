@@ -88,7 +88,8 @@ public class BcdMaster {
 
 
     // 발주 -> 발주일시 업데이트
-    public void updateOrderDate(Timestamp deletedt) {
-        this.orderDate = new Timestamp(System.currentTimeMillis());
+    public void updateOrder(Timestamp deletedt) {
+        this.orderDate = deletedt;
+        this.status = "D";
     }
 }

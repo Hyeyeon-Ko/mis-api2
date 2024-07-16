@@ -37,7 +37,7 @@ public class ApplyServiceImpl implements ApplyService {
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         // 특정 유형(ex.명함신청)만 조회합니다.
-        if (documentType != null) {
+        if (documentType != null && !documentType.isEmpty()) {
             switch (documentType) {
                 case "명함신청":
                     bcdApplyLists = bcdService.getBcdApplyByDateRange(timestamps[0], timestamps[1]);

@@ -31,21 +31,21 @@ public class AuthorityController {
         return ResponseWrapper.success(authorityService.getMemberName(userId));
     }
 
-    @Operation(summary = "add admin", description = "새로운 관리 권한을 추가")
+    @Operation(summary = "add admin", description = "새로운 관리 권한 추가")
     @PostMapping("/admin")
     public ApiResponse<?> addAdmin(@RequestParam String userRole, @RequestParam String userId) {
         authorityService.addAdmin(userRole, userId);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "modify admin", description = "기존 관리 권한을 수정")
-    @PostMapping("/admin/{authId}")
+    @Operation(summary = "modify admin", description = "기존 관리 권한 수정")
+    @PutMapping("/admin/{authId}")
     public ApiResponse<?> modifyAdmin(@PathVariable Long authId, @RequestParam String userRole) {
         authorityService.modifyAdmin(authId, userRole);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "delete admin", description = "기존 관리 권한을 삭제")
+    @Operation(summary = "delete admin", description = "기존 관리 권한 삭제")
     @DeleteMapping("/admin/{authId}")
     public ApiResponse<?> deleteAdmin(@PathVariable Long authId) {
         authorityService.deleteAdmin(authId);

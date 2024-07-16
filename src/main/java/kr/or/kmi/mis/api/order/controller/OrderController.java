@@ -28,10 +28,10 @@ public class OrderController {
         return ResponseWrapper.success(orderService.getOrderList());
     }
 
-    @Operation(summary = "order request", description = "발주 요청")
+    @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
     @PostMapping
     public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException {
-        orderService.orderRequest(orderRequest.getDraftIds());
+        orderService.orderRequest(orderRequest.getDraftIds(), orderRequest.getEmailSubject(), orderRequest.getEmailBody(), orderRequest.getFileName());
         return ResponseWrapper.success();
     }
 }

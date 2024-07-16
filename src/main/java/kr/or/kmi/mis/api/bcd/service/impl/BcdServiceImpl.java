@@ -159,8 +159,10 @@ public class BcdServiceImpl implements BcdService {
         // todo: 테이블 새로 create하고 findById로 변경
         BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(draftId)
                 .orElseThrow(()-> new  IllegalArgumentException("Not Found"));
+        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(draftId)
+                .orElseThrow(() -> new  IllegalArgumentException("Not Found"));
 
-        return BcdDetailResponseDTO.of(bcdDetail);
+        return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter());
 
     }
 

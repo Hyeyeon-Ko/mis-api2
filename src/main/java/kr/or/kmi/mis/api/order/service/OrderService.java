@@ -12,5 +12,5 @@ public interface OrderService {
     List<OrderListResponseDTO> getOrderList();
 
     /* 발주 요청 -> 이메일로 엑셀 파일 전송 */
-    void orderRequest(List<Long> orderIds) throws IOException, MessagingException;
+    void orderRequest(List<Long> draftIds, String emailSubject, String emailBody, String fileName) throws IOException, MessagingException;
 }

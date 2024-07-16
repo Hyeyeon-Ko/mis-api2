@@ -9,6 +9,7 @@ import lombok.*;
 public class BcdDetailResponseDTO {
 
     private Long draftId;
+    private String drafter;
     private String userId;
     private String division;
     private String korNm;
@@ -26,9 +27,10 @@ public class BcdDetailResponseDTO {
     private Integer quantity;
 
     // BcdMaster Entity -> BcdMaster response Dto
-    public static BcdDetailResponseDTO of(BcdDetail bcdDetail) {
+    public static BcdDetailResponseDTO of(BcdDetail bcdDetail, String drafter) {
         return BcdDetailResponseDTO.builder()
                 .draftId(bcdDetail.getDraftId())
+                .drafter(drafter)
                 .division(bcdDetail.getDivision())
                 .userId(bcdDetail.getUserId())
                 .korNm(bcdDetail.getKorNm())
