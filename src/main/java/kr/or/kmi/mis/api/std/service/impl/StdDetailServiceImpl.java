@@ -1,9 +1,13 @@
 package kr.or.kmi.mis.api.std.service.impl;
 
+import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdDetailHist;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
+import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
+import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
+import kr.or.kmi.mis.api.std.repository.StdDetailHistRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
@@ -12,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,19 +23,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StdDetailServiceImpl implements StdDetailService {
 
-    private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
+    private final StdDetailHistRepository stdDetailHistRepository;
 
-/*    @Override
+    @Override
     @Transactional(readOnly = true)
-    public List<StdDetailResponseDTO> getInfo(String clsCd, String etcCd) {
+    public List<StdDetailResponseDTO> getInfo(String groupCd) {
 
-        List<StdDetail> bscdLists = bscdRepository.findAllByClsCdAndEtcCd(clsCd, etcCd);
+        StdGroup stdGroup = stdGroupRepository.findById(groupCd)
+                .orElseThrow(() -> new EntityNotFoundException(StdDetail.class.getName()));
 
-        return bscdLists.stream()
-                .map(BscdResponseDTO::of)
+        List<StdDetail> stdDetails = stdDetailRepository.findAllByUseAtNotAndGroupCd("N", stdGroup)
+                .orElseThrow(() -> new EntityNotFoundException(StdDetail.class.getName()));
+
+        return stdDetails.stream()
+                .map(StdDetailResponseDTO::of)
                 .collect(Collectors.toList());
-    }*/
+    }
 
 
     @Override
@@ -41,80 +49,53 @@ public class StdDetailServiceImpl implements StdDetailService {
     // - 안되면, 로그인 세션 ID로 그룹웨어에서 정보 호출해, toEntity param으로 같이 넘겨줘야 함
     public void addInfo(StdDetailRequestDTO stdDetailRequestDTO) {
 
-        // todo: 로그인 세션 ID로 수정자 이름 찾기
-        String fstRegisterId = "수정자";
-
         StdGroup stdGroup = stdGroupRepository.findById(stdDetailRequestDTO.getGroupCd())
                 .orElseThrow(() -> new IllegalArgumentException("ggg"));
 
-        StdDetail stdDetail = stdDetailRequestDTO.toEntity(fstRegisterId, stdGroup);
+        StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
+
+        // todo: 로그인 세션 ID로 수정자 이름 찾기
+        String fstRegisterId = "등록자";
+        stdDetail.setRgstrId(fstRegisterId);
+        stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         stdDetailRepository.save(stdDetail);
     }
 
-    /*@Override
+    @Override
     @Transactional
-    public void updateInfo(StdDetailRequestDTO stdDetailRequestDTO) {
+    public void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
+
+        // 1. 기존 기준자료 값 조회
         StdDetail oriStdDetail = stdDetailRepository.findById(stdDetailRequestDTO.getDetailCd())
                 .orElseThrow(() -> new IllegalArgumentException("ggg"));
 
-        // todo: 로그인 세션 ID로 수정자 이름 찾기
-        String "lastUpd정자";
+        // 2. 기준자료 hist 생성 후, 수정된 내용 반영해 update
+        StdDetailHist stdDetailHist = StdDetailHist.builder()
+                .stdDetail(oriStdDetail)
+                .build();
 
-        if (oriStdDetail != null) {
-            StdDetailHist stdDetailHist =
+        stdDetailHist.setRgstrId(oriStdDetail.getRgstrId());
+        stdDetailHist.setRgstDt(oriStdDetail.getRgstDt());
+        stdDetailHist.setUpdtrId(oriStdDetail.getUpdtrId());
+        stdDetailHist.setUpdtDt(oriStdDetail.getUpdtDt());
+        stdDetailHistRepository.save(stdDetailHist);
 
-            bscdRepository.save(oriInfo);
-        } else {
-            throw new EntityNotFoundException("Entity with the given criteria not found");
-        }
+        // todo: 로그인 세션 ID로 수정자 찾기
+        String lstUpdtr = "마지막 수정자";
+        oriStdDetail.update(stdDetailRequestDTO);
+        oriStdDetail.setUpdtrId(lstUpdtr);
+        oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        stdDetailRepository.save(oriStdDetail);
 
-        // 시작, 종료일자가 null 값으로 들어올 때 default 설정
-        //   - Dates[0] : 시작일자
-        //   - Dates[1] : 종료일자
-        String[] Dates = setDefaultDates(bscdRequestDTO);
-
-        // todo: 로그인 세션 ID로 수정자 이름 찾기
-        String lastUpdater = "수정자";
-
-        if (oriInfo != null) {
-            oriInfo.update(bscdRequestDTO.getEtcDetlCd(),   // todo: unique 값 예외처리 필요
-                    Dates[0], Dates[1],
-                    lastUpdater, new Timestamp(System.currentTimeMillis()),
-                    bscdRequestDTO.getEtcItem1(),
-                    bscdRequestDTO.getEtcItem2(),
-                    bscdRequestDTO.getEtcItem3(),
-                    bscdRequestDTO.getEtcItem4(),
-                    bscdRequestDTO.getEtcItem5());
-
-            bscdRepository.save(oriInfo);
-        } else {
-            throw new EntityNotFoundException("Entity with the given criteria not found");
-        }
-    }*/
-/*
-    @Override
-    public void deleteInfo(String clsCd, String etcCd, String etcDetlCd) {
-        Bscd oriInfo = bscdRepository.findByClsCdAndEtcCdAndEtcDetlCd(clsCd, etcCd, etcDetlCd);
-
-        if (oriInfo != null) {
-            bscdRepository.delete(oriInfo);
-        } else {
-            throw new EntityNotFoundException("Entity with the given criteria not found");
-        }
     }
-*/
-/*    public String[] setDefaultDates(StdDetailRequestDTO stdDetailRequestDTO) {
 
-        String fromDd = stdDetailRequestDTO.getFromDd();
-        String toDd = stdDetailRequestDTO.getToDd();
+    @Override
+    @Transactional
+    public void deleteInfo(String detailCd) {
+        StdDetail stdDetail = stdDetailRepository.findById(detailCd)
+                .orElseThrow(() -> new IllegalArgumentException("ggg"));
 
-        if(fromDd == null) {
-            fromDd = String.valueOf((LocalDate.now()));
-        }
-        if(toDd == null) {
-            toDd = "9999-12-31";
-        }
-
-        return new String[]{fromDd, toDd};
-    }*/
+        stdDetail.updateUseAt("N");
+        stdDetailRepository.save(stdDetail);
+    }
 }

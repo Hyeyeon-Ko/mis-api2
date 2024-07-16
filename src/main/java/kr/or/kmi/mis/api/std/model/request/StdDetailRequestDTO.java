@@ -16,7 +16,8 @@ public class StdDetailRequestDTO {
     private String detailCd;
     private String groupCd;
     private String detailNm;
-    private String updtrId;
+    private String fromDd;
+    private String toDd;
     private String etcItem1;
     private String etcItem2;
     private String etcItem3;
@@ -24,20 +25,19 @@ public class StdDetailRequestDTO {
     private String etcItem5;
     private String etcItem6;
 
-    public StdDetail toEntity(String fstRegisterId, StdGroup groupCd) {
-
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-
+    public StdDetail toEntity(StdGroup groupCd) {
         return StdDetail.builder()
                 .detailCd(detailCd)
                 .groupCd(groupCd)
                 .detailNm(detailNm)
-                .updtrId(fstRegisterId)
+                .fromDd(fromDd)
+                .toDd(toDd)
                 .etcItem1(etcItem1)
                 .etcItem2(etcItem2)
                 .etcItem3(etcItem3)
                 .etcItem4(etcItem4)
                 .etcItem5(etcItem5)
+                .etcItem6(etcItem6)
                 .build();
     }
 }

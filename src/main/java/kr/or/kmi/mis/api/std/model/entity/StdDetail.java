@@ -1,13 +1,11 @@
 package kr.or.kmi.mis.api.std.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.sql.Timestamp;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -26,12 +24,14 @@ public class StdDetail extends BaseSystemFieldEntity{
     @Column(name = "detail_nm", length = 20, nullable = false)
     private String detailNm;
 
-    @Column(name = "updtr_id", length = 20)
-    private String updtrId;
+    @Column(name = "from_dd", length = 20)
+    private String fromDd;
 
-    @UpdateTimestamp
-    @Column(name = "updt_dt", length = 20)
-    private Timestamp updtDt;
+    @Column(name = "to_dd", length = 20)
+    private String toDd;
+
+    @Column(name = "use_at", length = 1)
+    private String useAt;
 
     @Column(name = "etc_item1", length = 100)
     private String etcItem1;
@@ -52,17 +52,37 @@ public class StdDetail extends BaseSystemFieldEntity{
     private String etcItem6;
 
     @Builder
-    public StdDetail(String detailCd, StdGroup groupCd, String detailNm, String updtrId,
+    public StdDetail(String detailCd, StdGroup groupCd, String detailNm, String fromDd, String toDd,
                 String etcItem1, String etcItem2, String etcItem3,String etcItem4,String etcItem5, String etcItem6) {
         this.detailCd = detailCd;
         this.groupCd = groupCd;
         this.detailNm = detailNm;
-        this.updtrId = updtrId;
+        this.fromDd = fromDd;
+        this.toDd = toDd;
+        this.useAt = "Y";
         this.etcItem1 = etcItem1;
         this.etcItem2 = etcItem2;
         this.etcItem3 = etcItem3;
         this.etcItem4 = etcItem4;
         this.etcItem5 = etcItem5;
+        this.etcItem6 = etcItem6;
+    }
+
+    public void update(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
+        this.detailCd = stdDetailRequestDTO.getDetailCd();
+        this.detailNm = stdDetailRequestDTO.getDetailNm();
+        this.fromDd = stdDetailRequestDTO.getFromDd();
+        this.toDd = stdDetailRequestDTO.getToDd();
+        this.etcItem1 = stdDetailRequestDTO.getEtcItem1();
+        this.etcItem2 = stdDetailRequestDTO.getEtcItem2();
+        this.etcItem3 = stdDetailRequestDTO.getEtcItem3();
+        this.etcItem4 = stdDetailRequestDTO.getEtcItem4();
+        this.etcItem5 = stdDetailRequestDTO.getEtcItem5();
+        this.etcItem6 = stdDetailRequestDTO.getEtcItem6();
+    }
+
+    public void updateUseAt(String useAt) {
+        this.useAt = useAt;
     }
 }
 
