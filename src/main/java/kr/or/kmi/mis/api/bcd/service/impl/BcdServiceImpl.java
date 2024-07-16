@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.bcd.service.impl;
 
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdHistory;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
@@ -9,15 +8,14 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
-import kr.or.kmi.mis.api.bcd.repository.BcdHistoryRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +27,7 @@ public class BcdServiceImpl implements BcdService {
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
     private final BcdHistoryService bcdHistoryService;
+    private final InfoService infoService;
 
     //ch
     @Override
@@ -63,9 +62,7 @@ public class BcdServiceImpl implements BcdService {
             // 3. 수정된 명함상세 정보로 명함상세 update
             //   1) 수정자 조회
             //   2) 정보 업데이트
-
-            // todo: 로그인 한 세션의 id(사번) 값 -> 이름
-            String updtr = "명함수정자";
+            String updtr = infoService.getUserInfo().getCurrentUserName();
             bcdDetail.update(updateBcdRequestDTO, updtr);
             bcdDetailRepository.save(bcdDetail);
 
@@ -113,8 +110,7 @@ public class BcdServiceImpl implements BcdService {
 
         List<BcdMasterResponseDTO> results = new ArrayList<>();
 
-        //todo: 로그인 한 세션의 id 값 받아오기
-        String userId = "2024000111";
+        String userId = infoService.getUserInfo().getCurrentUserId();
 
         // 2. 나의 모든 명함신청 내역을 호출한다.
         //  - DrafterId(기안자 사번)로 나의 명함신청 내역을 불러온다.
@@ -156,10 +152,9 @@ public class BcdServiceImpl implements BcdService {
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcd(Long draftId) {
 
-        // todo: 테이블 새로 create하고 findById로 변경
-        BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(draftId)
+        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
                 .orElseThrow(()-> new  IllegalArgumentException("Not Found"));
-        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(draftId)
+        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new  IllegalArgumentException("Not Found"));
 
         return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter());
@@ -176,7 +171,7 @@ public class BcdServiceImpl implements BcdService {
         // 2. Detail 테이블의 seqId와 수정자, 수정일시, 센터 정보와 매핑해, ResponseDto 형태로 반환
         return bcdMasters.stream()
                 .map(bcdMaster -> {
-                            BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
+                            BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                                     .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
                             return BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
@@ -189,8 +184,7 @@ public class BcdServiceImpl implements BcdService {
 
         List<BcdPendingResponseDTO> results = new ArrayList<>();
 
-        //todo: 로그인 한 세션의 id 값 받아오기
-        String userId = "2024000111";
+        String userId = infoService.getUserInfo().getCurrentUserId();
 
         // 2. 나의 모든 명함신청 승인대기 내역을 호출한다.
         //  - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.
@@ -201,7 +195,7 @@ public class BcdServiceImpl implements BcdService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<BcdPendingResponseDTO> bcdMasterResponses = myBcdMasters.stream()
                 .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
+                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
                     return BcdPendingResponseDTO.of(bcdMaster, bcdDetail);

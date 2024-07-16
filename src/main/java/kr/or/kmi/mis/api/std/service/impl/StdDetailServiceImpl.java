@@ -11,6 +11,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailHistRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class StdDetailServiceImpl implements StdDetailService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
     private final StdDetailHistRepository stdDetailHistRepository;
+    private final InfoService infoService;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,8 +56,7 @@ public class StdDetailServiceImpl implements StdDetailService {
 
         StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
 
-        // todo: 로그인 세션 ID로 수정자 이름 찾기
-        String fstRegisterId = "등록자";
+        String fstRegisterId = infoService.getUserInfo().getCurrentUserId();
         stdDetail.setRgstrId(fstRegisterId);
         stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         stdDetailRepository.save(stdDetail);
@@ -80,8 +81,7 @@ public class StdDetailServiceImpl implements StdDetailService {
         stdDetailHist.setUpdtDt(oriStdDetail.getUpdtDt());
         stdDetailHistRepository.save(stdDetailHist);
 
-        // todo: 로그인 세션 ID로 수정자 찾기
-        String lstUpdtr = "마지막 수정자";
+        String lstUpdtr = infoService.getUserInfo().getCurrentUserName();
         oriStdDetail.update(stdDetailRequestDTO);
         oriStdDetail.setUpdtrId(lstUpdtr);
         oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
