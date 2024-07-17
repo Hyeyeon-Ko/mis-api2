@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.cmm.response.ApiResponse;
@@ -44,9 +45,9 @@ public class ApplyController {
 
     @Operation(summary = "나의 신청 내역 호출", description = "나의 모든 신청 내역을 호출합니다.")
     @GetMapping(value = "/myApplyList")
-    public ApiResponse<ApplyResponseDTO> getAllMyApplyList(@RequestParam(required = false) String documentType,
-                                                              @RequestParam(required = false) LocalDate startDate,
-                                                              @RequestParam(required = false) LocalDate endDate) {
+    public ApiResponse<MyApplyResponseDTO> getAllMyApplyList(@RequestParam(required = false) String documentType,
+                                                             @RequestParam(required = false) LocalDate startDate,
+                                                             @RequestParam(required = false) LocalDate endDate) {
 
         return ResponseWrapper.success(applyService.getAllMyApplyList(documentType, startDate, endDate));
     }

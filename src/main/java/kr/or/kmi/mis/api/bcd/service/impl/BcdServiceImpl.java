@@ -4,10 +4,7 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdSampleResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.*;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.repository.impl.BcdSampleQueryRepositoryImpl;
@@ -101,9 +98,9 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
+    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
 
-        List<BcdMasterResponseDTO> results = new ArrayList<>();
+        List<BcdMyResponseDTO> results = new ArrayList<>();
 
         // 1. 로그인한 사용자 정보 호출
         String userId = infoService.getUserInfo().getUserId();
@@ -115,25 +112,25 @@ public class BcdServiceImpl implements BcdService {
         // 2-1. 내가 신청한 나의 명함신청 내역
         List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        List<BcdMasterResponseDTO> bcdMasterResponses = bcdMasters.stream()
+        List<BcdMyResponseDTO> bcdMasterResponses = bcdMasters.stream()
                 .map(bcdMaster -> {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
-                    return BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
+                    return BcdMyResponseDTO.of(bcdMaster);
                 }).toList();
 
         // 2-2. 타인이 신청해준 나의 명함신청 내역
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
-        List<BcdMasterResponseDTO> anotherBcdResponses = bcdDetails.stream()
+        List<BcdMyResponseDTO> anotherBcdResponses = bcdDetails.stream()
                 .map(bcdDetail -> {
                             // startDate와 endDate 사이에 있는 BcdMaster 조회
                             List<BcdMaster> newBcdMasters = bcdMasterRepository.findByDraftIdAndDraftDateBetween(bcdDetail.getDraftId(), startDate, endDate)
                                     .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdDetail.getDraftId()));
 
                             return newBcdMasters.stream()
-                                    .map(bcdMaster -> BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd()))
+                                    .map(BcdMyResponseDTO::of)
                                     .collect(Collectors.toList());
                 }).flatMap(Collection::stream).toList();
 

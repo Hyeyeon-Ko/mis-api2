@@ -1,7 +1,9 @@
 package kr.or.kmi.mis.api.apply.service.Impl;
 
+import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
@@ -56,7 +58,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate) {
+    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate) {
 
         /**
          * 다른 유형의 신청목록 추가될 수 있음
@@ -67,7 +69,7 @@ public class ApplyServiceImpl implements ApplyService {
          *              break;
          * */
 
-        List<BcdMasterResponseDTO> myBcdApplyLists;
+        List<BcdMyResponseDTO> myBcdApplyLists;
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         // 특정 유형(ex.명함신청)만 조회합니다.
@@ -84,7 +86,7 @@ public class ApplyServiceImpl implements ApplyService {
             myBcdApplyLists = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1]);
         }
 
-        return ApplyResponseDTO.of(myBcdApplyLists);
+        return MyApplyResponseDTO.of(myBcdApplyLists);
     }
 
     @Override
