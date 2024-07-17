@@ -4,8 +4,6 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import lombok.Getter;
 
-import java.sql.Timestamp;
-
 @Getter
 public class BcdRequestDTO {
 

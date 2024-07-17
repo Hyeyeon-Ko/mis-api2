@@ -29,7 +29,6 @@ public class BcdServiceImpl implements BcdService {
     private final BcdHistoryService bcdHistoryService;
     private final InfoService infoService;
 
-    //ch
     @Override
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
@@ -45,33 +44,26 @@ public class BcdServiceImpl implements BcdService {
 
     }
 
-    // ch
     @Override
     @Transactional
     public void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO) {
 
         // 1. 명함상세 조회
-        Optional<BcdDetail> existingDetailOpt = bcdDetailRepository.findByDraftId(draftId);
+        BcdDetail existingDetailOpt = bcdDetailRepository.findById(draftId)
+                .orElseThrow(()-> new IllegalArgumentException("명함 신청 이력이 없습니다."));
 
-        if (existingDetailOpt.isPresent()) {
+        // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
+        bcdHistoryService.createBcdHistory(existingDetailOpt);
 
-            // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
-            BcdDetail bcdDetail = existingDetailOpt.get();
-            bcdHistoryService.createBcdHistory(bcdDetail);
+        // 3. 수정된 명함상세 정보로 명함상세 update
+        //   1) 수정자 조회
+        //   2) 정보 업데이트
+        String updtr = infoService.getUserInfo().getCurrentUserName();
+        existingDetailOpt.update(updateBcdRequestDTO, updtr);
+        bcdDetailRepository.save(existingDetailOpt);
 
-            // 3. 수정된 명함상세 정보로 명함상세 update
-            //   1) 수정자 조회
-            //   2) 정보 업데이트
-            String updtr = infoService.getUserInfo().getCurrentUserName();
-            bcdDetail.update(updateBcdRequestDTO, updtr);
-            bcdDetailRepository.save(bcdDetail);
-
-        } else {
-            throw new IllegalArgumentException("신청 이력이 없습니다.");
-        }
     }
 
-    // ch
     @Override
     @Transactional
     public void cancelBcdApply(Long draftId) {
@@ -82,7 +74,6 @@ public class BcdServiceImpl implements BcdService {
         bcdMaster.updateStatus("F");   // F(신청 취소)
     }
 
-    // ch
     @Override
     @Transactional(readOnly = true)
     public List<BcdMasterResponseDTO> getBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
@@ -97,7 +88,7 @@ public class BcdServiceImpl implements BcdService {
         // 2. 신청 내역을 하나씩 꺼내, response dto 와 매핑하여 반환한다.
         return bcdMasters.stream()
                 .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
+                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
                     return BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
@@ -110,6 +101,7 @@ public class BcdServiceImpl implements BcdService {
 
         List<BcdMasterResponseDTO> results = new ArrayList<>();
 
+        // 1. 로그인한 사용자 정보 호출
         String userId = infoService.getUserInfo().getCurrentUserId();
 
         // 2. 나의 모든 명함신청 내역을 호출한다.
@@ -121,7 +113,7 @@ public class BcdServiceImpl implements BcdService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<BcdMasterResponseDTO> bcdMasterResponses = bcdMasters.stream()
                 .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
+                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
                     return BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
@@ -147,7 +139,6 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
-    // ch
     @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcd(Long draftId) {
@@ -168,7 +159,7 @@ public class BcdServiceImpl implements BcdService {
         //   - 기안일자 기준 내림차순 정렬
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
 
-        // 2. Detail 테이블의 seqId와 수정자, 수정일시, 센터 정보와 매핑해, ResponseDto 형태로 반환
+        // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
         return bcdMasters.stream()
                 .map(bcdMaster -> {
                             BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
@@ -219,7 +210,6 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
-   // ch
     @Override
     @Transactional
     public void completeBcdApply(Long draftId){

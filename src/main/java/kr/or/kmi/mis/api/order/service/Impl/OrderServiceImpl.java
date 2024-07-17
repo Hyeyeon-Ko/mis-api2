@@ -41,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
 
         return bcdMasterList.stream()
                 .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(bcdMaster.getDraftId())
+                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new EntityNotFoundException("BcdDetail"));
 
                     Integer quantity = bcdDetail.getQuantity();

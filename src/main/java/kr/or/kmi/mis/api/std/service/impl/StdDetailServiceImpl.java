@@ -34,10 +34,10 @@ public class StdDetailServiceImpl implements StdDetailService {
     public List<StdDetailResponseDTO> getInfo(String groupCd) {
 
         StdGroup stdGroup = stdGroupRepository.findById(groupCd)
-                .orElseThrow(() -> new EntityNotFoundException(StdDetail.class.getName()));
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
         List<StdDetail> stdDetails = stdDetailRepository.findAllByUseAtNotAndGroupCd("N", stdGroup)
-                .orElseThrow(() -> new EntityNotFoundException(StdDetail.class.getName()));
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
         return stdDetails.stream()
                 .map(StdDetailResponseDTO::of)
@@ -47,12 +47,10 @@ public class StdDetailServiceImpl implements StdDetailService {
 
     @Override
     @Transactional
-    // - 되면, DTO에서 get해서 저장
-    // - 안되면, 로그인 세션 ID로 그룹웨어에서 정보 호출해, toEntity param으로 같이 넘겨줘야 함
     public void addInfo(StdDetailRequestDTO stdDetailRequestDTO) {
 
         StdGroup stdGroup = stdGroupRepository.findById(stdDetailRequestDTO.getGroupCd())
-                .orElseThrow(() -> new IllegalArgumentException("ggg"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 그룹 정보 없음: groupCd = " + stdDetailRequestDTO.getGroupCd()));
 
         StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
 
@@ -68,7 +66,7 @@ public class StdDetailServiceImpl implements StdDetailService {
 
         // 1. 기존 기준자료 값 조회
         StdDetail oriStdDetail = stdDetailRepository.findById(stdDetailRequestDTO.getDetailCd())
-                .orElseThrow(() -> new IllegalArgumentException("ggg"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + stdDetailRequestDTO.getDetailCd()));
 
         // 2. 기준자료 hist 생성 후, 수정된 내용 반영해 update
         StdDetailHist stdDetailHist = StdDetailHist.builder()
@@ -93,7 +91,7 @@ public class StdDetailServiceImpl implements StdDetailService {
     @Transactional
     public void deleteInfo(String detailCd) {
         StdDetail stdDetail = stdDetailRepository.findById(detailCd)
-                .orElseThrow(() -> new IllegalArgumentException("ggg"));
+                .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + detailCd));
 
         stdDetail.updateUseAt("N");
         stdDetailRepository.save(stdDetail);

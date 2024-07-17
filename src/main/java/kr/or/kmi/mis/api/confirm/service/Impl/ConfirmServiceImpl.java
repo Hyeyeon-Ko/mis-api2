@@ -10,6 +10,7 @@ import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.service.ConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +23,16 @@ public class ConfirmServiceImpl implements ConfirmService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
+    private final InfoService infoService;
     private final HttpServletRequest request;
 
     @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcdDetailInfo(Long id) {
-        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id)
+        BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found"));
         String drafter = bcdMaster.getDrafter();
-        BcdDetail bcdDetail = bcdDetailRepository.findByDraftId(id)
+        BcdDetail bcdDetail = bcdDetailRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
         return BcdDetailResponseDTO.of(bcdDetail, drafter);
@@ -39,16 +41,12 @@ public class ConfirmServiceImpl implements ConfirmService {
     /* 승인 */
     @Override
     public void approve(Long id) {
-        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id)
+        BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
-        // 세션에서 현재 로그인된 사용자 정보(사번, 이름) 가져오기
-        String currentUserId = (String) request.getSession().getAttribute("userId");
-        String currentUser = (String) request.getSession().getAttribute("hngnm");
-
         ApproveRequestDTO approveRequest = ApproveRequestDTO.builder()
-                .approverId(currentUserId)
-                .approver(currentUser)
+                .approverId(infoService.getUserInfo().getCurrentUserId())
+                .approver(infoService.getUserInfo().getCurrentUserName())
                 .respondDate(new Timestamp(System.currentTimeMillis()))
                 .status("B")
                 .build();
@@ -59,16 +57,12 @@ public class ConfirmServiceImpl implements ConfirmService {
     /* 반려 */
     @Override
     public void disapprove(Long id, String rejectReason) {
-        BcdMaster bcdMaster = bcdMasterRepository.findByDraftId(id)
+        BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
-        // 세션에서 현재 로그인된 사용자 정보(사번, 이름) 가져오기
-        String currentUserId = (String) request.getSession().getAttribute("userId");
-        String currentUser = (String) request.getSession().getAttribute("hngnm");
-
         DisapproveRequestDTO disapproveRequest = DisapproveRequestDTO.builder()
-                .disapproverId(currentUserId)
-                .disapprover(currentUser)
+                .disapproverId(infoService.getUserInfo().getCurrentUserId())
+                .disapprover(infoService.getUserInfo().getCurrentUserName())
                 .rejectReason(rejectReason)
                 .respondDate(new Timestamp(System.currentTimeMillis()))
                 .status("C")

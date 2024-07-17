@@ -28,10 +28,10 @@ public class StdGroupServiceImpl implements StdGroupService {
     public List<StdGroupResponseDTO> getInfo(String classCd) {
 
         StdClass stdClass = stdClassRepository.findById(classCd)
-                .orElseThrow(()-> new EntityNotFoundException(StdDetail.class.getName()));
+                .orElseThrow(()-> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
         List<StdGroup> stdGroups = stdGroupRepository.findAllByClassCd(stdClass)
-                .orElseThrow(() -> new EntityNotFoundException(StdDetail.class.getName()));
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
         return stdGroups.stream()
                 .map(StdGroupResponseDTO::of)
@@ -43,7 +43,7 @@ public class StdGroupServiceImpl implements StdGroupService {
     public void addInfo(StdGroupRequestDTO stdGroupRequestDTO) {
 
         StdClass stdClass = stdClassRepository.findById(stdGroupRequestDTO.getClassCd())
-                .orElseThrow(() -> new IllegalArgumentException("ggg"));
+                .orElseThrow(() -> new IllegalArgumentException("Not found: " + stdGroupRequestDTO.getClassCd()));
 
         StdGroup stdGroup = stdGroupRequestDTO.toEntity(stdClass);
         stdGroupRepository.save(stdGroup);
