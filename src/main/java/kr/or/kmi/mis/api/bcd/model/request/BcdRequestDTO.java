@@ -22,7 +22,7 @@ public class BcdRequestDTO {
     String faxTel;
     String email;
     String address;
-    String endAddress;
+    String engAddress;
     String division;    // 명함구분
     Integer quantity;
 
@@ -53,7 +53,7 @@ public class BcdRequestDTO {
                 .phoneTel(phoneTel)
                 .email(email)
                 .address(address)
-                .engAddress(endAddress)
+                .engAddress(engAddress)
                 .quantity(quantity)
                 .build();
     }
