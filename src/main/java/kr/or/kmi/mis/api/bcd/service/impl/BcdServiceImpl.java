@@ -7,8 +7,10 @@ import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdSampleResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
+import kr.or.kmi.mis.api.bcd.repository.impl.BcdSampleQueryRepositoryImpl;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
@@ -28,6 +30,8 @@ public class BcdServiceImpl implements BcdService {
     private final BcdDetailRepository bcdDetailRepository;
     private final BcdHistoryService bcdHistoryService;
     private final InfoService infoService;
+
+    private final BcdSampleQueryRepositoryImpl bcdSampleQueryRepositoryImpl;
 
     @Override
     @Transactional
@@ -220,5 +224,10 @@ public class BcdServiceImpl implements BcdService {
 
         // 2. 명함신청 상태 "완료, End"로 변경
         bcdMaster.updateStatus("E");
+    }
+
+    @Override
+    public BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd) {
+        return bcdSampleQueryRepositoryImpl.getBcdSampleNm(groupCd, detailCd);
     }
 }

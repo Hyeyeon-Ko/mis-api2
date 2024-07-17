@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdSampleResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.cmm.response.ApiResponse;
 import kr.or.kmi.mis.cmm.response.ResponseWrapper;
@@ -61,4 +62,9 @@ public class BcdController {
         return ResponseWrapper.success();
     }
 
+
+    @GetMapping("/sample")
+    public ApiResponse<BcdSampleResponseDTO> getSample(@RequestParam("groupCd") String groupCd, @RequestParam("detailCd") String detailCd) {
+        return ResponseWrapper.success(bcdService.getDetailNm(groupCd, detailCd));
+    }
 }
