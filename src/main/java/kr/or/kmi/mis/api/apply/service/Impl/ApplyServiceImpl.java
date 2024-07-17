@@ -1,5 +1,6 @@
-package kr.or.kmi.mis.api.apply.service;
+package kr.or.kmi.mis.api.apply.service.Impl;
 
+import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;

@@ -31,7 +31,7 @@ public class OrderController {
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
     @PostMapping
     public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException {
-        orderService.orderRequest(orderRequest.getDraftIds(), orderRequest.getEmailSubject(), orderRequest.getEmailBody(), orderRequest.getFileName());
+        orderService.orderRequest(orderRequest);
         return ResponseWrapper.success();
     }
 }

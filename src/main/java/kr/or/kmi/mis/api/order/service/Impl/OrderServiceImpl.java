@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.service.ExcelService;
 import kr.or.kmi.mis.api.order.service.OrderService;
@@ -59,16 +60,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void orderRequest(List<Long> draftIds, String emailSubject, String emailBody, String fileName) throws IOException, MessagingException {
+    public void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException {
 
         // 엑셀 데이터 생성
-        byte[] excelData = excelService.generateExcel(draftIds);
+        byte[] excelData = excelService.generateExcel(orderRequest.getDraftIds());
 
         // 첨부 파일과 함께 이메일 전송
-        sendEmailWithAttachment(excelData, emailSubject, emailBody, fileName);
+        sendEmailWithAttachment(excelData, orderRequest.getEmailSubject(), orderRequest.getEmailBody(), orderRequest.getFileName());
 
         // 발주일시 업데이트
-        draftIds.forEach(draftId -> {
+        orderRequest.getDraftIds().forEach(draftId -> {
             BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                     .orElseThrow(() -> new EntityNotFoundException("Draft not found with id " + draftId));
             bcdMaster.updateOrder(new Timestamp(System.currentTimeMillis()));

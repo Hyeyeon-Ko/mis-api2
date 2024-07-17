@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.order.service;
 
 import jakarta.mail.MessagingException;
+import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 
 import java.io.IOException;
@@ -12,5 +13,5 @@ public interface OrderService {
     List<OrderListResponseDTO> getOrderList();
 
     /* 발주 요청 -> 이메일로 엑셀 파일 전송 */
-    void orderRequest(List<Long> draftIds, String emailSubject, String emailBody, String fileName) throws IOException, MessagingException;
+    void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException;
 }
