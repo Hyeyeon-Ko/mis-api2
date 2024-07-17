@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.std.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,4 +23,10 @@ public class StdGroup {
     @Column(name = "group_nm", length = 20, nullable = false)
     private String groupNm;
 
+    @Builder
+    public StdGroup(String groupCd, StdClass classCd, String groupNm) {
+        this.groupCd = groupCd;
+        this.classCd = classCd;
+        this.groupNm = groupNm;
+    }
 }
