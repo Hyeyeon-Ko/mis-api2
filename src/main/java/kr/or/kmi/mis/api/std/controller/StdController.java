@@ -9,9 +9,9 @@ import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.StdGroupResponseDTO;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
+import kr.or.kmi.mis.cmm.response.ApiResponse;
+import kr.or.kmi.mis.cmm.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,62 +27,56 @@ public class StdController {
 
     @Operation(summary = "get Group Info", description = "기준자료 > 중분류 정보 호출 시 사용")
     @GetMapping("/groupInfo")
-    public ResponseEntity<List<StdGroupResponseDTO>> getGroupInfo(@RequestParam("classCd") String classCd) {
+    public ApiResponse<List<StdGroupResponseDTO>> getGroupInfo(@RequestParam("classCd") String classCd) {
 
         List<StdGroupResponseDTO> stdGroupResponses = stdGroupService.getInfo(classCd);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(stdGroupResponses);
+        return ResponseWrapper.success(stdGroupResponses);
     }
 
     @Operation(summary = "add Group Info", description = "기준자료 > 중분류 추가 시 사용")
     @PostMapping("/GroupInfo")
-    public ResponseEntity<String> addGroupInfo(@RequestBody StdGroupRequestDTO stdGroupRequestDTO) {
+    public ApiResponse<?> addGroupInfo(@RequestBody StdGroupRequestDTO stdGroupRequestDTO) {
 
         stdGroupService.addInfo(stdGroupRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("중분류가 추가되었습니다.");
+        return ResponseWrapper.success();
     }
 
     @Operation(summary = "get Detail Info", description = "기준자료 > 상세 정보 호출 시 사용")
     @GetMapping("/detailInfo")
-    public ResponseEntity<List<StdDetailResponseDTO>> getDetailInfo(@RequestParam("groupCd") String groupCd) {
+    public ApiResponse<List<StdDetailResponseDTO>> getDetailInfo(@RequestParam("groupCd") String groupCd) {
 
         List<StdDetailResponseDTO> stdDetailResponses = stdDetailService.getInfo(groupCd);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(stdDetailResponses);
+        return ResponseWrapper.success(stdDetailResponses);
     }
 
     @Operation(summary = "add Detail Info", description = "기준자료 > 상세 정보 추가 시 사용")
     @PostMapping("/detailInfo")
-    public ResponseEntity<String> addDetailInfo(@RequestBody StdDetailRequestDTO stdDetailRequestDTO) {
+    public ApiResponse<?> addDetailInfo(@RequestBody StdDetailRequestDTO stdDetailRequestDTO) {
 
         stdDetailService.addInfo(stdDetailRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("기준자료가 추가되었습니다.");
+        return ResponseWrapper.success();
     }
 
     @Operation(summary = "update Detail Info", description = "기준자료 > 상세 정보 수정 시 사용")
     @PutMapping("/detailInfo")
-    public ResponseEntity<String> updateDetailInfo(@RequestBody StdDetailUpdateRequestDTO stdDetailRequestDTO) {
+    public ApiResponse<?> updateDetailInfo(@RequestBody StdDetailUpdateRequestDTO stdDetailRequestDTO) {
 
         stdDetailService.updateInfo(stdDetailRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("기준자료가 수정되었습니다.");
+        return ResponseWrapper.success();
     }
 
     @Operation(summary = "delete Detail Info", description = "기준자료 > 상세 정보 삭제 시 사용")
     @PutMapping("/deleteDetailInfo")
-    public ResponseEntity<String> deleteDetailInfo(@RequestParam("detailCd") String detailCd) {
+    public ApiResponse<?> deleteDetailInfo(@RequestParam("detailCd") String detailCd) {
 
         stdDetailService.deleteInfo(detailCd);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("기준자료가 삭제되었습니다.");
+        return ResponseWrapper.success();
     }
 
 }

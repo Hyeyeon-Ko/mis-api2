@@ -6,9 +6,9 @@ import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.cmm.response.ApiResponse;
+import kr.or.kmi.mis.cmm.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,48 +21,44 @@ public class BcdController {
 
     @Operation(summary = "create bcd apply", description = "유저 > 명함신청 시 사용")
     @PostMapping(value = "/")
-    public ResponseEntity<String> createBcdApply(@RequestBody BcdRequestDTO bcdRequestDTO) {
+    public ApiResponse<?> createBcdApply(@RequestBody BcdRequestDTO bcdRequestDTO) {
 
         bcdService.applyBcd(bcdRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("명함이 신청되었습니다.");
+        return ResponseWrapper.success();
     }
 
     @Operation(summary = "modify bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 수정 시 사용")
     @PostMapping(value = "/update")
-    public ResponseEntity<String> updateBcdApply(@RequestParam("draftId") Long draftId, @RequestBody BcdUpdateRequestDTO bcdUpdateRequestDTO) {
+    public ApiResponse<?> updateBcdApply(@RequestParam("draftId") Long draftId, @RequestBody BcdUpdateRequestDTO bcdUpdateRequestDTO) {
         bcdService.updateBcd(draftId, bcdUpdateRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("명함이 수정되었습니다.");
+        return ResponseWrapper.success();
     }
 
     @Operation(summary = "cancel bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 취소 시 사용")
     @PutMapping(value = "/{draftId}")
-    public ResponseEntity<String> cancelBscApply(@PathVariable("draftId") Long draftId) {
+    public ApiResponse<?> cancelBscApply(@PathVariable("draftId") Long draftId) {
 
         bcdService.cancelBcdApply(draftId);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("명함신청이 취소되었습니다.");
+        return ResponseWrapper.success();
     }
 
     @Operation(summary = "get bcd detail", description = "유저 > 나의 신청내역 > 명함신청 상세 정보 조회 시 사용")
     @GetMapping(value = "/{draftId}")
-    public BcdDetailResponseDTO getBcdDetail(@PathVariable("draftId") Long draftId) {
+    public ApiResponse<BcdDetailResponseDTO> getBcdDetail(@PathVariable("draftId") Long draftId) {
 
-        return bcdService.getBcd(draftId);
+        return ResponseWrapper.success(bcdService.getBcd(draftId));
     }
 
     @Operation(summary = "put status ORDERED into COMPLETED", description = "유저 > 나의 신청 내역 > 명함을 수령한 후, 발주 완료 버튼 클릭 시 사용")
     @PutMapping(value = "/completeApply")
-    public ResponseEntity<String> completeBcdApply(@RequestParam("draftId") Long draftId) {
+    public ApiResponse<?> completeBcdApply(@RequestParam("draftId") Long draftId) {
 
         bcdService.completeBcdApply(draftId);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("명함 수령이 완료되었습니다.");
+        return ResponseWrapper.success();
     }
 
 }
