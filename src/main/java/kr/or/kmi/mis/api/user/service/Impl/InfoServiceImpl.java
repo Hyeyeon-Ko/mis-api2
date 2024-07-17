@@ -32,8 +32,8 @@ public class InfoServiceImpl implements InfoService {
     @Transactional(readOnly = true)
     public InfoDetailResponseDTO getUserInfoDetail(String userId) {
 
-        if(userId == null) {
-            String currentUserId = (String) request.getSession().getAttribute("userId");
+        if (userId == null) {
+            userId = (String) request.getSession().getAttribute("userId");
         }
 
         ResponseData.ResultData resultData = authorityService.fetchUserInfo(userId).block();

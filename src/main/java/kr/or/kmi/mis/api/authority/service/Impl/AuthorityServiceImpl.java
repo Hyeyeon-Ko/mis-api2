@@ -32,7 +32,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final AuthorityRepository authorityRepository;
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
-    private final HttpServletRequest request;
+    private final HttpServletRequest httpServletRequest;
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
 
@@ -70,7 +70,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Transactional(readOnly = true)
     public String getMemberName(String userId) {
 
-        String sessionUserId = (String) request.getSession().getAttribute("userId");
+        String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
 
         if (sessionUserId.equals(userId)) {
             throw new RuntimeException("로그인한 사용자의 userId와 동일합니다");
@@ -132,7 +132,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         authority.updateAdmin(request.getUserRole());
         authorityRepository.save(authority);
 
-        String sessionUserId = "2024000111";
+        String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
 
         if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
             StdDetail stdDetail = stdDetailRepository.findByEtcItem1(authority.getUserId())
