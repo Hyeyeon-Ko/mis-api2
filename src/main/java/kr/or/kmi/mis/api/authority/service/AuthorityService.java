@@ -2,6 +2,8 @@ package kr.or.kmi.mis.api.authority.service;
 
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.ResponseData;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -21,4 +23,7 @@ public interface AuthorityService {
 
     /* 권한 취소 */
     void deleteAdmin(Long authId, String detailCd);
+
+    /* 외부 사용자 정보 API 에서 사용자 정보 가져오기 */
+    Mono<ResponseData.ResultData> fetchUserInfo(String userId);
 }

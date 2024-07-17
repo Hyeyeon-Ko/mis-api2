@@ -62,7 +62,7 @@ public class BcdServiceImpl implements BcdService {
         // 3. 수정된 명함상세 정보로 명함상세 update
         //   1) 수정자 조회
         //   2) 정보 업데이트
-        String updtr = infoService.getUserInfo().getCurrentUserName();
+        String updtr = infoService.getUserInfo().getUserName();
         existingDetailOpt.update(updateBcdRequestDTO, updtr);
         bcdDetailRepository.save(existingDetailOpt);
 
@@ -106,7 +106,7 @@ public class BcdServiceImpl implements BcdService {
         List<BcdMasterResponseDTO> results = new ArrayList<>();
 
         // 1. 로그인한 사용자 정보 호출
-        String userId = infoService.getUserInfo().getCurrentUserId();
+        String userId = infoService.getUserInfo().getUserId();
 
         // 2. 나의 모든 명함신청 내역을 호출한다.
         //  - DrafterId(기안자 사번)로 나의 명함신청 내역을 불러온다.
@@ -179,7 +179,7 @@ public class BcdServiceImpl implements BcdService {
 
         List<BcdPendingResponseDTO> results = new ArrayList<>();
 
-        String userId = infoService.getUserInfo().getCurrentUserId();
+        String userId = infoService.getUserInfo().getUserId();
 
         // 2. 나의 모든 명함신청 승인대기 내역을 호출한다.
         //  - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.

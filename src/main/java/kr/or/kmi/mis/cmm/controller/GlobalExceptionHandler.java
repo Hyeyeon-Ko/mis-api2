@@ -18,4 +18,9 @@ public class GlobalExceptionHandler {
     public ApiResponse<?> IllegalArgumentException(final IllegalArgumentException e) {
         return ResponseWrapper.error();
     }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ApiResponse<?> NullPointerException(final NullPointerException e) {
+        return ResponseWrapper.error();
+    }
 }

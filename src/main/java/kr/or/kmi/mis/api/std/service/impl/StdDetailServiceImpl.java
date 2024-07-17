@@ -54,7 +54,7 @@ public class StdDetailServiceImpl implements StdDetailService {
 
         StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
 
-        String fstRegisterId = infoService.getUserInfo().getCurrentUserId();
+        String fstRegisterId = infoService.getUserInfo().getUserId();
         stdDetail.setRgstrId(fstRegisterId);
         stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         stdDetailRepository.save(stdDetail);
@@ -79,7 +79,7 @@ public class StdDetailServiceImpl implements StdDetailService {
         stdDetailHist.setUpdtDt(oriStdDetail.getUpdtDt());
         stdDetailHistRepository.save(stdDetailHist);
 
-        String lstUpdtr = infoService.getUserInfo().getCurrentUserName();
+        String lstUpdtr = infoService.getUserInfo().getUserName();
         oriStdDetail.update(stdDetailRequestDTO);
         oriStdDetail.setUpdtrId(lstUpdtr);
         oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));

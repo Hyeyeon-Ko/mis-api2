@@ -7,13 +7,13 @@ import lombok.Getter;
 @Getter
 public class InfoResponseDTO {
 
-    String currentUserId;
-    String currentUserName;
+    String userId;
+    String userName;
 
     public static InfoResponseDTO of(String userId, String userName) {
         return InfoResponseDTO.builder()
-                .currentUserId(userId)
-                .currentUserName(userName)
+                .userId(userId)
+                .userName(userName)
                 .build();
     }
 }

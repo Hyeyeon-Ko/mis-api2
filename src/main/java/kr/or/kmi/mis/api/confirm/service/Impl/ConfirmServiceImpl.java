@@ -45,8 +45,8 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
         ApproveRequestDTO approveRequest = ApproveRequestDTO.builder()
-                .approverId(infoService.getUserInfo().getCurrentUserId())
-                .approver(infoService.getUserInfo().getCurrentUserName())
+                .approverId(infoService.getUserInfo().getUserId())
+                .approver(infoService.getUserInfo().getUserName())
                 .respondDate(new Timestamp(System.currentTimeMillis()))
                 .status("B")
                 .build();
@@ -61,8 +61,8 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
         DisapproveRequestDTO disapproveRequest = DisapproveRequestDTO.builder()
-                .disapproverId(infoService.getUserInfo().getCurrentUserId())
-                .disapprover(infoService.getUserInfo().getCurrentUserName())
+                .disapproverId(infoService.getUserInfo().getUserId())
+                .disapprover(infoService.getUserInfo().getUserName())
                 .rejectReason(rejectReason)
                 .respondDate(new Timestamp(System.currentTimeMillis()))
                 .status("C")

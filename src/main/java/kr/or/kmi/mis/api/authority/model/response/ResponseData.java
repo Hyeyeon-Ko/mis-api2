@@ -17,5 +17,6 @@ public class ResponseData {
         private String orgdeptnm;
         private String orgdeptcd;
         private String email;
+        private String mpphonno;
     }
 }

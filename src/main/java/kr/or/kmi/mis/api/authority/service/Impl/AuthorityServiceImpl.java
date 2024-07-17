@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.authority.service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
@@ -12,7 +13,6 @@ import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthorityServiceImpl implements AuthorityService {
 
-    private final InfoService infoService;
     private final AuthorityRepository authorityRepository;
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final HttpServletRequest request;
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
 
@@ -69,7 +69,9 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Override
     @Transactional(readOnly = true)
     public String getMemberName(String userId) {
-        String sessionUserId = infoService.getUserInfo().getCurrentUserId();
+
+        String sessionUserId = (String) request.getSession().getAttribute("userId");
+
         if (sessionUserId.equals(userId)) {
             throw new RuntimeException("로그인한 사용자의 userId와 동일합니다");
         }
@@ -130,7 +132,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         authority.updateAdmin(request.getUserRole());
         authorityRepository.save(authority);
 
-        String sessionUserId = infoService.getUserInfo().getCurrentUserId();
+        String sessionUserId = "2024000111";
 
         if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
             StdDetail stdDetail = stdDetailRepository.findByEtcItem1(authority.getUserId())
@@ -176,8 +178,9 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
     }
 
-    // 외부 사용자 정보 API에서 사용자 정보 가져오기
-    private Mono<ResponseData.ResultData> fetchUserInfo(String userId) {
+    @Override
+    @Transactional
+    public Mono<ResponseData.ResultData> fetchUserInfo(String userId) {
         Map<String, String> requestData = new HashMap<>();
         requestData.put("userId", userId);
         return webClient.post()
