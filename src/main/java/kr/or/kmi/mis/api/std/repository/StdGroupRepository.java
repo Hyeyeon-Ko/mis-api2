@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface StdGroupRepository extends JpaRepository<StdGroup, String> {
 
     Optional<List<StdGroup>> findAllByClassCd(StdClass classCd);
+
+    Optional<StdGroup> findByGroupCd(String groupCd);
 }

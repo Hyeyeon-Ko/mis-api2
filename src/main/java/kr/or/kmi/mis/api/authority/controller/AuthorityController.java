@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.authority.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.cmm.response.ApiResponse;
@@ -33,22 +34,22 @@ public class AuthorityController {
 
     @Operation(summary = "add admin", description = "새로운 관리 권한 추가")
     @PostMapping("/admin")
-    public ApiResponse<?> addAdmin(@RequestParam String userRole, @RequestParam String userId) {
-        authorityService.addAdmin(userRole, userId);
+    public ApiResponse<?> addAdmin(@RequestBody AuthorityRequestDTO request) {
+        authorityService.addAdmin(request);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "modify admin", description = "기존 관리 권한 수정")
+    @Operation(summary = "update admin", description = "기존 관리 권한 수정")
     @PutMapping("/admin/{authId}")
-    public ApiResponse<?> modifyAdmin(@PathVariable Long authId, @RequestParam String userRole) {
-        authorityService.modifyAdmin(authId, userRole);
+    public ApiResponse<?> updateAdmin(@PathVariable Long authId, @RequestBody AuthorityRequestDTO request) {
+        authorityService.updateAdmin(authId, request);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "delete admin", description = "기존 관리 권한 삭제")
     @DeleteMapping("/admin/{authId}")
-    public ApiResponse<?> deleteAdmin(@PathVariable Long authId) {
-        authorityService.deleteAdmin(authId);
+    public ApiResponse<?> deleteAdmin(@PathVariable Long authId, @RequestParam(required = false) String detailCd) {
+        authorityService.deleteAdmin(authId, detailCd);
         return ResponseWrapper.success();
     }
 }

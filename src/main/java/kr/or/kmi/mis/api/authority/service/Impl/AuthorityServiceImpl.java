@@ -1,13 +1,18 @@
 package kr.or.kmi.mis.api.authority.service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
+import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,9 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,11 +29,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthorityServiceImpl implements AuthorityService {
 
+    private final InfoService infoService;
     private final AuthorityRepository authorityRepository;
+    private final StdDetailRepository stdDetailRepository;
+    private final StdGroupRepository stdGroupRepository;
     private final ObjectMapper objectMapper;
-    private final HttpSession httpSession;
     private final WebClient webClient;
-//    private final WebClientUtils webClientUtils;
 
     @Value("${external.userInfo.url}")
     private String externalUserInfoUrl;
@@ -38,30 +42,34 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Override
     @Transactional(readOnly = true)
     public List<AuthorityListResponseDTO> getAuthorityList() {
-        // 1. 종료일자가 찍히지 않은 admin, master 리스트 불러오기
         List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
-
-        // 2. 각 관리자들의 상세 정보 불러오기
-        // todo: 기준자료 생성 완료시 센터코드 -> 센터명으로 받아오기 수정!!!!
         return authorityList.stream()
-                .map(authority -> AuthorityListResponseDTO.builder()
-                        .authId(authority.getAuthId())
-                        .userId(authority.getUserId())
-                        .hngNm(authority.getHngNm())
-                        .userRole(authority.getRole())
-                        .instCd(authority.getInstCd())
-                        .deptNm(authority.getDeptNm())
-                        .email(authority.getEmail())
-                        .build())
+                .map(authority -> {
+                    StdDetail stdDetail1 = stdDetailRepository.findByDetailCd(authority.getInstCd())
+                            .orElseThrow(() -> new EntityNotFoundException(authority.getInstCd()));
+                    StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
+                            .orElseThrow(() -> new EntityNotFoundException("B001"));
+
+                    Optional<StdDetail> optionalStdDetail2 = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup, authority.getUserId());
+
+                    return AuthorityListResponseDTO.builder()
+                            .authId(authority.getAuthId())
+                            .userId(authority.getUserId())
+                            .hngNm(authority.getHngNm())
+                            .userRole(authority.getRole())
+                            .deptNm(authority.getDeptNm())
+                            .email(authority.getEmail())
+                            .instNm(stdDetail1.getDetailNm())
+                            .detailCd(optionalStdDetail2.map(StdDetail::getDetailCd).orElse(null))
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public String getMemberName(String userId) {
-
-        String sessionUserId = (String) httpSession.getAttribute("userId");
-
+        String sessionUserId = infoService.getUserInfo().getCurrentUserId();
         if (sessionUserId.equals(userId)) {
             throw new RuntimeException("로그인한 사용자의 userId와 동일합니다");
         }
@@ -74,17 +82,16 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public void addAdmin(String userRole, String userId) {
-
-        boolean authorityExists = authorityRepository.findByUserIdAndDeletedtIsNull(userId).isPresent();
-
+    @Transactional
+    public void addAdmin(AuthorityRequestDTO request) {
+        boolean authorityExists = authorityRepository.findByUserIdAndDeletedtIsNull(request.getUserId()).isPresent();
         if (authorityExists) {
-            throw new IllegalStateException("Authority with userId " + userId + " already exists");
+            throw new IllegalStateException("Authority with userId " + request.getUserId() + " already exists");
         }
 
-        ResponseData.ResultData resultData = fetchUserInfo(userId).block();
+        ResponseData.ResultData resultData = fetchUserInfo(request.getUserId()).block();
         if (resultData == null) {
-            throw new EntityNotFoundException("User information not found for userId: " + userId);
+            throw new EntityNotFoundException("User information not found for userId: " + request.getUserId());
         }
 
         Authority authorityInfo = Authority.builder()
@@ -94,70 +101,102 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .deptCd(resultData.getOrgdeptcd())
                 .deptNm(resultData.getOrgdeptnm())
                 .email(resultData.getEmail())
-                .role(userRole)
+                .role(request.getUserRole())
                 .createdt(new Timestamp(System.currentTimeMillis()))
                 .build();
+
+        if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
+            StdDetail newStdDetail = StdDetail.builder()
+                    .detailCd(request.getUserId())
+                    .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
+                    .detailNm("기준자료")
+                    .fromDd(null)
+                    .toDd(null)
+                    .etcItem1(request.getUserId())
+                    .etcItem2(request.getUserNm())
+                    .build();
+            newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            stdDetailRepository.save(newStdDetail);
+        }
 
         authorityRepository.save(authorityInfo);
     }
 
-    // todo: 관리 종류 추가시 수정 예정!!!!
     @Override
-    public void modifyAdmin(Long authId, String role) {
-
+    @Transactional
+    public void updateAdmin(Long authId, AuthorityRequestDTO request) {
         Authority authority = authorityRepository.findByAuthId(authId)
                 .orElseThrow(() -> new EntityNotFoundException("Authority with authId " + authId + " not found"));
+        authority.updateAdmin(request.getUserRole());
+        authorityRepository.save(authority);
 
-        authority.modifyAdmin(role);
+        String sessionUserId = infoService.getUserInfo().getCurrentUserId();
+
+        if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
+            StdDetail stdDetail = stdDetailRepository.findByEtcItem1(authority.getUserId())
+                    .orElseGet(() -> StdDetail.builder()
+                            .detailCd(authority.getUserId())
+                            .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
+                            .detailNm(authority.getUserId())
+                            .fromDd(null)
+                            .toDd(null)
+                            .etcItem1(authority.getUserId())
+                            .etcItem2(authority.getHngNm())
+                            .build()
+                    );
+            stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            stdDetail.setRgstrId(sessionUserId);
+            stdDetailRepository.save(stdDetail);
+        } else {
+            stdDetailRepository.findByEtcItem1(authority.getUserId()).ifPresent(stdDetail -> {
+                stdDetail.updateUseAt("N");
+                stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+                stdDetail.setUpdtrId(sessionUserId);
+                stdDetailRepository.save(stdDetail);
+            });
+        }
     }
 
     @Override
-    public void deleteAdmin(Long authId) {
+    @Transactional
+    public void deleteAdmin(Long authId, String detailCd) {
         Authority authority = authorityRepository.findByAuthId(authId)
                 .orElseThrow(() -> new EntityNotFoundException("Authority with id " + authId + " not found"));
 
-        // 권한 취소할 관리자의 종료일시 저장
+        // 권한 테이블 -> 취소할 관리자의 종료일시 저장
         authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
         authorityRepository.save(authority);
+
+        // 기준자료 관리자였다면 -> 기준자료 테이블 updateUseAt("N")
+        if (detailCd != null) {
+            StdDetail stdDetail = stdDetailRepository.findById(detailCd)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid detailCd: " + detailCd));
+            stdDetail.updateUseAt("N");
+            stdDetailRepository.save(stdDetail);
+        }
     }
 
-    // 그룹웨어로부터 정보 불러오기
+    // 외부 사용자 정보 API에서 사용자 정보 가져오기
     private Mono<ResponseData.ResultData> fetchUserInfo(String userId) {
-        // requestData 맵을 생성하고 userId 추가
         Map<String, String> requestData = new HashMap<>();
         requestData.put("userId", userId);
-
-//        String response = webClientUtils.post(
-//                "https://api.vitaport.co.kr/api/v1/kmi/setKmiExtExamCheckup",
-//                requestData,
-//                String.class
-//        );
-
-
-        // WebClient를 사용하여 외부 사용자 정보 API에 POST 요청
         return webClient.post()
-                .uri(externalUserInfoUrl)  // 요청을 보낼 URL 설정
-                .bodyValue(requestData)    // 요청 바디에 requestData 설정
-                .retrieve()                // 응답을 받아옴
-                .bodyToMono(String.class)  // 응답을 String으로 변환
+                .uri(externalUserInfoUrl)
+                .bodyValue(requestData)
+                .retrieve()
+                .bodyToMono(String.class)
                 .flatMap(responseJson -> {
-                    // 응답이 null이면 에러 반환
                     if (responseJson == null) {
                         return Mono.error(new EntityNotFoundException("User response data not found for userId: " + userId));
                     }
                     try {
-                        // 응답 JSON을 ResponseData 객체로 변환
                         ResponseData responseData = objectMapper.readValue(responseJson, ResponseData.class);
-                        // 변환된 ResponseData 객체에서 ResultData를 가져옴
                         ResponseData.ResultData resultData = responseData.getResultData();
-                        // ResultData가 null이면 에러 반환
                         if (resultData == null) {
                             return Mono.error(new EntityNotFoundException("User information not found for userId: " + userId));
                         }
-                        // ResultData가 유효하면 Mono.just로 반환
                         return Mono.just(resultData);
                     } catch (Exception e) {
-                        // JSON 처리 중 에러가 발생하면 RuntimeException 반환
                         return Mono.error(new RuntimeException("Error processing response from groupware API", e));
                     }
                 });

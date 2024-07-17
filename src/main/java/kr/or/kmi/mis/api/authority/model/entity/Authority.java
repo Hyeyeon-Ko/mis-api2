@@ -55,8 +55,8 @@ public class Authority {
     }
 
     // 권한 수정
-    public void modifyAdmin(String role) {
-        this.role = role;
+    public void updateAdmin(String userRole) {
+        this.role = userRole;
     }
 
     // 권한 취소 -> 종료일시 기록

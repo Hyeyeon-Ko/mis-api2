@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.authority.service;
 
+import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 
 import java.util.List;
@@ -13,11 +14,11 @@ public interface AuthorityService {
     String getMemberName(String userId);
 
     /* 권한 추가 */
-    void addAdmin(String userRole, String userId);
+    void addAdmin(AuthorityRequestDTO stdDetailAuthorityRequestDTO);
 
     /*권한 수정*/
-    void modifyAdmin(Long authId, String role);
+    void updateAdmin(Long authId, AuthorityRequestDTO request);
 
     /* 권한 취소 */
-    void deleteAdmin(Long authId);
+    void deleteAdmin(Long authId, String detailCd);
 }

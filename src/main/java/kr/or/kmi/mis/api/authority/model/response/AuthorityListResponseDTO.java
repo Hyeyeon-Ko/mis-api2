@@ -11,18 +11,20 @@ public class AuthorityListResponseDTO {
     private String userId;
     private String hngNm;
     private String userRole;
-    private String instCd;
+    private String instNm;
     private String deptNm;
     private String email;
+    private String detailCd;
 
     @Builder
-    public AuthorityListResponseDTO(Long authId, String userId, String hngNm, String userRole, String instCd, String deptNm, String email) {
+    public AuthorityListResponseDTO(Long authId, String userId, String hngNm, String userRole, String instNm, String deptNm, String email, String detailCd) {
         this.authId = authId;
         this.userId = userId;
         this.hngNm = hngNm;
         this.userRole = userRole;
-        this.instCd = instCd;
+        this.instNm = instNm;
         this.deptNm = deptNm;
         this.email = email;
+        this.detailCd = detailCd;
     }
 }
