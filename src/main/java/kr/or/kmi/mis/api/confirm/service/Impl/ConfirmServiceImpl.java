@@ -25,7 +25,7 @@ public class ConfirmServiceImpl implements ConfirmService {
     private final BcdDetailRepository bcdDetailRepository;
     private final InfoService infoService;
 
-    @Override
+/*    @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcdDetailInfo(Long id) {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
@@ -35,7 +35,7 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
         return BcdDetailResponseDTO.of(bcdDetail, drafter);
-    }
+    }*/
 
     /* 승인 */
     @Override

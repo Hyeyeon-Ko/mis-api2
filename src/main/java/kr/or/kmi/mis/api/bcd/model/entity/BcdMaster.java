@@ -67,6 +67,10 @@ public class BcdMaster {
         this.draftDate = draftDate;
     }
 
+    public void updateEndDate(Timestamp endDate) {
+        this.endDate = endDate;
+    }
+
     public void updateStatus(String applyStatus) {
         this.status = applyStatus;
     }

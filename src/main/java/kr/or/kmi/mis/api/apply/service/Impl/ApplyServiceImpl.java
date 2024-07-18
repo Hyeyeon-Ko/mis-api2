@@ -91,7 +91,6 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-
     public PendingResponseDTO getAllPendingList() {
 
         return PendingResponseDTO.of(
@@ -105,9 +104,7 @@ public class ApplyServiceImpl implements ApplyService {
         /**
          * 다른 유형의 승인대기 신청목록 추가될 수 있음
          * */
-
-        return PendingResponseDTO.of(
-                bcdService.getMyPendingList());
+        return PendingResponseDTO.of(bcdService.getMyPendingList());
     }
 
     public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {

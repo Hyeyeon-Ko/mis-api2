@@ -21,6 +21,7 @@ public class BcdHistory {
 
     @Id
     @Column(name = "seq_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long seqId;
 
     @Column(length = 20)

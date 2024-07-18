@@ -8,8 +8,8 @@ import java.time.LocalDate;
 
 public interface ApplyService {
 
-    public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate);
-    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate);
-    public PendingResponseDTO getAllPendingList();
-    public PendingResponseDTO getMyPendingList();
+    ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate);
+    MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate);
+    PendingResponseDTO getAllPendingList();
+    PendingResponseDTO getMyPendingList();
 }
