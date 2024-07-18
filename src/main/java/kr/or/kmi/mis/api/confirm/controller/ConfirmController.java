@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/bsc/applyList")
+@RequestMapping("api/bcd/applyList")
 @Tag(name = "Confirm", description = "승인/반려 관리 API")
 public class ConfirmController {
 

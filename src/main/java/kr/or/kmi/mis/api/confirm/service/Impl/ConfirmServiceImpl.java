@@ -24,7 +24,6 @@ public class ConfirmServiceImpl implements ConfirmService {
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
     private final InfoService infoService;
-    private final HttpServletRequest request;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,6 +51,7 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .build();
 
         bcdMaster.updateApprove(approveRequest);
+        bcdMasterRepository.save(bcdMaster);
     }
 
     /* 반려 */
@@ -69,5 +69,6 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .build();
 
         bcdMaster.updateDisapprove(disapproveRequest);
+        bcdMasterRepository.save(bcdMaster);
     }
 }

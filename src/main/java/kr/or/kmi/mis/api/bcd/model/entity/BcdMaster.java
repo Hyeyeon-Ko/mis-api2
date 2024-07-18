@@ -74,6 +74,7 @@ public class BcdMaster {
     // 승인 -> 승인자, 대응일시, 상태 업데이트
     public void updateApprove(ApproveRequestDTO approveRequestDTO) {
         this.approver = approveRequestDTO.getApprover();
+        this.approverId = approveRequestDTO.getApproverId();
         this.respondDate = approveRequestDTO.getRespondDate();
         this.status = approveRequestDTO.getStatus();
     }
@@ -81,6 +82,7 @@ public class BcdMaster {
     // 반려 -> 반려자, 대응일시, 상태 업데이트
     public void updateDisapprove(DisapproveRequestDTO disapproveRequestDTO) {
         this.disapprover = disapproveRequestDTO.getDisapprover();
+        this.disapproverId = disapproveRequestDTO.getDisapproverId();
         this.rejectReason = disapproveRequestDTO.getRejectReason();
         this.respondDate = disapproveRequestDTO.getRespondDate();
         this.status = disapproveRequestDTO.getStatus();

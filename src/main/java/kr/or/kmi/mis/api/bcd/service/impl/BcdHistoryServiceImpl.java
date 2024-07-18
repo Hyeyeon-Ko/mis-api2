@@ -22,7 +22,7 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
         String instNm = "재단본부";
         String deptNm = "디지털혁신실";
         String teamNm = "디지털헬스케어팀";
-        String engTeamNm = "Digital HealthCare Team";
+        String engTeamNm = "Digital HealthCare";
         String grade = "선임";
         String engGrade = "Assistant Manager";
 
