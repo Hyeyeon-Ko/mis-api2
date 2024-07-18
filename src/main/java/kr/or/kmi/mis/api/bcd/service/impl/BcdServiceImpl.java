@@ -10,8 +10,10 @@ import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.repository.impl.BcdSampleQueryRepositoryImpl;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class BcdServiceImpl implements BcdService {
     private final BcdDetailRepository bcdDetailRepository;
     private final BcdHistoryService bcdHistoryService;
     private final InfoService infoService;
+    private final StdBcdService stdBcdService;
 
     private final BcdSampleQueryRepositoryImpl bcdSampleQueryRepositoryImpl;
 
@@ -60,9 +63,10 @@ public class BcdServiceImpl implements BcdService {
         //   1) 수정자 조회
         //   2) 정보 업데이트
         String updtr = infoService.getUserInfo().getUserName();
+        System.out.println("updtr = " + updtr);;
         existingDetailOpt.update(updateBcdRequestDTO, updtr);
-        bcdDetailRepository.save(existingDetailOpt);
-
+        BcdDetail bcdDetail = bcdDetailRepository.save(existingDetailOpt);
+        System.out.println("bcdDetail.getLastUpdtr() = " + bcdDetail.getLastUpdtr());
     }
 
     @Override
@@ -106,38 +110,47 @@ public class BcdServiceImpl implements BcdService {
         String userId = infoService.getUserInfo().getUserId();
 
         // 2. 나의 모든 명함신청 내역을 호출한다.
-        //  - DrafterId(기안자 사번)로 나의 명함신청 내역을 불러온다.
-        //  - 기안 일자를 기준으로 내림차순 정렬한다.
+        results.addAll(this.getMyMasterList(userId, startDate, endDate));
+        results.addAll(this.getAnotherMasterList(userId, startDate, endDate));
+        return results;
+    }
 
-        // 2-1. 내가 신청한 나의 명함신청 내역
+    /**
+     * 2-1. 내가 신청한 나의 명함신청 내역
+     * @param userId
+     * @param startDate
+     * @param endDate
+     * @return List<BcdMyResponseDTO>
+     */
+    public List<BcdMyResponseDTO> getMyMasterList(String userId, Timestamp startDate, Timestamp endDate) {
         List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        List<BcdMyResponseDTO> bcdMasterResponses = bcdMasters.stream()
-                .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
-                    return BcdMyResponseDTO.of(bcdMaster);
-                }).toList();
+        return bcdMasters.stream()
+                .map(BcdMyResponseDTO::of).toList();
+    }
 
+    /**
+     * 2-2. 타인이 신청한 나의 명함신청 내역
+     * @param userId
+     * @param startDate
+     * @param endDate
+     * @return List<BcdMyResponseDTO>
+     */
+    public List<BcdMyResponseDTO> getAnotherMasterList(String userId, Timestamp startDate, Timestamp endDate) {
         // 2-2. 타인이 신청해준 나의 명함신청 내역
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
-        List<BcdMyResponseDTO> anotherBcdResponses = bcdDetails.stream()
-                .map(bcdDetail -> {
-                            // startDate와 endDate 사이에 있는 BcdMaster 조회
-                            List<BcdMaster> newBcdMasters = bcdMasterRepository.findByDraftIdAndDraftDateBetween(bcdDetail.getDraftId(), startDate, endDate)
-                                    .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdDetail.getDraftId()));
+        return bcdDetails.stream()
+                .flatMap(bcdDetail -> {
+                    // startDate, endDate 사이에 있는 BcdMaster 조회
+                    List<BcdMaster> newBcdMasters = bcdMasterRepository
+                            .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
+                            .orElse(new ArrayList<>());
 
-                            return newBcdMasters.stream()
-                                    .map(BcdMyResponseDTO::of)
-                                    .collect(Collectors.toList());
-                }).flatMap(Collection::stream).toList();
-
-        // 3. 명함신청 내역 반환
-        results.addAll(bcdMasterResponses);
-        results.addAll(anotherBcdResponses);
-        return results;
+                    return newBcdMasters.stream()
+                            .map(BcdMyResponseDTO::of);
+                }).toList();
     }
 
     @Override
@@ -149,7 +162,10 @@ public class BcdServiceImpl implements BcdService {
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new  IllegalArgumentException("Not Found"));
 
-        return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter());
+        // 기준자료 detail 명 가져오기
+        List<String> names = stdBcdService.getDetailNames(bcdDetail.getInstCd());
+
+        return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter(), names);
 
     }
 
@@ -176,39 +192,52 @@ public class BcdServiceImpl implements BcdService {
 
         List<BcdPendingResponseDTO> results = new ArrayList<>();
 
+        // 1. 로그인 세션에서 사번 정보를 가져온다.
         String userId = infoService.getUserInfo().getUserId();
 
         // 2. 나의 모든 명함신청 승인대기 내역을 호출한다.
-        //  - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.
-        //  - 기안 일자를 기준으로 내림차순 정렬한다.
+        results.addAll(this.getMyPndMasterList(userId));
+        results.addAll(this.getAnotherPndMasterList(userId));
+        return results;
+    }
 
-        // 2-1. 내가 신청한 나의 명함신청 승인대기 내역
+    /**
+     * 2-1. 내가 신청한 나의 명함신청 승인대기 내역
+     *    - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.
+     *    - 기안 일자를 기준으로 내림차순 정렬한다.
+     * @param userId
+     * @return List<BcdPendingResponseDTO>
+     */
+    public List<BcdPendingResponseDTO> getMyPndMasterList(String userId) {
         List<BcdMaster> myBcdMasters = bcdMasterRepository.findByDrafterIdAndStatus(userId, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        List<BcdPendingResponseDTO> bcdMasterResponses = myBcdMasters.stream()
+        return myBcdMasters.stream()
                 .map(bcdMaster -> {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
-
                     return BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
                 }).toList();
+    }
 
-        // 2-2. 타인이 신청해준 나의 명함신청 승인대기 내역
-        //  - 명함대상자가 userId인 명함신청의 pk(draftId)를 조회
-        //  - draftId로 bcdMaster 찾아, 앞선 bcdMasters(2-1)에 추가
+    /**
+     * 2-2. 타인이 신청해준 나의 명함신청 승인대기 내역
+     *    - userId(기안자 사번)로 타인이 신청해준 나의 명함신청 승인대기 내역을 불러온다.
+     *    - 기안 일자를 기준으로 내림차순 정렬한다.
+     * @param userId
+     * @return List<BcdPendingResponseDTO>
+     */
+    public List<BcdPendingResponseDTO> getAnotherPndMasterList(String userId) {
+
+        // 1. 명함신청 대상자 사번이 나의 사번과 일치하는 명함상세를 조회한다.
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
-        List<BcdPendingResponseDTO> anotherBcdResponses = bcdDetails.stream()
+        // 2. 명함상세의 draftId로 BcdMaster와 매핑해 PendingResponseDTO로 반환한다.
+        return bcdDetails.stream()
                 .map(bcdDetail -> {
-                    BcdMaster newBcdMaster = bcdMasterRepository.findByDraftIdAndStatus(bcdDetail.getDraftId(), "A")
-                            .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdDetail.getDraftId()));
-
-                    return BcdPendingResponseDTO.of(newBcdMaster, bcdDetail);
-                }).toList();
-
-        results.addAll(bcdMasterResponses);
-        results.addAll(anotherBcdResponses);
-        return results;
+                    return bcdMasterRepository.findByDraftIdAndStatusAndDrafterIdNot(bcdDetail.getDraftId(), "A", userId)
+                            .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
+                            .orElse(null);
+                }).filter(Objects::nonNull).toList();
     }
 
     @Override
@@ -221,6 +250,7 @@ public class BcdServiceImpl implements BcdService {
 
         // 2. 명함신청 상태 "완료, End"로 변경
         bcdMaster.updateStatus("E");
+        bcdMaster.updateEndDate(new Timestamp(System.currentTimeMillis()));
     }
 
     @Override
