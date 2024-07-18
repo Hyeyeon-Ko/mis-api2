@@ -10,12 +10,15 @@ import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.service.ConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,19 +26,26 @@ public class ConfirmServiceImpl implements ConfirmService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
+    private final StdBcdService stdBcdService;
     private final InfoService infoService;
 
-/*    @Override
+    @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcdDetailInfo(Long id) {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found"));
-        String drafter = bcdMaster.getDrafter();
         BcdDetail bcdDetail = bcdDetailRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
-        return BcdDetailResponseDTO.of(bcdDetail, drafter);
-    }*/
+        String drafter = bcdMaster.getDrafter();
+        List<String> names = new ArrayList<>();
+        names.add(stdBcdService.getInstNm(bcdDetail.getInstCd()));
+        names.add(stdBcdService.getDeptNm(bcdDetail.getDeptCd()));
+        names.add(stdBcdService.getTeamNm(bcdDetail.getTeamCd()));
+        names.add(stdBcdService.getGradeNm(bcdDetail.getGradeCd()));
+
+        return BcdDetailResponseDTO.of(bcdDetail, drafter, names);
+    }
 
     /* 승인 */
     @Override

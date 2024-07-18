@@ -23,7 +23,7 @@ public class InfoServiceImpl implements InfoService {
     @Transactional(readOnly = true)
     public InfoResponseDTO getUserInfo() {
         String currentUserId = (String) request.getSession().getAttribute("userId");
-        String currentUser = (String) request.getSession().getAttribute("hngnm");
+        String currentUser = (String) request.getSession().getAttribute("hngNm");
 
         return InfoResponseDTO.of(currentUserId, currentUser);
     }

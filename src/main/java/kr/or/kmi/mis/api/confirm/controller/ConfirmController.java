@@ -17,11 +17,12 @@ public class ConfirmController {
 
     private final ConfirmService confirmService;
 
-/*    @Operation(summary = "get apply list", description = "신청 목록 상세정보 조회")
+    // todo: 동일한 api 있으므로 추후 연동 path 변경
+    @Operation(summary = "get apply list", description = "신청 목록 상세정보 조회")
     @GetMapping("/{draftId}")
     public ApiResponse<BcdDetailResponseDTO> getApplyList(@PathVariable Long draftId) {
         return ResponseWrapper.success(confirmService.getBcdDetailInfo(draftId));
-    }*/
+    }
 
     @Operation(summary = "approve application", description = "신청 승인")
     @PostMapping("/{draftId}")
