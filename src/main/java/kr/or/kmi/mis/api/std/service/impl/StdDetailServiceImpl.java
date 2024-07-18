@@ -36,7 +36,7 @@ public class StdDetailServiceImpl implements StdDetailService {
         StdGroup stdGroup = stdGroupRepository.findById(groupCd)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
-        List<StdDetail> stdDetails = stdDetailRepository.findAllByUseAtNotAndGroupCd("N", stdGroup)
+        List<StdDetail> stdDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", stdGroup)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
         return stdDetails.stream()

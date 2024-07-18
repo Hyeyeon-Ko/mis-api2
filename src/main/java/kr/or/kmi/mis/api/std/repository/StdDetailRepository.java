@@ -9,11 +9,15 @@ import java.util.Optional;
 
 public interface StdDetailRepository extends JpaRepository<StdDetail, String> {
 
-    public Optional<List<StdDetail>> findAllByUseAtNotAndGroupCd(String useAt, StdGroup groupCd);
+    public Optional<List<StdDetail>> findAllByUseAtAndGroupCd(String useAt, StdGroup groupCd);
 
     Optional<StdDetail> findByDetailCd(String instCd);
+
+
 
     Optional<StdDetail> findByEtcItem1(String userId);
 
     Optional<StdDetail> findByGroupCdAndDetailNm(StdGroup groupCd, String detailNm);
+
+    String findDetailNmByGroupCdAndDetailCd(StdGroup groupCd, String instCd);
 }
