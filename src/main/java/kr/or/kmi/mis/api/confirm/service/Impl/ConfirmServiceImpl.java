@@ -8,6 +8,7 @@ import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
+import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.ConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,5 +79,26 @@ public class ConfirmServiceImpl implements ConfirmService {
 
         bcdMaster.updateDisapprove(disapproveRequest);
         bcdMasterRepository.save(bcdMaster);
+    }
+
+    /*신청이력조회*/
+    @Override
+    @Transactional(readOnly = true)
+    public List<BcdHistoryResponseDTO> getApplicationHistory(Long draftId) {
+        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
+
+        String drafterId = bcdMaster.getDrafterId();
+
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterId(drafterId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + drafterId));
+
+        return bcdMasters.stream().map(master -> {
+            return BcdHistoryResponseDTO.builder()
+                    .title(master.getTitle())
+                    .draftDate(master.getDraftDate().toString())
+                    .applyStatus(master.getStatus())
+                    .build();
+        }).collect(Collectors.toList());
     }
 }

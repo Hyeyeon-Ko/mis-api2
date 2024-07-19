@@ -25,4 +25,6 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, Long> {
     Optional<List<BcdMaster>> findAllByStatusAndOrderDateIsNull(String status);
 
     Optional<List<BcdMaster>> findByDraftIdAndDraftDateBetweenAndDrafterIdNot(Long draftId, Timestamp startDate, Timestamp endDate, String drafterId);
+
+    Optional<List<BcdMaster>> findAllByDrafterId(String drafterId);
 }
