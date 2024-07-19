@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.order.service.ExcelService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExcelServiceImpl implements ExcelService {
 
     private final BcdDetailRepository bcdDetailRepository;
+    private final StdBcdService stdBcdService;
 
     @Override
     public void downloadExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
@@ -72,9 +74,10 @@ public class ExcelServiceImpl implements ExcelService {
             // 앞면 정보
             createCell(row, 0, no.getAndIncrement(), thickBorderStyle, centeredStyle);
             // todo: 기준자료에서 해당 코드의 이름 불러오기
-            createCell(row, 1, detail.getInstCd(), thinBorderStyle, centeredStyle);
-            createCell(row, 2, detail.getTeamCd(), thinBorderStyle, centeredStyle);
-            createCell(row, 3, detail.getGradeCd(), thinBorderStyle, centeredStyle);
+            createCell(row, 1, stdBcdService.getInstNm(detail.getInstCd()), thinBorderStyle, centeredStyle);
+            System.out.println("teamCd = " + detail.getTeamCd());
+            createCell(row, 2, stdBcdService.getTeamNm(detail.getTeamCd()).getFirst(), thinBorderStyle, centeredStyle);
+            createCell(row, 3, stdBcdService.getGradeNm(detail.getGradeCd()).getFirst(), thinBorderStyle, centeredStyle);
             createCell(row, 4, detail.getKorNm(), thinBorderStyle, centeredStyle);
             createCell(row, 5, detail.getEngNm(), thinBorderStyle, centeredStyle);
             createCell(row, 6, formatPhoneNumber(detail.getExtTel(), false), thinBorderStyle, centeredStyle);
@@ -95,7 +98,9 @@ public class ExcelServiceImpl implements ExcelService {
 
             createCell(rowBack, 0, "", thickBorderStyle, centeredStyle);
             // todo: 기준자료에서 해당 teamCd의 영어 이름 불러오기
-            createCell(rowBack, 1, detail.getTeamCd(), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 1, stdBcdService.getGradeNm(
+                    detail.getGradeCd()).getLast() + " - " +stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
+                    , thinBorderStyle, centeredStyle);
             createCell(rowBack, 2, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 3, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 4, detail.getEngNm(), thinBorderStyle, centeredStyle);
