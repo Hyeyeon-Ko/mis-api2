@@ -38,11 +38,8 @@ public class ConfirmServiceImpl implements ConfirmService {
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
         String drafter = bcdMaster.getDrafter();
-        List<String> names = new ArrayList<>();
-        names.add(stdBcdService.getInstNm(bcdDetail.getInstCd()));
-        names.add(stdBcdService.getDeptNm(bcdDetail.getDeptCd()));
-        names.add(stdBcdService.getTeamNm(bcdDetail.getTeamCd()));
-        names.add(stdBcdService.getGradeNm(bcdDetail.getGradeCd()));
+        // 기준자료에서 각 기준자료 코드에 해당하는 명칭 불러오기
+        List<String> names = stdBcdService.getBcdStdNames(bcdDetail);
 
         return BcdDetailResponseDTO.of(bcdDetail, drafter, names);
     }

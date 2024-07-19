@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface StdDetailService {
 
-    public List<StdDetailResponseDTO> getInfo(String groupCd);
-    public void addInfo(StdDetailRequestDTO stdDetailRequestDTO);
-    public void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO);
-    public void deleteInfo(String detailCd);
+    List<StdDetailResponseDTO> getInfo(String groupCd);
+    void addInfo(StdDetailRequestDTO stdDetailRequestDTO);
+    void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO);
+    void deleteInfo(String detailCd);
 
 }

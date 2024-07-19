@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.std.service.impl;
 
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdResponseDTO;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,43 +65,35 @@ public class StdBcdServiceImpl implements StdBcdService {
     }
 
     @Override
-    public String getTeamNm(String teamCd) {
-        return stdDetailRepository.findByGroupCdAndDetailCd(team, teamCd).get().getDetailNm();
+    public List<String> getTeamNm(String teamCd) {
+        List<String> teamNms = new ArrayList<>();
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(team, teamCd).get();
+        teamNms.add(stdDetail.getDetailNm());  // 팀명
+        teamNms.add(stdDetail.getEtcItem1());  // 영문팀명
+        return teamNms;
     }
 
     @Override
-    public String getGradeNm(String gradeCd) {
-        return stdDetailRepository.findByGroupCdAndDetailCd(grade, gradeCd).get().getDetailNm();
+    public List<String> getGradeNm(String gradeCd) {
+        List<String> gradeNms = new ArrayList<>();
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(grade, gradeCd).get();
+        gradeNms.add(stdDetail.getDetailNm());  // 직급/직책명
+        gradeNms.add(stdDetail.getEtcItem1());  // 영문 직급/직책명
+        return gradeNms;
     }
 
-/*    @Override
+    @Override
     @Transactional(readOnly = true)
-    public List<String> getDetailNames(String detailCd) {
+    public List<String> getBcdStdNames(BcdDetail bcdDetail) {
 
+        List<String> names = new ArrayList<>();
+        names.add(this.getInstNm(bcdDetail.getInstCd()));
+        names.add(this.getDeptNm(bcdDetail.getDeptCd()));
+        names.add(this.getTeamNm(bcdDetail.getTeamCd()).getFirst() + " | " + this.getTeamNm(bcdDetail.getTeamCd()).getLast());
+        names.add(this.getGradeNm(bcdDetail.getGradeCd()).getFirst() + "| " + this.getGradeNm(bcdDetail.getGradeCd()).getLast());
         Map<String, String> groupCodeMap = new HashMap<>();
-        groupCodeMap.put("A001", "centerCd");
-        groupCodeMap.put("A002", "deptCd");
-        groupCodeMap.put("A003", "teamCd");
-        groupCodeMap.put("A004", "gradeCd");
 
-        return this.getNamesByGroupAndCodes(groupCodeMap);
-    }*/
-
-    private List<String> getNamesByGroupAndCodes(Map<String, String> groupCodeMap) {
-        return groupCodeMap.entrySet().stream()
-                .map(entry -> {
-                    String groupCd = entry.getKey();
-                    String detailCd = entry.getValue();
-                    StdGroup group = stdGroupRepository.findByGroupCd(groupCd).orElseThrow(
-                            () -> new RuntimeException("Group not found for code: " + groupCd));
-                    StdDetail detail = stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
-                            .orElseThrow(null);
-
-                    if(detail != null) {
-                        return detail.getDetailNm();
-                    } else return null;
-                })
-                .collect(Collectors.toList());
+        return names;
     }
 
 }

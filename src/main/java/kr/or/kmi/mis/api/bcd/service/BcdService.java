@@ -9,15 +9,15 @@ import java.util.List;
 
 public interface BcdService {
 
-    public void applyBcd(BcdRequestDTO bcdRequestDTO);
-    public void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO);
-    public void cancelBcdApply(Long draftId);
-    public List<BcdMasterResponseDTO> getBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
-    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
-    public BcdDetailResponseDTO getBcd(Long draftId);
-    public List<BcdPendingResponseDTO> getPendingList();
-    public List<BcdPendingResponseDTO> getMyPendingList();
-    public void completeBcdApply(Long draftId);
+    void applyBcd(BcdRequestDTO bcdRequestDTO);
+    void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO);
+    void cancelBcdApply(Long draftId);
+    List<BcdMasterResponseDTO> getBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
+    List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
+    BcdDetailResponseDTO getBcd(Long draftId);
+    List<BcdPendingResponseDTO> getPendingList();
+    List<BcdPendingResponseDTO> getMyPendingList();
+    void completeBcdApply(Long draftId);
 
     BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd);
 }

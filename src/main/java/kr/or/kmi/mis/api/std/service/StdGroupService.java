@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface StdGroupService {
 
-    public List<StdGroupResponseDTO> getInfo(String classCd);
-    public void addInfo(StdGroupRequestDTO stdGroupRequestDTO);
+    List<StdGroupResponseDTO> getInfo(String classCd);
+    void addInfo(StdGroupRequestDTO stdGroupRequestDTO);
 
 }
