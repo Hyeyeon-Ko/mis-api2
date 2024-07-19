@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 public class BcdMasterResponseDTO {
     private Long draftId;
     private String instCd;
+    private String instNm;
     private String title;
     private Timestamp draftDate;
     private Timestamp respondDate;

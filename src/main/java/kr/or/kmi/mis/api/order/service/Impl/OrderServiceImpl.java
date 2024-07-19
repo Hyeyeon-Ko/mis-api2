@@ -11,6 +11,7 @@ import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.service.ExcelService;
 import kr.or.kmi.mis.api.order.service.OrderService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -32,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final BcdDetailRepository bcdDetailRepository;
     private final ExcelService excelService;
     private final JavaMailSender mailSender;
+    private final StdBcdService stdBcdService;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
 
                     return OrderListResponseDTO.builder()
                             .draftId(bcdDetail.getDraftId())
-                            .instNm(bcdDetail.getInstCd())
+                            .instNm(stdBcdService.getInstNm(bcdDetail.getInstCd()))
                             .title(bcdMaster.getTitle())
                             .draftDate(bcdMaster.getDraftDate())
                             .respondDate(bcdMaster.getRespondDate())

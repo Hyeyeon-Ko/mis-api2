@@ -92,7 +92,9 @@ public class BcdServiceImpl implements BcdService {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
-                    return BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
+                    BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
+                    result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
+                    return result;
                 }).toList();
     }
 
@@ -178,7 +180,9 @@ public class BcdServiceImpl implements BcdService {
                             BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                                     .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
-                            return BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
+                            BcdPendingResponseDTO result = BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
+                            result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
+                            return result;
                 }).toList();
     }
 
