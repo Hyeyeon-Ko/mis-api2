@@ -20,6 +20,7 @@ public class BcdMyResponseDTO {
     private String approver;
     private String disapprover;
     private String applyStatus;
+    private String rejectReason;
 
     public static BcdMyResponseDTO of(BcdMaster bcdMaster) {
         return BcdMyResponseDTO.builder()
@@ -31,6 +32,7 @@ public class BcdMyResponseDTO {
                 .approver(bcdMaster.getApprover())
                 .disapprover(bcdMaster.getDisapprover())
                 .applyStatus(bcdMaster.getStatus())
+                .rejectReason(bcdMaster.getRejectReason())
                 .build();
     }
 
