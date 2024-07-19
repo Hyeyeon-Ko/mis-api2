@@ -39,11 +39,9 @@ public class InfoServiceImpl implements InfoService {
         ResponseData.ResultData resultData = authorityService.fetchUserInfo(userId).block();
 
         String userNm = Objects.requireNonNull(resultData).getUsernm();        // 성명
-        String centerNm = Objects.requireNonNull(resultData).getOrginstnm();   // 센터명
-        String teamNm = Objects.requireNonNull(resultData).getOrgdeptnm();     // 팀명
         String telNum = Objects.requireNonNull(resultData).getMpphonno();      // 전화번호
         String userEmail = Objects.requireNonNull(resultData).getEmail();      // 이메일
 
-        return InfoDetailResponseDTO.of(userId, userNm, centerNm, teamNm, telNum, userEmail);
+        return InfoDetailResponseDTO.of(userId, userNm, telNum, userEmail);
     }
 }

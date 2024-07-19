@@ -9,18 +9,13 @@ public class InfoDetailResponseDTO {
 
     String userId;
     String userName;
-    String centerNm;
-    String teamNm;
     String telNum;
     String email;
 
-    public static InfoDetailResponseDTO of(String userId, String userName,
-                                           String centerNm, String teamNm, String telNum, String email) {
+    public static InfoDetailResponseDTO of(String userId, String userName, String telNum, String email) {
         return InfoDetailResponseDTO.builder()
                 .userId(userId)
                 .userName(userName)
-                .centerNm(centerNm)
-                .teamNm(teamNm)
                 .telNum(telNum)
                 .email(email)
                 .build();

@@ -56,9 +56,7 @@ public class StdBcdServiceImpl implements StdBcdService {
 
     @Override
     public String getInstNm(String instCd) {
-        String s = stdDetailRepository.findByGroupCdAndDetailCd(center, instCd).get().getDetailNm();
-        System.out.println("s = " + s);
-        return s;
+        return stdDetailRepository.findByGroupCdAndDetailCd(center, instCd).get().getDetailNm();
     }
 
     @Override
