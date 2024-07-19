@@ -21,7 +21,6 @@ public class BcdHistory {
 
     @Id
     @Column(name = "seq_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long seqId;
 
     @Column(length = 20)
@@ -46,7 +45,7 @@ public class BcdHistory {
     @Column(length = 100)
     private String teamNm;
 
-    @Column(length = 20)
+    @Column(length = 50)
     private String engTeamnm;
 
     @Column(length = 20)
@@ -76,8 +75,9 @@ public class BcdHistory {
     private Integer quantity;
 
     @Builder
-    public BcdHistory(BcdDetail bcdDetail,
+    public BcdHistory(BcdDetail bcdDetail, Long seqId,
                       String instNm, String deptNm, String teamNm, String engTeamnm, String grade, String engGrade) {
+        this.seqId = seqId;
         this.draftId = bcdDetail.getDraftId();
         this.updtr = bcdDetail.getLastUpdtr();
         this.division = bcdDetail.getDivision();

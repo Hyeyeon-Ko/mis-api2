@@ -9,6 +9,8 @@ import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class BcdHistoryServiceImpl implements BcdHistoryService {
@@ -28,9 +30,14 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
         String grade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst();
         String engGrade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getLast();
 
+        // seqId 설정
+        Long maxSeqId = bcdHistoryRepository.findTopByDraftIdOrderBySeqIdDesc(bcdDetail.getDraftId())
+                .map(BcdHistory::getSeqId).orElse(0L);
+
         // BcdHistory 객체 생성
         BcdHistory bcdHistory = BcdHistory.builder()
                 .bcdDetail(bcdDetail)
+                .seqId(maxSeqId + 1)
                 .instNm(instNm)
                 .deptNm(deptNm)
                 .teamNm(teamNm)

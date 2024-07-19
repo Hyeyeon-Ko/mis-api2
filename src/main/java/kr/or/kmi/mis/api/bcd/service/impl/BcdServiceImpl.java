@@ -13,13 +13,11 @@ import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,10 +61,8 @@ public class BcdServiceImpl implements BcdService {
         //   1) 수정자 조회
         //   2) 정보 업데이트
         String updtr = infoService.getUserInfo().getUserName();
-        System.out.println("updtr = " + updtr);;
         existingDetailOpt.update(updateBcdRequestDTO, updtr);
         BcdDetail bcdDetail = bcdDetailRepository.save(existingDetailOpt);
-        System.out.println("bcdDetail.getLastUpdtr() = " + bcdDetail.getLastUpdtr());
     }
 
     @Override

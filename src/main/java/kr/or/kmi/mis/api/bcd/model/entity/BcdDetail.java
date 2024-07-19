@@ -21,7 +21,6 @@ public class BcdDetail {
     @Column(length = 20)
     private String lastUpdtr;         // 명함 최종 수정자
 
-    @UpdateTimestamp
     private Timestamp lastupdtDate;   // 명함 최종 수정일
 
     @Column(length = 1)
@@ -105,5 +104,10 @@ public class BcdDetail {
         this.address = bcdUpdateRequestDTO.getAddress();
         this.engAddress = bcdUpdateRequestDTO.getEngAddress();
         this.quantity = bcdUpdateRequestDTO.getQuantity();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.lastupdtDate = new Timestamp(System.currentTimeMillis());
     }
 }
