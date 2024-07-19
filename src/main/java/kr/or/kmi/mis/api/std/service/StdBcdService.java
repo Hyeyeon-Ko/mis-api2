@@ -1,6 +1,6 @@
 package kr.or.kmi.mis.api.std.service;
 
-import kr.or.kmi.mis.api.std.model.response.StdBcdResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdResponseDTO;
 
 public interface StdBcdService {
 

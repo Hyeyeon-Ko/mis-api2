@@ -1,9 +1,9 @@
 package kr.or.kmi.mis.api.std.service.impl;
 
-import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
-import kr.or.kmi.mis.api.std.model.response.StdBcdResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdDetailResponseDTO;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
@@ -47,10 +47,10 @@ public class StdBcdServiceImpl implements StdBcdService {
         List<StdDetail> gradeDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", grade).orElseThrow();
 
         return StdBcdResponseDTO.builder()
-                .centerInfo(centerDetails)
-                .deptInfo(deptDetails)
-                .teamInfo(teamDetails)
-                .gradeInfo(gradeDetails)
+                .instInfo(StdBcdDetailResponseDTO.of(centerDetails))
+                .deptInfo(StdBcdDetailResponseDTO.of(deptDetails))
+                .teamInfo(StdBcdDetailResponseDTO.of(teamDetails))
+                .gradeInfo(StdBcdDetailResponseDTO.of(gradeDetails))
                 .build();
     }
 

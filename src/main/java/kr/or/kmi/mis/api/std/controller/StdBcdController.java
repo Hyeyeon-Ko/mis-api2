@@ -1,7 +1,7 @@
 package kr.or.kmi.mis.api.std.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.std.model.response.StdBcdResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdResponseDTO;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.response.ApiResponse;
 import kr.or.kmi.mis.cmm.response.ResponseWrapper;
