@@ -73,7 +73,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
 
         if (sessionUserId.equals(userId)) {
-            throw new RuntimeException("로그인한 사용자의 userId와 동일합니다");
+            throw new IllegalArgumentException("로그인한 사용자의 userId와 동일합니다");
         }
 
         ResponseData.ResultData resultData = fetchUserInfo(userId).block();

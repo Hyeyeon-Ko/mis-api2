@@ -85,6 +85,8 @@ public class OrderServiceImpl implements OrderService {
 
         // 이메일 설정
         helper.setFrom("gdkimm@kmi.or.kr"); // 발신자 이메일 주소
+
+        // 임시 수신 메일주소
         helper.setTo("khy33355@naver.com"); // 수신자 이메일 주소
         helper.setSubject(subject); // 이메일 제목
         helper.setText(body); // 이메일 내용
