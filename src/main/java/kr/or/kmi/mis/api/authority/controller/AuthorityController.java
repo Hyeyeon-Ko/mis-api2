@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.cmm.response.ApiResponse;
 import kr.or.kmi.mis.cmm.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 public class AuthorityController {
 
     private final AuthorityService authorityService;
+    private final AopAutoConfiguration aopAutoConfiguration;
 
     @Operation(summary = "get authority list", description = "권한 관리 페이지에서 사용, 모든 권한 목록 호출")
     @GetMapping
@@ -51,5 +54,11 @@ public class AuthorityController {
     public ApiResponse<?> deleteAdmin(@PathVariable Long authId, @RequestParam(required = false) String detailCd) {
         authorityService.deleteAdmin(authId, detailCd);
         return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "get admin info", description = "특정 관리자 권한 정보 조회")
+    @GetMapping("/admin/{authId}")
+    public ApiResponse<AuthorityResponseDTO> getAdmin(@PathVariable Long authId) {
+        return ResponseWrapper.success(authorityService.getAdmin(authId));
     }
 }
