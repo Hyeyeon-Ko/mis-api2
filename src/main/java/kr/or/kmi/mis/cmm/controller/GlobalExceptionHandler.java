@@ -27,4 +27,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleNullPointerException(NullPointerException e) {
         return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<String>> handleIllegalStateException(IllegalStateException e) {
+        return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }
