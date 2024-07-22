@@ -89,8 +89,12 @@ public class StdDetailServiceImpl implements StdDetailService {
 
     @Override
     @Transactional
-    public void deleteInfo(String detailCd) {
-        StdDetail stdDetail = stdDetailRepository.findById(detailCd)
+    public void deleteInfo(String groupCd, String detailCd) {
+
+        StdGroup stdGroup = stdGroupRepository.findById(groupCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
+
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + detailCd));
 
         stdDetail.updateUseAt("N");

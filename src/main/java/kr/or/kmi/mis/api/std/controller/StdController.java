@@ -72,9 +72,9 @@ public class StdController {
 
     @Operation(summary = "delete Detail Info", description = "기준자료 > 상세 정보 삭제 시 사용")
     @PutMapping("/deleteDetailInfo")
-    public ApiResponse<?> deleteDetailInfo(@RequestParam("detailCd") String detailCd) {
+    public ApiResponse<?> deleteDetailInfo(@RequestParam("groupCd") String groupCd, @RequestParam("detailCd") String detailCd) {
 
-        stdDetailService.deleteInfo(detailCd);
+        stdDetailService.deleteInfo(groupCd, detailCd);
 
         return ResponseWrapper.success();
     }
