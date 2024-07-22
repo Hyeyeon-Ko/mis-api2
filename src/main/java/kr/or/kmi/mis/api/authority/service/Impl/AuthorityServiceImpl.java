@@ -114,11 +114,11 @@ public class AuthorityServiceImpl implements AuthorityService {
             StdDetail newStdDetail = StdDetail.builder()
                     .detailCd(request.getUserId())
                     .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
-                    .detailNm("기준자료")
+                    .detailNm(request.getUserNm())
                     .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
                     .toDd("99991231")
                     .etcItem1(request.getUserId())
-                    .etcItem2(request.getUserNm())
+                    .etcItem2(request.getUserRole())
                     .build();
             newStdDetail.setRgstrId((String) httpServletRequest.getSession().getAttribute("userId"));
             newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
@@ -143,10 +143,11 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .orElseGet(() -> StdDetail.builder()
                             .detailCd(authority.getUserId())
                             .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
-                            .detailNm(authority.getUserId())
+                            .detailNm(authority.getHngNm())
                             .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                            .toDd("99991231")
                             .etcItem1(authority.getUserId())
-                            .etcItem2(authority.getHngNm())
+                            .etcItem2(authority.getRole())
                             .build()
                     );
             stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
@@ -154,17 +155,14 @@ public class AuthorityServiceImpl implements AuthorityService {
             stdDetailRepository.save(stdDetail);
         } else {
             stdDetailRepository.findByEtcItem1(authority.getUserId()).ifPresent(stdDetail -> {
-                stdDetail.updateUseAt("N");
-                stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-                stdDetail.setUpdtrId(sessionUserId);
-                stdDetailRepository.save(stdDetail);
+                stdDetailRepository.deleteById(stdDetail.getDetailCd());
             });
         }
     }
 
     @Override
     @Transactional
-    public void deleteAdmin(Long authId, String detailCd) {
+    public void deleteAdmin(Long authId) {
         Authority authority = authorityRepository.findByAuthId(authId)
                 .orElseThrow(() -> new EntityNotFoundException("Authority with id " + authId + " not found"));
 
@@ -172,12 +170,11 @@ public class AuthorityServiceImpl implements AuthorityService {
         authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
         authorityRepository.save(authority);
 
-        // 기준자료 관리자였다면 -> 기준자료 테이블 updateUseAt("N")
-        if (detailCd != null) {
-            StdDetail stdDetail = stdDetailRepository.findById(detailCd)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid detailCd: " + detailCd));
-            stdDetail.updateUseAt("N");
-            stdDetailRepository.save(stdDetail);
+        // 기준자료 관리자였다면 -> 기준자료 테이블 데이터 삭제
+        if (authority.getUserId() != null) {
+            StdDetail stdDetail = stdDetailRepository.findById(authority.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid detailCd: " + authority.getUserId()));
+            stdDetailRepository.deleteById(stdDetail.getDetailCd());
         }
     }
 

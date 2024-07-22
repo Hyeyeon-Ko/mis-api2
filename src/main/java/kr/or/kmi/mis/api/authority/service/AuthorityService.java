@@ -23,7 +23,7 @@ public interface AuthorityService {
     void updateAdmin(Long authId, AuthorityRequestDTO request);
 
     /* 권한 취소 */
-    void deleteAdmin(Long authId, String detailCd);
+    void deleteAdmin(Long authId);
 
     /* 외부 사용자 정보 API 에서 사용자 정보 가져오기 */
     Mono<ResponseData.ResultData> fetchUserInfo(String userId);

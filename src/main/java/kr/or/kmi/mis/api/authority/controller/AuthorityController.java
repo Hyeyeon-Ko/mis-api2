@@ -51,8 +51,8 @@ public class AuthorityController {
 
     @Operation(summary = "delete admin", description = "기존 관리 권한 삭제")
     @DeleteMapping("/admin/{authId}")
-    public ApiResponse<?> deleteAdmin(@PathVariable Long authId, @RequestParam(required = false) String detailCd) {
-        authorityService.deleteAdmin(authId, detailCd);
+    public ApiResponse<?> deleteAdmin(@PathVariable Long authId) {
+        authorityService.deleteAdmin(authId);
         return ResponseWrapper.success();
     }
 

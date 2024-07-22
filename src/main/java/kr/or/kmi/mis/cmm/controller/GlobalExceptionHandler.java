@@ -33,4 +33,4 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }
-tus
+
