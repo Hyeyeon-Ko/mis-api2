@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -46,7 +47,8 @@ public class ApplyServiceImpl implements ApplyService {
                     bcdApplyLists = bcdService.getBcdApplyByDateRange(timestamps[0], timestamps[1]);
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid document type: " + documentType);
+                    bcdApplyLists = new ArrayList<>();
+                    break;
             }
         } else {
             // 전체 신청 목록을 조회합니다.
@@ -79,7 +81,8 @@ public class ApplyServiceImpl implements ApplyService {
                     myBcdApplyLists = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1]);
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid document type: " + documentType);
+                    myBcdApplyLists = new ArrayList<>();
+                    break;
             }
         } else {
             // 전체 신청 목록을 조회합니다.
