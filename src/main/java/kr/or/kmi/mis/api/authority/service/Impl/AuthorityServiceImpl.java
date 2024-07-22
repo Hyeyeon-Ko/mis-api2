@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
@@ -21,6 +22,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,11 +115,12 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .detailCd(request.getUserId())
                     .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
                     .detailNm("기준자료")
-                    .fromDd(null)
-                    .toDd(null)
+                    .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                    .toDd("99991231")
                     .etcItem1(request.getUserId())
                     .etcItem2(request.getUserNm())
                     .build();
+            newStdDetail.setRgstrId((String) httpServletRequest.getSession().getAttribute("userId"));
             newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
             stdDetailRepository.save(newStdDetail);
         }
@@ -140,8 +144,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                             .detailCd(authority.getUserId())
                             .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
                             .detailNm(authority.getUserId())
-                            .fromDd(null)
-                            .toDd(null)
+                            .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
                             .etcItem1(authority.getUserId())
                             .etcItem2(authority.getHngNm())
                             .build()
@@ -203,5 +206,23 @@ public class AuthorityServiceImpl implements AuthorityService {
                         return Mono.error(new RuntimeException("Error processing response from groupware API", e));
                     }
                 });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AuthorityResponseDTO getAdmin(Long authId) {
+
+        Authority authority = authorityRepository.findByAuthId(authId)
+                .orElseThrow(() -> new EntityNotFoundException("Authority with id " + authId + " not found"));
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
+                .orElseThrow(() -> new EntityNotFoundException("StdGroup with id " + authId + " not found"));
+
+        String canHandleStd = "N";
+        if (stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId()).isPresent()) {
+            canHandleStd = "Y";
+        }
+
+        return AuthorityResponseDTO.of(authority, canHandleStd);
     }
 }

@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.authority.service;
 
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
 import reactor.core.publisher.Mono;
 
@@ -26,4 +27,6 @@ public interface AuthorityService {
 
     /* 외부 사용자 정보 API 에서 사용자 정보 가져오기 */
     Mono<ResponseData.ResultData> fetchUserInfo(String userId);
+
+    AuthorityResponseDTO getAdmin(Long authId);
 }

@@ -30,6 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<String>> handleIllegalStateException(IllegalStateException e) {
-        return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }
+tus

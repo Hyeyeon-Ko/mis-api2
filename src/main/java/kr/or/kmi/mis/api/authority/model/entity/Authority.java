@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 public class Authority {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long authId;
 
     @Column(nullable = false, length = 20)
