@@ -73,7 +73,6 @@ public class ExcelServiceImpl implements ExcelService {
 
             // 앞면 정보
             createCell(row, 0, no.getAndIncrement(), thickBorderStyle, centeredStyle);
-            // todo: 기준자료에서 해당 코드의 이름 불러오기
             createCell(row, 1, stdBcdService.getInstNm(detail.getInstCd()), thinBorderStyle, centeredStyle);
             System.out.println("teamCd = " + detail.getTeamCd());
             createCell(row, 2, stdBcdService.getTeamNm(detail.getTeamCd()).getFirst(), thinBorderStyle, centeredStyle);
@@ -97,7 +96,6 @@ public class ExcelServiceImpl implements ExcelService {
             rowBack.setHeight((short) 600); // 세로 너비 설정
 
             createCell(rowBack, 0, "", thickBorderStyle, centeredStyle);
-            // todo: 기준자료에서 해당 teamCd의 영어 이름 불러오기
             createCell(rowBack, 1, stdBcdService.getGradeNm(
                     detail.getGradeCd()).getLast() + " - " +stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
                     , thinBorderStyle, centeredStyle);
