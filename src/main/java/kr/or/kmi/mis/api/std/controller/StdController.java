@@ -35,7 +35,7 @@ public class StdController {
     }
 
     @Operation(summary = "add Group Info", description = "기준자료 > 중분류 추가 시 사용")
-    @PostMapping("/GroupInfo")
+    @PostMapping("/groupInfo")
     public ApiResponse<?> addGroupInfo(@RequestBody StdGroupRequestDTO stdGroupRequestDTO) {
 
         stdGroupService.addInfo(stdGroupRequestDTO);
