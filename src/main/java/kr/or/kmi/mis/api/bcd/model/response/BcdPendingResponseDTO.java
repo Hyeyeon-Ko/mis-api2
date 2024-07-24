@@ -19,6 +19,7 @@ public class BcdPendingResponseDTO {
     private Timestamp lastUpdateDate;   // 최종 수정일시
     private String lastUpdater;        // 최종 수정자
     private String applyStatus;
+    private String docType;
 
     // BcdMaster Entity -> BcdPending response Dto
     public static BcdPendingResponseDTO of(BcdMaster bcdMaster, BcdDetail bcdDetail) {
@@ -32,6 +33,7 @@ public class BcdPendingResponseDTO {
                 .lastUpdateDate(bcdDetail.getLastupdtDate())
                 .lastUpdater(bcdDetail.getLastUpdtr())
                 .applyStatus(bcdMaster.getStatus())
+                .docType("명함신청")
                 .build();
     }
 }

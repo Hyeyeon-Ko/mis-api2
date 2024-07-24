@@ -20,6 +20,7 @@ public class BcdMasterResponseDTO {
     private String applyStatus;
     private String lastUpdtId;
     private Timestamp lastUpdtDate;
+    private String docType;
 
     // BcdMaster Entity -> BcdMaster response Dto
     public static BcdMasterResponseDTO of(BcdMaster bcdMaster, String instCd) {
@@ -33,6 +34,7 @@ public class BcdMasterResponseDTO {
                 .orderDate(bcdMaster.getOrderDate())
                 .drafter(bcdMaster.getDrafter())
                 .applyStatus(bcdMaster.getStatus())
+                .docType("명함신청")
                 .build();
     }
 

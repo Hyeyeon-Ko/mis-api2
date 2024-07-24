@@ -21,6 +21,7 @@ public class BcdMyResponseDTO {
     private String disapprover;
     private String applyStatus;
     private String rejectReason;
+    private String docType;
 
     public static BcdMyResponseDTO of(BcdMaster bcdMaster) {
         return BcdMyResponseDTO.builder()
@@ -33,6 +34,7 @@ public class BcdMyResponseDTO {
                 .disapprover(bcdMaster.getDisapprover())
                 .applyStatus(bcdMaster.getStatus())
                 .rejectReason(bcdMaster.getRejectReason())
+                .docType("명함신청")
                 .build();
     }
 
