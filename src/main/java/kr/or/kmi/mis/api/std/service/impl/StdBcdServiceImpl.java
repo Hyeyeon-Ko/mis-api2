@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.bcd.StdBcdDetailResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.bcd.StdStatusResponseDTO;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
@@ -80,6 +81,15 @@ public class StdBcdServiceImpl implements StdBcdService {
         gradeNms.add(stdDetail.getDetailNm());  // 직급/직책명
         gradeNms.add(stdDetail.getEtcItem1());  // 영문 직급/직책명
         return gradeNms;
+    }
+
+    @Override
+    public List<StdStatusResponseDTO> getApplyStatus() {
+
+        StdGroup applyStatus = stdGroupRepository.findByGroupCd("A005").orElseThrow();
+        List<StdDetail> stdDetails = stdDetailRepository.findByGroupCd(applyStatus).orElseThrow();
+
+        return StdStatusResponseDTO.of(stdDetails);
     }
 
     @Override
