@@ -151,7 +151,7 @@ public class BcdServiceImpl implements BcdService {
                 }).toList();
     }
 
-    @Override
+/*    @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcd(Long draftId) {
 
@@ -165,7 +165,7 @@ public class BcdServiceImpl implements BcdService {
 
         return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter(), names);
 
-    }
+    }*/
 
     @Override
     public List<BcdPendingResponseDTO> getPendingList() {

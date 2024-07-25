@@ -14,7 +14,7 @@ public interface BcdService {
     void cancelBcdApply(Long draftId);
     List<BcdMasterResponseDTO> getBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
     List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
-    BcdDetailResponseDTO getBcd(Long draftId);
+//    BcdDetailResponseDTO getBcd(Long draftId);
     List<BcdPendingResponseDTO> getPendingList();
     List<BcdPendingResponseDTO> getMyPendingList();
     void completeBcdApply(Long draftId);
