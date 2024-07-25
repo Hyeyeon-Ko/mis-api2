@@ -63,8 +63,8 @@ public class BcdController {
     }
 
 
-    @GetMapping("/sample")
-    public ApiResponse<BcdSampleResponseDTO> getSample(@RequestParam("groupCd") String groupCd, @RequestParam("detailCd") String detailCd) {
-        return ResponseWrapper.success(bcdService.getDetailNm(groupCd, detailCd));
-    }
+//    @GetMapping("/sample")
+//    public ApiResponse<BcdSampleResponseDTO> getSample(@RequestParam("groupCd") String groupCd, @RequestParam("detailCd") String detailCd) {
+//        return ResponseWrapper.success(bcdService.getDetailNm(groupCd, detailCd));
+//    }
 }

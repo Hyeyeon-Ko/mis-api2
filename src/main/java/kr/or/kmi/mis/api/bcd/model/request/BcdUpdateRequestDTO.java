@@ -11,6 +11,8 @@ public class BcdUpdateRequestDTO {
     String teamCd;
     String teamNm;
     String gradeCd;
+    String gradeNm;
+    String engGradeNm;
     String extTel;
     String phoneTel;
     String faxTel;

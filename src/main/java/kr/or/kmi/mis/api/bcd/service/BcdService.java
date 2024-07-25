@@ -19,5 +19,5 @@ public interface BcdService {
     List<BcdPendingResponseDTO> getMyPendingList();
     void completeBcdApply(Long draftId);
 
-    BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd);
+//    BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd);
 }

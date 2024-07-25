@@ -27,8 +27,16 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
         String deptNm = stdBcdService.getDeptNm(bcdDetail.getDeptCd());
         String teamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getFirst();
         String engTeamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getLast();
-        String grade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst();
-        String engGrade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getLast();
+        String grade = "";
+        String engGrade = "";
+        if (stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst().equals("직접입력")) {
+            grade = bcdDetail.getGradeNm();
+            engGrade = bcdDetail.getEngradeNm();
+        } else {
+            grade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst();
+            engGrade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getLast();
+        }
+
 
         // seqId 설정
         Long maxSeqId = bcdHistoryRepository.findTopByDraftIdOrderBySeqIdDesc(bcdDetail.getDraftId())

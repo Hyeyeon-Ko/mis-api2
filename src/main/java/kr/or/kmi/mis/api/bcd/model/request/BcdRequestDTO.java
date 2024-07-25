@@ -17,6 +17,8 @@ public class BcdRequestDTO {
     String teamCd;
     String teamNm;
     String gradeCd;
+    String gradeNm;
+    String enGradeNm;
     String extTel;
     String phoneTel;
     String faxTel;
@@ -48,6 +50,8 @@ public class BcdRequestDTO {
                 .deptCd(deptCd)
                 .teamCd(teamCd)
                 .gradeCd(gradeCd)
+                .gradeNm(gradeNm)
+                .enGradeNm(enGradeNm)
                 .extTel(extTel)
                 .faxTel(faxTel)
                 .phoneTel(phoneTel)

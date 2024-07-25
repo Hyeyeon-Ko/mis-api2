@@ -100,7 +100,12 @@ public class StdBcdServiceImpl implements StdBcdService {
         names.add(this.getInstNm(bcdDetail.getInstCd()));
         names.add(this.getDeptNm(bcdDetail.getDeptCd()));
         names.add(this.getTeamNm(bcdDetail.getTeamCd()).getFirst() + " | " + this.getTeamNm(bcdDetail.getTeamCd()).getLast());
-        names.add(this.getGradeNm(bcdDetail.getGradeCd()).getFirst() + "| " + this.getGradeNm(bcdDetail.getGradeCd()).getLast());
+
+        if (this.getGradeNm(bcdDetail.getGradeCd()).getFirst().equals("직접입력")) {
+            names.add(bcdDetail.getGradeNm() + "| " + bcdDetail.getEngradeNm());
+        } else {
+            names.add(this.getGradeNm(bcdDetail.getGradeCd()).getFirst() + " | " + this.getGradeNm(bcdDetail.getGradeCd()).getLast());
+        }
         Map<String, String> groupCodeMap = new HashMap<>();
 
         return names;

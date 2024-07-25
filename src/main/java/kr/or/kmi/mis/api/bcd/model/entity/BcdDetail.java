@@ -3,7 +3,6 @@ package kr.or.kmi.mis.api.bcd.model.entity;
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import lombok.*;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -48,6 +47,12 @@ public class BcdDetail {
     private String gradeCd;
 
     @Column(length = 20)
+    private String gradeNm;
+
+    @Column(length = 20)
+    private String engradeNm;
+
+    @Column(length = 20)
     private String extTel;
 
     @Column(length = 20)
@@ -69,7 +74,7 @@ public class BcdDetail {
 
     @Builder
     public BcdDetail(Long draftId, String division, String userId, String korNm, String engNm,
-                     String instCd, String deptCd, String teamCd, String gradeCd,
+                     String instCd, String deptCd, String teamCd, String gradeCd, String gradeNm, String enGradeNm,
                      String extTel, String faxTel, String phoneTel, String email, String address, String engAddress, Integer quantity) {
         this.draftId = draftId;
         this.division = division;
@@ -80,6 +85,8 @@ public class BcdDetail {
         this.deptCd = deptCd;
         this.teamCd = teamCd;
         this.gradeCd = gradeCd;
+        this.gradeNm = gradeNm;
+        this.engradeNm = enGradeNm;
         this.extTel = extTel;
         this.faxTel = faxTel;
         this.phoneTel = phoneTel;
@@ -97,6 +104,8 @@ public class BcdDetail {
         this.deptCd = bcdUpdateRequestDTO.getDeptCd();
         this.teamCd = bcdUpdateRequestDTO.getTeamCd();
         this.gradeCd = bcdUpdateRequestDTO.getGradeCd();
+        this.gradeNm = bcdUpdateRequestDTO.getGradeNm();
+        this.engradeNm = bcdUpdateRequestDTO.getEngGradeNm();
         this.extTel = bcdUpdateRequestDTO.getExtTel();
         this.faxTel = bcdUpdateRequestDTO.getFaxTel();
         this.phoneTel = bcdUpdateRequestDTO.getPhoneTel();

@@ -253,8 +253,8 @@ public class BcdServiceImpl implements BcdService {
         bcdMaster.updateEndDate(new Timestamp(System.currentTimeMillis()));
     }
 
-    @Override
+/*    @Override
     public BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd) {
         return bcdSampleQueryRepositoryImpl.getBcdSampleNm(groupCd, detailCd);
-    }
+    }*/
 }
