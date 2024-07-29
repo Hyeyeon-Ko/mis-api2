@@ -105,7 +105,7 @@ public class BcdDetail {
         this.teamCd = bcdUpdateRequestDTO.getTeamCd();
         this.gradeCd = bcdUpdateRequestDTO.getGradeCd();
         this.gradeNm = bcdUpdateRequestDTO.getGradeNm();
-        this.engradeNm = bcdUpdateRequestDTO.getEngGradeNm();
+        this.engradeNm = bcdUpdateRequestDTO.getEnGradeNm();
         this.extTel = bcdUpdateRequestDTO.getExtTel();
         this.faxTel = bcdUpdateRequestDTO.getFaxTel();
         this.phoneTel = bcdUpdateRequestDTO.getPhoneTel();

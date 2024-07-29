@@ -12,7 +12,7 @@ public class BcdUpdateRequestDTO {
     String teamNm;
     String gradeCd;
     String gradeNm;
-    String engGradeNm;
+    String enGradeNm;
     String extTel;
     String phoneTel;
     String faxTel;
