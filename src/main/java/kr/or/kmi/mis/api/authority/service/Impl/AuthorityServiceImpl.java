@@ -71,6 +71,18 @@ public class AuthorityServiceImpl implements AuthorityService {
 
     @Override
     @Transactional(readOnly = true)
+    public boolean hasStandardDataManagementAuthority() {
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
+                .orElseThrow(() -> new EntityNotFoundException("B001"));
+
+        String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+
+        return stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, sessionUserId).isPresent();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public String getMemberName(String userId) {
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");

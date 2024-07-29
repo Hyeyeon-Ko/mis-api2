@@ -13,6 +13,9 @@ public interface AuthorityService {
     /* 관리자 목록 불러오기 */
     List<AuthorityListResponseDTO> getAuthorityList();
 
+    /* 해당 사번의 기준자료 권한 불러오기 */
+    boolean hasStandardDataManagementAuthority();
+
     /* 해당 센터의 총무팀 목록 불러오기 */
     String getMemberName(String userId);
 

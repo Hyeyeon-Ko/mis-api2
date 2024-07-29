@@ -29,6 +29,12 @@ public class AuthorityController {
         return ResponseWrapper.success(authorityService.getAuthorityList());
     }
 
+    @Operation(summary = "get member authority", description = "유저 ID를 통해 유저 기준자료 권한 조회")
+    @GetMapping("/standardData")
+    public ApiResponse<Boolean> getMemberAuthority() {
+        return ResponseWrapper.success(authorityService.hasStandardDataManagementAuthority());
+    }
+
     @Operation(summary = "get member name", description = "유저 ID를 통해 유저 이름 조회")
     @PostMapping
     public ApiResponse<String> getMemberName(@RequestParam String userId) {
