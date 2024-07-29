@@ -71,24 +71,32 @@ public class ExcelServiceImpl implements ExcelService {
             Row row = sheet.createRow(rowNum.getAndIncrement());
             row.setHeight((short) 600); // 세로 너비 설정
 
+            // Division 값에 따른 조건 처리
+            String divisionValue = "기타"; // 기본값 설정
+            if ("A".equals(detail.getDivision())) {
+                divisionValue = "1안";
+            } else if ("B".equals(detail.getDivision())) {
+                divisionValue = "2안";
+            }
+
             // 앞면 정보
             createCell(row, 0, no.getAndIncrement(), thickBorderStyle, centeredStyle);
-            createCell(row, 1, stdBcdService.getInstNm(detail.getInstCd()), thinBorderStyle, centeredStyle);
-            System.out.println("teamCd = " + detail.getTeamCd());
-            createCell(row, 2, stdBcdService.getTeamNm(detail.getTeamCd()).getFirst(), thinBorderStyle, centeredStyle);
-            createCell(row, 3, stdBcdService.getGradeNm(detail.getGradeCd()).getFirst(), thinBorderStyle, centeredStyle);
-            createCell(row, 4, detail.getKorNm(), thinBorderStyle, centeredStyle);
-            createCell(row, 5, detail.getEngNm(), thinBorderStyle, centeredStyle);
-            createCell(row, 6, formatPhoneNumber(detail.getExtTel(), false), thinBorderStyle, centeredStyle);
-            createCell(row, 7, formatPhoneNumber(detail.getFaxTel(), false), thinBorderStyle, centeredStyle);
-            createCell(row, 8, formatPhoneNumber(detail.getPhoneTel(), false), thinBorderStyle, centeredStyle);
-            createCell(row, 9, detail.getEmail(), thinBorderStyle, centeredStyle);
-            createCell(row, 10, detail.getQuantity(), thinBorderStyle, centeredStyle);
-            createCell(row, 11, detail.getAddress(), thinBorderStyle, centeredStyle);
+            createCell(row, 1, divisionValue, thinBorderStyle, centeredStyle);
+            createCell(row, 2, stdBcdService.getInstNm(detail.getInstCd()), thinBorderStyle, centeredStyle);
+            createCell(row, 3, stdBcdService.getTeamNm(detail.getTeamCd()).getFirst(), thinBorderStyle, centeredStyle);
+            createCell(row, 4, stdBcdService.getGradeNm(detail.getGradeCd()).getFirst(), thinBorderStyle, centeredStyle);
+            createCell(row, 5, detail.getKorNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 6, detail.getEngNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 7, formatPhoneNumber(detail.getExtTel(), false), thinBorderStyle, centeredStyle);
+            createCell(row, 8, formatPhoneNumber(detail.getFaxTel(), false), thinBorderStyle, centeredStyle);
+            createCell(row, 9, formatPhoneNumber(detail.getPhoneTel(), false), thinBorderStyle, centeredStyle);
+            createCell(row, 10, detail.getEmail(), thinBorderStyle, centeredStyle);
+            createCell(row, 11, detail.getQuantity(), thinBorderStyle, centeredStyle);
+            createCell(row, 12, detail.getAddress(), thinBorderStyle, centeredStyle);
 
             // 병합할 행 조건 (짝수 행)
             if ((rowNum.get() - 1) % 2 == 0) {
-                sheet.addMergedRegion(new CellRangeAddress(rowNum.get(), rowNum.get(), 1, 3));
+                sheet.addMergedRegion(new CellRangeAddress(rowNum.get(), rowNum.get(), 2, 4));
             }
 
             // 뒷면 정보
@@ -96,39 +104,40 @@ public class ExcelServiceImpl implements ExcelService {
             rowBack.setHeight((short) 600); // 세로 너비 설정
 
             createCell(rowBack, 0, "", thickBorderStyle, centeredStyle);
-            createCell(rowBack, 1, stdBcdService.getGradeNm(
-                    detail.getGradeCd()).getLast() + " - " +stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
+            createCell(rowBack, 1, "", thinBorderStyle, centeredStyle);
+            createCell(rowBack, 2, stdBcdService.getGradeNm(
+                            detail.getGradeCd()).getLast() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
                     , thinBorderStyle, centeredStyle);
-            createCell(rowBack, 2, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 3, "", thinBorderStyle, centeredStyle);
-            createCell(rowBack, 4, detail.getEngNm(), thinBorderStyle, centeredStyle);
-            createCell(rowBack, 5, "", thinBorderStyle, centeredStyle);
-            createCell(rowBack, 6, formatPhoneNumber(detail.getExtTel(), true), thinBorderStyle, centeredStyle);
-            createCell(rowBack, 7, formatPhoneNumber(detail.getFaxTel(), true), thinBorderStyle, centeredStyle);
-            createCell(rowBack, 8, formatPhoneNumber(detail.getPhoneTel(), true), thinBorderStyle, centeredStyle);
-            createCell(rowBack, 9, detail.getEmail(), thinBorderStyle, centeredStyle);
-            createCell(rowBack, 10, "", thinBorderStyle, centeredStyle);
-            createCell(rowBack, 11, detail.getEngAddress(), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 4, "", thinBorderStyle, centeredStyle);
+            createCell(rowBack, 5, detail.getEngNm(), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 6, "", thinBorderStyle, centeredStyle);
+            createCell(rowBack, 7, formatPhoneNumber(detail.getExtTel(), true), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 8, formatPhoneNumber(detail.getFaxTel(), true), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 9, formatPhoneNumber(detail.getPhoneTel(), true), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 10, detail.getEmail(), thinBorderStyle, centeredStyle);
+            createCell(rowBack, 11, "", thinBorderStyle, centeredStyle);
+            createCell(rowBack, 12, detail.getEngAddress(), thinBorderStyle, centeredStyle);
 
             sheet.addMergedRegion(new CellRangeAddress(rowNum.get() - 2, rowNum.get() - 1, 0, 0));
-            sheet.addMergedRegion(new CellRangeAddress(rowNum.get() - 2, rowNum.get() - 1, 10, 10));
-            Cell quantityCell = row.getCell(10);
-            quantityCell.setCellStyle(centeredStyle);
+            sheet.addMergedRegion(new CellRangeAddress(rowNum.get() - 2, rowNum.get() - 1, 1, 1));
+            sheet.addMergedRegion(new CellRangeAddress(rowNum.get() - 2, rowNum.get() - 1, 11, 11));
         });
-        
-        // 행 너비 조정
+
+        // 열 너비 조정
         sheet.setColumnWidth(0, 1500);
-        sheet.setColumnWidth(1, 4000);
-        sheet.setColumnWidth(2, 5000);
-        sheet.setColumnWidth(3, 4000);
-        sheet.setColumnWidth(4, 5000);
+        sheet.setColumnWidth(1, 2000);
+        sheet.setColumnWidth(2, 4000);
+        sheet.setColumnWidth(3, 5000);
+        sheet.setColumnWidth(4, 4000);
         sheet.setColumnWidth(5, 5000);
-        sheet.setColumnWidth(6, 5800);
+        sheet.setColumnWidth(6, 5000);
         sheet.setColumnWidth(7, 5800);
         sheet.setColumnWidth(8, 5800);
-        sheet.setColumnWidth(9, 7000);
-        sheet.setColumnWidth(10, 2300);
-        sheet.setColumnWidth(11, 20000);
+        sheet.setColumnWidth(9, 5800);
+        sheet.setColumnWidth(10, 7000);
+        sheet.setColumnWidth(11, 2000);
+        sheet.setColumnWidth(12, 20000);
 
         // 엑셀 파일을 ByteArrayOutputStream에 쓰기
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -144,13 +153,13 @@ public class ExcelServiceImpl implements ExcelService {
         Cell cell = titleRow.createCell(0);
         cell.setCellValue("명함신청");
         cell.setCellStyle(style);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 9));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
     }
 
     private void createHeader(Sheet sheet, CellStyle style) {
         Row headerRow = sheet.createRow(1);
         headerRow.setHeight((short) 700); // 세로 너비 설정
-        String[] headers = {"No", "센터", "소속", "직위", "성명", "영문", "TEL", "FAX", "H.P", "E-mail", "수량", "주소"};
+        String[] headers = {"No", "사안", "센터", "소속", "직위", "성명", "영문", "TEL", "FAX", "H.P", "E-mail", "수량", "주소"};
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
