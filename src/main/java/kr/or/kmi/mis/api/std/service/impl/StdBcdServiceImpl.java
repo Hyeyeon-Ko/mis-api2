@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.std.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -10,7 +11,6 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,29 +23,31 @@ public class StdBcdServiceImpl implements StdBcdService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
-    private final StdGroup center;
-    private final StdGroup dept;
-    private final StdGroup team;
-    private final StdGroup grade;
+    private StdGroup center;
+    private StdGroup dept;
+    private StdGroup team;
+    private StdGroup grade;
 
-    @Autowired
-    public StdBcdServiceImpl(StdGroupRepository stdGroupRepository, StdDetailRepository stdDetailRepository) {
-        this.stdGroupRepository = stdGroupRepository;
-        this.center = stdGroupRepository.findByGroupCd("A001").orElseThrow();
-        this.dept = stdGroupRepository.findByGroupCd("A002").orElseThrow();
-        this.team = stdGroupRepository.findByGroupCd("A003").orElseThrow();
-        this.grade = stdGroupRepository.findByGroupCd("A004").orElseThrow();
-        this.stdDetailRepository = stdDetailRepository;
+    @PostConstruct
+    public void init() {
+        this.center = stdGroupRepository.findById("A001").orElseThrow(() -> new NoSuchElementException("Center StdGroup not found"));
+        this.dept = stdGroupRepository.findById("A002").orElseThrow(() -> new NoSuchElementException("Dept StdGroup not found"));
+        this.team = stdGroupRepository.findById("A003").orElseThrow(() -> new NoSuchElementException("Team StdGroup not found"));
+        this.grade = stdGroupRepository.findById("A004").orElseThrow(() -> new NoSuchElementException("Grade StdGroup not found"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public StdBcdResponseDTO getAllBcdStd() {
 
-        List<StdDetail> centerDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", center).orElseThrow();
-        List<StdDetail> deptDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", dept).orElseThrow();
-        List<StdDetail> teamDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", team).orElseThrow();
-        List<StdDetail> gradeDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", grade).orElseThrow();
+        List<StdDetail> centerDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", center)
+                .orElseThrow(() -> new NoSuchElementException("Center details not found"));
+        List<StdDetail> deptDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", dept)
+                .orElseThrow(() -> new NoSuchElementException("Dept details not found"));
+        List<StdDetail> teamDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", team)
+                .orElseThrow(() -> new NoSuchElementException("Team details not found"));
+        List<StdDetail> gradeDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", grade)
+                .orElseThrow(() -> new NoSuchElementException("Grade details not found"));
 
         return StdBcdResponseDTO.builder()
                 .instInfo(StdBcdDetailResponseDTO.of(centerDetails))
@@ -57,18 +59,23 @@ public class StdBcdServiceImpl implements StdBcdService {
 
     @Override
     public String getInstNm(String instCd) {
-        return stdDetailRepository.findByGroupCdAndDetailCd(center, instCd).get().getDetailNm();
+        return stdDetailRepository.findByGroupCdAndDetailCd(center, instCd)
+                .orElseThrow(() -> new NoSuchElementException("Institution not found"))
+                .getDetailNm();
     }
 
     @Override
     public String getDeptNm(String deptCd) {
-        return stdDetailRepository.findByGroupCdAndDetailCd(dept, deptCd).get().getDetailNm();
+        return stdDetailRepository.findByGroupCdAndDetailCd(dept, deptCd)
+                .orElseThrow(() -> new NoSuchElementException("Department not found"))
+                .getDetailNm();
     }
 
     @Override
     public List<String> getTeamNm(String teamCd) {
         List<String> teamNms = new ArrayList<>();
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(team, teamCd).get();
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(team, teamCd)
+                .orElseThrow(() -> new NoSuchElementException("Team not found"));
         teamNms.add(stdDetail.getDetailNm());  // 팀명
         teamNms.add(stdDetail.getEtcItem1());  // 영문팀명
         return teamNms;
@@ -77,7 +84,8 @@ public class StdBcdServiceImpl implements StdBcdService {
     @Override
     public List<String> getGradeNm(String gradeCd) {
         List<String> gradeNms = new ArrayList<>();
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(grade, gradeCd).get();
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(grade, gradeCd)
+                .orElseThrow(() -> new NoSuchElementException("Grade not found"));
         gradeNms.add(stdDetail.getDetailNm());  // 직급/직책명
         gradeNms.add(stdDetail.getEtcItem1());  // 영문 직급/직책명
         return gradeNms;
@@ -86,8 +94,10 @@ public class StdBcdServiceImpl implements StdBcdService {
     @Override
     public List<StdStatusResponseDTO> getApplyStatus() {
 
-        StdGroup applyStatus = stdGroupRepository.findByGroupCd("A005").orElseThrow();
-        List<StdDetail> stdDetails = stdDetailRepository.findByGroupCd(applyStatus).orElseThrow();
+        StdGroup applyStatus = stdGroupRepository.findByGroupCd("A005")
+                .orElseThrow(() -> new NoSuchElementException("Apply status StdGroup not found"));
+        List<StdDetail> stdDetails = stdDetailRepository.findByGroupCd(applyStatus)
+                .orElseThrow(() -> new NoSuchElementException("Apply status details not found"));
 
         return StdStatusResponseDTO.of(stdDetails);
     }
@@ -106,7 +116,6 @@ public class StdBcdServiceImpl implements StdBcdService {
         } else {
             names.add(this.getGradeNm(bcdDetail.getGradeCd()).getFirst() + " | " + this.getGradeNm(bcdDetail.getGradeCd()).getLast());
         }
-        Map<String, String> groupCodeMap = new HashMap<>();
 
         return names;
     }

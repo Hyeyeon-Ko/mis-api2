@@ -18,11 +18,11 @@ public class StdDetailHist extends BaseSystemFieldEntity{
     private Long histId;
 
     @ManyToOne
-    @JoinColumn(name = "detail_cd", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "detail_cd", referencedColumnName = "detail_cd"),
+            @JoinColumn(name = "group_cd", referencedColumnName = "group_cd"),
+    })
     private StdDetail detailCd;
-
-    @Column(name = "group_cd", length = 20, nullable = false)
-    private String groupCd;
 
     @Column(name = "detail_nm", length = 20, nullable = false)
     private String detailNm;
@@ -54,7 +54,6 @@ public class StdDetailHist extends BaseSystemFieldEntity{
     @Builder
     public StdDetailHist(StdDetail stdDetail) {
         this.detailCd = stdDetail;
-        this.groupCd = stdDetail.getGroupCd().getGroupCd();
         this.detailNm = stdDetail.getDetailNm();
         this.fromDd = stdDetail.getFromDd();
         this.toDd = stdDetail.getToDd();

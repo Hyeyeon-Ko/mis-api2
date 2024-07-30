@@ -25,7 +25,6 @@ public class ApplyController {
 
     private final ApplyService applyService;
 
-    // todo: 기준자료(권한)에서 접근 가능한 기준자료 확인
     @Operation(summary = "전체 신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList")
     public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam(required = false) String documentType,

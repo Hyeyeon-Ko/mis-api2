@@ -11,6 +11,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class StdDetailUpdateRequestDTO {
 
+    private String groupCd;
     private String detailCd;
     private String detailNm;
     private String fromDd;

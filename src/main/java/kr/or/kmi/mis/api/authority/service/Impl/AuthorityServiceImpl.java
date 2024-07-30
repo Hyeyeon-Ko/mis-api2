@@ -48,10 +48,10 @@ public class AuthorityServiceImpl implements AuthorityService {
         List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
         return authorityList.stream()
                 .map(authority -> {
-                    StdDetail stdDetail1 = stdDetailRepository.findByDetailCd(authority.getInstCd())
-                            .orElseThrow(() -> new EntityNotFoundException(authority.getInstCd()));
                     StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
                             .orElseThrow(() -> new EntityNotFoundException("B001"));
+                    StdDetail stdDetail1 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getInstCd())
+                            .orElseThrow(() -> new EntityNotFoundException(authority.getInstCd()));
 
                     Optional<StdDetail> optionalStdDetail2 = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup, authority.getUserId());
 
@@ -167,7 +167,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             stdDetailRepository.save(stdDetail);
         } else {
             stdDetailRepository.findByEtcItem1(authority.getUserId()).ifPresent(stdDetail -> {
-                stdDetailRepository.deleteById(stdDetail.getDetailCd());
+                stdDetailRepository.deleteByGroupCdAndDetailCd(stdDetail.getGroupCd(), stdDetail.getDetailCd());
             });
         }
     }
@@ -184,9 +184,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         // 기준자료 관리자였다면 -> 기준자료 테이블 데이터 삭제
         if (authority.getUserId() != null) {
-            StdDetail stdDetail = stdDetailRepository.findById(authority.getUserId())
+            StdDetail stdDetail = stdDetailRepository.findByDetailCd(authority.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid detailCd: " + authority.getUserId()));
-            stdDetailRepository.deleteById(stdDetail.getDetailCd());
+            stdDetailRepository.deleteByGroupCdAndDetailCd(stdDetail.getGroupCd(), stdDetail.getDetailCd());
         }
     }
 

@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "cmm_detail_code", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"detail_cd", "group_cd"})
-})
+@Table(name = "cmm_detail_code")
+@IdClass(StdDetailId.class)
 public class StdDetail extends BaseSystemFieldEntity{
 
     @Id
     @Column(name = "detail_cd", length = 20)
     private String detailCd;
 
+    @Id
     @ManyToOne
     @JoinColumn(name = "group_cd", nullable = false)
     private StdGroup groupCd;

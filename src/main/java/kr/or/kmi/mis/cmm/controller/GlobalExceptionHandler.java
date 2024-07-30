@@ -3,6 +3,7 @@ package kr.or.kmi.mis.cmm.controller;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.cmm.response.ApiResponse;
 import kr.or.kmi.mis.cmm.response.ResponseWrapper;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,6 +32,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<String>> handleIllegalStateException(IllegalStateException e) {
         return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoSuchBeanDefinitionException.class)
+    public ResponseEntity<ApiResponse<String>> handleNoSuchBeanDefinitionException(NoSuchBeanDefinitionException e) {
+        return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 }
 

@@ -34,7 +34,7 @@ public class StdDetailServiceImpl implements StdDetailService {
     public List<StdDetailResponseDTO> getInfo(String groupCd) {
 
         StdGroup stdGroup = stdGroupRepository.findById(groupCd)
-                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + groupCd));
 
         List<StdDetail> stdDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", stdGroup)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
@@ -65,7 +65,9 @@ public class StdDetailServiceImpl implements StdDetailService {
     public void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
 
         // 1. 기존 기준자료 값 조회
-        StdDetail oriStdDetail = stdDetailRepository.findById(stdDetailRequestDTO.getDetailCd())
+        StdGroup stdGroup = stdGroupRepository.findById(stdDetailRequestDTO.getGroupCd())
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + stdDetailRequestDTO.getGroupCd()));
+        StdDetail oriStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, stdDetailRequestDTO.getDetailCd())
                 .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + stdDetailRequestDTO.getDetailCd()));
 
         // 2. 기준자료 hist 생성 후, 수정된 내용 반영해 update
