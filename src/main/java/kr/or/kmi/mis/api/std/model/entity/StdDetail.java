@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.std.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Table(name = "cmm_detail_code")
 @IdClass(StdDetailId.class)
-public class StdDetail extends BaseSystemFieldEntity{
+public class StdDetail extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "detail_cd", length = 20)

@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.std.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Entity
 @Table(name = "cmm_detail_code_hist")
-public class StdDetailHist extends BaseSystemFieldEntity{
+public class StdDetailHist extends BaseSystemFieldEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

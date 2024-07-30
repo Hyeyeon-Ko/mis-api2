@@ -9,8 +9,8 @@ import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.StdGroupResponseDTO;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
-import kr.or.kmi.mis.cmm.response.ApiResponse;
-import kr.or.kmi.mis.cmm.response.ResponseWrapper;
+import kr.or.kmi.mis.cmm.model.response.ApiResponse;
+import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

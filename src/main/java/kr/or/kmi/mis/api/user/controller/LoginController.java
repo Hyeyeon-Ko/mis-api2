@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import kr.or.kmi.mis.api.user.model.request.LoginRequestDTO;
 import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
 import kr.or.kmi.mis.api.user.service.LoginService;
-import kr.or.kmi.mis.cmm.response.ApiResponse;
-import kr.or.kmi.mis.cmm.response.ResponseWrapper;
+import kr.or.kmi.mis.cmm.model.response.ApiResponse;
+import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

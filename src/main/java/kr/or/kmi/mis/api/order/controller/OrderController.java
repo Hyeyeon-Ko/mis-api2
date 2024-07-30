@@ -6,8 +6,8 @@ import jakarta.mail.MessagingException;
 import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.service.OrderService;
-import kr.or.kmi.mis.cmm.response.ApiResponse;
-import kr.or.kmi.mis.cmm.response.ResponseWrapper;
+import kr.or.kmi.mis.cmm.model.response.ApiResponse;
+import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

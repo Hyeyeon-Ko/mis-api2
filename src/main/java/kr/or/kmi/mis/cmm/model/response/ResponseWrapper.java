@@ -1,6 +1,6 @@
-package kr.or.kmi.mis.cmm.response;
+package kr.or.kmi.mis.cmm.model.response;
 
-import kr.or.kmi.mis.cmm.response.code.CodeMessage;
+import kr.or.kmi.mis.cmm.model.response.code.CodeMessage;
 import org.springframework.http.HttpStatus;
 
 /**

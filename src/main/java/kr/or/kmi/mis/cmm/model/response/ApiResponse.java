@@ -1,4 +1,4 @@
-package kr.or.kmi.mis.cmm.response;
+package kr.or.kmi.mis.cmm.model.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

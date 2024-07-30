@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.ConfirmService;
-import kr.or.kmi.mis.cmm.response.ApiResponse;
-import kr.or.kmi.mis.cmm.response.ResponseWrapper;
+import kr.or.kmi.mis.cmm.model.response.ApiResponse;
+import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

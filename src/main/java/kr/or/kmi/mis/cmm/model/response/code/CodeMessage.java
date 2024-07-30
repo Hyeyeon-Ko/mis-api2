@@ -1,4 +1,4 @@
-package kr.or.kmi.mis.cmm.response.code;
+package kr.or.kmi.mis.cmm.model.response.code;
 
 /**
  * packageName    : kr.or.kmi.mis.cmm.response.code

@@ -1,8 +1,8 @@
 package kr.or.kmi.mis.cmm.controller;
 
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
-import kr.or.kmi.mis.cmm.response.ApiResponse;
-import kr.or.kmi.mis.cmm.response.ResponseWrapper;
+import kr.or.kmi.mis.cmm.model.response.ApiResponse;
+import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
