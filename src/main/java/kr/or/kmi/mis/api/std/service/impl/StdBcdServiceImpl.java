@@ -49,6 +49,7 @@ public class StdBcdServiceImpl implements StdBcdService {
         List<StdDetail> gradeDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", grade)
                 .orElseThrow(() -> new NoSuchElementException("Grade details not found"));
 
+        System.out.println("gradeDetails.getFirst() = " + gradeDetails.getFirst());
         return StdBcdResponseDTO.builder()
                 .instInfo(StdBcdDetailResponseDTO.of(centerDetails))
                 .deptInfo(StdBcdDetailResponseDTO.of(deptDetails))

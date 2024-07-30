@@ -24,6 +24,8 @@ public class BcdDetailResponseDTO {
     private String teamNm;
     private String gradeCd;
     private String gradeNm;
+    private String addGradeNm;
+    private String enGradeNm;
     private String extTel;
     private String faxTel;
     private String phoneTel;
@@ -56,6 +58,8 @@ public class BcdDetailResponseDTO {
                 .deptNm(names.get(1))
                 .teamNm(names.get(2))
                 .gradeNm(names.get(3))
+                .addGradeNm(bcdDetail.getGradeNm())
+                .enGradeNm(bcdDetail.getEngradeNm())
                 .build();
     }
 }
