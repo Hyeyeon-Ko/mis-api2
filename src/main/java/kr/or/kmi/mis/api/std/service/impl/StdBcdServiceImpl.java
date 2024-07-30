@@ -49,7 +49,6 @@ public class StdBcdServiceImpl implements StdBcdService {
         List<StdDetail> gradeDetails = stdDetailRepository.findAllByUseAtAndGroupCd("Y", grade)
                 .orElseThrow(() -> new NoSuchElementException("Grade details not found"));
 
-        System.out.println("gradeDetails.getFirst() = " + gradeDetails.getFirst());
         return StdBcdResponseDTO.builder()
                 .instInfo(StdBcdDetailResponseDTO.of(centerDetails))
                 .deptInfo(StdBcdDetailResponseDTO.of(deptDetails))
@@ -78,7 +77,7 @@ public class StdBcdServiceImpl implements StdBcdService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(team, teamCd)
                 .orElseThrow(() -> new NoSuchElementException("Team not found"));
         teamNms.add(stdDetail.getDetailNm());  // 팀명
-        teamNms.add(stdDetail.getEtcItem1());  // 영문팀명
+        teamNms.add(stdDetail.getEtcItem2());  // 영문팀명
         return teamNms;
     }
 
@@ -88,7 +87,7 @@ public class StdBcdServiceImpl implements StdBcdService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(grade, gradeCd)
                 .orElseThrow(() -> new NoSuchElementException("Grade not found"));
         gradeNms.add(stdDetail.getDetailNm());  // 직급/직책명
-        gradeNms.add(stdDetail.getEtcItem1());  // 영문 직급/직책명
+        gradeNms.add(stdDetail.getEtcItem2());  // 영문 직급/직책명
         return gradeNms;
     }
 

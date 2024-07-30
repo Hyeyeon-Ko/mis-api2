@@ -124,9 +124,14 @@ public class ExcelServiceImpl implements ExcelService {
 
             createCell(rowBack, 0, "", thickBorderStyle, centeredStyle);
             createCell(rowBack, 1, "", thinBorderStyle, centeredStyle);
-            createCell(rowBack, 2, stdBcdService.getGradeNm(
-                            detail.getGradeCd()).getLast() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
-                    , thinBorderStyle, centeredStyle);
+            if (detail.getGradeCd().equals("999")) {
+                createCell(rowBack, 2, detail.getEngradeNm() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
+                        , thinBorderStyle, centeredStyle);
+            } else {
+                createCell(rowBack, 2, stdBcdService.getGradeNm(
+                                detail.getGradeCd()).getLast() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
+                        , thinBorderStyle, centeredStyle);
+            }
             createCell(rowBack, 3, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 4, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 5, detail.getEngNm(), thinBorderStyle, centeredStyle);
