@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -28,8 +31,8 @@ public class StdDetailRequestDTO {
                 .detailCd(detailCd)
                 .groupCd(groupCd)
                 .detailNm(detailNm)
-                .fromDd(fromDd)
-                .toDd(toDd)
+                .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .toDd("991231")
                 .etcItem1(etcItem1)
                 .etcItem2(etcItem2)
                 .etcItem3(etcItem3)

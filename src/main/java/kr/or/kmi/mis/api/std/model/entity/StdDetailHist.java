@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -56,7 +59,7 @@ public class StdDetailHist extends BaseSystemFieldEntity{
         this.detailCd = stdDetail;
         this.detailNm = stdDetail.getDetailNm();
         this.fromDd = stdDetail.getFromDd();
-        this.toDd = stdDetail.getToDd();
+        this.toDd = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         this.etcItem1 = stdDetail.getEtcItem1();
         this.etcItem2 = stdDetail.getEtcItem2();
         this.etcItem3 = stdDetail.getEtcItem3();

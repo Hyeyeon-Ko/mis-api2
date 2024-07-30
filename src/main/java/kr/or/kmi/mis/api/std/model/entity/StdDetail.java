@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -73,8 +76,8 @@ public class StdDetail extends BaseSystemFieldEntity{
     public void update(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
         this.detailCd = stdDetailRequestDTO.getDetailCd();
         this.detailNm = stdDetailRequestDTO.getDetailNm();
-        this.fromDd = stdDetailRequestDTO.getFromDd();
-        this.toDd = stdDetailRequestDTO.getToDd();
+        this.fromDd = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        this.toDd = "991231";
         this.etcItem1 = stdDetailRequestDTO.getEtcItem1();
         this.etcItem2 = stdDetailRequestDTO.getEtcItem2();
         this.etcItem3 = stdDetailRequestDTO.getEtcItem3();
@@ -85,6 +88,10 @@ public class StdDetail extends BaseSystemFieldEntity{
 
     public void updateUseAt(String useAt) {
         this.useAt = useAt;
+    }
+
+    public void updateToDd(String toDd) {
+        this.toDd = toDd;
     }
 }
 

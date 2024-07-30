@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -99,7 +101,11 @@ public class StdDetailServiceImpl implements StdDetailService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + detailCd));
 
+        stdDetail.updateToDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
         stdDetail.updateUseAt("N");
+        String deleter = infoService.getUserInfo().getUserId();
+        stdDetail.setUpdtrId(deleter);
+        stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         stdDetailRepository.save(stdDetail);
     }
 }
