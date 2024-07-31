@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
-import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
@@ -9,7 +8,7 @@ import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
-import kr.or.kmi.mis.api.confirm.service.ConfirmService;
+import kr.or.kmi.mis.api.confirm.service.BcdConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
@@ -18,13 +17,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ConfirmServiceImpl implements ConfirmService {
+public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;

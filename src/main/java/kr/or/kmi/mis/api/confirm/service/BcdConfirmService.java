@@ -5,7 +5,7 @@ import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 
 import java.util.List;
 
-public interface ConfirmService {
+public interface BcdConfirmService {
 
     /* 신청 상세 정보 불러오기 */
     BcdDetailResponseDTO getBcdDetailInfo(Long id);
