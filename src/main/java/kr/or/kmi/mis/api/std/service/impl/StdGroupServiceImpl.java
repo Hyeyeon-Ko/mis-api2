@@ -42,6 +42,10 @@ public class StdGroupServiceImpl implements StdGroupService {
     @Transactional
     public void addInfo(StdGroupRequestDTO stdGroupRequestDTO) {
 
+        if (stdGroupRepository.existsById(stdGroupRequestDTO.getGroupCd())) {
+            throw new IllegalArgumentException("해당 대분류그룹에 이미 존재하는 DetailCd 입니다: detailCd = " + stdGroupRequestDTO.getGroupCd());
+        }
+
         StdClass stdClass = stdClassRepository.findById(stdGroupRequestDTO.getClassCd())
                 .orElseThrow(() -> new IllegalArgumentException("Not found: " + stdGroupRequestDTO.getClassCd()));
 
