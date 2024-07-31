@@ -44,7 +44,15 @@ public class DocMaster {
     @Column(length = 1)
     private String status;
 
-    @Column(length = 20)
-    private String docId;
+    public void confirm(String status, String approver, String approverId) {
+        this.status = status;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.approver = approver;
+        this.approverId = approverId;
+    }
 
+    public void delete(String status) {
+        this.status = status;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+    }
 }

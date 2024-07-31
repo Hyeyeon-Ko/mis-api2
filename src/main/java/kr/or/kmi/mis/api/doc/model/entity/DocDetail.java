@@ -38,4 +38,7 @@ public class DocDetail {
     @Column(length = 20)
     private String docId;
 
+    public void updateDocId(String docId) {
+        this.docId = docId;
+    }
 }
