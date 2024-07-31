@@ -7,6 +7,8 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
+import kr.or.kmi.mis.api.doc.service.DocService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.List;
 public class ApplyServiceImpl implements ApplyService {
 
     private final BcdService bcdService;
+    private final DocService docService;
 
     @Override
     @Transactional(readOnly = true)
@@ -71,7 +74,8 @@ public class ApplyServiceImpl implements ApplyService {
          *              break;
          * */
 
-        List<BcdMyResponseDTO> myBcdApplyLists;
+        List<BcdMyResponseDTO> myBcdApplyLists = new ArrayList<>();
+        List<DocMyResponseDTO> myDocApplyLists = new ArrayList<>();
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         // 특정 유형(ex.명함신청)만 조회합니다.
@@ -80,25 +84,26 @@ public class ApplyServiceImpl implements ApplyService {
                 case "명함신청":
                     myBcdApplyLists = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1]);
                     break;
+                case "문서수발신":
+                    myDocApplyLists = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1]);
                 default:
-                    myBcdApplyLists = new ArrayList<>();
                     break;
             }
         } else {
             // 전체 신청 목록을 조회합니다.
             myBcdApplyLists = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1]);
+            myDocApplyLists = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1]);
         }
 
-        return MyApplyResponseDTO.of(myBcdApplyLists);
+        return MyApplyResponseDTO.of(myBcdApplyLists, myDocApplyLists);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public PendingResponseDTO getAllPendingList() {
-
-        return PendingResponseDTO.of(
-                bcdService.getPendingList());
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public PendingResponseDTO getAllPendingList() {
+//
+//        return PendingResponseDTO.of(bcdService.getPendingList());
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -107,7 +112,7 @@ public class ApplyServiceImpl implements ApplyService {
         /**
          * 다른 유형의 승인대기 신청목록 추가될 수 있음
          * */
-        return PendingResponseDTO.of(bcdService.getMyPendingList());
+        return PendingResponseDTO.of(bcdService.getMyPendingList(), docService.getMyDocPendingList());
     }
 
     public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {

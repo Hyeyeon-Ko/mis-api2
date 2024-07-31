@@ -10,6 +10,6 @@ public interface ApplyService {
 
     ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate);
     MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate);
-    PendingResponseDTO getAllPendingList();
+//    PendingResponseDTO getAllPendingList();
     PendingResponseDTO getMyPendingList();
 }

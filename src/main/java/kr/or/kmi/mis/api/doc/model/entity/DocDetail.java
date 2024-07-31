@@ -4,17 +4,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
 @Entity
 @Table(name = "hrmtdocd")
-public class DocDetail {
+public class DocDetail extends BaseSystemFieldEntity {
 
     @Id
     @Column(nullable = false)
@@ -40,5 +39,24 @@ public class DocDetail {
 
     public void updateDocId(String docId) {
         this.docId = docId;
+    }
+
+    @Builder
+    public DocDetail(Long draftId, String division, String receiver, String sender, String docTitle, String purpose, String docId) {
+        this.draftId = draftId;
+        this.division = division;
+        this.receiver = receiver;
+        this.sender = sender;
+        this.docTitle = docTitle;
+        this.purpose = purpose;
+        this.docId = docId;
+    }
+
+    public void update(DocUpdateRequestDTO docUpdateRequestDTO) {
+        this.division = docUpdateRequestDTO.getDivision();
+        this.receiver = docUpdateRequestDTO.getReceiver();
+        this.sender = docUpdateRequestDTO.getSender();
+        this.docTitle = docUpdateRequestDTO.getDocTitle();
+        this.purpose = docUpdateRequestDTO.getPurpose();
     }
 }

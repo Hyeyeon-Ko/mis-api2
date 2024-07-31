@@ -2,10 +2,8 @@ package kr.or.kmi.mis.api.doc.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -13,7 +11,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "hrmtdocd_hist")
 @IdClass(DraftSeqPK.class)
-public class DocHistory {
+public class DocHistory extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "draft_id")
@@ -38,4 +36,14 @@ public class DocHistory {
     @Column(length = 1000)
     private String purpose;
 
+    @Builder
+    public DocHistory(DocDetail docDetail, Long seqId) {
+        this.draftId = docDetail.getDraftId();
+        this.seqId = seqId;
+        this.division = docDetail.getDivision();
+        this.receiver = docDetail.getReceiver();
+        this.sender = docDetail.getSender();
+        this.docTitle = docDetail.getDocTitle();
+        this.purpose = docDetail.getPurpose();
+    }
 }

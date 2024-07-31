@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.apply.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocMyPendingResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,10 +20,12 @@ public class PendingResponseDTO {
      * */
 
     private List<BcdPendingResponseDTO> bcdPendingResponses;
+    private List<DocMyPendingResponseDTO> docPendingResponses;
 
-    public static PendingResponseDTO of(List<BcdPendingResponseDTO> bcdPendingResponses) {
+    public static PendingResponseDTO of(List<BcdPendingResponseDTO> bcdPendingResponses, List<DocMyPendingResponseDTO> docPendingResponses) {
         return PendingResponseDTO.builder()
                 .bcdPendingResponses(bcdPendingResponses)
+                .docPendingResponses(docPendingResponses)
                 .build();
     }
 

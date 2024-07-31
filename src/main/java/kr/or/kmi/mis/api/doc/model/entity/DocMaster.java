@@ -1,10 +1,8 @@
 package kr.or.kmi.mis.api.doc.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import lombok.*;
 
 import java.sql.Timestamp;
 
@@ -13,7 +11,7 @@ import java.sql.Timestamp;
 @ToString
 @Entity
 @Table(name = "hrmtdocm")
-public class DocMaster {
+public class DocMaster extends BaseSystemFieldEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,5 +52,18 @@ public class DocMaster {
     public void delete(String status) {
         this.status = status;
         this.respondDate = new Timestamp(System.currentTimeMillis());
+    }
+
+    @Builder
+    public DocMaster(Timestamp draftDate, String drafter, String drafterId, String status) {
+        this.title =  String.format("문서수발신 신청서 (%s)", drafter);
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.drafterId = drafterId;
+        this.status = status;
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
     }
 }
