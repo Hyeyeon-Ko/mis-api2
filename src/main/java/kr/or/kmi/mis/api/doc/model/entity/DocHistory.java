@@ -17,11 +17,11 @@ public class DocHistory {
 
     @Id
     @Column(name = "draft_id")
-    private int draftId;
+    private Long draftId;
 
     @Id
     @Column(name = "seq_id")
-    private int seqId;
+    private Long seqId;
 
     @Column(length = 1)
     private String division;

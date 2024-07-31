@@ -17,7 +17,7 @@ public class DocMaster {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int draftId;
+    private Long draftId;
 
     @Column(nullable = false)
     private Timestamp draftDate;

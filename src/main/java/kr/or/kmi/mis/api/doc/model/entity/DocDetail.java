@@ -18,7 +18,7 @@ public class DocDetail {
 
     @Id
     @Column(nullable = false)
-    private int draftId;
+    private Long draftId;
 
     @Column(length = 1)
     private String division;
