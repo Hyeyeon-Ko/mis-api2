@@ -35,6 +35,7 @@ public class StdDetailResponseDTO {
                 .etcItem3(stdDetail.getEtcItem3())
                 .etcItem4(stdDetail.getEtcItem4())
                 .etcItem5(stdDetail.getEtcItem5())
+                .etcItem6(stdDetail.getEtcItem6())
                 .build();
     }
 }
