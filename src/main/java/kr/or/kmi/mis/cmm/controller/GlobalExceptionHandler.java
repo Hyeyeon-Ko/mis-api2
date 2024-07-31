@@ -38,5 +38,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleNoSuchBeanDefinitionException(NoSuchBeanDefinitionException e) {
         return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException e) {
+        return new ResponseEntity<>(ResponseWrapper.error("An unexpected error occurred: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
 

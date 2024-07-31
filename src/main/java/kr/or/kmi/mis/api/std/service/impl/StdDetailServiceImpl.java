@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.std.service.impl;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdDetailHist;
+import kr.or.kmi.mis.api.std.model.entity.StdDetailId;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
 import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
@@ -53,6 +54,12 @@ public class StdDetailServiceImpl implements StdDetailService {
 
         StdGroup stdGroup = stdGroupRepository.findById(stdDetailRequestDTO.getGroupCd())
                 .orElseThrow(() -> new IllegalArgumentException("해당 그룹 정보 없음: groupCd = " + stdDetailRequestDTO.getGroupCd()));
+
+        StdDetailId stdDetailId = new StdDetailId(stdDetailRequestDTO.getGroupCd(), stdDetailRequestDTO.getDetailCd());
+
+        if (stdDetailRepository.existsById(stdDetailId)) {
+            throw new IllegalArgumentException("해당 중분류그룹에 이미 존재하는 DetailCd 입니다: detailCd = " + stdDetailRequestDTO.getDetailCd() + ", groupCd = " + stdDetailRequestDTO.getGroupCd());
+        }
 
         StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
 
