@@ -12,5 +12,5 @@ public interface StdDetailService {
     void addInfo(StdDetailRequestDTO stdDetailRequestDTO);
     void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO);
     void deleteInfo(String groupCd, String detailCd);
-
+    StdDetailResponseDTO getSelectedInfo(String groupCd, String detailCd);
 }

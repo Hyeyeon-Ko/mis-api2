@@ -115,4 +115,16 @@ public class StdDetailServiceImpl implements StdDetailService {
         stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         stdDetailRepository.save(stdDetail);
     }
+
+    @Override
+    public StdDetailResponseDTO getSelectedInfo(String groupCd, String detailCd) {
+
+        StdGroup stdGroup = stdGroupRepository.findById(groupCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + groupCd));
+
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, detailCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found"));
+
+        return StdDetailResponseDTO.of(stdDetail);
+    }
 }

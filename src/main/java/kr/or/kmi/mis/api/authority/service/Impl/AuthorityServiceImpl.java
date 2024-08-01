@@ -52,7 +52,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                             .orElseThrow(() -> new EntityNotFoundException("B001"));
                     StdDetail stdDetail1 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId())
                             .orElseThrow(() -> new EntityNotFoundException(authority.getUserId()));
-                    Optional<StdDetail> optionalStdDetail2 = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup, authority.getUserId());
+                    Optional<StdDetail> optionalStdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId());
 
                     return AuthorityListResponseDTO.builder()
                             .authId(authority.getAuthId())
