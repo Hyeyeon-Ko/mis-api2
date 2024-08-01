@@ -17,8 +17,6 @@ public class StdDetailRequestDTO {
     private String detailCd;
     private String groupCd;
     private String detailNm;
-    private String fromDd;
-    private String toDd;
     private String etcItem1;
     private String etcItem2;
     private String etcItem3;

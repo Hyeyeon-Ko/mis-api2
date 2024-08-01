@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 
 @Builder
 @Data
-public class docResponseDTO {
+public class DocResponseDTO {
 
     private Long draftId;
     private String draftDate;
@@ -21,8 +21,8 @@ public class docResponseDTO {
 
     static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static docResponseDTO sOf(DocDetail docDetail, DocMaster docMaster) {
-        return docResponseDTO.builder()
+    public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster) {
+        return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
                 .drafter(docMaster.getDrafter())
@@ -33,8 +33,8 @@ public class docResponseDTO {
                 .build();
     }
 
-    public static docResponseDTO rOf(DocDetail docDetail, DocMaster docMaster) {
-        return docResponseDTO.builder()
+    public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster) {
+        return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
                 .drafter(docMaster.getDrafter())

@@ -1,7 +1,7 @@
 package kr.or.kmi.mis.api.doc.service.impl;
 
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
-import kr.or.kmi.mis.api.doc.model.response.docResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocSRService;
@@ -21,14 +21,14 @@ public class DocSRServiceImpl implements DocSRService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<docResponseDTO> getReceiveApplyList() {
+    public List<DocResponseDTO> getReceiveApplyList() {
 
         return docDetailRepository.findAllByDocIdNotNullAndDivision("A")
                 .stream()
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findById(docDetail.getDraftId()).orElse(null);
                     if(docMaster != null) {
-                        return docResponseDTO.rOf(docDetail, docMaster);
+                        return DocResponseDTO.rOf(docDetail, docMaster);
                     } else {
                         return null;
                     }
@@ -39,14 +39,14 @@ public class DocSRServiceImpl implements DocSRService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<docResponseDTO> getSendApplyList() {
+    public List<DocResponseDTO> getSendApplyList() {
 
         return docDetailRepository.findAllByDocIdNotNullAndDivision("B")
                 .stream()
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findById(docDetail.getDraftId()).orElse(null);
                     if(docMaster != null) {
-                        return docResponseDTO.sOf(docDetail, docMaster);
+                        return DocResponseDTO.sOf(docDetail, docMaster);
                     } else {
                         return null;
                     }

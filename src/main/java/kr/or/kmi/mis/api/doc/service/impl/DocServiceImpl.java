@@ -5,12 +5,15 @@ import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
-import kr.or.kmi.mis.api.doc.model.response.DocMyPendingResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class DocServiceImpl implements DocService {
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
     private final DocHistoryService docHistoryService;
+    private final StdBcdService stdBcdService;
     private final InfoService infoService;
 
     @Override
@@ -91,7 +95,7 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
 
         String userId = infoService.getUserInfo().getUserId();
@@ -110,18 +114,49 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyPendingResponseDTO> getMyDocPendingList() {
+    public List<DocPendingResponseDTO> getMyDocPendingList() {
 
         String userId = infoService.getUserInfo().getUserId();
 
         return new ArrayList<>(this.getMyDocPendingMasterList(userId));
     }
 
-    public List<DocMyPendingResponseDTO> getMyDocPendingMasterList(String userId) {
+    @Override
+    @Transactional(readOnly = true)
+    public List<DocMasterResponseDTO> getDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
+
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
+
+        if (docMasters == null) {
+            docMasters = new ArrayList<>();
+        }
+
+        return docMasters.stream()
+                .map(docMaster -> {
+                    DocMasterResponseDTO docMasterResponseDTO = DocMasterResponseDTO.of(docMaster);
+                    docMasterResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
+                    return  docMasterResponseDTO;
+                }).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DocPendingResponseDTO> getDocPendingList() {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
+
+        return docMasters.stream()
+                .map(docMaster -> {
+                    DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster);
+                    docPendingResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
+                    return  docPendingResponseDTO;
+                }).toList();
+    }
+
+    public List<DocPendingResponseDTO> getMyDocPendingMasterList(String userId) {
         List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndStatus(userId, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
-                .map(DocMyPendingResponseDTO::of).toList();
+                .map(DocPendingResponseDTO::of).toList();
     }
 }

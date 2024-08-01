@@ -34,12 +34,12 @@ public class ApplyController {
         return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate));
     }
 
-//    @Operation(summary = "전체 승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
-//    @GetMapping(value = "/pendingList")
-//    public ApiResponse<PendingResponseDTO> getPendingApplyList() {
-//
-//        return ResponseWrapper.success(applyService.getAllPendingList());
-//    }
+    @Operation(summary = "전체 승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
+    @GetMapping(value = "/pendingList")
+    public ApiResponse<PendingResponseDTO> getPendingApplyList() {
+
+        return ResponseWrapper.success(applyService.getAllPendingList());
+    }
 
 
     @Operation(summary = "나의 신청내역 > 전체 신청목록 호출", description = "나의 모든 신청 내역을 호출합니다.")
