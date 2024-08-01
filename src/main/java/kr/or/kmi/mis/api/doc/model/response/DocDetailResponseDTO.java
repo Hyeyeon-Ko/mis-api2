@@ -15,6 +15,7 @@ public class DocDetailResponseDTO {
 
     private Timestamp draftDate;
     private Timestamp lastUpdateDate;
+    private String drafter;
     private String division;
     private String receiver;
     private String sender;
@@ -25,6 +26,7 @@ public class DocDetailResponseDTO {
         return DocDetailResponseDTO.builder()
                 .draftDate(docMaster.getDraftDate())
                 .lastUpdateDate(docDetail.getUpdtDt())
+                .drafter(docMaster.getUpdtrId())
                 .division(docDetail.getDivision())
                 .receiver(docDetail.getReceiver())
                 .sender(docDetail.getSender())
