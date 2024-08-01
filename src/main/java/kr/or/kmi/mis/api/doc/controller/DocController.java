@@ -22,7 +22,6 @@ public class DocController {
     @Operation(summary = "create doc apply", description = "문서수발신 신청")
     @PostMapping
     public ApiResponse<?> createDocApply(@RequestBody DocRequestDTO docRequestDTO) {
-        System.out.println("docRequestDTO.getInstCd() = " + docRequestDTO.getInstCd());
         docService.applyDoc(docRequestDTO);
 
         return ResponseWrapper.success();
