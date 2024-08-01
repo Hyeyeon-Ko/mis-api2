@@ -14,13 +14,13 @@ public class StdGroupRequestDTO {
 
     String classCd;
     String groupCd;
-    String groupName;
+    String groupNm;
 
     public StdGroup toEntity(StdClass stdClass) {
         return StdGroup.builder()
                 .classCd(stdClass)
                 .groupCd(groupCd)
-                .groupNm(groupName)
+                .groupNm(groupNm)
                 .build();
     }
 }

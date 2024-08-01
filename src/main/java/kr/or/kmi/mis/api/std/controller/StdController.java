@@ -79,4 +79,11 @@ public class StdController {
         return ResponseWrapper.success();
     }
 
+    @Operation(summary = "get Selected Detail Info", description = "기준자료 > 상세정보 수정 시 사용")
+    @GetMapping("/detailInfo/{detailCd}")
+    public ApiResponse<StdDetailResponseDTO> getSelectedDetailInfo(@RequestParam("groupCd") String groupCd, @PathVariable String detailCd) {
+
+        return ResponseWrapper.success(stdDetailService.getSelectedInfo(groupCd, detailCd));
+    }
+
 }
