@@ -11,6 +11,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.user.model.request.LoginRequestDTO;
 import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.api.user.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class LoginServiceImpl implements LoginService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
     private final AuthorityService authorityService;
+    private final InfoService infoService;
 
     @Value("${external.login.url}")
     private String externalLoginUrl;
@@ -67,6 +69,9 @@ public class LoginServiceImpl implements LoginService {
             Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(loginRequestDTO.getUserId()).orElse(null);
             responseDTO.setRole(authority != null ? authority.getRole() : "USER");
             responseDTO.setSidebarPermissions(sidebarPermissions);
+
+            String instCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getInstCd();
+            responseDTO.setInstCd(instCd);
 
             return responseDTO;
         } else {

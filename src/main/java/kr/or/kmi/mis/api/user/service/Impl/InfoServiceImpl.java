@@ -41,7 +41,8 @@ public class InfoServiceImpl implements InfoService {
         String userNm = Objects.requireNonNull(resultData).getUsernm();        // 성명
         String telNum = Objects.requireNonNull(resultData).getMpphonno();      // 전화번호
         String userEmail = Objects.requireNonNull(resultData).getEmail();      // 이메일
+        String instCd = Objects.requireNonNull(resultData).getOrginstcd();
 
-        return InfoDetailResponseDTO.of(userId, userNm, telNum, userEmail);
+        return InfoDetailResponseDTO.of(userId, userNm, telNum, userEmail, instCd);
     }
 }

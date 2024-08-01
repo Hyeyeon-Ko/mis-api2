@@ -8,5 +8,6 @@ import java.util.List;
 public class LoginResponseDTO {
     private String hngNm;
     private String role;
+    private String instCd;
     private List<String> sidebarPermissions;
 }

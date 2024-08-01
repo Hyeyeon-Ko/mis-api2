@@ -21,6 +21,7 @@ public class LoginController {
     @Operation(summary = "user login", description = "유저 로그인")
     @PostMapping
     public ApiResponse<?> login(@RequestBody LoginRequestDTO loginRequestDTO, HttpSession session) {
+
         LoginResponseDTO responseDTO = loginService.login(loginRequestDTO);
 
         if (responseDTO != null) {
