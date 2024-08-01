@@ -16,6 +16,7 @@ public class DocRequestDTO {
     private String receiver;
     private String docTitle;
     private String purpose;
+    private String instCd;
 
     // DocRequest Dto -> DocMaster Entity
     public DocMaster toMasterEntity() {
@@ -24,6 +25,7 @@ public class DocRequestDTO {
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .status("A")
+                .instCd(instCd)
                 .build();
     }
 

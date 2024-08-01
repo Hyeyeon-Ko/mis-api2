@@ -63,8 +63,8 @@ public class StdDetail extends BaseSystemFieldEntity {
         this.detailCd = detailCd;
         this.groupCd = groupCd;
         this.detailNm = detailNm;
-        this.fromDd = fromDd;
-        this.toDd = toDd;
+        this.fromDd = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        this.toDd = "991231";
         this.useAt = "Y";
         this.etcItem1 = etcItem1;
         this.etcItem2 = etcItem2;

@@ -2,7 +2,7 @@ package kr.or.kmi.mis.api.doc.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.doc.model.response.docResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocSRService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -23,15 +23,15 @@ public class DocSRController {
 
     @Operation(summary = "get doc receive applyList", description = "문서수신대장 조회")
     @PutMapping("/receiveList")
-    public ApiResponse<List<docResponseDTO>> getReceiveList() {
-        List<docResponseDTO> receiveApplyList = docSRService.getReceiveApplyList();
+    public ApiResponse<List<DocResponseDTO>> getReceiveList() {
+        List<DocResponseDTO> receiveApplyList = docSRService.getReceiveApplyList();
         return ResponseWrapper.success(receiveApplyList);
     }
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")
     @PutMapping("/sendList")
-    public ApiResponse<List<docResponseDTO>> getSendList() {
-        List<docResponseDTO> sendApplyList = docSRService.getSendApplyList();
+    public ApiResponse<List<DocResponseDTO>> getSendList() {
+        List<DocResponseDTO> sendApplyList = docSRService.getSendApplyList();
         return ResponseWrapper.success(sendApplyList);
     }
 }

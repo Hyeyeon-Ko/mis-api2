@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.doc.model.response;
 
-import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,21 +10,24 @@ import java.sql.Timestamp;
 @Builder
 @Data
 @AllArgsConstructor
-public class DocMyPendingResponseDTO {
+public class DocPendingResponseDTO {
 
     private Long draftId;
     private String title;
+    private String instCd;
+    private String instNm;
     private Timestamp draftDate;
     private String drafter;
-    private Timestamp lastUpdateDate;
-    private String lastUpdater;
+    private Timestamp lastUpdateDate;   // 최종 수정일시
+    private String lastUpdater;        // 최종 수정자
     private String applyStatus;
     private String docType;
 
-    public static DocMyPendingResponseDTO of(DocMaster docMaster) {
-        return DocMyPendingResponseDTO.builder()
+    public static DocPendingResponseDTO of(DocMaster docMaster) {
+        return DocPendingResponseDTO.builder()
                 .draftId(docMaster.getDraftId())
                 .title(docMaster.getTitle())
+                .instCd(docMaster.getInstCd())
                 .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .lastUpdateDate(docMaster.getUpdtDt())

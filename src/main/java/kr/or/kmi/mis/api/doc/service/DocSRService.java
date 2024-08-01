@@ -1,11 +1,11 @@
 package kr.or.kmi.mis.api.doc.service;
 
-import kr.or.kmi.mis.api.doc.model.response.docResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 
 import java.util.List;
 
 public interface DocSRService {
-    List<docResponseDTO> getReceiveApplyList();
+    List<DocResponseDTO> getReceiveApplyList();
 
-    List<docResponseDTO> getSendApplyList();
+    List<DocResponseDTO> getSendApplyList();
 }
