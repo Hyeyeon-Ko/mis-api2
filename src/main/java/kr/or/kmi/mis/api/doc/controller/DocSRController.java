@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.doc.service.DocSRService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,14 +23,14 @@ public class DocSRController {
     public final DocSRService docSRService;
 
     @Operation(summary = "get doc receive applyList", description = "문서수신대장 조회")
-    @PutMapping("/receiveList")
+    @GetMapping("/receiveList")
     public ApiResponse<List<DocResponseDTO>> getReceiveList() {
         List<DocResponseDTO> receiveApplyList = docSRService.getReceiveApplyList();
         return ResponseWrapper.success(receiveApplyList);
     }
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")
-    @PutMapping("/sendList")
+    @GetMapping("/sendList")
     public ApiResponse<List<DocResponseDTO>> getSendList() {
         List<DocResponseDTO> sendApplyList = docSRService.getSendApplyList();
         return ResponseWrapper.success(sendApplyList);

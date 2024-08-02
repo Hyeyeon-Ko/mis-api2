@@ -27,6 +27,7 @@ public class StdBcdServiceImpl implements StdBcdService {
     private StdGroup dept;
     private StdGroup team;
     private StdGroup grade;
+    private StdGroup applyStatus;
 
     @PostConstruct
     public void init() {
@@ -34,6 +35,7 @@ public class StdBcdServiceImpl implements StdBcdService {
         this.dept = stdGroupRepository.findById("A002").orElseThrow(() -> new NoSuchElementException("Dept StdGroup not found"));
         this.team = stdGroupRepository.findById("A003").orElseThrow(() -> new NoSuchElementException("Team StdGroup not found"));
         this.grade = stdGroupRepository.findById("A004").orElseThrow(() -> new NoSuchElementException("Grade StdGroup not found"));
+        this.applyStatus = stdGroupRepository.findById("A005").orElseThrow(() -> new NoSuchElementException("ApplyStatus StdGroup not found"));
     }
 
     @Override
@@ -58,6 +60,7 @@ public class StdBcdServiceImpl implements StdBcdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getInstNm(String instCd) {
         return stdDetailRepository.findByGroupCdAndDetailCd(center, instCd)
                 .orElseThrow(() -> new NoSuchElementException("Institution not found"))
@@ -65,6 +68,7 @@ public class StdBcdServiceImpl implements StdBcdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getDeptNm(String deptCd) {
         return stdDetailRepository.findByGroupCdAndDetailCd(dept, deptCd)
                 .orElseThrow(() -> new NoSuchElementException("Department not found"))
@@ -72,6 +76,7 @@ public class StdBcdServiceImpl implements StdBcdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<String> getTeamNm(String teamCd) {
         List<String> teamNms = new ArrayList<>();
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(team, teamCd)
@@ -82,6 +87,7 @@ public class StdBcdServiceImpl implements StdBcdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<String> getGradeNm(String gradeCd) {
         List<String> gradeNms = new ArrayList<>();
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(grade, gradeCd)
@@ -92,6 +98,15 @@ public class StdBcdServiceImpl implements StdBcdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public String getApplyStatusNm(String applyStatusCd) {
+        return stdDetailRepository.findByGroupCdAndDetailCd(applyStatus, applyStatusCd)
+                .orElseThrow(() -> new NoSuchElementException("ApplyStatus not found"))
+                .getDetailNm();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<StdStatusResponseDTO> getApplyStatus() {
 
         StdGroup applyStatus = stdGroupRepository.findByGroupCd("A005")

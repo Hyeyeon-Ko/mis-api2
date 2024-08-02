@@ -39,7 +39,7 @@ public class DocResponseDTO {
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())
-                .resSender(docDetail.getReceiver())
+                .resSender(docDetail.getSender())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
                 .build();

@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocSRService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class DocSRServiceImpl implements DocSRService {
 
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
+    private final StdBcdService stdBcdService;
 
     @Override
     @Transactional(readOnly = true)
@@ -28,7 +30,9 @@ public class DocSRServiceImpl implements DocSRService {
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findById(docDetail.getDraftId()).orElse(null);
                     if(docMaster != null) {
-                        return DocResponseDTO.rOf(docDetail, docMaster);
+                        DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
+                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                        return docResponseDTO;
                     } else {
                         return null;
                     }

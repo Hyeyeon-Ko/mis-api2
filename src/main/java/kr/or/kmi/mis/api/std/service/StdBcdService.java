@@ -14,5 +14,6 @@ public interface StdBcdService {
     String getDeptNm(String deptCd);
     List<String> getTeamNm(String teamCd);
     List<String> getGradeNm(String gradeCd);
+    String getApplyStatusNm(String applyStatusCd);
     List<StdStatusResponseDTO> getApplyStatus();
 }
