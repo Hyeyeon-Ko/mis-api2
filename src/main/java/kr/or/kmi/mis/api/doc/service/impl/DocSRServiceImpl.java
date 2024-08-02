@@ -50,7 +50,9 @@ public class DocSRServiceImpl implements DocSRService {
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findById(docDetail.getDraftId()).orElse(null);
                     if(docMaster != null) {
-                        return DocResponseDTO.sOf(docDetail, docMaster);
+                        DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster);
+                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                        return docResponseDTO;
                     } else {
                         return null;
                     }
