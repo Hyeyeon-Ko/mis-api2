@@ -48,21 +48,39 @@ public class AuthorityServiceImpl implements AuthorityService {
         List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
         return authorityList.stream()
                 .map(authority -> {
-                    StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
-                            .orElseThrow(() -> new EntityNotFoundException("B001"));
-                    StdDetail stdDetail1 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId())
-                            .orElseThrow(() -> new EntityNotFoundException(authority.getUserId()));
-                    Optional<StdDetail> optionalStdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId());
+
+                    // 기준자료 참조
+                    // 1. 팀 이름 -> 부서 코드
+                    StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("A003")
+                            .orElseThrow(() -> new EntityNotFoundException("A003"));
+                    StdDetail stdDetail1 = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup1, authority.getDeptNm())
+                            .orElseThrow(() -> new EntityNotFoundException(authority.getDeptNm()));
+                    String deptCd = stdDetail1.getEtcItem1();
+
+                    // 2. 부서 코드 -> 부서 이름 & 센터 코드
+                    StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("A002")
+                            .orElseThrow(() -> new EntityNotFoundException("A002"));
+                    StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup2, deptCd)
+                            .orElseThrow(() -> new EntityNotFoundException(deptCd));
+                    String deptNm = stdDetail2.getDetailNm();
+                    String instCd = stdDetail2.getEtcItem1();
+
+                    // 3. 센터 코드 -> 센터 이름
+                    StdGroup stdGroup3 = stdGroupRepository.findByGroupCd("A001")
+                            .orElseThrow(() -> new EntityNotFoundException("A001"));
+                    StdDetail stdDetail3 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup3, instCd)
+                            .orElseThrow(() -> new EntityNotFoundException(instCd));
+                    String instNm = stdDetail3.getDetailNm();
 
                     return AuthorityListResponseDTO.builder()
                             .authId(authority.getAuthId())
                             .userId(authority.getUserId())
                             .hngNm(authority.getHngNm())
                             .userRole(authority.getRole())
-                            .deptNm(authority.getDeptNm())
                             .email(authority.getEmail())
-                            .instNm(stdDetail1.getDetailNm())
-                            .detailCd(optionalStdDetail2.map(StdDetail::getDetailCd).orElse(null))
+                            .instNm(instNm)
+                            .deptNm(deptNm)
+                            .detailCd(authority.getUserId())
                             .build();
                 })
                 .collect(Collectors.toList());

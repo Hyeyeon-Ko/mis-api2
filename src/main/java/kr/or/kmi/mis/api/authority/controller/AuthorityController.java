@@ -9,7 +9,6 @@ import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.List;
 public class AuthorityController {
 
     private final AuthorityService authorityService;
-    private final AopAutoConfiguration aopAutoConfiguration;
 
     @Operation(summary = "get authority list", description = "권한 관리 페이지에서 사용, 모든 권한 목록 호출")
     @GetMapping
