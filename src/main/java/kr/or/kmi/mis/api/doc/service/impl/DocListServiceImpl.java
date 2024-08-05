@@ -4,7 +4,7 @@ import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
-import kr.or.kmi.mis.api.doc.service.DocSRService;
+import kr.or.kmi.mis.api.doc.service.DocListService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class DocSRServiceImpl implements DocSRService {
+public class DocListServiceImpl implements DocListService {
 
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
