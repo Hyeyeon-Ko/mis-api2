@@ -7,9 +7,11 @@ import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocSRService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,19 +25,23 @@ public class DocSRServiceImpl implements DocSRService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getReceiveApplyList() {
+    public List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate) {
+
+        LocalDate[] localDates = dateSet(startDate, endDate);
 
         return docDetailRepository.findAllByDocIdNotNullAndDivision("A")
                 .stream()
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findById(docDetail.getDraftId()).orElse(null);
                     if(docMaster != null) {
-                        DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
-                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                        return docResponseDTO;
-                    } else {
-                        return null;
+                        LocalDate draftDate = docMaster.getDraftDate().toLocalDateTime().toLocalDate();
+                        if(!draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1])){
+                            DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
+                            docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                            return docResponseDTO;
+                        }
                     }
+                        return null;
                 })
                 .filter(Objects::nonNull)
                 .toList();
@@ -59,5 +65,17 @@ public class DocSRServiceImpl implements DocSRService {
                 })
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    public static LocalDate[] dateSet(LocalDate startDate, LocalDate endDate) {
+
+        if(Objects.isNull(endDate)) {
+            endDate = LocalDate.now();
+        }
+        if(Objects.isNull(startDate)) {
+            startDate = endDate.minusMonths(1);
+        }
+
+        return new LocalDate[]{startDate, endDate};
     }
 }

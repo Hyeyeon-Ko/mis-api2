@@ -7,11 +7,9 @@ import kr.or.kmi.mis.api.doc.service.DocSRService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,9 +22,9 @@ public class DocSRController {
 
     @Operation(summary = "get doc receive applyList", description = "문서수신대장 조회")
     @GetMapping("/receiveList")
-    public ApiResponse<List<DocResponseDTO>> getReceiveList() {
-        List<DocResponseDTO> receiveApplyList = docSRService.getReceiveApplyList();
-        return ResponseWrapper.success(receiveApplyList);
+    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam(required = false) LocalDate startDate,
+                                                            @RequestParam(required = false) LocalDate endDate) {
+        return ResponseWrapper.success(docSRService.getReceiveApplyList(startDate, endDate));
     }
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")

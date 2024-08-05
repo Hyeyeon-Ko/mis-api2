@@ -37,8 +37,8 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         docMaster.confirm("B", approver, approverId);
 
         // 문서번호 생성해, 업데이트
-        DocDetail lastDocDetail = docDetailRepository.findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision())
-                .orElse(null);
+        DocDetail lastDocDetail = docDetailRepository
+                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
         String docId = "";
         if (lastDocDetail != null) {
             docId = createDocId(lastDocDetail.getDocId());
