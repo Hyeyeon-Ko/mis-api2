@@ -29,8 +29,8 @@ public class DocSRController {
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")
     @GetMapping("/sendList")
-    public ApiResponse<List<DocResponseDTO>> getSendList() {
-        List<DocResponseDTO> sendApplyList = docSRService.getSendApplyList();
-        return ResponseWrapper.success(sendApplyList);
+    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam(required = false) LocalDate startDate,
+                                                         @RequestParam(required = false) LocalDate endDate) {
+        return ResponseWrapper.success(docSRService.getSendApplyList(startDate, endDate));
     }
 }

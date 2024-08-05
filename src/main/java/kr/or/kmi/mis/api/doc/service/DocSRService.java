@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface DocSRService {
     List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate);
-
-    List<DocResponseDTO> getSendApplyList();
+    List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate);
 }

@@ -7,7 +7,6 @@ import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocSRService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,7 @@ public class DocSRServiceImpl implements DocSRService {
                             return docResponseDTO;
                         }
                     }
-                        return null;
+                    return null;
                 })
                 .filter(Objects::nonNull)
                 .toList();
@@ -49,19 +48,23 @@ public class DocSRServiceImpl implements DocSRService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getSendApplyList() {
+    public List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate) {
+
+        LocalDate[] localDates = dateSet(startDate, endDate);
 
         return docDetailRepository.findAllByDocIdNotNullAndDivision("B")
                 .stream()
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findById(docDetail.getDraftId()).orElse(null);
                     if(docMaster != null) {
-                        DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster);
-                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                        return docResponseDTO;
-                    } else {
-                        return null;
+                        LocalDate draftDate = docMaster.getDraftDate().toLocalDateTime().toLocalDate();
+                        if(!draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1])) {
+                            DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster);
+                            docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                            return docResponseDTO;
+                        }
                     }
+                    return null;
                 })
                 .filter(Objects::nonNull)
                 .toList();
