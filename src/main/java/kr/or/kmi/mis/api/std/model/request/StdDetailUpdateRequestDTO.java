@@ -20,5 +20,7 @@ public class StdDetailUpdateRequestDTO {
     private String etcItem4;
     private String etcItem5;
     private String etcItem6;
+    private String etcItem7;
+    private String etcItem8;
 
 }

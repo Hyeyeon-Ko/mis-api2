@@ -57,9 +57,16 @@ public class StdDetail extends BaseSystemFieldEntity {
     @Column(name = "etc_item6", length = 100)
     private String etcItem6;
 
+    @Column(name = "etc_item7", length = 100)
+    private String etcItem7;
+
+    @Column(name = "etc_item8", length = 100)
+    private String etcItem8;
+
     @Builder
     public StdDetail(String detailCd, StdGroup groupCd, String detailNm, String fromDd, String toDd,
-                String etcItem1, String etcItem2, String etcItem3,String etcItem4,String etcItem5, String etcItem6) {
+                String etcItem1, String etcItem2, String etcItem3, String etcItem4,
+                     String etcItem5, String etcItem6, String etcItem7, String etcItem8) {
         this.detailCd = detailCd;
         this.groupCd = groupCd;
         this.detailNm = detailNm;
@@ -72,6 +79,8 @@ public class StdDetail extends BaseSystemFieldEntity {
         this.etcItem4 = etcItem4;
         this.etcItem5 = etcItem5;
         this.etcItem6 = etcItem6;
+        this.etcItem7 = etcItem7;
+        this.etcItem8 = etcItem8;
     }
 
     public void update(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
@@ -85,6 +94,8 @@ public class StdDetail extends BaseSystemFieldEntity {
         this.etcItem4 = stdDetailRequestDTO.getEtcItem4();
         this.etcItem5 = stdDetailRequestDTO.getEtcItem5();
         this.etcItem6 = stdDetailRequestDTO.getEtcItem6();
+        this.etcItem7 = stdDetailRequestDTO.getEtcItem7();
+        this.etcItem8 = stdDetailRequestDTO.getEtcItem8();
     }
 
     public void updateUseAt(String useAt) {

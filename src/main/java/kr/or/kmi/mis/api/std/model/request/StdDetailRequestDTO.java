@@ -23,6 +23,8 @@ public class StdDetailRequestDTO {
     private String etcItem4;
     private String etcItem5;
     private String etcItem6;
+    private String etcItem7;
+    private String etcItem8;
 
     public StdDetail toEntity(StdGroup groupCd) {
         return StdDetail.builder()
@@ -37,6 +39,8 @@ public class StdDetailRequestDTO {
                 .etcItem4(etcItem4)
                 .etcItem5(etcItem5)
                 .etcItem6(etcItem6)
+                .etcItem6(etcItem7)
+                .etcItem6(etcItem8)
                 .build();
     }
 }
