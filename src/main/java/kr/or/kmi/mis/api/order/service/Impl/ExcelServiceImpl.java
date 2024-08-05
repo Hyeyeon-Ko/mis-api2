@@ -6,14 +6,21 @@ import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.order.service.ExcelService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.poifs.crypt.EncryptionInfo;
+import org.apache.poi.poifs.crypt.EncryptionMode;
+import org.apache.poi.poifs.crypt.Encryptor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,38 +36,68 @@ public class ExcelServiceImpl implements ExcelService {
     public void downloadExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
         byte[] excelData = generateExcel(draftIds);
 
-        // HTTP 응답에 엑셀 파일 첨부
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-        response.setContentLength(excelData.length);
-        response.getOutputStream().write(excelData);
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
+        try {
+            // 엑셀 파일 암호화
+            byte[] encryptedExcelData = getEncryptedExcelBytes(excelData, "password@!");
+
+            // HTTP 응답에 암호화된 엑셀 파일 첨부
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
+            response.setContentLength(encryptedExcelData.length);
+            response.getOutputStream().write(encryptedExcelData);
+            response.getOutputStream().flush();
+            response.getOutputStream().close();
+        } catch (Exception e) {
+            throw new IOException("Failed to encrypt and send Excel file", e);
+        }
+    }
+
+    public byte[] getEncryptedExcelBytes(byte[] excelData, String password) throws IOException, GeneralSecurityException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        POIFSFileSystem fs = new POIFSFileSystem();
+        EncryptionInfo info = new EncryptionInfo(EncryptionMode.standard);
+        Encryptor encryptor = info.getEncryptor();
+        encryptor.confirmPassword(password);
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(excelData);
+             Workbook wb = new XSSFWorkbook(bais);
+             OutputStream os = encryptor.getDataStream(fs)) {
+            wb.write(os);
+        }
+
+        fs.writeFilesystem(bos);
+        return bos.toByteArray();
     }
 
     @Override
     public void downloadOrderExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
         byte[] excelData = generateOrderExcel(draftIds);
 
-        // HTTP 응답에 엑셀 파일 첨부
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-        response.setContentLength(excelData.length);
-        response.getOutputStream().write(excelData);
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
+        try {
+            // 엑셀 파일 암호화
+            byte[] encryptedExcelData = getEncryptedExcelBytes(excelData, "password@!");
+
+            // HTTP 응답에 암호화된 엑셀 파일 첨부
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
+            response.setContentLength(encryptedExcelData.length);
+            response.getOutputStream().write(encryptedExcelData);
+            response.getOutputStream().flush();
+            response.getOutputStream().close();
+        } catch (Exception e) {
+            throw new IOException("Failed to encrypt and send Excel file", e);
+        }
     }
 
     @Override
     public byte[] generateExcel(List<Long> draftIds) throws IOException {
-        // draftIds 리스트 내의 draftId에 해당하는 각각의 정보 불러오기
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
         return createExcelData(bcdDetails);
     }
 
     @Override
     public byte[] generateOrderExcel(List<Long> draftIds) throws IOException {
-        // draftIds 리스트 내의 draftId에 해당하는 각각의 정보 불러오기
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
         return createOrderExcelData(bcdDetails);
     }
@@ -88,10 +125,10 @@ public class ExcelServiceImpl implements ExcelService {
 
         bcdDetails.forEach(detail -> {
             Row row = sheet.createRow(rowNum.getAndIncrement());
-            row.setHeight((short) 600); // 세로 너비 설정
+            row.setHeight((short) 600);
 
             // Division 값에 따른 조건 처리
-            String divisionValue = "기타"; // 기본값 설정
+            String divisionValue = "기타";
             if ("A".equals(detail.getDivision())) {
                 divisionValue = "1안";
             } else if ("B".equals(detail.getDivision())) {
@@ -151,9 +188,9 @@ public class ExcelServiceImpl implements ExcelService {
         // 열 너비 조정
         sheet.setColumnWidth(0, 1500);
         sheet.setColumnWidth(1, 2000);
-        sheet.setColumnWidth(2, 4000);
-        sheet.setColumnWidth(3, 5000);
-        sheet.setColumnWidth(4, 4000);
+        sheet.setColumnWidth(2, 4500);
+        sheet.setColumnWidth(3, 5500);
+        sheet.setColumnWidth(4, 5500);
         sheet.setColumnWidth(5, 5000);
         sheet.setColumnWidth(6, 5000);
         sheet.setColumnWidth(7, 5800);

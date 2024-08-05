@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
+import kr.or.kmi.mis.api.order.model.response.EmailSettingsResponseDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 @RestController
@@ -30,8 +32,15 @@ public class OrderController {
 
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
     @PostMapping
-    public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException {
+    public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
+        System.out.println("orderRequest.getFromEmail() = " + orderRequest.getFromEmail());
         orderService.orderRequest(orderRequest);
         return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "get email settings", description = "기본 이메일 설정 조회")
+    @GetMapping("/email-settings")
+    public ApiResponse<EmailSettingsResponseDTO> getEmailSettings() {
+        return ResponseWrapper.success(orderService.getEmailSettings());
     }
 }

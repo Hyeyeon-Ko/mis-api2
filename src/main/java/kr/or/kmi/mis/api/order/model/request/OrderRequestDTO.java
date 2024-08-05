@@ -13,4 +13,6 @@ public class OrderRequestDTO {
     private String emailSubject;
     private String emailBody;
     private String fileName;
+    private String fromEmail;
+    private String toEmail;
 }
