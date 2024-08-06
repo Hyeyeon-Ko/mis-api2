@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,19 +70,33 @@ public class StdDetailServiceImpl implements StdDetailService {
 
         StdGroup stdGroup = stdGroupRepository.findById(stdDetailRequestDTO.getGroupCd())
                 .orElseThrow(() -> new IllegalArgumentException("해당 그룹 정보 없음: groupCd = " + stdDetailRequestDTO.getGroupCd()));
-
         StdDetailId stdDetailId = new StdDetailId(stdDetailRequestDTO.getGroupCd(), stdDetailRequestDTO.getDetailCd());
 
         if (stdDetailRepository.existsById(stdDetailId)) {
-            throw new IllegalArgumentException("해당 중분류그룹에 이미 존재하는 DetailCd 입니다: detailCd = " + stdDetailRequestDTO.getDetailCd() + ", groupCd = " + stdDetailRequestDTO.getGroupCd());
+            StdDetail existStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, stdDetailId.getDetailCd())
+                    .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
+
+            if (Objects.equals(existStdDetail.getUseAt(), "N")) {
+                // 기존 데이터를 히스토리 테이블에 저장
+                this.saveDetailIntoHist(existStdDetail);
+
+                // 기존 객체를 업데이트할 새로운 객체를 생성
+                StdDetail newStdDetail = stdDetailRequestDTO.toEntity(stdGroup);
+                String userId = infoService.getUserInfo().getUserId();
+                newStdDetail.setRgstrId(userId);
+                newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+
+                stdDetailRepository.save(newStdDetail);
+            } else {
+                throw new IllegalArgumentException("해당 중분류그룹에 이미 존재하는 DetailCd 입니다: detailCd = " + stdDetailRequestDTO.getDetailCd() + ", groupCd = " + stdDetailRequestDTO.getGroupCd());
+            }
+        } else {
+            StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
+            stdDetail.setRgstrId(infoService.getUserInfo().getUserId());
+            stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+
+            stdDetailRepository.save(stdDetail);
         }
-
-        StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
-
-        String fstRegisterId = infoService.getUserInfo().getUserId();
-        stdDetail.setRgstrId(fstRegisterId);
-        stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
-        stdDetailRepository.save(stdDetail);
     }
 
     @Override
@@ -95,15 +110,7 @@ public class StdDetailServiceImpl implements StdDetailService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + stdDetailRequestDTO.getDetailCd()));
 
         // 2. 기준자료 hist 생성 후, 수정된 내용 반영해 update
-        StdDetailHist stdDetailHist = StdDetailHist.builder()
-                .stdDetail(oriStdDetail)
-                .build();
-
-        stdDetailHist.setRgstrId(oriStdDetail.getRgstrId());
-        stdDetailHist.setRgstDt(oriStdDetail.getRgstDt());
-        stdDetailHist.setUpdtrId(oriStdDetail.getUpdtrId());
-        stdDetailHist.setUpdtDt(oriStdDetail.getUpdtDt());
-        stdDetailHistRepository.save(stdDetailHist);
+        this.saveDetailIntoHist(oriStdDetail);
 
         String lstUpdtr = infoService.getUserInfo().getUserName();
         oriStdDetail.update(stdDetailRequestDTO);
@@ -111,6 +118,18 @@ public class StdDetailServiceImpl implements StdDetailService {
         oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         stdDetailRepository.save(oriStdDetail);
 
+    }
+
+    public void saveDetailIntoHist(StdDetail stdDetail) {
+        StdDetailHist stdDetailHist = StdDetailHist.builder()
+                .stdDetail(stdDetail)
+                .build();
+
+        stdDetailHist.setRgstrId(stdDetail.getRgstrId());
+        stdDetailHist.setRgstDt(stdDetail.getRgstDt());
+        stdDetailHist.setUpdtrId(stdDetail.getUpdtrId());
+        stdDetailHist.setUpdtDt(stdDetail.getUpdtDt());
+        stdDetailHistRepository.save(stdDetailHist);
     }
 
     @Override

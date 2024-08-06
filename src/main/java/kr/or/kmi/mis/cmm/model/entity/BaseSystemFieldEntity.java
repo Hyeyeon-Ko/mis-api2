@@ -13,10 +13,10 @@ import java.sql.Timestamp;
 @Data
 public class BaseSystemFieldEntity {
 
-    @Column(name = "rgstr_id", updatable = false)
+    @Column(name = "rgstr_id")
     private String rgstrId;
 
-    @Column(name = "rgst_dt", updatable = false)
+    @Column(name = "rgst_dt")
     private Timestamp rgstDt;
 
     @Column(name = "updtr_id")
