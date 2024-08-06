@@ -39,8 +39,8 @@ public class StdDetailRequestDTO {
                 .etcItem4(etcItem4)
                 .etcItem5(etcItem5)
                 .etcItem6(etcItem6)
-                .etcItem6(etcItem7)
-                .etcItem6(etcItem8)
+                .etcItem7(etcItem7)
+                .etcItem8(etcItem8)
                 .build();
     }
 }
