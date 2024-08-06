@@ -199,11 +199,14 @@ public class AuthorityServiceImpl implements AuthorityService {
         authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
         authorityRepository.save(authority);
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
+                .orElseThrow(() -> new EntityNotFoundException("B001"));
+
         // 기준자료 관리자였다면 -> 기준자료 테이블 데이터 삭제
         if (authority.getUserId() != null) {
-            StdDetail stdDetail = stdDetailRepository.findByDetailCd(authority.getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid detailCd: " + authority.getUserId()));
-            stdDetailRepository.deleteByGroupCdAndDetailCd(stdDetail.getGroupCd(), stdDetail.getDetailCd());
+            stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId())
+                    .ifPresent(stdDetailToDelete -> stdDetailRepository.deleteByGroupCdAndDetailCd(
+                            stdDetailToDelete.getGroupCd(), stdDetailToDelete.getDetailCd()));
         }
     }
 
