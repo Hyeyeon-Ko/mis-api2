@@ -27,8 +27,8 @@ public class StdController {
 
     @Operation(summary = "get Std Header Name", description = "각 기준자료의 헤더명 호출 시 사용")
     @GetMapping("/header")
-    public ApiResponse<List<StdDetailResponseDTO>> getHeaderInfo() {
-        return ResponseWrapper.success(stdDetailService.getInfo("A000"));
+    public ApiResponse<List<StdDetailResponseDTO>> getHeaderInfo(String groupCd) {
+        return ResponseWrapper.success(stdDetailService.getHeaderInfo(groupCd));
     }
 
     @Operation(summary = "get Group Info", description = "기준자료 > 중분류 정보 호출 시 사용")

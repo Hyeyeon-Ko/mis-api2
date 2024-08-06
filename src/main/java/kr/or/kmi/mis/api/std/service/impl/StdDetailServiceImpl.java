@@ -47,6 +47,21 @@ public class StdDetailServiceImpl implements StdDetailService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<StdDetailResponseDTO> getHeaderInfo(String groupCd) {
+
+        StdGroup stdGroup = stdGroupRepository.findById("A000")
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + groupCd));
+
+        List<StdDetail> stdDetails = stdDetailRepository.findByUseAtAndGroupCdAndDetailCd("Y", stdGroup, groupCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
+
+        return stdDetails.stream()
+                .map(StdDetailResponseDTO::of)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     @Transactional
