@@ -21,7 +21,10 @@ public class DocMyResponseDTO {
     private String applyStatus;
     private String docType;
 
-    public static DocMyResponseDTO of(DocMaster docMaster) {
+    public static DocMyResponseDTO of(DocMaster docMaster, String division) {
+
+        String docType = "A".equals(division) ? "문서수신" : "문서발신";
+
         return DocMyResponseDTO.builder()
                 .draftId(docMaster.getDraftId())
                 .title(docMaster.getTitle())
@@ -30,7 +33,7 @@ public class DocMyResponseDTO {
                 .drafter(docMaster.getDrafter())
                 .approver(docMaster.getApprover())
                 .applyStatus(docMaster.getStatus())
-                .docType("문서수발신")
+                .docType(docType)
                 .build();
     }
 }

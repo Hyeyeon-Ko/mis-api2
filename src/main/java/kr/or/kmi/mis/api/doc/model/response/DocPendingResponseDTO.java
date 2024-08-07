@@ -23,7 +23,10 @@ public class DocPendingResponseDTO {
     private String applyStatus;
     private String docType;
 
-    public static DocPendingResponseDTO of(DocMaster docMaster) {
+    public static DocPendingResponseDTO of(DocMaster docMaster, String division) {
+
+        String docType = "A".equals(division) ? "문서수신" : "문서발신";
+
         return DocPendingResponseDTO.builder()
                 .draftId(docMaster.getDraftId())
                 .title(docMaster.getTitle())
@@ -33,7 +36,7 @@ public class DocPendingResponseDTO {
                 .lastUpdateDate(docMaster.getUpdtDt())
                 .lastUpdater(docMaster.getDrafter())
                 .applyStatus(docMaster.getStatus())
-                .docType("문서수발신")
+                .docType(docType)
                 .build();
     }
 }

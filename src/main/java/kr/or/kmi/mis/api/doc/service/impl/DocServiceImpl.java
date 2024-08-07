@@ -109,7 +109,11 @@ public class DocServiceImpl implements DocService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
-                .map(DocMyResponseDTO::of).toList();
+                .map(docMaster -> {
+                    DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+                    return DocMyResponseDTO.of(docMaster, docDetail.getDivision());
+                }).toList();
     }
 
     @Override
@@ -133,7 +137,9 @@ public class DocServiceImpl implements DocService {
 
         return docMasters.stream()
                 .map(docMaster -> {
-                    DocMasterResponseDTO docMasterResponseDTO = DocMasterResponseDTO.of(docMaster);
+                    DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+                    DocMasterResponseDTO docMasterResponseDTO = DocMasterResponseDTO.of(docMaster, docDetail.getDivision());
                     docMasterResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
                     return  docMasterResponseDTO;
                 }).toList();
@@ -146,7 +152,9 @@ public class DocServiceImpl implements DocService {
 
         return docMasters.stream()
                 .map(docMaster -> {
-                    DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster);
+                    DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+                    DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
                     docPendingResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
                     return  docPendingResponseDTO;
                 }).toList();
@@ -157,6 +165,10 @@ public class DocServiceImpl implements DocService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
-                .map(DocPendingResponseDTO::of).toList();
+                .map(docMaster -> {
+                    DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+                    return DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
+                }).toList();
     }
 }
