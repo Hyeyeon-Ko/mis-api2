@@ -17,5 +17,5 @@ public interface BcdConfirmService {
     void disapprove(Long id, String rejectReason);
 
     /*신청이력조회*/
-    List<BcdHistoryResponseDTO> getApplicationHistory(Long draftId); // 추가된 메서드
+    List<BcdHistoryResponseDTO> getApplicationHistory(Long draftId);
 }

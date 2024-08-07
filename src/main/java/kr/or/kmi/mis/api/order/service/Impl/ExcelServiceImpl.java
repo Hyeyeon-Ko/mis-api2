@@ -37,18 +37,32 @@ public class ExcelServiceImpl implements ExcelService {
         byte[] excelData = generateExcel(draftIds);
 
         try {
-            // 엑셀 파일 암호화
-            byte[] encryptedExcelData = getEncryptedExcelBytes(excelData, "password@!");
-
-            // HTTP 응답에 암호화된 엑셀 파일 첨부
+            // HTTP 응답에 엑셀 파일 첨부
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-            response.setContentLength(encryptedExcelData.length);
-            response.getOutputStream().write(encryptedExcelData);
+            response.setContentLength(excelData.length);
+            response.getOutputStream().write(excelData);
             response.getOutputStream().flush();
             response.getOutputStream().close();
         } catch (Exception e) {
-            throw new IOException("Failed to encrypt and send Excel file", e);
+            throw new IOException("Failed to send Excel file", e);
+        }
+    }
+
+    @Override
+    public void downloadOrderExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
+        byte[] excelData = generateOrderExcel(draftIds);
+
+        try {
+            // HTTP 응답에 엑셀 파일 첨부
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
+            response.setContentLength(excelData.length);
+            response.getOutputStream().write(excelData);
+            response.getOutputStream().flush();
+            response.getOutputStream().close();
+        } catch (Exception e) {
+            throw new IOException("Failed to send Excel file", e);
         }
     }
 
@@ -68,26 +82,6 @@ public class ExcelServiceImpl implements ExcelService {
 
         fs.writeFilesystem(bos);
         return bos.toByteArray();
-    }
-
-    @Override
-    public void downloadOrderExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
-        byte[] excelData = generateOrderExcel(draftIds);
-
-        try {
-            // 엑셀 파일 암호화
-            byte[] encryptedExcelData = getEncryptedExcelBytes(excelData, "password@!");
-
-            // HTTP 응답에 암호화된 엑셀 파일 첨부
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-            response.setContentLength(encryptedExcelData.length);
-            response.getOutputStream().write(encryptedExcelData);
-            response.getOutputStream().flush();
-            response.getOutputStream().close();
-        } catch (Exception e) {
-            throw new IOException("Failed to encrypt and send Excel file", e);
-        }
     }
 
     @Override

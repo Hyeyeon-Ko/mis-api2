@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,11 +93,22 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterId(drafterId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + drafterId));
 
+        Map<Long, BcdDetail> bcdDetailMap = new HashMap<>();
+
+        for (BcdMaster master : bcdMasters) {
+            BcdDetail bcdDetail = bcdDetailRepository.findById(master.getDraftId())
+                    .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for BcdMaster ID: " + master.getDraftId()));
+            bcdDetailMap.put(master.getDraftId(), bcdDetail);
+        }
+
         return bcdMasters.stream().map(master -> {
+            BcdDetail bcdDetail = bcdDetailMap.get(master.getDraftId());
+
             return BcdHistoryResponseDTO.builder()
                     .title(master.getTitle())
                     .draftDate(master.getDraftDate().toString())
                     .applyStatus(master.getStatus())
+                    .quantity(bcdDetail != null ? bcdDetail.getQuantity() : null)
                     .build();
         }).collect(Collectors.toList());
     }

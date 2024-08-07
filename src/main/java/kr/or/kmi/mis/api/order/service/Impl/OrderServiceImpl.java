@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
-        System.out.println("orderRequest.getToEmail() = " + orderRequest.getToEmail());
+
         // 엑셀 데이터 생성
         byte[] excelData = excelService.generateExcel(orderRequest.getDraftIds());
 
