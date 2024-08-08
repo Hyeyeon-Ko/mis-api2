@@ -5,8 +5,8 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
-import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
-import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
+import kr.or.kmi.mis.api.confirm.model.request.BcdApproveRequestDTO;
+import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.BcdConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
@@ -52,7 +52,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
-        ApproveRequestDTO approveRequest = ApproveRequestDTO.builder()
+        BcdApproveRequestDTO approveRequest = BcdApproveRequestDTO.builder()
                 .approverId(infoService.getUserInfo().getUserId())
                 .approver(infoService.getUserInfo().getUserName())
                 .respondDate(new Timestamp(System.currentTimeMillis()))
@@ -69,7 +69,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
-        DisapproveRequestDTO disapproveRequest = DisapproveRequestDTO.builder()
+        BcdDisapproveRequestDTO disapproveRequest = BcdDisapproveRequestDTO.builder()
                 .disapproverId(infoService.getUserInfo().getUserId())
                 .disapprover(infoService.getUserInfo().getUserName())
                 .rejectReason(rejectReason)
@@ -84,7 +84,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     /*신청이력조회*/
     @Override
     @Transactional(readOnly = true)
-    public List<BcdHistoryResponseDTO> getApplicationHistory(Long draftId) {
+    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(Long draftId) {
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
 

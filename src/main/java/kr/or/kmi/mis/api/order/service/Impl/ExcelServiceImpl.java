@@ -296,6 +296,7 @@ public class ExcelServiceImpl implements ExcelService {
         String[] centers = {"재단본부", "광화문", "본원센터", "여의도센터", "강남센터", "수원센터", "대구센터", "부산센터", "광주센터", "제주센터", "합계"};
         int[] counts = new int[centers.length];
         int[] quantities = new int[centers.length];
+        int[] amounts = new int[centers.length];
 
         bcdDetails.forEach(detail -> {
             String instName = stdBcdService.getInstNm(detail.getInstCd());
@@ -303,10 +304,12 @@ public class ExcelServiceImpl implements ExcelService {
                 if (instName.equals(centers[i])) {
                     counts[i]++;
                     quantities[i] += detail.getQuantity();
+                    amounts[i] += detail.getQuantity() * 13000;
                 }
             }
             counts[centers.length - 1]++;
             quantities[centers.length - 1] += detail.getQuantity();
+            amounts[centers.length - 1] += detail.getQuantity() * 13000;
         });
 
         for (int i = 0; i < centers.length; i++) {
@@ -315,11 +318,13 @@ public class ExcelServiceImpl implements ExcelService {
             createSumCell(rowCount, 3, centers[i], thinBorderStyle, sumCenterStyle); // 센터 이름
             createSumCell(rowCount, 4, counts[i] + "건", thinBorderStyle, sumCenterStyle); // 건수
             createSumCell(rowCount, 5, quantities[i] + "통", thinBorderStyle, sumCenterStyle); // 수량
+            createSumCell(rowCount, 6, amounts[i] + "원", thinBorderStyle, sumCenterStyle); // 금액
         }
 
         sheet.setColumnWidth(3, 4000);
         sheet.setColumnWidth(4, 5000);
         sheet.setColumnWidth(5, 5000);
+        sheet.setColumnWidth(6, 5000);
 
         // 엑셀 파일을 ByteArrayOutputStream에 쓰기
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -20,29 +20,29 @@ public class BcdConfirmController {
 
     private final BcdConfirmService bcdConfirmService;
 
-    @Operation(summary = "get apply list", description = "신청 목록 상세정보 조회")
+    @Operation(summary = "get apply list", description = "명함신청 목록 상세정보 조회")
     @GetMapping("/{draftId}")
     public ApiResponse<BcdDetailResponseDTO> getApplyList(@PathVariable Long draftId) {
         return ResponseWrapper.success(bcdConfirmService.getBcdDetailInfo(draftId));
     }
 
-    @Operation(summary = "approve application", description = "신청 승인")
+    @Operation(summary = "approve application", description = "명함신청 승인")
     @PostMapping("/{draftId}")
     public ApiResponse<?> approve(@PathVariable Long draftId) {
         bcdConfirmService.approve(draftId);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "disapprove application", description = "신청 반려")
+    @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
     public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason) {
         bcdConfirmService.disapprove(draftId, rejectReason);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "get application history by drafter", description = "기안자의 신청 이력 조회")
+    @Operation(summary = "get bcd application history by drafter", description = "기안자의 명함신청 이력 조회")
     @GetMapping("/history/{draftId}")
     public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@PathVariable Long draftId) {
-        return ResponseWrapper.success(bcdConfirmService.getApplicationHistory(draftId));
+        return ResponseWrapper.success(bcdConfirmService.getBcdApplicationHistory(draftId));
     }
 }

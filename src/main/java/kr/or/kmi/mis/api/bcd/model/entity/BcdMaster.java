@@ -1,8 +1,8 @@
 package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
-import kr.or.kmi.mis.api.confirm.model.request.ApproveRequestDTO;
-import kr.or.kmi.mis.api.confirm.model.request.DisapproveRequestDTO;
+import kr.or.kmi.mis.api.confirm.model.request.BcdApproveRequestDTO;
+import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -76,20 +76,20 @@ public class BcdMaster {
     }
 
     // 승인 -> 승인자, 대응일시, 상태 업데이트
-    public void updateApprove(ApproveRequestDTO approveRequestDTO) {
-        this.approver = approveRequestDTO.getApprover();
-        this.approverId = approveRequestDTO.getApproverId();
-        this.respondDate = approveRequestDTO.getRespondDate();
-        this.status = approveRequestDTO.getStatus();
+    public void updateApprove(BcdApproveRequestDTO bcdApproveRequestDTO) {
+        this.approver = bcdApproveRequestDTO.getApprover();
+        this.approverId = bcdApproveRequestDTO.getApproverId();
+        this.respondDate = bcdApproveRequestDTO.getRespondDate();
+        this.status = bcdApproveRequestDTO.getStatus();
     }
 
     // 반려 -> 반려자, 대응일시, 상태 업데이트
-    public void updateDisapprove(DisapproveRequestDTO disapproveRequestDTO) {
-        this.disapprover = disapproveRequestDTO.getDisapprover();
-        this.disapproverId = disapproveRequestDTO.getDisapproverId();
-        this.rejectReason = disapproveRequestDTO.getRejectReason();
-        this.respondDate = disapproveRequestDTO.getRespondDate();
-        this.status = disapproveRequestDTO.getStatus();
+    public void updateDisapprove(BcdDisapproveRequestDTO bcdDisapproveRequestDTO) {
+        this.disapprover = bcdDisapproveRequestDTO.getDisapprover();
+        this.disapproverId = bcdDisapproveRequestDTO.getDisapproverId();
+        this.rejectReason = bcdDisapproveRequestDTO.getRejectReason();
+        this.respondDate = bcdDisapproveRequestDTO.getRespondDate();
+        this.status = bcdDisapproveRequestDTO.getStatus();
     }
 
 

@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Getter
 @RequiredArgsConstructor
-public class DisapproveRequestDTO {
+public class BcdDisapproveRequestDTO {
 
     private String disapproverId;
     private String disapprover;
@@ -17,7 +17,7 @@ public class DisapproveRequestDTO {
     private String status;
 
     @Builder
-    public DisapproveRequestDTO(String disapproverId, String disapprover, String rejectReason, Timestamp respondDate, String status) {
+    public BcdDisapproveRequestDTO(String disapproverId, String disapprover, String rejectReason, Timestamp respondDate, String status) {
         this.disapproverId = disapproverId;
         this.disapprover = disapprover;
         this.rejectReason = rejectReason;

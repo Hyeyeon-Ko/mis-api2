@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BcdConfirmService {
 
-    /* 신청 상세 정보 불러오기 */
+    /* 명함신청 상세 정보 불러오기 */
     BcdDetailResponseDTO getBcdDetailInfo(Long id);
 
     /* 승인 */
@@ -16,6 +16,6 @@ public interface BcdConfirmService {
     /* 반려 */
     void disapprove(Long id, String rejectReason);
 
-    /*신청이력조회*/
-    List<BcdHistoryResponseDTO> getApplicationHistory(Long draftId);
+    /* 명함 신청이력 조회 */
+    List<BcdHistoryResponseDTO> getBcdApplicationHistory(Long draftId);
 }
