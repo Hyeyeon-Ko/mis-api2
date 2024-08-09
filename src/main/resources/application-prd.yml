@@ -1,17 +1,37 @@
 spring:
   application:
     name: mis
-  profiles:
-    active: prd
   datasource:
     url: jdbc:mariadb://10.1.10.216:3306/mis  # 마리아DB 연결 URL
     username: user  # 데이터베이스 사용자 이름
     password: kmi12345  # 데이터베이스 비밀번호
     driver-class-name: org.mariadb.jdbc.Driver  # 마리아DB JDBC 드라이버 클래스
-    jpa:
-      database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
-      hibernate:
-        ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
+    hibernate:
+      ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: khy33355@gmail.com
+    password: lhvwwazvwxoxgekp
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          mime:
+            charset: UTF-8
+          transport:
+            protocol: smtp
+    default-encoding: UTF-8
+external:
+  login:
+    url: http://172.16.250.84/mis/login
+  userInfo:
+    url: http://172.16.250.84/mis/userDeptInfo
 
 logging:
   level:
@@ -30,5 +50,6 @@ logging:
             sql: info
     web: info
     root: info
+
 server:
   port: 9090
