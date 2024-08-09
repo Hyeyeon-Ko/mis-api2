@@ -1,8 +1,10 @@
 package kr.or.kmi.mis.config;
 
+import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import kr.or.kmi.mis.config.custom.CustomTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,7 +31,8 @@ public class QueryDslConfig {
      */
     @Bean
     public JPAQueryFactory jpaQueryFactory(){
-        return new JPAQueryFactory(entityManager);
+        JPQLTemplates templates = CustomTemplate.DEFAULT;
+        return new JPAQueryFactory(templates, entityManager);
     }
 
 }
