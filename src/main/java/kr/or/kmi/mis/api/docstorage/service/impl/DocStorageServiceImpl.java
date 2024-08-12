@@ -4,7 +4,6 @@ import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocStorageDetailResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.sql.Timestamp;
 
 @Service
 @RequiredArgsConstructor
@@ -35,14 +35,23 @@ public class DocStorageServiceImpl implements DocStorageService {
 
     @Override
     @Transactional
-    public void updateStorageInfo(Long draftId, DocStorageUpdateDTO docStorageUpdateDTO) {
+    public void updateStorageInfo(Long detailId, DocStorageRequestDTO docStorageUpdateDTO) {
+        DocStorageDetail docStorageDetail = docStorageDetailRepository.findById(detailId)
+                .orElseThrow(() -> new IllegalArgumentException("DocStorageDetail not found By DetailId : " + detailId));
 
+        docStorageDetail.update(docStorageUpdateDTO);
+        docStorageDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docStorageDetail.setUpdtrId(infoService.getUserInfo().getUserName());
+        docStorageDetailRepository.save(docStorageDetail);
     }
 
     @Override
     @Transactional
-    public void deleteStorageInfo(Long draftId) {
+    public void deleteStorageInfo(Long detailId) {
+        DocStorageDetail docStorageDetail = docStorageDetailRepository.findById(detailId)
+                .orElseThrow(() -> new IllegalArgumentException("DocStorageDetail not found By DetailId : " + detailId));
 
+        docStorageDetailRepository.delete(docStorageDetail);
     }
 
     @Override
@@ -64,6 +73,17 @@ public class DocStorageServiceImpl implements DocStorageService {
     @Transactional
     public void applyStorage(DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
 
+        String drafter = infoService.getUserInfo().getUserName();
+        String drafterId = infoService.getUserInfo().getUserId();
+
+        DocStorageMaster docStorageMaster = docStorageMasterRepository.save(docStorageApplyRequestDTO.toMasterEntity(drafter, drafterId));
+
+        docStorageApplyRequestDTO.getDetailIds().forEach(detailId -> {
+            docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
+                docStorageDetail.updateDraftId(docStorageMaster.getDraftId());
+                docStorageDetailRepository.save(docStorageDetail);
+            });
+        });
     }
 
     @Override

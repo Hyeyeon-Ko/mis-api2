@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocStorageService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -31,15 +30,15 @@ public class DocStorageController {
     }
 
     @Operation(summary = "modify docStorage info", description = "문서보관 관련 정보 수정")
-    @PostMapping("/update")
-    public ApiResponse<?> updateDocStorageInfo(@RequestParam("draftId") Long detailId, @RequestBody DocStorageUpdateDTO docStorageUpdateDTO) {
+    @PutMapping("/")
+    public ApiResponse<?> updateDocStorageInfo(@RequestParam("detailId") Long detailId, @RequestBody DocStorageRequestDTO docStorageUpdateDTO) {
         docStorageService.updateStorageInfo(detailId, docStorageUpdateDTO);
 
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "delete docStorage info", description = "문서보관 관련 정보 삭제")
-    @PutMapping("/delete")
+    @DeleteMapping("/")
     public ApiResponse<?> deleteDocStorageInfo(@RequestParam("detailId") Long detailId) {
         docStorageService.deleteStorageInfo(detailId);
 
@@ -54,7 +53,7 @@ public class DocStorageController {
     }
 
     @Operation(summary = "apply docStorage", description = "문서보관 신청")
-    @PutMapping("/")
+    @PostMapping("/apply")
     public ApiResponse<?> applyDocStorage(@RequestBody DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
         docStorageService.applyStorage(docStorageApplyRequestDTO);
 
