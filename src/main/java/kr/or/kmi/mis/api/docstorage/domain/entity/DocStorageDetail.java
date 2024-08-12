@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.docstorage.domain.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -71,15 +72,19 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
         this.disposalDate = disposalDate;
     }
 
-    public void update(DocStorageRequestDTO docStorageUpdateDTO) {
+    public void update(DocStorageUpdateRequestDTO docStorageUpdateDTO) {
         this.docId=docStorageUpdateDTO.getDocId();
         this.docNm=docStorageUpdateDTO.getDocNm();
+        this.location=docStorageUpdateDTO.getLocation();
         this.teamNm=docStorageUpdateDTO.getTeamNm();
         this.manager=docStorageUpdateDTO.getManager();
         this.subManager=docStorageUpdateDTO.getSubManager();
         this.storageYear=docStorageUpdateDTO.getStorageYear();
         this.createDate=docStorageUpdateDTO.getCreateDate();
+        this.transferDate=docStorageUpdateDTO.getTransferDate();
+        this.tsdNum=docStorageUpdateDTO.getTsdNum();
         this.disposalDate=docStorageUpdateDTO.getDisposalDate();
+        this.dpdNum=docStorageUpdateDTO.getDpdNum();
     }
 
     public void updateDraftId(Long draftId) {

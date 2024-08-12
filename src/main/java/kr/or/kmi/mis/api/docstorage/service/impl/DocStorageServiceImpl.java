@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocStorageDetailResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
@@ -35,7 +36,7 @@ public class DocStorageServiceImpl implements DocStorageService {
 
     @Override
     @Transactional
-    public void updateStorageInfo(Long detailId, DocStorageRequestDTO docStorageUpdateDTO) {
+    public void updateStorageInfo(Long detailId, DocStorageUpdateRequestDTO docStorageUpdateDTO) {
         DocStorageDetail docStorageDetail = docStorageDetailRepository.findById(detailId)
                 .orElseThrow(() -> new IllegalArgumentException("DocStorageDetail not found By DetailId : " + detailId));
 
