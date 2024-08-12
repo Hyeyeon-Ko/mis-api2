@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +32,24 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     private final InfoService infoService;
 
     @Override
-    public List<DocstorageResponseDTO> getDocstorageCenterList(String userId) {
+    public List<DocstorageResponseDTO> getDocstorageDeptList(String userId) {
 
-        InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(userId);
-        String instCd = infoDetailResponseDTO.getInstCd();
+//        배포시, 주석 제거
+//        InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(userId);
+//        String teamCd = infoDetailResponseDTO.getTeamCd();
 
-        List<DocStorageMaster> docStorageMasterList = docStorageMasterRepository.findAllByInstCd(instCd)
+        String teamCd = "FDT30";
+
+        // 1. 팀 코드 -> 부서 검색
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndEtcItem3(stdGroup, teamCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String deptCd = stdDetail.getEtcItem1();
+
+        // 2. 부서 문서보관 내역 검색
+        List<DocStorageMaster> docStorageMasterList = docStorageMasterRepository.findAllByDeptCd(deptCd)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<DocstorageResponseDTO> docstorageResponseDTOList = new ArrayList<>();
 
@@ -46,7 +59,51 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     }
 
     @Override
+    public DocstorageCenterListResponseDTO getDocstorageCenterList(String instCd) {
+
+        // 1. 부서 목록
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A002")
+                .orElseThrow(() -> new IllegalArgumentException("Standard Group not found for code: A002"));
+
+        List<StdDetail> stdDetailList = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        List<DeptResponseDTO> deptList = stdDetailList.stream()
+                .map(stdDetail -> DeptResponseDTO.builder()
+                        .detailCd(stdDetail.getDetailCd())
+                        .detailNm(stdDetail.getDetailNm())
+                        .build())
+                .toList();
+
+        // 2. 부서 목록에 따른 문서보관 내역
+        List<DocStorageMaster> docStorageMasterList = docStorageMasterRepository.findAllByInstCd(instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        Map<String, List<DocStorageMaster>> groupedByDept = docStorageMasterList.stream()
+                .collect(Collectors.groupingBy(DocStorageMaster::getDeptCd));
+
+        List<DeptDocstorageListResponseDTO> deptDocstorageListResponses = groupedByDept.entrySet().stream()
+                .map(entry -> {
+                    String deptCd = entry.getKey();
+                    List<DocstorageResponseDTO> docstorageResponseDTOList = entry.getValue().stream()
+                            .flatMap(docStorageMaster -> getDocstorageResponsesForMaster(docStorageMaster).stream())
+                            .toList();
+
+                    return DeptDocstorageListResponseDTO.builder()
+                            .deptCd(deptCd)
+                            .docstorageResponseDTOList(docstorageResponseDTOList)
+                            .build();
+                })
+                .toList();
+
+        return DocstorageCenterListResponseDTO.of(deptList, deptDocstorageListResponses);
+    }
+
+
+    @Override
     public DocstorageTotalListResponseDTO getTotalDocstorageList() {
+
+        // 1. 센터 목록
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("A001")
                 .orElseThrow(() -> new IllegalArgumentException("Standard Group not found for code: A001"));
         List<StdDetail> stdDetailList = stdDetailRepository.findAllByUseAtAndGroupCd("Y", stdGroup)
@@ -59,6 +116,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                         .build())
                 .toList();
 
+        // 2. 센터 목록에 따른 문서보관 내역
         Map<String, List<DocstorageResponseDTO>> responseMap = new HashMap<>();
         responseMap.put("100", new ArrayList<>());
         responseMap.put("101", new ArrayList<>());

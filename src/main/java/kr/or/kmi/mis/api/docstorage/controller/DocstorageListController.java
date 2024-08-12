@@ -1,6 +1,8 @@
 package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
+import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageCenterListResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageTotalListResponseDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageListService;
@@ -8,6 +10,7 @@ import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,9 +24,14 @@ public class DocstorageListController {
 
     private final DocstorageListService docstorageListService;
 
-    @GetMapping
-    public ApiResponse<List<DocstorageResponseDTO>> getDocstorageCenterList(String userId) {
-        return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(userId));
+    @GetMapping("dept")
+    public ApiResponse<List<DocstorageResponseDTO>> getDocstorageDeptList(String userId) {
+        return ResponseWrapper.success(docstorageListService.getDocstorageDeptList(userId));
+    }
+
+    @GetMapping("/center")
+    public ApiResponse<DocstorageCenterListResponseDTO> getDocstorageCenterList(String instCd) {
+        return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(instCd));
     }
 
     @GetMapping("/total")
