@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class DocStorageServiceImpl implements DocStorageService {
@@ -62,5 +64,15 @@ public class DocStorageServiceImpl implements DocStorageService {
     @Transactional
     public void applyStorage(DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
 
+    }
+
+    @Override
+    public void saveAll(List<DocStorageDetail> documents) {
+        for (DocStorageDetail document : documents) {
+            if (document.getDraftId() == null) {
+                throw new IllegalArgumentException("Draft ID must be provided");
+            }
+        }
+        docStorageDetailRepository.saveAll(documents);
     }
 }

@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateDTO;
@@ -10,6 +11,8 @@ import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/storage")
@@ -55,6 +58,12 @@ public class DocStorageController {
     public ApiResponse<?> applyDocStorage(@RequestBody DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
         docStorageService.applyStorage(docStorageApplyRequestDTO);
 
+        return ResponseWrapper.success();
+    }
+
+    @PostMapping("/upload")
+    public ApiResponse<?> uploadData(@RequestBody List<DocStorageDetail> documents) {
+        docStorageService.saveAll(documents);
         return ResponseWrapper.success();
     }
 
