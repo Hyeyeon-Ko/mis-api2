@@ -81,4 +81,8 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
         this.createDate=docStorageUpdateDTO.getCreateDate();
         this.disposalDate=docStorageUpdateDTO.getDisposalDate();
     }
+
+    public void updateDraftId(Long draftId) {
+        this.draftId = draftId;
+    }
 }

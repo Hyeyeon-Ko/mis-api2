@@ -72,5 +72,16 @@ public class DocStorageServiceImpl implements DocStorageService {
     @Transactional
     public void applyStorage(DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
 
+        String drafter = infoService.getUserInfo().getUserName();
+        String drafterId = infoService.getUserInfo().getUserId();
+
+        DocStorageMaster docStorageMaster = docStorageMasterRepository.save(docStorageApplyRequestDTO.toMasterEntity(drafter, drafterId));
+
+        docStorageApplyRequestDTO.getDetailIds().forEach(detailId -> {
+            docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
+                docStorageDetail.updateDraftId(docStorageMaster.getDraftId());
+                docStorageDetailRepository.save(docStorageDetail);
+            });
+        });
     }
 }

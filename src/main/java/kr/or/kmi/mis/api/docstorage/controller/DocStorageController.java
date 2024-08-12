@@ -50,7 +50,7 @@ public class DocStorageController {
     }
 
     @Operation(summary = "apply docStorage", description = "문서보관 신청")
-    @PutMapping("/apply")
+    @PostMapping("/apply")
     public ApiResponse<?> applyDocStorage(@RequestBody DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
         docStorageService.applyStorage(docStorageApplyRequestDTO);
 

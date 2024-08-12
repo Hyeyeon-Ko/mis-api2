@@ -1,15 +1,30 @@
 package kr.or.kmi.mis.api.docstorage.domain.request;
 
-public class DocStorageApplyRequestDTO {
-}
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
+import lombok.Builder;
+import lombok.Getter;
 
-//    public DocStorageMaster toMasterEntity() {
-//        return DocStorageMaster.builder()
-//                .draftDate(new Timestamp(System.currentTimeMillis()))
-//                .drafterId(drafterId)
-//                .drafter(drafter)
-//                .instCd(instCd)
-//                .deptCd(deptCd)
-//                .status("N")
-//                .build();
-//    }
+import java.sql.Timestamp;
+import java.util.List;
+
+@Getter
+@Builder
+public class DocStorageApplyRequestDTO {
+
+    private String instCd;
+    private String deptCd;
+    private String type;
+    private List<Long> detailIds;
+
+    public DocStorageMaster toMasterEntity(String drafter, String drafterId) {
+        return DocStorageMaster.builder()
+                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .drafter(drafter)
+                .drafterId(drafterId)
+                .instCd(instCd)
+                .deptCd(deptCd)
+                .type(type)
+                .status("A")       // 신청완료
+                .build();
+    }
+}
