@@ -16,11 +16,11 @@ import java.sql.Timestamp;
 public class DocStorageDetail extends BaseSystemFieldEntity {
 
     @Id
-    @Column(name = "draft_id")
-    private Long draftId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long detailId;
 
-    @Column(length = 50)
-    private String draftNum;
+    @Column
+    private Long draftId;
 
     @Column(length = 50)
     private String docId;
@@ -40,32 +40,46 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     @Column(length =20)
     private String subManager;
 
-    @Column
-    private int storageYear;
+    @Column(length = 20)
+    private String storageYear;
 
-    @Column
-    private int creationYear;
+    @Column(length = 20)
+    private String createDate;
 
-    @Column
-    private Timestamp transferDate;
+    @Column(length = 20)
+    private String transferDate;
 
-    @Column
-    private Timestamp disposalDate;
+    @Column(length = 50)
+    private String tsdNum;         // 이관 기안번호
+
+    @Column(length = 20)
+    private String disposalDate;
+
+    @Column(length = 50)
+    private String dpdNum;         // 폐기 기안번호
+
+    @Column(length = 20)
+    private String registr;
+
+    @Column(length = 20)
+    private String lastupdtr;
+
+    @Column(length = 20)
+    private String lastupdtDt;
+
 
     @Builder
-    public DocStorageDetail(Long draftId, String draftNum, String docId, String docNm, String location, String teamNm,
-                            String manager, String subManager, int storageYear, int creationYear, Timestamp transferDate) {
-        this.draftId = draftId;
-        this.draftNum = draftNum;
+    public DocStorageDetail(String docId, String docNm, String teamNm, String manager, String subManager,
+                            String storageYear, String createDate, String transferDate, String disposalDate, String registr) {
         this.docId = docId;
         this.docNm = docNm;
-        this.location = location;
         this.teamNm = teamNm;
         this.manager = manager;
         this.subManager = subManager;
         this.storageYear = storageYear;
-        this.creationYear = creationYear;
+        this.createDate = createDate;
         this.transferDate = transferDate;
-        this.disposalDate = transferDate;
+        this.disposalDate = disposalDate;
+        this.registr = registr;
     }
 }
