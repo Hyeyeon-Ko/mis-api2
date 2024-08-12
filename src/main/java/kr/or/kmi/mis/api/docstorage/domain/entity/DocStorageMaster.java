@@ -47,4 +47,8 @@ public class DocStorageMaster {
         this.type = type;
         this.status = status;
     }
+
+    public void updateStatus(String newStatus) {
+        this.status = newStatus;
+    }
 }

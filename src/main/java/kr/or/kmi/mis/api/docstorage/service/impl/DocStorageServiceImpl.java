@@ -87,6 +87,7 @@ public class DocStorageServiceImpl implements DocStorageService {
     }
 
     @Override
+    @Transactional
     public void saveAll(List<DocStorageDetail> documents) {
         for (DocStorageDetail document : documents) {
             if (document.getDraftId() == null) {
@@ -94,5 +95,16 @@ public class DocStorageServiceImpl implements DocStorageService {
             }
         }
         docStorageDetailRepository.saveAll(documents);
+    }
+
+    @Override
+    @Transactional
+    public void approveStorage(List<Long> draftIds) {
+        draftIds.forEach(draftId -> {
+            docStorageMasterRepository.findById(draftId).ifPresent(docStorageMaster -> {
+                docStorageMaster.updateStatus("B");
+                docStorageMasterRepository.save(docStorageMaster);
+            });
+        });
     }
 }

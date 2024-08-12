@@ -3,10 +3,7 @@ package kr.or.kmi.mis.api.std.model.entity;
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

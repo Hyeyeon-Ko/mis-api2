@@ -60,9 +60,18 @@ public class DocStorageController {
         return ResponseWrapper.success();
     }
 
+    @Operation(summary = "upload docStorage", description = "엑셀 파일로 문서보관 일괄 신청 ")
     @PostMapping("/upload")
     public ApiResponse<?> uploadData(@RequestBody List<DocStorageDetail> documents) {
         docStorageService.saveAll(documents);
+        return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "approve docStorage apply", description = "문서보관 신청 승인")
+    @PutMapping("/approve")
+    public ApiResponse<?> approveDocStorage(@RequestParam("draftIds") List<Long> draftIds) {
+        docStorageService.approveStorage(draftIds);
+
         return ResponseWrapper.success();
     }
 
