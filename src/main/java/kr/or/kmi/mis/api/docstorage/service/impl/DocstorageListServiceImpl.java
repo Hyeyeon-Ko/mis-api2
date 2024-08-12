@@ -1,0 +1,113 @@
+package kr.or.kmi.mis.api.docstorage.service.impl;
+
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
+import kr.or.kmi.mis.api.docstorage.domain.response.*;
+import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
+import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
+import kr.or.kmi.mis.api.docstorage.service.DocstorageListService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
+import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
+import kr.or.kmi.mis.api.user.service.InfoService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class DocstorageListServiceImpl implements DocstorageListService {
+
+    private final StdDetailRepository stdDetailRepository;
+    private final DocStorageDetailRepository docStorageDetailRepository;
+    private final DocStorageMasterRepository docStorageMasterRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final InfoService infoService;
+
+    @Override
+    public List<DocstorageResponseDTO> getDocstorageCenterList(String userId) {
+
+        InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(userId);
+        String instCd = infoDetailResponseDTO.getInstCd();
+
+        List<DocStorageMaster> docStorageMasterList = docStorageMasterRepository.findAllByInstCd(instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        List<DocstorageResponseDTO> docstorageResponseDTOList = new ArrayList<>();
+
+        docStorageMasterList.forEach(docStorageMaster -> docstorageResponseDTOList.addAll(getDocstorageResponsesForMaster(docStorageMaster)));
+
+        return docstorageResponseDTOList;
+    }
+
+    @Override
+    public DocstorageTotalListResponseDTO getTotalDocstorageList() {
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Standard Group not found for code: A001"));
+        List<StdDetail> stdDetailList = stdDetailRepository.findAllByUseAtAndGroupCd("Y", stdGroup)
+                .orElseThrow(() -> new IllegalArgumentException("Standard Detail not found"));
+
+        List<CenterResponseDTO> centerList = stdDetailList.stream()
+                .map(stdDetail -> CenterResponseDTO.builder()
+                        .detailNm(stdDetail.getDetailNm())
+                        .detailCd(stdDetail.getDetailCd())
+                        .build())
+                .toList();
+
+        Map<String, List<DocstorageResponseDTO>> responseMap = new HashMap<>();
+        responseMap.put("100", new ArrayList<>());
+        responseMap.put("101", new ArrayList<>());
+        responseMap.put("102", new ArrayList<>());
+        responseMap.put("103", new ArrayList<>());
+        responseMap.put("104", new ArrayList<>());
+        responseMap.put("105", new ArrayList<>());
+        responseMap.put("106", new ArrayList<>());
+        responseMap.put("107", new ArrayList<>());
+        responseMap.put("108", new ArrayList<>());
+
+        stdDetailList.forEach(stdDetail -> {
+            List<DocStorageMaster> docStorageMasterList = docStorageMasterRepository.findAllByInstCd(stdDetail.getDetailCd())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+            docStorageMasterList.forEach(docStorageMaster -> {
+                List<DocstorageResponseDTO> docstorageResponses = getDocstorageResponsesForMaster(docStorageMaster);
+                responseMap.getOrDefault(stdDetail.getDetailCd(), new ArrayList<>()).addAll(docstorageResponses);
+            });
+        });
+
+        CenterDocstorageListResponseDTO centerDocstorageListResponseDTO = CenterDocstorageListResponseDTO.of(
+                responseMap.get("100"), responseMap.get("101"), responseMap.get("102"), responseMap.get("103"),
+                responseMap.get("104"), responseMap.get("105"), responseMap.get("106"), responseMap.get("107"), responseMap.get("108")
+        );
+
+        return DocstorageTotalListResponseDTO.of(centerList, List.of(centerDocstorageListResponseDTO));
+    }
+
+    private List<DocstorageResponseDTO> getDocstorageResponsesForMaster(DocStorageMaster docStorageMaster) {
+        List<DocStorageDetail> docStorageDetails = docStorageDetailRepository.findAllByDraftId(docStorageMaster.getDraftId())
+                .orElseThrow(() -> new IllegalArgumentException("DocStorageDetails not found for draftId: " + docStorageMaster.getDraftId()));
+
+        return docStorageDetails.stream()
+                .map(docStorageDetail -> DocstorageResponseDTO.builder()
+                        .teamNm(docStorageDetail.getTeamNm())
+                        .docId(docStorageDetail.getDocId())
+                        .location(docStorageDetail.getLocation())
+                        .docNm(docStorageDetail.getDocNm())
+                        .manager(docStorageDetail.getManager())
+                        .subManager(docStorageDetail.getSubManager())
+                        .storageYear(docStorageDetail.getStorageYear())
+                        .createDate(docStorageDetail.getCreateDate())
+                        .transferDate(docStorageDetail.getTransferDate())
+                        .tsdNum(docStorageDetail.getTsdNum())
+                        .disposalDate(docStorageDetail.getDisposalDate())
+                        .dpdraftNum(docStorageDetail.getDpdNum())
+                        .build())
+                .toList();
+    }
+
+}
