@@ -75,7 +75,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
             Row row = sheet.createRow(rowNum.getAndIncrement());
             row.setHeight((short) 600);
 
-            createCell(row, 0, no.getAndIncrement(), thickBorderStyle, centeredStyle);
+            createCell(row, 0, no.getAndIncrement(), thinBorderStyle, centeredStyle);
             createCell(row, 1, detail.getTeamNm(), thinBorderStyle, centeredStyle);
             createCell(row, 2, detail.getDocId(), thinBorderStyle, centeredStyle);
             createCell(row, 3, detail.getLocation() != null ? detail.getLocation() : "", thinBorderStyle, centeredStyle);
@@ -111,14 +111,87 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     }
 
     private void createMergedHeader(Sheet sheet, CellStyle style) {
-        Row headerRow = sheet.createRow(2);
-        headerRow.setHeight((short) 700);
-        String[] headers = {"No", "팀명", "문서관리번호\n(신규생성)", "입고위치\n(대호물류창고)", "문서명", "관리자(정)", "관리자(부)", "보존연한", "생성일자", "이관일자", "기안번호", "폐기일자", "기안번호"};
+        Row headerRow1 = sheet.createRow(2);
+        headerRow1.setHeight((short) 500);
 
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(headers[i]);
-            cell.setCellStyle(style);
+        Row headerRow2 = sheet.createRow(3);
+        headerRow2.setHeight((short) 500);
+
+        // NO 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 0, 2, 3, style, "No");
+
+        // 팀명 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 1, 2, 3, style, "팀명");
+
+        // 문서관리번호 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 2, 2, 3, style, "문서관리번호");
+
+        // 입고위치 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 3, 2, 3, style, "입고위치");
+
+        // 문서명 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 4, 2, 3, style, "문서명");
+
+        // 관리자 셀 (5~6열 병합)
+        createMergedCell(headerRow1, headerRow2, sheet, 5, 2, 2, 5, 6, style, "관리자");
+        createMergedCell(headerRow2, sheet, 5, style, "정");
+        createMergedCell(headerRow2, sheet, 6, style, "부");
+
+        // 보존연한 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 7, 2, 3, style, "보존연한");
+
+        // 생성일자 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 8, 2, 3, style, "생성일자");
+
+        // 이관일자 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 9, 2, 3, style, "이관일자");
+
+        // 기안번호 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 10, 2, 3, style, "기안번호");
+
+        // 폐기일자 셀
+        createMergedCell(headerRow1, headerRow2, sheet, 11, 2, 3, style, "폐기일자");
+
+        // 기안번호 셀 (12열)
+        createMergedCell(headerRow1, headerRow2, sheet, 12, 2, 3, style, "기안번호");
+    }
+
+    private void createMergedCell(Row headerRow1, Row headerRow2, Sheet sheet, int column, int startRow, int endRow, CellStyle style, String value) {
+        Cell cell = headerRow1.createCell(column);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+        sheet.addMergedRegion(new CellRangeAddress(startRow, endRow, column, column));
+        applyStyleToMergedRegion(sheet, startRow, endRow, column, column, style);
+    }
+
+    private void createMergedCell(Row headerRow, Sheet sheet, int column, CellStyle style, String value) {
+        Cell cell = headerRow.createCell(column);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+        applyStyleToMergedRegion(sheet, headerRow.getRowNum(), headerRow.getRowNum(), column, column, style);
+    }
+
+    private void createMergedCell(Row headerRow1, Row headerRow2, Sheet sheet, int column, int startRow1, int endRow1, int startCol, int endCol, CellStyle style, String value) {
+        Cell cell = headerRow1.createCell(column);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+        sheet.addMergedRegion(new CellRangeAddress(startRow1, endRow1, startCol, endCol));
+        applyStyleToMergedRegion(sheet, startRow1, endRow1, startCol, endCol, style);
+    }
+
+    private void applyStyleToMergedRegion(Sheet sheet, int startRow, int endRow, int startCol, int endCol, CellStyle style) {
+        for (int i = startRow; i <= endRow; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) {
+                row = sheet.createRow(i);
+            }
+            for (int j = startCol; j <= endCol; j++) {
+                Cell cell = row.getCell(j);
+                if (cell == null) {
+                    cell = row.createCell(j);
+                }
+                cell.setCellStyle(style);
+            }
         }
     }
 
