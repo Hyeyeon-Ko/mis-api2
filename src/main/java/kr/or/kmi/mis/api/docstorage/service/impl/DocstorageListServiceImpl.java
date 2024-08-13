@@ -181,6 +181,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                     }
 
                     return DocstorageResponseDTO.builder()
+                            .detailId(docStorageDetail.getDetailId())
                             .draftId(docStorageDetail.getDraftId())
                             .teamNm(docStorageDetail.getTeamNm())
                             .docId(docStorageDetail.getDocId())

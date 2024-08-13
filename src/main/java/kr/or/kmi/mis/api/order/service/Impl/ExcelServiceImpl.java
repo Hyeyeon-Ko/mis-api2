@@ -441,17 +441,6 @@ public class ExcelServiceImpl implements ExcelService {
         return style;
     }
 
-    private CellStyle createSubTitleStyle(Workbook wb) {
-        CellStyle style = wb.createCellStyle();
-        Font font = wb.createFont();
-        font.setBold(true);
-        font.setFontHeightInPoints((short) 12);
-        style.setFont(font);
-        style.setAlignment(HorizontalAlignment.CENTER);
-        style.setVerticalAlignment(VerticalAlignment.CENTER);
-        return style;
-    }
-
     private CellStyle createThickBorderStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
         style.setBorderBottom(BorderStyle.MEDIUM);
