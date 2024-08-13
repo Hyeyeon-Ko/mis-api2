@@ -89,12 +89,7 @@ public class DocStorageServiceImpl implements DocStorageService {
 
     @Override
     @Transactional
-    public void saveAll(List<DocStorageDetail> documents) {
-        for (DocStorageDetail document : documents) {
-            if (document.getDraftId() == null) {
-                throw new IllegalArgumentException("Draft ID must be provided");
-            }
-        }
+    public void saveFileData(List<DocStorageDetail> documents) {
         docStorageDetailRepository.saveAll(documents);
     }
 

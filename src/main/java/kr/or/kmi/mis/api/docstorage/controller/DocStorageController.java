@@ -64,7 +64,7 @@ public class DocStorageController {
     @Operation(summary = "upload docStorage", description = "엑셀 파일로 문서보관 일괄 신청 ")
     @PostMapping("/upload")
     public ApiResponse<?> uploadData(@RequestBody List<DocStorageDetail> documents) {
-        docStorageService.saveAll(documents);
+        docStorageService.saveFileData(documents);
         return ResponseWrapper.success();
     }
 

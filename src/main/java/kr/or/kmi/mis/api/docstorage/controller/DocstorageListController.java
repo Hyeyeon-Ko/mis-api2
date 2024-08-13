@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageCenterListResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageTotalListResponseDTO;
@@ -10,7 +9,6 @@ import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
