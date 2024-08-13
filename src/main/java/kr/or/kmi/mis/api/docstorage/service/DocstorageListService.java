@@ -11,6 +11,9 @@ public interface DocstorageListService {
     /* 부서별 문서보관 내역 */
     List<DocstorageResponseDTO> getDocstorageDeptList(String deptCd);
 
+    /* 센터별 승인대기 내역 */
+    List<DocstorageResponseDTO> getDocstoragePendingList(String instCd);
+
     /* 센터별 문서보관 내역 */
     DocstorageCenterListResponseDTO getDocstorageCenterList(String instCd);
 

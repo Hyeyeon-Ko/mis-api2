@@ -35,9 +35,38 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     }
 
     @Override
+    public List<DocstorageResponseDTO> getDocstoragePendingList(String instCd) {
+
+        List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCdAndA(instCd);
+
+        return docStorageMasterList.stream()
+                .flatMap(master -> {
+                    List<DocStorageDetail> details = fetchDocStorageDetailsByDraftId(master.getDraftId());
+
+                    return details.stream()
+                            .map(detail -> DocstorageResponseDTO.builder()
+                                    .draftId(master.getDraftId())
+                                    .teamNm(detail.getTeamNm())
+                                    .docId(detail.getDocId())
+                                    .location(detail.getLocation())
+                                    .docNm(detail.getDocNm())
+                                    .manager(detail.getManager())
+                                    .subManager(detail.getSubManager())
+                                    .storageYear(detail.getStorageYear())
+                                    .createDate(detail.getCreateDate())
+                                    .transferDate(detail.getTransferDate())
+                                    .tsdNum(detail.getTsdNum())
+                                    .disposalDate(detail.getDisposalDate())
+                                    .dpdraftNum(detail.getDpdNum())
+                                    .build());
+                })
+                .toList();
+    }
+
+    @Override
     public DocstorageCenterListResponseDTO getDocstorageCenterList(String instCd) {
         List<DeptResponseDTO> deptList = fetchDeptListForCenter(instCd);
-        List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCd(instCd);
+        List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCdAndE(instCd);
 
         Map<String, List<DocStorageMaster>> groupedByDept = groupByDeptCd(docStorageMasterList);
         List<DeptDocstorageListResponseDTO> deptDocstorageListResponses = groupedByDept.entrySet().stream()
@@ -53,7 +82,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
         Map<String, List<DocstorageResponseDTO>> responseMap = initializeResponseMap();
 
         centerList.forEach(center -> {
-            List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCd(center.getDetailCd());
+            List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCdAndE(center.getDetailCd());
             docStorageMasterList.forEach(master -> addToResponseMap(responseMap, center.getDetailCd(), master));
         });
 
@@ -84,7 +113,12 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                 .orElseThrow(() -> new IllegalArgumentException("Standard Group not found for code: " + groupCd));
     }
 
-    private List<DocStorageMaster> fetchDocStorageMastersByInstCd(String instCd) {
+    private List<DocStorageMaster> fetchDocStorageMastersByInstCdAndA(String instCd) {
+        return docStorageMasterRepository.findAllByInstCdAndStatus(instCd, "A")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+    }
+
+    private List<DocStorageMaster> fetchDocStorageMastersByInstCdAndE(String instCd) {
         return docStorageMasterRepository.findAllByInstCdAndStatus(instCd, "E")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
     }

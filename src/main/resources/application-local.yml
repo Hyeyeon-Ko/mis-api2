@@ -31,7 +31,7 @@ external:
   login:
     url: http://172.16.250.85/mis/login
   userInfo:
-    url: http://10.1.10.129/mis/userDeptInfo
+    url: http://172.16.250.85/mis/userDeptInfo
 
 logging:
   level:

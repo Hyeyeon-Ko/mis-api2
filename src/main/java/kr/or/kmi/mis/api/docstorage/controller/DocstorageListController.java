@@ -27,6 +27,11 @@ public class DocstorageListController {
         return ResponseWrapper.success(docstorageListService.getDocstorageDeptList(deptCd));
     }
 
+    @GetMapping("/pending")
+    public ApiResponse<List<DocstorageResponseDTO>> getDocstoragePendingList(String instCd) {
+        return ResponseWrapper.success(docstorageListService.getDocstoragePendingList(instCd));
+    }
+
     @GetMapping("/center")
     public ApiResponse<DocstorageCenterListResponseDTO> getDocstorageCenterList(String instCd) {
         return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(instCd));
