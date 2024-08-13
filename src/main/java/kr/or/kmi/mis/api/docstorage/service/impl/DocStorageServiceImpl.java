@@ -98,8 +98,6 @@ public class DocStorageServiceImpl implements DocStorageService {
     public void saveFileData(List<DocStorageDetail> documents, String teamCd) {
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("A003")
                 .orElseThrow(() -> new IllegalArgumentException("StdGroup Not Found"));
-        System.out.println("stdGroup = " + stdGroup);
-        System.out.println("teamCd = " + teamCd);
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, teamCd)
                         .orElseThrow(() -> new IllegalArgumentException("StdDetail Not Found"));
 

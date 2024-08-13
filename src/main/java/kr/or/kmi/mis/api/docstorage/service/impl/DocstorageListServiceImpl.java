@@ -58,6 +58,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                                     .tsdNum(detail.getTsdNum())
                                     .disposalDate(detail.getDisposalDate())
                                     .dpdraftNum(detail.getDpdNum())
+                                    .type(master.getType())
                                     .build());
                 })
                 .toList();
