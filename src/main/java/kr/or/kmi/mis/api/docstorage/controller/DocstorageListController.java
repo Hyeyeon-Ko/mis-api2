@@ -22,9 +22,9 @@ public class DocstorageListController {
 
     private final DocstorageListService docstorageListService;
 
-    @GetMapping("dept")
-    public ApiResponse<List<DocstorageResponseDTO>> getDocstorageDeptList(String userId) {
-        return ResponseWrapper.success(docstorageListService.getDocstorageDeptList(userId));
+    @GetMapping("/dept")
+    public ApiResponse<List<DocstorageResponseDTO>> getDocstorageDeptList(String deptCd) {
+        return ResponseWrapper.success(docstorageListService.getDocstorageDeptList(deptCd));
     }
 
     @GetMapping("/center")

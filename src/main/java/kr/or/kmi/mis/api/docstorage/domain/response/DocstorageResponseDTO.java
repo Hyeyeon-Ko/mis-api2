@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class DocstorageResponseDTO {
 
+    private Long draftId;
     private String teamNm;
     private String docId;
     private String location;
@@ -18,10 +19,14 @@ public class DocstorageResponseDTO {
     private String tsdNum;
     private String disposalDate;
     private String dpdraftNum;
+    private String type;
+    private String status;
 
     @Builder
-    public DocstorageResponseDTO(String teamNm, String docId, String location, String docNm, String manager, String subManager,
-                                 String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdraftNum) {
+    public DocstorageResponseDTO(Long draftId, String teamNm, String docId, String location, String docNm, String manager, String subManager,
+                                 String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdraftNum,
+                                 String type, String status) {
+        this.draftId = draftId;
         this.teamNm = teamNm;
         this.docId = docId;
         this.location = location;
@@ -34,5 +39,7 @@ public class DocstorageResponseDTO {
         this.tsdNum = tsdNum;
         this.disposalDate = disposalDate;
         this.dpdraftNum = dpdraftNum;
+        this.type = type;
+        this.status = status;
     }
 }

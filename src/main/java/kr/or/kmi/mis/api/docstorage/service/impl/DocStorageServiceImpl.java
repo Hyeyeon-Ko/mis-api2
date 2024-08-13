@@ -9,6 +9,10 @@ import kr.or.kmi.mis.api.docstorage.domain.response.DocStorageDetailResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocStorageService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +28,8 @@ public class DocStorageServiceImpl implements DocStorageService {
     private final DocStorageMasterRepository docStorageMasterRepository;
     private final DocStorageDetailRepository docStorageDetailRepository;
     private final InfoService infoService;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional
@@ -89,7 +95,19 @@ public class DocStorageServiceImpl implements DocStorageService {
 
     @Override
     @Transactional
-    public void saveFileData(List<DocStorageDetail> documents) {
+    public void saveFileData(List<DocStorageDetail> documents, String teamCd) {
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A003")
+                .orElseThrow(() -> new IllegalArgumentException("StdGroup Not Found"));
+        System.out.println("stdGroup = " + stdGroup);
+        System.out.println("teamCd = " + teamCd);
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, teamCd)
+                        .orElseThrow(() -> new IllegalArgumentException("StdDetail Not Found"));
+
+        String deptCd = stdDetail.getEtcItem1();
+
+        documents.stream()
+                .forEach(document -> document.updateDeptCd(deptCd));
+
         docStorageDetailRepository.saveAll(documents);
     }
 

@@ -14,6 +14,6 @@ public interface DocStorageService {
     void deleteStorageInfo(Long detailId);
     DocStorageDetailResponseDTO getStorageInfo(Long detailId);
     void applyStorage(DocStorageApplyRequestDTO docStorageApplyRequestDTO);
-    void saveFileData(List<DocStorageDetail> documents);
+    void saveFileData(List<DocStorageDetail> documents, String teamCd);
     void approveStorage(List<Long> draftIds);
 }

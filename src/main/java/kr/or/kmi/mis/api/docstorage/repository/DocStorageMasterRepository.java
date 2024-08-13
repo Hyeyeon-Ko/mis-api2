@@ -8,6 +8,5 @@ import java.util.Optional;
 
 public interface DocStorageMasterRepository extends JpaRepository<DocStorageMaster, Long> {
 
-    Optional<List<DocStorageMaster>> findAllByDeptCd(String deptCd);
-    Optional<List<DocStorageMaster>> findAllByInstCd(String instCd);
+    Optional<List<DocStorageMaster>> findAllByInstCdAndStatus(String instCd, String status);
 }

@@ -6,6 +6,7 @@ import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocstorageFileRequestDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocStorageService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -63,8 +64,8 @@ public class DocStorageController {
 
     @Operation(summary = "upload docStorage", description = "엑셀 파일로 문서보관 일괄 신청 ")
     @PostMapping("/upload")
-    public ApiResponse<?> uploadData(@RequestBody List<DocStorageDetail> documents) {
-        docStorageService.saveFileData(documents);
+    public ApiResponse<?> uploadData(@RequestBody DocstorageFileRequestDTO request) {
+        docStorageService.saveFileData(request.getDocuments(), request.getTeamCd());
         return ResponseWrapper.success();
     }
 

@@ -58,6 +58,9 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     @Column(length = 50)
     private String dpdNum;         // 폐기 기안번호
 
+    @Column(length = 20)
+    private String deptCd;
+
 
     @Builder
     public DocStorageDetail(String docId, String docNm, String teamNm, String manager, String subManager,
@@ -89,5 +92,9 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
 
     public void updateDraftId(Long draftId) {
         this.draftId = draftId;
+    }
+
+    public void updateDeptCd(String deptCd) {
+        this.deptCd = deptCd;
     }
 }
