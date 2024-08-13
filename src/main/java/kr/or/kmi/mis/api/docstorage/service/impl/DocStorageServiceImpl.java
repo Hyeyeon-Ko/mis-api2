@@ -37,6 +37,8 @@ public class DocStorageServiceImpl implements DocStorageService {
         DocStorageDetail docStorageDetail = docStorageRequestDTO.toDetailEntity();
 
         docStorageDetail.setRgstrId(infoService.getUserInfo().getUserName());
+        docStorageDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+
         docStorageDetailRepository.save(docStorageDetail);
     }
 

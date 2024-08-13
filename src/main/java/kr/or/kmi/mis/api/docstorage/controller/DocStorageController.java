@@ -2,7 +2,6 @@ package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/storage")
+@RequestMapping("/api/docstorage")
 @RequiredArgsConstructor
 @Tag(name="DocStorageCRUD", description = "문서보관목록 관련 CRUD API")
 public class DocStorageController {
