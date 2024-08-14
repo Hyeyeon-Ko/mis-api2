@@ -105,7 +105,7 @@ public class DocStorageServiceImpl implements DocStorageService {
 
         String deptCd = stdDetail.getEtcItem1();
 
-        documents.stream()
+        documents
                 .forEach(document -> document.updateDeptCd(deptCd));
 
         docStorageDetailRepository.saveAll(documents);
