@@ -47,7 +47,17 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     @Override
     public byte[] generateExcel(List<Long> detailIds) throws IOException {
         List<DocStorageDetail> docStorageDetails = docStorageDetailRepository.findAllByDetailIdIn(detailIds);
-        return createExcelData(docStorageDetails);
+
+        // 엑셀 파일 생성
+        Workbook wb = new XSSFWorkbook();
+        try {
+            byte[] excelData = createExcelData(docStorageDetails);
+            return excelData;
+        } catch (Exception e) {
+            throw new IOException("Error generating Excel file", e);
+        } finally {
+            wb.close();
+        }
     }
 
     private byte[] createExcelData(List<DocStorageDetail> docStorageDetails) throws IOException {
@@ -59,7 +69,6 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         CellStyle thinBorderStyle = createThinBorderStyle(wb);
         CellStyle titleStyle = createTitleStyle(wb);
         CellStyle centeredStyle = createCenteredStyle(wb);
-        CellStyle thickBorderStyle = createThickBorderStyle(wb);
 
         // 제목 생성
         createTitle(sheet, titleStyle);
@@ -96,18 +105,27 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         // 엑셀 파일을 ByteArrayOutputStream에 쓰기
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         wb.write(baos);
-        wb.close();
-
         return baos.toByteArray();
     }
 
-    private void createTitle(Sheet sheet, CellStyle style) {
+    private void createTitle(Sheet sheet, CellStyle titleStyle) {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeight((short) 800);
         Cell cell = titleRow.createCell(0);
         cell.setCellValue("문서박스 목록표");
-        cell.setCellStyle(style);
+
+        CellStyle combinedStyle = sheet.getWorkbook().createCellStyle();
+        combinedStyle.cloneStyleFrom(titleStyle);
+        combinedStyle.setBorderBottom(BorderStyle.MEDIUM);
+        combinedStyle.setBorderTop(BorderStyle.MEDIUM);
+        combinedStyle.setBorderLeft(BorderStyle.MEDIUM);
+        combinedStyle.setBorderRight(BorderStyle.MEDIUM);
+
+        cell.setCellStyle(combinedStyle);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 12));
+
+        // 병합된 영역에 스타일 적용
+        applyStyleToMergedRegion(sheet, 0, 0, 0, 12, combinedStyle);
     }
 
     private void createMergedHeader(Sheet sheet, CellStyle style) {
@@ -198,7 +216,6 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     private void createCell(Row row, int column, Object value, CellStyle borderStyle, CellStyle centeredStyle) {
         Cell cell = row.createCell(column);
 
-        // null 값을 체크하여 빈 문자열로 처리
         if (value == null) {
             cell.setCellValue("");
         } else if (value instanceof String) {
@@ -223,16 +240,16 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         sheet.setColumnWidth(0, 1500);
         sheet.setColumnWidth(1, 8000);
         sheet.setColumnWidth(2, 8000);
-        sheet.setColumnWidth(3, 6000);
-        sheet.setColumnWidth(4, 20000);
+        sheet.setColumnWidth(3, 7000);
+        sheet.setColumnWidth(4, 12000);
         sheet.setColumnWidth(5, 3000);
         sheet.setColumnWidth(6, 3000);
-        sheet.setColumnWidth(7, 4000);
-        sheet.setColumnWidth(8, 4000);
-        sheet.setColumnWidth(9, 6000);
-        sheet.setColumnWidth(10, 8000);
-        sheet.setColumnWidth(11, 6000);
-        sheet.setColumnWidth(12, 8000);
+        sheet.setColumnWidth(7, 2500);
+        sheet.setColumnWidth(8, 5000);
+        sheet.setColumnWidth(9, 5000);
+        sheet.setColumnWidth(10, 7000);
+        sheet.setColumnWidth(11, 5000);
+        sheet.setColumnWidth(12, 7000);
     }
 
     private CellStyle createThinBorderStyle(Workbook wb) {
@@ -250,7 +267,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         CellStyle style = wb.createCellStyle();
         Font font = wb.createFont();
         font.setBold(true);
-        font.setFontHeightInPoints((short) 16);
+        font.setFontHeightInPoints((short) 24);
         style.setFont(font);
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -275,17 +292,6 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     private CellStyle createCenteredStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
-        style.setAlignment(HorizontalAlignment.CENTER);
-        style.setVerticalAlignment(VerticalAlignment.CENTER);
-        return style;
-    }
-
-    private CellStyle createThickBorderStyle(Workbook wb) {
-        CellStyle style = wb.createCellStyle();
-        style.setBorderBottom(BorderStyle.MEDIUM);
-        style.setBorderTop(BorderStyle.MEDIUM);
-        style.setBorderLeft(BorderStyle.MEDIUM);
-        style.setBorderRight(BorderStyle.MEDIUM);
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
         return style;

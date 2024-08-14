@@ -2,15 +2,16 @@ package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocstorageFileRequestDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocStorageService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -61,11 +62,12 @@ public class DocStorageController {
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "upload docStorage", description = "엑셀 파일로 문서보관 일괄 신청 ")
-    @PostMapping("/upload")
-    public ApiResponse<?> uploadData(@RequestBody DocstorageFileRequestDTO request) {
-        docStorageService.saveFileData(request.getDocuments(), request.getTeamCd());
-        return ResponseWrapper.success();
+    @Operation(summary = "upload docStorage with file", description = "엑셀 파일로 문서보관 일괄 신청")
+    @PostMapping("/upload-file")
+    public ApiResponse<?> uploadDataWithFile(@RequestParam("file") MultipartFile file,
+                                             @RequestParam("teamCd") String teamCd) {
+        List<DocStorageDetail> documents = docStorageService.parseAndSaveFileData(file, teamCd);
+        return ResponseWrapper.success(documents);
     }
 
     @Operation(summary = "approve docStorage apply", description = "문서보관 신청 승인")

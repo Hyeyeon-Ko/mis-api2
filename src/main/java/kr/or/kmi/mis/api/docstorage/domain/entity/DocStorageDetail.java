@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.docstorage.domain.entity;
 
 import jakarta.persistence.*;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
@@ -63,16 +62,20 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
 
 
     @Builder
-    public DocStorageDetail(String docId, String docNm, String teamNm, String manager, String subManager,
-                            String storageYear, String createDate, String disposalDate) {
+    public DocStorageDetail(String docId, String docNm, String location, String teamNm, String manager, String subManager,
+                            String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdNum) {
         this.docId = docId;
         this.docNm = docNm;
+        this.location = location;
         this.teamNm = teamNm;
         this.manager = manager;
         this.subManager = subManager;
         this.storageYear = storageYear;
         this.createDate = createDate;
+        this.transferDate = transferDate;
+        this.tsdNum = tsdNum;
         this.disposalDate = disposalDate;
+        this.dpdNum = dpdNum;
     }
 
     public void update(DocStorageUpdateRequestDTO docStorageUpdateDTO) {
