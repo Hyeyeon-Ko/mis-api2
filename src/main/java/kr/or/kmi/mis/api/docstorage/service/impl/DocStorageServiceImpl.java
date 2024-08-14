@@ -206,7 +206,7 @@ public class DocStorageServiceImpl implements DocStorageService {
     public void approveStorage(List<Long> draftIds) {
         draftIds.forEach(draftId -> {
             docStorageMasterRepository.findById(draftId).ifPresent(docStorageMaster -> {
-                docStorageMaster.updateStatus("B");
+                docStorageMaster.updateStatus("E");
                 docStorageMasterRepository.save(docStorageMaster);
             });
         });
