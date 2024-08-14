@@ -120,7 +120,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     }
 
     private List<DocStorageMaster> fetchDocStorageMastersByInstCdAndE(String instCd) {
-        return docStorageMasterRepository.findAllByInstCdAndStatus(instCd, "E")
+        return docStorageMasterRepository.findAllByInstCdAndStatusAndType(instCd, "E", "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
     }
 
