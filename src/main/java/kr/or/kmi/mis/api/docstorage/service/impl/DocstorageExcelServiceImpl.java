@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.docstorage.service.impl;
 
 import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
+import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -58,6 +60,27 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         } finally {
             wb.close();
         }
+    }
+
+    @Override
+    public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
+        List<DocStorageDetail> entities = details.stream().map(dto -> DocStorageDetail.builder()
+                .teamNm(dto.getTeamNm())
+                .docId(dto.getDocId())
+                .location(dto.getLocation())
+                .docNm(dto.getDocNm())
+                .manager(dto.getManager())
+                .subManager(dto.getSubManager())
+                .storageYear(dto.getStorageYear())
+                .createDate(dto.getCreateDate())
+                .transferDate(dto.getTransferDate())
+                .tsdNum(dto.getTsdNum())
+                .disposalDate(dto.getDisposalDate())
+                .dpdNum(dto.getDpdNum())
+                .build()).collect(Collectors.toList());
+
+        docStorageDetailRepository.saveAll(entities);
+
     }
 
     private byte[] createExcelData(List<DocStorageDetail> docStorageDetails) throws IOException {
