@@ -14,6 +14,7 @@ public class DocStorageRequestDTO {
     private String storageYear;
     private String createDate;
     private String disposalDate;
+    private String deptCd;
 
     public DocStorageDetail toDetailEntity() {
         return DocStorageDetail.builder()
@@ -25,6 +26,7 @@ public class DocStorageRequestDTO {
                 .storageYear(storageYear)
                 .createDate(createDate)
                 .disposalDate(disposalDate)
+                .deptCd(deptCd)
                 .build();
     }
 }

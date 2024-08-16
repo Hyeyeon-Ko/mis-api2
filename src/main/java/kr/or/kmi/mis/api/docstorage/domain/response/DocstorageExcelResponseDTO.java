@@ -6,8 +6,6 @@ import lombok.Data;
 @Data
 public class DocstorageExcelResponseDTO {
 
-    // todo: 부서 코드 추가 필요!!!
-
     private String teamNm;
     private String docId;
     private String location;
@@ -20,11 +18,12 @@ public class DocstorageExcelResponseDTO {
     private String tsdNum;
     private String disposalDate;
     private String dpdNum;
+    private String deptCd;
 
     @Builder
     public DocstorageExcelResponseDTO(String teamNm, String docId, String location, String docNm, String manager,
                                       String subManager, String storageYear, String createDate, String transferDate,
-                                      String tsdNum, String disposalDate, String dpdNum) {
+                                      String tsdNum, String disposalDate, String dpdNum, String deptCd) {
         this.teamNm = teamNm;
         this.docId = docId;
         this.location = location;
@@ -37,6 +36,7 @@ public class DocstorageExcelResponseDTO {
         this.tsdNum = tsdNum;
         this.disposalDate = disposalDate;
         this.dpdNum = dpdNum;
+        this.deptCd = deptCd;
     }
 
 }

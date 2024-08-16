@@ -28,6 +28,9 @@ public class LoginController {
             session.setAttribute("userId", loginRequestDTO.getUserId());
             session.setAttribute("hngNm", responseDTO.getHngNm());
             session.setAttribute("role", responseDTO.getRole());
+            session.setAttribute("instCd", responseDTO.getInstCd());
+            session.setAttribute("deptCd", responseDTO.getDeptCd());
+            session.setAttribute("teamCd", responseDTO.getTeamCd());
             return ResponseWrapper.success(responseDTO);
         } else {
             return ResponseWrapper.error();

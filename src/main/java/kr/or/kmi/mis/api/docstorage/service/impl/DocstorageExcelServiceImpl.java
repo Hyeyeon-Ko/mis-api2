@@ -5,6 +5,9 @@ import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -16,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -26,6 +30,9 @@ import java.util.stream.Collectors;
 public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     private final DocStorageDetailRepository docStorageDetailRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
+    private final InfoService infoService;
 
     @Override
     public void downloadExcel(HttpServletResponse response, List<Long> detailIds) throws IOException {
@@ -50,7 +57,6 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     public byte[] generateExcel(List<Long> detailIds) throws IOException {
         List<DocStorageDetail> docStorageDetails = docStorageDetailRepository.findAllByDetailIdIn(detailIds);
 
-        // 엑셀 파일 생성
         Workbook wb = new XSSFWorkbook();
         try {
             byte[] excelData = createExcelData(docStorageDetails);
@@ -64,23 +70,34 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     @Override
     public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
-        List<DocStorageDetail> entities = details.stream().map(dto -> DocStorageDetail.builder()
-                .teamNm(dto.getTeamNm())
-                .docId(dto.getDocId())
-                .location(dto.getLocation())
-                .docNm(dto.getDocNm())
-                .manager(dto.getManager())
-                .subManager(dto.getSubManager())
-                .storageYear(dto.getStorageYear())
-                .createDate(dto.getCreateDate())
-                .transferDate(dto.getTransferDate())
-                .tsdNum(dto.getTsdNum())
-                .disposalDate(dto.getDisposalDate())
-                .dpdNum(dto.getDpdNum())
-                .build()).collect(Collectors.toList());
+
+        String rgstrId = infoService.getUserInfo().getUserName();
+        Timestamp rgstDt = new Timestamp(System.currentTimeMillis());
+
+        List<DocStorageDetail> entities = details.stream().map(dto -> {
+            DocStorageDetail entity = DocStorageDetail.builder()
+                    .teamNm(dto.getTeamNm())
+                    .docId(dto.getDocId())
+                    .location(dto.getLocation())
+                    .docNm(dto.getDocNm())
+                    .manager(dto.getManager())
+                    .subManager(dto.getSubManager())
+                    .storageYear(dto.getStorageYear())
+                    .createDate(dto.getCreateDate())
+                    .transferDate(dto.getTransferDate())
+                    .tsdNum(dto.getTsdNum())
+                    .disposalDate(dto.getDisposalDate())
+                    .dpdNum(dto.getDpdNum())
+                    .deptCd(dto.getDeptCd())
+                    .build();
+
+            entity.setRgstrId(rgstrId);
+            entity.setRgstDt(rgstDt);
+
+            return entity;
+        }).collect(Collectors.toList());
 
         docStorageDetailRepository.saveAll(entities);
-
     }
 
     private byte[] createExcelData(List<DocStorageDetail> docStorageDetails) throws IOException {

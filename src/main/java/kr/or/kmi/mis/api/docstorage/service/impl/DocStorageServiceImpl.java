@@ -9,25 +9,11 @@ import kr.or.kmi.mis.api.docstorage.domain.response.DocStorageDetailResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocStorageService;
-import kr.or.kmi.mis.api.std.model.entity.StdDetail;
-import kr.or.kmi.mis.api.std.model.entity.StdGroup;
-import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
-import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.sql.Timestamp;
 
@@ -38,8 +24,6 @@ public class DocStorageServiceImpl implements DocStorageService {
     private final DocStorageMasterRepository docStorageMasterRepository;
     private final DocStorageDetailRepository docStorageDetailRepository;
     private final InfoService infoService;
-    private final StdGroupRepository stdGroupRepository;
-    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional

@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,13 +62,37 @@ public class LoginServiceImpl implements LoginService {
         if (responseMap != null && "0000".equals(responseMap.get("resultCd"))) {
             LoginResponseDTO responseDTO = new LoginResponseDTO();
             responseDTO.setHngNm((String) responseMap.get("hngnm"));
+            responseDTO.setTeamCd((String) responseMap.get("orgdeptcd"));
+
+            String instCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getInstCd();
+            responseDTO.setInstCd(instCd);
+
+            // teamCd, instCd -> deptCd
+            StdGroup teamStdGroup = stdGroupRepository.findByGroupCd("A003")
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+            List<StdDetail> teamStdDetails = stdDetailRepository.findByGroupCdAndEtcItem3(teamStdGroup, responseDTO.getTeamCd())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+            Optional<String> deptCdOpt = teamStdDetails.stream()
+                    .map(teamStdDetail -> {
+                        try {
+                            return stdDetailRepository.findByDetailCdAndEtcItem1(teamStdDetail.getEtcItem1(), responseDTO.getInstCd())
+                                    .map(StdDetail::getDetailCd)
+                                    .orElse(null);
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .findFirst();
+
+            String deptCd = deptCdOpt.orElseThrow(() -> new IllegalArgumentException("No matching department code found"));
+            responseDTO.setDeptCd(deptCd);
 
             Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(loginRequestDTO.getUserId()).orElse(null);
             responseDTO.setRole(authority != null ? authority.getRole() : "USER");
             responseDTO.setSidebarPermissions(sidebarPermissions);
-
-            String instCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getInstCd();
-            responseDTO.setInstCd(instCd);
 
             return responseDTO;
         } else {
