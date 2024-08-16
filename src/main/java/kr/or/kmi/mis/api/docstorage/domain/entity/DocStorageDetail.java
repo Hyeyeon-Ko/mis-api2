@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.docstorage.domain.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -92,6 +93,21 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
         this.tsdNum=docStorageUpdateDTO.getTsdNum();
         this.disposalDate=docStorageUpdateDTO.getDisposalDate();
         this.dpdNum=docStorageUpdateDTO.getDpdNum();
+    }
+    
+    public void updateExcelData(DocstorageExcelResponseDTO dto) {
+        this.docNm=dto.getDocNm();
+        this.location=dto.getLocation();
+        System.out.println("this.location = " + this.location);
+        this.teamNm=dto.getTeamNm();
+        this.manager=dto.getManager();
+        this.subManager=dto.getSubManager();
+        this.storageYear=dto.getStorageYear();
+        this.createDate=dto.getCreateDate();
+        this.transferDate=dto.getTransferDate();
+        this.tsdNum=dto.getTsdNum();
+        this.disposalDate=dto.getDisposalDate();
+        this.dpdNum=dto.getDpdNum();
     }
 
     public void updateDraftId(Long draftId) {

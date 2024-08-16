@@ -103,30 +103,14 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     @Override
     public void updateDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
-        List<DocStorageDetail> entities = details.stream().map(dto -> {
-
+        details.forEach(dto -> {
             DocStorageDetail existingDetail = docStorageDetailRepository.findByDocId(dto.getDocId())
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-            return DocStorageDetail.builder()
-                    .detailId(existingDetail.getDetailId())
-                    .docId(existingDetail.getDocId())
-                    .teamNm(dto.getTeamNm() != null ? dto.getTeamNm() : existingDetail.getTeamNm())
-                    .location(dto.getLocation() != null ? dto.getLocation() : existingDetail.getLocation())
-                    .docNm(dto.getDocNm() != null ? dto.getDocNm() : existingDetail.getDocNm())
-                    .manager(dto.getManager() != null ? dto.getManager() : existingDetail.getManager())
-                    .subManager(dto.getSubManager() != null ? dto.getSubManager() : existingDetail.getSubManager())
-                    .storageYear(dto.getStorageYear() != null ? dto.getStorageYear() : existingDetail.getStorageYear())
-                    .createDate(dto.getCreateDate() != null ? dto.getCreateDate() : existingDetail.getCreateDate())
-                    .transferDate(dto.getTransferDate() != null ? dto.getTransferDate() : existingDetail.getTransferDate())
-                    .tsdNum(dto.getTsdNum() != null ? dto.getTsdNum() : existingDetail.getTsdNum())
-                    .disposalDate(dto.getDisposalDate() != null ? dto.getDisposalDate() : existingDetail.getDisposalDate())
-                    .dpdNum(dto.getDpdNum() != null ? dto.getDpdNum() : existingDetail.getDpdNum())
-                    .deptCd(existingDetail.getDeptCd())
-                    .build();
-        }).collect(Collectors.toList());
+            existingDetail.updateExcelData(dto);
 
-        docStorageDetailRepository.saveAll(entities);
+            docStorageDetailRepository.save(existingDetail);
+        });
     }
 
     private byte[] createExcelData(List<DocStorageDetail> docStorageDetails) throws IOException {

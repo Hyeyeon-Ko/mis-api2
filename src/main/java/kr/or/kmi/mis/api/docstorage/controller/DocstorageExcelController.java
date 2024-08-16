@@ -32,7 +32,7 @@ public class DocstorageExcelController {
     }
 
     @Operation(summary = "modify docStorage info with file", description = "문서보관 관련 정보 파일을 통한 수정")
-    @PutMapping("/update")
+    @PostMapping("/update")
     public void modifyDocStorageInfo(@RequestBody List<DocstorageExcelResponseDTO> details) {
         docstorageExcelService.updateDocstorageDetails(details);
     }
