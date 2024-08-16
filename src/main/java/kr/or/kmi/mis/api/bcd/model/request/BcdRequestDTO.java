@@ -16,6 +16,7 @@ public class BcdRequestDTO {
     String deptCd;
     String teamCd;
     String teamNm;
+    String engTeamNm;
     String gradeCd;
     String gradeNm;
     String enGradeNm;
@@ -33,7 +34,7 @@ public class BcdRequestDTO {
         return BcdMaster.builder()
                 .drafter(drafter)
                 .drafterId(drafterId)
-                .teamNm(teamNm)
+                .teamNm(teamNm)         // 얘는,,,
                 .korNm(korNm)
                 .build();
     }
@@ -49,6 +50,8 @@ public class BcdRequestDTO {
                 .instCd(instCd)
                 .deptCd(deptCd)
                 .teamCd(teamCd)
+                .teamNm(teamNm)
+                .engteamNm(engTeamNm)
                 .gradeCd(gradeCd)
                 .gradeNm(gradeNm)
                 .enGradeNm(enGradeNm)

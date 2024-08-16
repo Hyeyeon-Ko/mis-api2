@@ -25,11 +25,18 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
         // 기준자료에서 각각의 명칭 담아 저장
         String instNm = stdBcdService.getInstNm(bcdDetail.getInstCd());
         String deptNm = stdBcdService.getDeptNm(bcdDetail.getDeptCd());
-        String teamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getFirst();
-        String engTeamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getLast();
+        String teamNm = "";
+        String engTeamnm = "";
+        if (bcdDetail.getEngteamNm() == null) {
+            teamNm = bcdDetail.getTeamNm();
+            engTeamnm = bcdDetail.getTeamNm();
+        } else {
+            teamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getFirst();
+            engTeamnm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getLast();
+        }
         String grade = "";
         String engGrade = "";
-        if (stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst().equals("직접입력")) {
+        if (bcdDetail.getGradeCd().equals("000")) {
             grade = bcdDetail.getGradeNm();
             engGrade = bcdDetail.getEngradeNm();
         } else {
@@ -49,7 +56,7 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
                 .instNm(instNm)
                 .deptNm(deptNm)
                 .teamNm(teamNm)
-                .engTeamnm(engTeamNm)
+                .engTeamnm(engTeamnm)
                 .grade(grade)
                 .engGrade(engGrade)
                 .build();

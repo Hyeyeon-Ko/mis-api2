@@ -10,6 +10,7 @@ public class BcdUpdateRequestDTO {
     String deptCd;
     String teamCd;
     String teamNm;
+    String engTeamNm;
     String gradeCd;
     String gradeNm;
     String enGradeNm;
