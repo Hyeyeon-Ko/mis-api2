@@ -62,8 +62,9 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
 
 
     @Builder
-    public DocStorageDetail(String docId, String docNm, String location, String teamNm, String manager, String subManager,
+    public DocStorageDetail(Long detailId, String docId, String docNm, String location, String teamNm, String manager, String subManager,
                             String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdNum, String deptCd) {
+        this.detailId = detailId;
         this.docId = docId;
         this.docNm = docNm;
         this.location = location;
@@ -80,7 +81,6 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     }
 
     public void update(DocStorageUpdateRequestDTO docStorageUpdateDTO) {
-        this.docId=docStorageUpdateDTO.getDocId();
         this.docNm=docStorageUpdateDTO.getDocNm();
         this.location=docStorageUpdateDTO.getLocation();
         this.teamNm=docStorageUpdateDTO.getTeamNm();

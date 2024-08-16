@@ -16,4 +16,7 @@ public interface DocstorageExcelService {
 
     /* 문서보관 내역 저장 */
     void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details);
+
+    /* 문서보관 내역 수정 */
+    void updateDocstorageDetails(List<DocstorageExcelResponseDTO> details);
 }

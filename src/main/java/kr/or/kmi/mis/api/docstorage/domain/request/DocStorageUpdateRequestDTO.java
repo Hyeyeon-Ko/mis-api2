@@ -1,12 +1,12 @@
 package kr.or.kmi.mis.api.docstorage.domain.request;
 
-import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
+@Data
+@Builder
 public class DocStorageUpdateRequestDTO {
 
-    private String docId;
     private String docNm;
     private String location;
     private String teamNm;

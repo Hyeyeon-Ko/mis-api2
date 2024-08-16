@@ -6,10 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,4 +30,11 @@ public class DocstorageExcelController {
     public void receiveData(@RequestBody List<DocstorageExcelResponseDTO> details) {
         docstorageExcelService.saveDocstorageDetails(details);
     }
+
+    @Operation(summary = "modify docStorage info with file", description = "문서보관 관련 정보 파일을 통한 수정")
+    @PutMapping("/update")
+    public void modifyDocStorageInfo(@RequestBody List<DocstorageExcelResponseDTO> details) {
+        docstorageExcelService.updateDocstorageDetails(details);
+    }
+
 }
