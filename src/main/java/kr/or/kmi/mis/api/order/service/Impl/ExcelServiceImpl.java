@@ -214,7 +214,7 @@ public class ExcelServiceImpl implements ExcelService {
     private void createHeader(Sheet sheet, CellStyle style) {
         Row headerRow = sheet.createRow(1);
         headerRow.setHeight((short) 700);
-        String[] headers = {"No", "사안", "센터", "소속", "직위", "성명", "영문", "TEL", "FAX", "H.P", "E-mail", "수량", "주소"};
+        String[] headers = {"No", "시안", "센터", "소속", "직위", "성명", "영문", "TEL", "FAX", "H.P", "E-mail", "수량", "주소"};
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);

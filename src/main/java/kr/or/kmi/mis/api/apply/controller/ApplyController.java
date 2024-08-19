@@ -25,7 +25,7 @@ public class ApplyController {
 
     private final ApplyService applyService;
 
-    @Operation(summary = "전체 신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
+    @Operation(summary = "신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList")
     public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam(required = false) String documentType,
                                                          @RequestParam(required = false) LocalDate startDate,
@@ -34,11 +34,10 @@ public class ApplyController {
         return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate));
     }
 
-    @Operation(summary = "전체 승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
+    @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/pendingList")
-    public ApiResponse<PendingResponseDTO> getPendingApplyList() {
-
-        return ResponseWrapper.success(applyService.getAllPendingList());
+    public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam(required = true) String documentType) {
+        return ResponseWrapper.success(applyService.getPendingListByType(documentType));
     }
 
 

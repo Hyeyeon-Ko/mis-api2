@@ -87,10 +87,15 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getAllPendingList() {
-
-        return PendingResponseDTO.of(bcdService.getPendingList(),
-                docService.getDocPendingList());
+    public PendingResponseDTO getPendingListByType(String documentType) {
+        switch (documentType) {
+            case "명함신청":
+                return PendingResponseDTO.of(bcdService.getPendingList(), null);
+            case "문서수발신":
+                return PendingResponseDTO.of(null, docService.getDocPendingList());
+            default:
+                throw new IllegalArgumentException("Invalid document type: " + documentType);
+        }
     }
 
     @Override
