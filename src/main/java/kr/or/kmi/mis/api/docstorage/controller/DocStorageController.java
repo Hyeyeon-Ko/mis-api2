@@ -70,4 +70,11 @@ public class DocStorageController {
         return ResponseWrapper.success();
     }
 
+    @Operation(summary = "finish docStorage", description = "문서보관 완료")
+    @PostMapping("/finish")
+    public ApiResponse<?> finishDocStorage(@RequestBody List<Long> detailIds) {
+        docStorageService.finishStorage(detailIds);
+
+        return ResponseWrapper.success();
+    }
 }

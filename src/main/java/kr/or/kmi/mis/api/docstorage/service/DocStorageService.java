@@ -14,4 +14,5 @@ public interface DocStorageService {
     DocStorageDetailResponseDTO getStorageInfo(Long detailId);
     void applyStorage(DocStorageApplyRequestDTO docStorageApplyRequestDTO);
     void approveStorage(List<Long> draftIds);
+    void finishStorage(List<Long> detailIds);
 }

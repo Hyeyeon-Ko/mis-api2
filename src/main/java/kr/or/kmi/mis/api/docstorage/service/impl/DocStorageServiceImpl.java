@@ -83,6 +83,7 @@ public class DocStorageServiceImpl implements DocStorageService {
 
         docStorageApplyRequestDTO.getDetailIds().forEach(detailId -> {
             docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
+                docStorageDetail.updateStatus("A");
                 docStorageDetail.updateDraftId(docStorageMaster.getDraftId());
                 docStorageDetailRepository.save(docStorageDetail);
             });
@@ -94,8 +95,25 @@ public class DocStorageServiceImpl implements DocStorageService {
     public void approveStorage(List<Long> draftIds) {
         draftIds.forEach(draftId -> {
             docStorageMasterRepository.findById(draftId).ifPresent(docStorageMaster -> {
-                docStorageMaster.updateStatus("E");
+                docStorageMaster.updateStatus("B");
                 docStorageMasterRepository.save(docStorageMaster);
+            });
+
+            List<DocStorageDetail> docStorageDetails = docStorageDetailRepository.findAllByDraftId(draftId)
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+            docStorageDetails.forEach(docStorageDetail -> {
+                docStorageDetail.updateStatus("B");
+                docStorageDetailRepository.save(docStorageDetail);
+            });
+        });
+    }
+
+    @Override
+    public void finishStorage(List<Long> detailIds) {
+        detailIds.forEach(detailId -> {
+            docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
+                docStorageDetail.updateStatus("E");
+                docStorageDetailRepository.save(docStorageDetail);
             });
         });
     }

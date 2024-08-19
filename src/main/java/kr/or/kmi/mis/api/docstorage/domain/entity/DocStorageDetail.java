@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -61,6 +63,9 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String deptCd;
 
+    @Column(length = 1)
+    private String status;
+
 
     @Builder
     public DocStorageDetail(Long detailId, String docId, String docNm, String location, String teamNm, String manager, String subManager,
@@ -98,7 +103,6 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     public void updateExcelData(DocstorageExcelResponseDTO dto) {
         this.docNm=dto.getDocNm();
         this.location=dto.getLocation();
-        System.out.println("this.location = " + this.location);
         this.teamNm=dto.getTeamNm();
         this.manager=dto.getManager();
         this.subManager=dto.getSubManager();
@@ -114,7 +118,7 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
         this.draftId = draftId;
     }
 
-    public void updateDeptCd(String deptCd) {
-        this.deptCd = deptCd;
+    public void updateStatus(String newStatus) {
+        this.status = newStatus;
     }
 }

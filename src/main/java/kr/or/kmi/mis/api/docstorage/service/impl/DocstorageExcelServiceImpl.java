@@ -2,7 +2,6 @@ package kr.or.kmi.mis.api.docstorage.service.impl;
 
 import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
@@ -102,6 +101,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     }
 
     @Override
+    @Transactional
     public void updateDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
         details.forEach(dto -> {
             DocStorageDetail existingDetail = docStorageDetailRepository.findByDocId(dto.getDocId())
