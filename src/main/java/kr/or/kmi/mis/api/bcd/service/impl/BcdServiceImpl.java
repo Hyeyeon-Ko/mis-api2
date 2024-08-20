@@ -13,6 +13,7 @@ import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BcdServiceImpl implements BcdService {
 
     private final BcdMasterRepository bcdMasterRepository;
@@ -53,6 +55,8 @@ public class BcdServiceImpl implements BcdService {
         // 1. 명함상세 조회
         BcdDetail existingDetailOpt = bcdDetailRepository.findById(draftId)
                 .orElseThrow(()-> new IllegalArgumentException("명함 신청 이력이 없습니다."));
+
+        System.out.println(updateBcdRequestDTO.toString());
 
         // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
         bcdHistoryService.createBcdHistory(existingDetailOpt);
