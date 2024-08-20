@@ -144,8 +144,6 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .detailCd(request.getUserId())
                     .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
                     .detailNm(request.getUserNm())
-                    .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                    .toDd("99991231")
                     .etcItem1(request.getUserId())
                     .etcItem2(request.getUserRole())
                     .build();
@@ -173,8 +171,6 @@ public class AuthorityServiceImpl implements AuthorityService {
                             .detailCd(authority.getUserId())
                             .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
                             .detailNm(authority.getHngNm())
-                            .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                            .toDd("99991231")
                             .etcItem1(authority.getUserId())
                             .etcItem2(authority.getRole())
                             .build()

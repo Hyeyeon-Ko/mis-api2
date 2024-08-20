@@ -61,8 +61,8 @@ public class StdDetail extends BaseSystemFieldEntity {
     private String etcItem8;
 
     @Builder
-    public StdDetail(String detailCd, StdGroup groupCd, String detailNm, String fromDd, String toDd,
-                String etcItem1, String etcItem2, String etcItem3, String etcItem4,
+    public StdDetail(String detailCd, StdGroup groupCd, String detailNm,
+                     String etcItem1, String etcItem2, String etcItem3, String etcItem4,
                      String etcItem5, String etcItem6, String etcItem7, String etcItem8) {
         this.detailCd = detailCd;
         this.groupCd = groupCd;

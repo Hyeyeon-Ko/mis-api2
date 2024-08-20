@@ -8,7 +8,7 @@ public class DocStorageRequestDTO {
 
     private String docId;
     private String docNm;
-    private String teamNm;     // 팀명
+    private String teamNm;
     private String manager;
     private String subManager;
     private String storageYear;

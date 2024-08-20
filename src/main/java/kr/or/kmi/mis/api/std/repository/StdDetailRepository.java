@@ -31,4 +31,6 @@ public interface StdDetailRepository extends JpaRepository<StdDetail, StdDetailI
     void deleteByGroupCdAndDetailCd(StdGroup stdGroup, String detailCd);
 
     Optional<List<StdDetail>> findByUseAtAndGroupCdAndDetailCd(String useAt, StdGroup groupCd,  String detailCd);
+
+    Boolean existsByGroupCdAndDetailCd(StdGroup groupCd, String detailCd);
 }
