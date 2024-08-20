@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.docstorage.service;
 
+import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageCenterListResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageTotalListResponseDTO;
@@ -14,8 +15,11 @@ public interface DocstorageListService {
     /* 센터별 승인대기 내역 */
     List<DocstorageResponseDTO> getDocstoragePendingList(String instCd);
 
+    /* 부서 리스트 */
+    List<DeptResponseDTO> getDeptListForCenter(String instCd);
+
     /* 센터별 문서보관 내역 */
-    DocstorageCenterListResponseDTO getDocstorageCenterList(String instCd);
+    List<DocstorageResponseDTO> getDocstorageCenterList(String instCd);
 
     /* 전국센터 문서보관 내역 */
     DocstorageTotalListResponseDTO getTotalDocstorageList();

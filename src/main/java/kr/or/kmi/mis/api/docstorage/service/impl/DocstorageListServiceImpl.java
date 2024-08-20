@@ -31,9 +31,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     /* 부서 문서보관 목록표 */
     @Override
     public List<DocstorageResponseDTO> getDocstorageDeptList(String deptCd) {
-
         List<DocStorageDetail> docStorageDetailList = fetchDocStorageDetailsByDeptCd(deptCd);
-
         return convertToResponseDTOListUsingMasterStatus(docStorageDetailList);
     }
 
@@ -70,20 +68,31 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                 .toList();
     }
 
+    /* 부서 리스트 반환 */
+    @Override
+    public List<DeptResponseDTO> getDeptListForCenter(String instCd) {
+        return fetchDeptListForCenter(instCd);
+    }
+
     /* 부서별 문서보관 목록표 */
     @Override
-    public DocstorageCenterListResponseDTO getDocstorageCenterList(String instCd) {
+    public List<DocstorageResponseDTO> getDocstorageCenterList(String deptCd) {
 
-        List<DeptResponseDTO> deptList = fetchDeptListForCenter(instCd);
-        List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCdAndBAndA(instCd);
+        List<DocStorageDetail> docStorageDetailList = fetchDocStorageDetailsByDeptCd(deptCd);
 
-        Map<String, List<DocStorageMaster>> groupedByDept = groupByDeptCd(docStorageMasterList);
-        List<DeptDocstorageListResponseDTO> deptDocstorageListResponses = groupedByDept.entrySet().stream()
-                .map(entry -> createDeptDocstorageResponse(entry.getKey(), entry.getValue()))
+        List<DocStorageDetail> filteredDetails = docStorageDetailList.stream()
+                .filter(detail -> "B".equals(detail.getStatus()) || "E".equals(detail.getStatus()))
                 .toList();
 
-        // 센터의 부서별 문서보관 목록 반환
-        return DocstorageCenterListResponseDTO.of(deptList, deptDocstorageListResponses);
+        List<DocStorageDetail> finalFilteredDetails = filteredDetails.stream()
+                .filter(detail -> {
+                    DocStorageMaster master = docStorageMasterRepository.findById(detail.getDraftId())
+                            .orElse(null);
+                    return master != null && "A".equals(master.getType());
+                })
+                .collect(Collectors.toList());
+
+        return convertToResponseDTOListUsingMasterStatus(finalFilteredDetails);
     }
 
     /* 전국 센터별 문서보관 목록표 */
@@ -146,32 +155,10 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
     }
 
-    /* 상태가 'B'이고 유형이 'A'인 문서보관 Master 리스트 조회 */
-    private List<DocStorageMaster> fetchDocStorageMastersByInstCdAndBAndA(String instCd) {
-        return docStorageMasterRepository.findAllByInstCdAndStatusAndType(instCd, "B", "A")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-    }
-
     /* 유형이 'A'인 문서보관 Master 리스트 조회 */
     private List<DocStorageMaster> fetchDocStorageMastersByInstCdAndTypeA(String instCd) {
         return docStorageMasterRepository.findAllByInstCdAndType(instCd, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-    }
-
-    /* 부서 코드별로 문서보관 Master 리스트를 그룹화 */
-    private Map<String, List<DocStorageMaster>> groupByDeptCd(List<DocStorageMaster> docStorageMasters) {
-        return docStorageMasters.stream().collect(Collectors.groupingBy(DocStorageMaster::getDeptCd));
-    }
-
-    /* 부서별 문서보관 목록 생성 */
-    private DeptDocstorageListResponseDTO createDeptDocstorageResponse(String deptCd, List<DocStorageMaster> masters) {
-        List<DocstorageResponseDTO> docstorageResponseDTOList = masters.stream()
-                .flatMap(master -> getDocstorageResponsesForMaster(master).stream())
-                .toList();
-        return DeptDocstorageListResponseDTO.builder()
-                .deptCd(deptCd)
-                .docstorageResponseDTOList(docstorageResponseDTOList)
-                .build();
     }
 
     /* 모든 센터 정보 조회 */
