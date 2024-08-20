@@ -1,7 +1,7 @@
 package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageCenterListResponseDTO;
+import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageTotalListResponseDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageListService;
@@ -32,9 +32,14 @@ public class DocstorageListController {
         return ResponseWrapper.success(docstorageListService.getDocstoragePendingList(instCd));
     }
 
+    @GetMapping("/deptList")
+    public ApiResponse<List<DeptResponseDTO>> getDeptListForCenter(String instCd) {
+        return ResponseWrapper.success(docstorageListService.getDeptListForCenter(instCd));
+    }
+
     @GetMapping("/center")
-    public ApiResponse<DocstorageCenterListResponseDTO> getDocstorageCenterList(String instCd) {
-        return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(instCd));
+    public ApiResponse<List<DocstorageResponseDTO>> getDocstorageCenterList(String deptCd) {
+        return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(deptCd));
     }
 
     @GetMapping("/total")

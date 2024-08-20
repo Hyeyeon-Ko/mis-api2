@@ -2,16 +2,15 @@ package kr.or.kmi.mis.api.docstorage.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageBulkUpdateRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocStorageService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -36,6 +35,13 @@ public class DocStorageController {
     public ApiResponse<?> updateDocStorageInfo(@RequestParam("detailId") Long detailId, @RequestBody DocStorageUpdateRequestDTO docStorageUpdateDTO) {
         docStorageService.updateStorageInfo(detailId, docStorageUpdateDTO);
 
+        return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "bulk update docStorage info", description = "문서보관 관련 정보 일괄 수정")
+    @PutMapping("/bulkUpdate")
+    public ApiResponse<?> bulkUpdateDocStorageInfo(@RequestBody DocStorageBulkUpdateRequestDTO docStorageUpdateDTO) {
+        docStorageService.bulkUpdateStorageInfo(docStorageUpdateDTO);
         return ResponseWrapper.success();
     }
 
