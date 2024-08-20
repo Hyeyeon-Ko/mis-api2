@@ -109,13 +109,13 @@ public class DocstorageListServiceImpl implements DocstorageListService {
             List<DocStorageMaster> docStorageMasterList = fetchDocStorageMastersByInstCdAndTypeA(center.getDetailCd());
 
             docStorageMasterList.forEach(master -> {
-
                 List<DocStorageDetail> filteredDetails = fetchDocStorageDetailsByDraftId(master.getDraftId()).stream()
                         .filter(detail -> "E".equals(detail.getStatus()))
                         .toList();
 
                 List<DocstorageResponseDTO> responseDTOs = convertToResponseDTOListUsingDetailStatus(filteredDetails);
-                responseMap.getOrDefault(center.getDetailCd(), new ArrayList<>()).addAll(responseDTOs);
+
+                responseMap.computeIfAbsent(center.getDetailCd(), k -> new ArrayList<>()).addAll(responseDTOs);
             });
         });
 
@@ -192,8 +192,15 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     /* 센터별 문서보관 목록 DTO 생성 */
     private CenterDocstorageListResponseDTO buildCenterDocstorageResponseDTO(Map<String, List<DocstorageResponseDTO>> responseMap) {
         return CenterDocstorageListResponseDTO.of(
-                responseMap.get("100"), responseMap.get("101"), responseMap.get("102"), responseMap.get("103"),
-                responseMap.get("104"), responseMap.get("105"), responseMap.get("106"), responseMap.get("107"), responseMap.get("108")
+                responseMap.getOrDefault("100", List.of()),
+                responseMap.getOrDefault("111", List.of()),
+                responseMap.getOrDefault("112", List.of()),
+                responseMap.getOrDefault("113", List.of()),
+                responseMap.getOrDefault("211", List.of()),
+                responseMap.getOrDefault("611", List.of()),
+                responseMap.getOrDefault("612", List.of()),
+                responseMap.getOrDefault("711", List.of()),
+                responseMap.getOrDefault("811", List.of())
         );
     }
 
