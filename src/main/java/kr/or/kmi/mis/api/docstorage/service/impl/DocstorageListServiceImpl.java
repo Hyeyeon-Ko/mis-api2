@@ -68,12 +68,6 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                 .toList();
     }
 
-    /* 부서 리스트 반환 */
-    @Override
-    public List<DeptResponseDTO> getDeptListForCenter(String instCd) {
-        return fetchDeptListForCenter(instCd);
-    }
-
     /* 부서별 문서보관 목록표 */
     @Override
     public List<DocstorageResponseDTO> getDocstorageCenterList(String deptCd) {
@@ -121,6 +115,12 @@ public class DocstorageListServiceImpl implements DocstorageListService {
 
         CenterDocstorageListResponseDTO centerDocstorageListResponseDTO = buildCenterDocstorageResponseDTO(responseMap);
         return DocstorageTotalListResponseDTO.of(centerList, List.of(centerDocstorageListResponseDTO));
+    }
+
+    /* 부서 리스트 반환 */
+    @Override
+    public List<DeptResponseDTO> getDeptListForCenter(String instCd) {
+        return fetchDeptListForCenter(instCd);
     }
 
     /* 부서 코드로 문서보관 상세 리스트 조회 */

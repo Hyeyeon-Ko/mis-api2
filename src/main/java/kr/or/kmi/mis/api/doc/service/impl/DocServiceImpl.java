@@ -13,12 +13,17 @@ import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,24 +32,45 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocServiceImpl implements DocService {
 
-
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
     private final DocHistoryService docHistoryService;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
 
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     @Override
     @Transactional
-    public void applyDoc(DocRequestDTO docRequestDTO) {
+    public void applyDoc(DocRequestDTO docRequestDTO, MultipartFile file) throws IOException {
 
         // 문서수발신
         DocMaster docMaster = docRequestDTO.toMasterEntity();
         docMaster = docMasterRepository.save(docMaster);
 
+        // 파일 저장 처리
+        String fileName = null;
+        String filePath = null;
+        if (file != null && !file.isEmpty()) {
+            fileName = file.getOriginalFilename();
+
+            // 파일 저장 경로 생성
+            Path fileStoragePath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            if (Files.notExists(fileStoragePath)) {
+                Files.createDirectories(fileStoragePath);
+            }
+
+            // 파일 저장
+            Path targetLocation = fileStoragePath.resolve(fileName);
+            Files.copy(file.getInputStream(), targetLocation);
+
+            filePath = targetLocation.toString();
+        }
+
         // 문서수발신 상세
         Long draftId = docMaster.getDraftId();
-        DocDetail docDetail = docRequestDTO.toDetailEntity(draftId);
+        DocDetail docDetail = docRequestDTO.toDetailEntity(draftId, fileName, filePath);
         docDetailRepository.save(docDetail);
     }
 

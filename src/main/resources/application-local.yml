@@ -27,11 +27,18 @@ spring:
           transport:
             protocol: smtp
     default-encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 external:
   login:
     url: http://172.16.250.85/mis/login
   userInfo:
     url: http://172.16.250.85/mis/userDeptInfo
+
+file:
+  upload-dir: uploads/
 
 logging:
   level:

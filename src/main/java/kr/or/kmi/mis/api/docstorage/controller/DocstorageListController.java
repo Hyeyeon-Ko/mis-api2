@@ -32,11 +32,6 @@ public class DocstorageListController {
         return ResponseWrapper.success(docstorageListService.getDocstoragePendingList(instCd));
     }
 
-    @GetMapping("/deptList")
-    public ApiResponse<List<DeptResponseDTO>> getDeptListForCenter(String instCd) {
-        return ResponseWrapper.success(docstorageListService.getDeptListForCenter(instCd));
-    }
-
     @GetMapping("/center")
     public ApiResponse<List<DocstorageResponseDTO>> getDocstorageCenterList(String deptCd) {
         return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(deptCd));
@@ -45,5 +40,10 @@ public class DocstorageListController {
     @GetMapping("/total")
     public ApiResponse<DocstorageTotalListResponseDTO> getTotalDocstorageList() {
         return ResponseWrapper.success(docstorageListService.getTotalDocstorageList());
+    }
+
+    @GetMapping("/deptList")
+    public ApiResponse<List<DeptResponseDTO>> getDeptListForCenter(String instCd) {
+        return ResponseWrapper.success(docstorageListService.getDeptListForCenter(instCd));
     }
 }

@@ -21,6 +21,8 @@ public class DocDetailResponseDTO {
     private String sender;
     private String docTitle;
     private String purpose;
+    private String fileName;
+    private String filePath;
 
     public static DocDetailResponseDTO of(DocMaster docMaster, DocDetail docDetail) {
         return DocDetailResponseDTO.builder()
@@ -32,6 +34,8 @@ public class DocDetailResponseDTO {
                 .sender(docDetail.getSender())
                 .docTitle(docDetail.getDocTitle())
                 .purpose(docDetail.getPurpose())
+                .fileName(docDetail.getFileName())
+                .filePath(docDetail.getFilePath())
                 .build();
     }
 }

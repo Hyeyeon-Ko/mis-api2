@@ -30,7 +30,7 @@ public class DocRequestDTO {
     }
 
     // DocRequest Dto -> DocDetail Entity
-    public DocDetail toDetailEntity(Long draftId) {
+    public DocDetail toDetailEntity(Long draftId, String fileName, String filePath) {
         return DocDetail.builder()
                 .draftId(draftId)
                 .division(division)
@@ -38,6 +38,8 @@ public class DocRequestDTO {
                 .receiver(receiver)
                 .docTitle(docTitle)
                 .purpose(purpose)
+                .fileName(fileName)
+                .filePath(filePath)
                 .build();
     }
 }

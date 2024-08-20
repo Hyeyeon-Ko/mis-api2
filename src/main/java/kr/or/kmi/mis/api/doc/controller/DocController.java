@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.doc.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.Resource;
 import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
@@ -9,7 +10,13 @@ import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/doc")
@@ -21,9 +28,10 @@ public class DocController {
 
     @Operation(summary = "create doc apply", description = "문서수발신 신청")
     @PostMapping
-    public ApiResponse<?> createDocApply(@RequestBody DocRequestDTO docRequestDTO) {
-        docService.applyDoc(docRequestDTO);
-
+    public ApiResponse<?> createDocApply(
+            @RequestPart("docRequest") DocRequestDTO docRequestDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        docService.applyDoc(docRequestDTO, file);
         return ResponseWrapper.success();
     }
 
