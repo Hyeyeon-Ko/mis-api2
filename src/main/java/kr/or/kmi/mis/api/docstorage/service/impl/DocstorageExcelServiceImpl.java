@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     private final DocStorageDetailRepository docStorageDetailRepository;
-    private final StdGroupRepository stdGroupRepository;
-    private final StdDetailRepository stdDetailRepository;
     private final InfoService infoService;
 
     @Override
@@ -70,11 +68,14 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     @Override
     public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
-
         String rgstrId = infoService.getUserInfo().getUserName();
         Timestamp rgstDt = new Timestamp(System.currentTimeMillis());
 
         List<DocStorageDetail> entities = details.stream().map(dto -> {
+            if (docStorageDetailRepository.existsByDocId(dto.getDocId())) {
+                throw new IllegalArgumentException("문서관리번호가 중복됩니다: " + dto.getDocId());
+            }
+
             DocStorageDetail entity = DocStorageDetail.builder()
                     .teamNm(dto.getTeamNm())
                     .docId(dto.getDocId())

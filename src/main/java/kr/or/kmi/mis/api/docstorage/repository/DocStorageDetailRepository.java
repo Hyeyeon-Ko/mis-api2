@@ -12,4 +12,5 @@ public interface DocStorageDetailRepository extends JpaRepository<DocStorageDeta
     Optional<List<DocStorageDetail>> findAllByDeptCd(String deptCd);
     List<DocStorageDetail> findAllByDetailIdIn(List<Long> detailIds);
     Optional<DocStorageDetail> findByDocId(String DocId);
+    boolean existsByDocId(String docId);
 }

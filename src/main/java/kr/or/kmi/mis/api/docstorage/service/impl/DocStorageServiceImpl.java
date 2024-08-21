@@ -29,6 +29,12 @@ public class DocStorageServiceImpl implements DocStorageService {
     @Override
     @Transactional
     public void addStorageInfo(DocStorageRequestDTO docStorageRequestDTO) {
+
+        boolean exists = docStorageDetailRepository.existsByDocId(docStorageRequestDTO.getDocId());
+        if (exists) {
+            throw new IllegalArgumentException("문서관리번호가 중복됩니다: " + docStorageRequestDTO.getDocId());
+        }
+
         DocStorageDetail docStorageDetail = docStorageRequestDTO.toDetailEntity();
         docStorageDetail.setRgstrId(infoService.getUserInfo().getUserName());
         docStorageDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
