@@ -53,7 +53,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional
-    public void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file) throws IOException {
+    public void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -62,7 +62,19 @@ public class DocServiceImpl implements DocService {
 
         docHistoryService.createDocHistory(docDetailInfo);
 
-        String[] savedFileInfo = saveFile(file, docDetailInfo.getFilePath());
+        String[] savedFileInfo;
+        if (file != null) {
+            savedFileInfo = saveFile(file, docDetailInfo.getFilePath());
+        } else if (isFileDeleted) {
+            savedFileInfo = new String[]{null, null};
+            if (docDetailInfo.getFilePath() != null) {
+                Path oldFilePath = Paths.get(docDetailInfo.getFilePath());
+                Files.deleteIfExists(oldFilePath);
+            }
+        } else {
+            savedFileInfo = new String[]{docDetailInfo.getFileName(), docDetailInfo.getFilePath()};
+        }
+
         updateDocDetail(docUpdateRequestDTO, draftId, savedFileInfo);
 
         docMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));

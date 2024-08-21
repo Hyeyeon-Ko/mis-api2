@@ -15,7 +15,7 @@ import java.util.List;
 public interface DocService {
 
     void applyDoc(DocRequestDTO docRequestDTO, MultipartFile file) throws IOException;
-    void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file) throws IOException;
+    void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
     void cancelDocApply(Long draftId);
     DocDetailResponseDTO getDoc(Long draftId);
     List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startTime, Timestamp endTime);

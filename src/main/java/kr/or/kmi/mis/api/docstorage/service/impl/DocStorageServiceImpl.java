@@ -134,15 +134,26 @@ public class DocStorageServiceImpl implements DocStorageService {
     public void approveStorage(List<Long> draftIds) {
         draftIds.forEach(draftId -> {
             docStorageMasterRepository.findById(draftId).ifPresent(docStorageMaster -> {
-                docStorageMaster.updateStatus("B");
-                docStorageMasterRepository.save(docStorageMaster);
-            });
 
-            List<DocStorageDetail> docStorageDetails = docStorageDetailRepository.findAllByDraftId(draftId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 초안 ID로 문서 보관 정보를 찾을 수 없습니다: " + draftId));
-            docStorageDetails.forEach(docStorageDetail -> {
-                docStorageDetail.updateStatus("B");
-                docStorageDetailRepository.save(docStorageDetail);
+                String currentType = docStorageMaster.getType();
+
+                if ("A".equals(currentType)) {
+                    docStorageMaster.updateStatus("B");
+                } else if ("B".equals(currentType)) {
+                    docStorageMaster.updateStatus("E");
+                }
+                docStorageMasterRepository.save(docStorageMaster);
+
+                List<DocStorageDetail> docStorageDetails = docStorageDetailRepository.findAllByDraftId(draftId)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 초안 ID로 문서 보관 정보를 찾을 수 없습니다: " + draftId));
+                docStorageDetails.forEach(docStorageDetail -> {
+                    if ("A".equals(currentType)) {
+                        docStorageDetail.updateStatus("B");
+                    } else if ("B".equals(currentType)) {
+                        docStorageDetail.updateStatus("E");
+                    }
+                    docStorageDetailRepository.save(docStorageDetail);
+                });
             });
         });
     }

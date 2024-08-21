@@ -49,8 +49,8 @@ public class DocController {
     public ApiResponse<?> updateDocApply(
             @RequestParam("draftId") Long draftId,
             @RequestPart("docUpdateRequest") DocUpdateRequestDTO docUpdateRequestDTO,
-            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
-        docService.updateDocApply(draftId, docUpdateRequestDTO, file);
+            @RequestPart(value = "file", required = false) MultipartFile file, boolean isFileDeleted) throws IOException {
+        docService.updateDocApply(draftId, docUpdateRequestDTO, file, isFileDeleted);
         return ResponseWrapper.success();
     }
 
