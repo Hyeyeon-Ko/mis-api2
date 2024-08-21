@@ -56,8 +56,6 @@ public class BcdServiceImpl implements BcdService {
         BcdDetail existingDetailOpt = bcdDetailRepository.findById(draftId)
                 .orElseThrow(()-> new IllegalArgumentException("명함 신청 이력이 없습니다."));
 
-        System.out.println(updateBcdRequestDTO.toString());
-
         // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
         bcdHistoryService.createBcdHistory(existingDetailOpt);
 
@@ -66,7 +64,7 @@ public class BcdServiceImpl implements BcdService {
         //   2) 정보 업데이트
         String updtr = infoService.getUserInfo().getUserName();
         existingDetailOpt.update(updateBcdRequestDTO, updtr);
-        BcdDetail bcdDetail = bcdDetailRepository.save(existingDetailOpt);
+        bcdDetailRepository.save(existingDetailOpt);
     }
 
     @Override
@@ -155,22 +153,6 @@ public class BcdServiceImpl implements BcdService {
                 }).toList();
     }
 
-/*    @Override
-    @Transactional(readOnly = true)
-    public BcdDetailResponseDTO getBcd(Long draftId) {
-
-        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
-                .orElseThrow(()-> new  IllegalArgumentException("Not Found"));
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new  IllegalArgumentException("Not Found"));
-
-        // 기준자료에서 각 기준자료 코드에 해당하는 명칭 불러오기
-        List<String> names = stdBcdService.getBcdStdNames(bcdDetail);
-
-        return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter(), names);
-
-    }*/
-
     @Override
     public List<BcdPendingResponseDTO> getPendingList() {
 
@@ -257,8 +239,4 @@ public class BcdServiceImpl implements BcdService {
         bcdMaster.updateEndDate(new Timestamp(System.currentTimeMillis()));
     }
 
-/*    @Override
-    public BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd) {
-        return bcdSampleQueryRepositoryImpl.getBcdSampleNm(groupCd, detailCd);
-    }*/
 }

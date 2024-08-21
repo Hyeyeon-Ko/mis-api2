@@ -33,7 +33,6 @@ public class OrderController {
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
     @PostMapping
     public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
-        System.out.println("orderRequest.getFromEmail() = " + orderRequest.getFromEmail());
         orderService.orderRequest(orderRequest);
         return ResponseWrapper.success();
     }

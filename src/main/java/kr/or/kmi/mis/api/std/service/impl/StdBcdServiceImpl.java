@@ -131,7 +131,7 @@ public class StdBcdServiceImpl implements StdBcdService {
             names.add(this.getTeamNm(bcdDetail.getTeamCd()).getFirst() + " | " + this.getTeamNm(bcdDetail.getTeamCd()).getLast());
         }
 
-        if (bcdDetail.getGradeNm() == null) {
+        if (bcdDetail.getEngradeNm() != null) {
             names.add("(직접입력)");
         } else {
             names.add(this.getGradeNm(bcdDetail.getGradeCd()).getFirst() + " | " + this.getGradeNm(bcdDetail.getGradeCd()).getLast());
