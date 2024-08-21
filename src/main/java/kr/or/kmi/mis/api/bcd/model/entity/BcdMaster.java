@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.BcdApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
 import lombok.*;
@@ -97,5 +98,9 @@ public class BcdMaster {
     public void updateOrder(Timestamp deletedt) {
         this.orderDate = deletedt;
         this.status = "D";
+    }
+
+    public void updateTitle(BcdUpdateRequestDTO updateBcdRequestDTO) {
+        this.title = this.title = String.format("[%s]명함신청서(%s)", updateBcdRequestDTO.getTeamNm(), updateBcdRequestDTO.getKorNm());
     }
 }

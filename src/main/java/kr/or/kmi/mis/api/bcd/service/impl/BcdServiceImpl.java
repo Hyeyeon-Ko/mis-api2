@@ -55,6 +55,8 @@ public class BcdServiceImpl implements BcdService {
         // 1. 명함상세 조회
         BcdDetail existingDetailOpt = bcdDetailRepository.findById(draftId)
                 .orElseThrow(()-> new IllegalArgumentException("명함 신청 이력이 없습니다."));
+        BcdMaster existingMasterOpt = bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("명함 신청 이력이 없습니다."));
 
         // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
         bcdHistoryService.createBcdHistory(existingDetailOpt);
@@ -64,6 +66,7 @@ public class BcdServiceImpl implements BcdService {
         //   2) 정보 업데이트
         String updtr = infoService.getUserInfo().getUserName();
         existingDetailOpt.update(updateBcdRequestDTO, updtr);
+        existingMasterOpt.updateTitle(updateBcdRequestDTO);
         bcdDetailRepository.save(existingDetailOpt);
     }
 

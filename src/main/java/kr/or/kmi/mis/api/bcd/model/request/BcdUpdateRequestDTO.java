@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public class BcdUpdateRequestDTO {
 
+    String korNm;
     String engNm;
     String instCd;
     String deptCd;
