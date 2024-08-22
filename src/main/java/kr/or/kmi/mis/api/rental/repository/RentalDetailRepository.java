@@ -11,4 +11,5 @@ public interface RentalDetailRepository extends JpaRepository<RentalDetail, Long
     boolean existsByContractNum(String contractNum);
     Optional<RentalDetail> findByContractNum(String contractNum);
     Optional<List<RentalDetail>> findByInstCd(String instCd);
+    Optional<List<RentalDetail>> findByInstCdAndStatus(String instCd, String status);
 }

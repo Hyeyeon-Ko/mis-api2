@@ -29,7 +29,17 @@ public class RentalListServiceImpl implements RentalListService {
 
     @Override
     public List<RentalResponseDTO> getCenterRentalList(String instCd) {
+        // instCd에 해당하는 모든 렌탈 내역을 가져옴
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCd(instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        return rentalDetailList.stream()
+                .map(RentalResponseDTO::of)
+                .collect(Collectors.toList());
+    }
+
+    // 추가된 메서드: instCd와 status가 E인 내역만 가져옴
+    public List<RentalResponseDTO> getCenterRentalListByStatus(String instCd, String status) {
+        List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCdAndStatus(instCd, status)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         return rentalDetailList.stream()
                 .map(RentalResponseDTO::of)
@@ -42,16 +52,15 @@ public class RentalListServiceImpl implements RentalListService {
         // 모든 센터 정보 조회
         List<CenterResponseDTO> centerList = fetchAllCenters();
 
-        // 각 센터의 instCd에 따른 렌탈 현황 조회
-        List<RentalResponseDTO> foundationResponses = getCenterRentalList("100");
-        List<RentalResponseDTO> gwanghwamunResponses = getCenterRentalList("111");
-        List<RentalResponseDTO> yeouidoResponses = getCenterRentalList("112");
-        List<RentalResponseDTO> gangnamResponses = getCenterRentalList("113");
-        List<RentalResponseDTO> suwonResponses = getCenterRentalList("211");
-        List<RentalResponseDTO> daeguResponses = getCenterRentalList("611");
-        List<RentalResponseDTO> busanResponses = getCenterRentalList("612");
-        List<RentalResponseDTO> gwangjuResponses = getCenterRentalList("711");
-        List<RentalResponseDTO> jejuResponses = getCenterRentalList("811");
+        List<RentalResponseDTO> foundationResponses = getCenterRentalListByStatus("100", "E");
+        List<RentalResponseDTO> gwanghwamunResponses = getCenterRentalListByStatus("111", "E");
+        List<RentalResponseDTO> yeouidoResponses = getCenterRentalListByStatus("112", "E");
+        List<RentalResponseDTO> gangnamResponses = getCenterRentalListByStatus("113", "E");
+        List<RentalResponseDTO> suwonResponses = getCenterRentalListByStatus("211", "E");
+        List<RentalResponseDTO> daeguResponses = getCenterRentalListByStatus("611", "E");
+        List<RentalResponseDTO> busanResponses = getCenterRentalListByStatus("612", "E");
+        List<RentalResponseDTO> gwangjuResponses = getCenterRentalListByStatus("711", "E");
+        List<RentalResponseDTO> jejuResponses = getCenterRentalListByStatus("811", "E");
 
         // 센터별 렌탈 목록을 CenterRentalListResponseDTO에 담음
         CenterRentalListResponseDTO centerRentalResponses = CenterRentalListResponseDTO.of(
