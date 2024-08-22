@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +27,15 @@ public class RentalServiceImpl implements RentalService {
     public void addRentalInfo(RentalRequestDTO rentalRequestDTO) {
 
         // 1. 계약번호 중복 불가 예외처리
-        checkDuplicateCNm(rentalRequestDTO.getContractNum());
+        checkDuplicateCNm(rentalRequestDTO.getContractNum(), "");
 
-/*      // 2. 렌탈정보 입력 사용자 정보 조회
+      // 2. 렌탈정보 입력 사용자 정보 조회
         String userId = infoService.getUserInfo().getUserId();
-        String instCd = infoService.getUserInfoDetail(userId).getInstCd();*/
+        String instCd = infoService.getUserInfoDetail(userId).getInstCd();
 
         // 3. 등록자 정보 update
-        RentalDetail rentalDetail = rentalRequestDTO.toEntity("100");
-        rentalDetail.setRgstrId("2024060035");
+        RentalDetail rentalDetail = rentalRequestDTO.toEntity(instCd);
+        rentalDetail.setRgstrId(userId);
         rentalDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
 
         // 4. 저장
@@ -54,25 +55,31 @@ public class RentalServiceImpl implements RentalService {
     @Transactional
     public void updateRentalInfo(Long detailId, RentalRequestDTO rentalUpdateRequestDTO) {
 
-        // 1. 계약번호 중복 불가 예외처리
-        checkDuplicateCNm(rentalUpdateRequestDTO.getContractNum());
-
-        // 2. rentalDetail 조회
+        // 1. rentalDetail 조회
         RentalDetail rentalDetail = rentalDetailRepository.findById(detailId)
                 .orElseThrow(() -> new EntityNotFoundException("Rental Detail Not Found: " + detailId));
+
+        // 2. 계약번호 중복 불가 예외처리
+        checkDuplicateCNm(rentalUpdateRequestDTO.getContractNum(), rentalDetail.getContractNum());
 
         // 3. rentalDetail 업데이트
         rentalDetail.update(rentalUpdateRequestDTO);
         rentalDetail.setUpdtrId(infoService.getUserInfo().getUserId());
         rentalDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
 
+        if(Objects.equals(rentalDetail.getStatus(), "E")){
+            rentalDetail.updateStatus("A");
+        }
+
         rentalDetailRepository.save(rentalDetail);
     }
 
-    void checkDuplicateCNm(String ContractNum) {
-        boolean exists = rentalDetailRepository.existsByContractNum(ContractNum);
+    void checkDuplicateCNm(String NewContractNum, String oriContractNum) {
+        boolean exists = rentalDetailRepository.existsByContractNum(NewContractNum);
         if (exists) {
-            throw new IllegalArgumentException("계약번호가 중복됩니다: " + ContractNum);
+            if(!Objects.equals(NewContractNum, oriContractNum)) {
+                throw new IllegalArgumentException("계약번호가 중복됩니다: " + NewContractNum);
+            }
         }
     }
 
