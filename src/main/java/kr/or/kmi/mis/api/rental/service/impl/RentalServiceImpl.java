@@ -25,16 +25,22 @@ public class RentalServiceImpl implements RentalService {
     @Transactional
     public void addRentalInfo(RentalRequestDTO rentalRequestDTO) {
 
-/*      // 1. 렌탈정보 입력 사용자 정보 조회
+        // 1. 계약번호 중복 예외처리
+        boolean exists = rentalDetailRepository.existsByContractNum(rentalRequestDTO.getContractNum());
+        if (exists) {
+            throw new IllegalArgumentException("계약번호가 중복됩니다: " + rentalRequestDTO.getContractNum());
+        }
+
+/*      // 2. 렌탈정보 입력 사용자 정보 조회
         String userId = infoService.getUserInfo().getUserId();
         String instCd = infoService.getUserInfoDetail(userId).getInstCd();*/
 
-        // 2. 등록자 정보 update
+        // 3. 등록자 정보 update
         RentalDetail rentalDetail = rentalRequestDTO.toEntity("100");
         rentalDetail.setRgstrId("2024060035");
         rentalDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
 
-        // 2. 저장
+        // 4. 저장
         rentalDetailRepository.save(rentalDetail);
     }
 
