@@ -25,11 +25,8 @@ public class RentalServiceImpl implements RentalService {
     @Transactional
     public void addRentalInfo(RentalRequestDTO rentalRequestDTO) {
 
-        // 1. 계약번호 중복 예외처리
-        boolean exists = rentalDetailRepository.existsByContractNum(rentalRequestDTO.getContractNum());
-        if (exists) {
-            throw new IllegalArgumentException("계약번호가 중복됩니다: " + rentalRequestDTO.getContractNum());
-        }
+        // 1. 계약번호 중복 불가 예외처리
+        checkDuplicateCNm(rentalRequestDTO.getContractNum());
 
 /*      // 2. 렌탈정보 입력 사용자 정보 조회
         String userId = infoService.getUserInfo().getUserId();
@@ -57,16 +54,26 @@ public class RentalServiceImpl implements RentalService {
     @Transactional
     public void updateRentalInfo(Long detailId, RentalRequestDTO rentalUpdateRequestDTO) {
 
-        // 1. rentalDetail 조회
+        // 1. 계약번호 중복 불가 예외처리
+        checkDuplicateCNm(rentalUpdateRequestDTO.getContractNum());
+
+        // 2. rentalDetail 조회
         RentalDetail rentalDetail = rentalDetailRepository.findById(detailId)
                 .orElseThrow(() -> new EntityNotFoundException("Rental Detail Not Found: " + detailId));
 
-        // 2. rentalDetail 업데이트
+        // 3. rentalDetail 업데이트
         rentalDetail.update(rentalUpdateRequestDTO);
         rentalDetail.setUpdtrId(infoService.getUserInfo().getUserId());
         rentalDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
 
         rentalDetailRepository.save(rentalDetail);
+    }
+
+    void checkDuplicateCNm(String ContractNum) {
+        boolean exists = rentalDetailRepository.existsByContractNum(ContractNum);
+        if (exists) {
+            throw new IllegalArgumentException("계약번호가 중복됩니다: " + ContractNum);
+        }
     }
 
     @Override
