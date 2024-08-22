@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.docstorage.service;
 
 import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
-import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageCenterListResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageResponseDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageTotalListResponseDTO;
 

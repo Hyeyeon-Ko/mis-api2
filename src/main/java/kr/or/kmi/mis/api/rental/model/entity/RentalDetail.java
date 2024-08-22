@@ -3,9 +3,8 @@ package kr.or.kmi.mis.api.rental.model.entity;
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.rental.model.request.RentalRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import kr.or.kmi.mis.api.rental.model.response.RentalExcelResponseDTO;
 import lombok.*;
-
-import java.sql.Timestamp;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -87,5 +86,17 @@ public class RentalDetail extends BaseSystemFieldEntity {
 
     public void updateStatus(String newStatus) {
         this.status = newStatus;
+    }
+    public void updateExcelData(RentalExcelResponseDTO dto) {
+        this.category = dto.getCategory();
+        this.companyNm = dto.getCompanyNm();
+        this.contractNum = dto.getContractNum();
+        this.modelNm = dto.getModelNm();
+        this.installDate = dto.getInstallDate();
+        this.expiryDate = dto.getExpiryDate();
+        this.rentalFee = dto.getRentalFee();
+        this.location = dto.getLocation();
+        this.installationSite = dto.getInstallationSite();
+        this.specialNote = dto.getSpecialNote();
     }
 }

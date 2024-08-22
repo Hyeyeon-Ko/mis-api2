@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/docstorage")
 @RequiredArgsConstructor
-@Tag(name = "Excel", description = "엑셀 다운로드 API")
+@Tag(name = "Docstorage Excel", description = "문서보관 엑셀 첨부 및 다운 API")
 public class DocstorageExcelController {
 
     private final DocstorageExcelService docstorageExcelService;
