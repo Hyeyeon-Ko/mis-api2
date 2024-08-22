@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.rental.model.response.RentalExcelResponseDTO;
 import kr.or.kmi.mis.api.rental.service.RentalExcelService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,19 @@ public class RentalExcelController {
     @PostMapping("/excel")
     public void downloadExcel(HttpServletResponse response, @RequestBody List<Long> detailIds) throws IOException {
         rentalExcelService.downloadExcel(response, detailIds);
+    }
+
+    @Operation(summary = "download total excel", description = "전국 센터 렌탈현황 엑셀 파일 다운로드")
+    @GetMapping("/totalExcel")
+    public void downloadTotalExcel(HttpServletResponse response) throws IOException {
+        byte[] excelData = rentalExcelService.generateTotalExcel();
+        String encodedFileName = "전국센터 렌탈제품 사용현황.xlsx";
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedFileName);
+        response.getOutputStream().write(excelData);
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
     }
 
     @Operation(summary = "download excel data", description = "렌탈현황 내역 엑셀 데이터 다운로드")

@@ -14,6 +14,9 @@ public interface RentalExcelService {
     /* 렌탈현황 내역 엑셀 파일 생성 */
     byte[] generateExcel(List<Long> detailIds) throws IOException;
 
+    /* 전국 센터 렌탈현황 요약 엑셀 파일 생성 */
+    byte[] generateTotalExcel() throws IOException;
+
     /* 렌탈현황 내역 저장 */
     void saveRentalDetails(List<RentalExcelResponseDTO> details);
 

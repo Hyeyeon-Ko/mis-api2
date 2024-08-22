@@ -204,6 +204,219 @@ public class RentalExcelServiceImpl implements RentalExcelService {
         sheet.setColumnWidth(14, 6000);
     }
 
+    @Override
+    public byte[] generateTotalExcel() throws IOException {
+        Workbook wb = new XSSFWorkbook();
+        try {
+            // 1. 전국센터 시트 생성
+            createSummarySheet(wb);
+
+            // 2. 각 센터별 시트 생성
+            createCenterSheets(wb);
+
+            // 엑셀 파일을 ByteArrayOutputStream에 쓰기
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            wb.write(baos);
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new IOException("Error generating Excel file", e);
+        } finally {
+            wb.close();
+        }
+    }
+
+    private void createSummarySheet(Workbook wb) {
+        Sheet sheet = wb.createSheet("전국센터");
+
+        // 스타일 설정
+        CellStyle headerStyle = createHeaderStyle(wb);
+        CellStyle thinBorderStyle = createThinBorderStyle(wb);
+        CellStyle titleStyle = createTitleStyle(wb);
+        CellStyle centeredStyle = createCenteredStyle(wb);
+        CellStyle centerNameStyle = createCenterNameStyle(wb);
+
+        // 제목 생성
+        createSumTitle(sheet, titleStyle);
+
+        // 병합된 헤더 생성
+        createSummaryHeader(sheet, headerStyle);
+
+        // 센터명 배열
+        String[] centers = {"재단본부", "본원센터", "광화문", "강남센터", "여의도센터", "수원센터", "대구센터", "부산센터", "광주센터", "제주센터"};
+
+        // 데이터 채우기
+        int waterPurifierTotal = 0;
+        int airPurifierTotal = 0;
+        int bidetTotal = 0;
+        double rentalFeeTotal = 0.0;
+
+        for (int i = 0; i < centers.length; i++) {
+            Row row = sheet.createRow(5 + i);
+            row.setHeight((short) 600);
+            createCell(row, 1, centers[i], centerNameStyle, centeredStyle);
+
+            // 각 센터의 데이터를 불러오기 (정수기, 공기청정기, 비데의 수 및 월 렌탈금액)
+            int[] data = fetchRentalDataForSummary(centers[i]);
+            waterPurifierTotal += data[0];
+            airPurifierTotal += data[1];
+            bidetTotal += data[2];
+            rentalFeeTotal += data[3];
+
+            createCell(row, 2, data[0], thinBorderStyle, centeredStyle);
+            createCell(row, 3, data[1], thinBorderStyle, centeredStyle);
+            createCell(row, 4, data[2], thinBorderStyle, centeredStyle);
+            createCell(row, 5, String.format("%,.0f", (double) data[3]), thinBorderStyle, centeredStyle);
+        }
+
+        Row totalRow = sheet.createRow(5 + centers.length);
+        totalRow.setHeight((short) 600);
+        createCell(totalRow, 1, "합계", centerNameStyle, centeredStyle);
+        createCell(totalRow, 2, waterPurifierTotal, thinBorderStyle, centeredStyle);
+        createCell(totalRow, 3, airPurifierTotal, thinBorderStyle, centeredStyle);
+        createCell(totalRow, 4, bidetTotal, thinBorderStyle, centeredStyle);
+        createCell(totalRow, 5, String.format("%,.0f", rentalFeeTotal), thinBorderStyle, centeredStyle);
+
+        adjustSummaryColumnWidths(sheet);
+    }
+
+    private void createCenterSheets(Workbook wb) {
+        String[] centers = {"재단본부", "본원센터", "광화문", "강남센터", "여의도센터", "수원센터", "대구센터", "부산센터", "광주센터", "제주센터"};
+        for (String center : centers) {
+            List<RentalDetail> rentalDetails = fetchRentalDetailsByCenter(center);
+            createCenterSheet(wb, center, rentalDetails);
+        }
+    }
+
+    private void createCenterSheet(Workbook wb, String sheetName, List<RentalDetail> rentalDetails) {
+        Sheet sheet = wb.createSheet(sheetName);
+
+        // 스타일 설정
+        CellStyle headerStyle = createHeaderStyle(wb);
+        CellStyle thinBorderStyle = createThinBorderStyle(wb);
+        CellStyle titleStyle = createTitleStyle(wb);
+        CellStyle centeredStyle = createCenteredStyle(wb);
+
+        // 제목 생성
+        createTitle(sheet, titleStyle);
+
+        // 병합된 헤더 생성
+        createHeader(sheet, headerStyle);
+
+        // 데이터 채우기
+        AtomicInteger rowNum = new AtomicInteger(5);
+        AtomicInteger no = new AtomicInteger(1);
+
+        rentalDetails.forEach(detail -> {
+            Row row = sheet.createRow(rowNum.getAndIncrement());
+            row.setHeight((short) 400);
+
+            createCell(row, 0, no.getAndIncrement(), null, null);
+            createCell(row, 1, detail.getCategory(), thinBorderStyle, centeredStyle);
+            createCell(row, 2, detail.getCompanyNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 3, detail.getContractNum(), thinBorderStyle, centeredStyle);
+            createCell(row, 4, detail.getModelNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 5, detail.getInstallDate(), thinBorderStyle, centeredStyle);
+            createCell(row, 6, detail.getExpiryDate(), thinBorderStyle, centeredStyle);
+
+            double rentalFee = 0.0;
+            try {
+                rentalFee = Double.parseDouble(detail.getRentalFee().replace(",", ""));
+            } catch (NumberFormatException e) {
+                rentalFee = 0.0;
+            }
+
+            createCell(row, 7, rentalFee, thinBorderStyle, centeredStyle);
+            createCell(row, 8, detail.getLocation(), thinBorderStyle, centeredStyle);
+            createCell(row, 9, detail.getInstallationSite(), thinBorderStyle, centeredStyle);
+            createCell(row, 10, detail.getSpecialNote(), thinBorderStyle, centeredStyle);
+        });
+
+        // 열 너비 조정
+        adjustColumnWidths(sheet);
+    }
+
+    private int[] fetchRentalDataForSummary(String centerName) {
+        // 각 센터별 데이터를 불러와서 [정수기 수, 공기청정기 수, 비데 수, 월 렌탈금액] 배열로 반환
+        List<RentalDetail> rentalDetails = fetchRentalDetailsByCenter(centerName);
+        int waterPurifierCount = 0;
+        int airPurifierCount = 0;
+        int bidetCount = 0;
+        double totalRentalFee = 0.0;
+
+        for (RentalDetail detail : rentalDetails) {
+            switch (detail.getCategory()) {
+                case "정수기":
+                    waterPurifierCount++;
+                    break;
+                case "공기청정기":
+                    airPurifierCount++;
+                    break;
+                case "비데":
+                    bidetCount++;
+                    break;
+            }
+            try {
+                totalRentalFee += Double.parseDouble(detail.getRentalFee().replace(",", ""));
+            } catch (NumberFormatException e) {
+                totalRentalFee += 0.0;
+            }
+        }
+
+        return new int[]{waterPurifierCount, airPurifierCount, bidetCount, (int) totalRentalFee};
+    }
+
+    private List<RentalDetail> fetchRentalDetailsByCenter(String centerName) {
+        String instCd = convertCenterNameToInstCd(centerName);
+        return rentalDetailRepository.findByInstCdAndStatus(instCd, "E")
+                .orElseThrow(() -> new IllegalArgumentException("No rental data found for center: " + centerName));
+    }
+
+    private String convertCenterNameToInstCd(String centerName) {
+        switch (centerName) {
+            case "재단본부":
+                return "100";
+            case "본원센터":
+                return "101"; // 본원센터 ???
+            case "광화문":
+                return "111";
+            case "강남센터":
+                return "113";
+            case "여의도센터":
+                return "112";
+            case "수원센터":
+                return "211";
+            case "대구센터":
+                return "611";
+            case "부산센터":
+                return "612";
+            case "광주센터":
+                return "711";
+            case "제주센터":
+                return "811";
+            default:
+                throw new IllegalArgumentException("Unknown center name: " + centerName);
+        }
+    }
+
+    private void createSummaryHeader(Sheet sheet, CellStyle headerStyle) {
+        Row headerRow = sheet.createRow(4);
+        headerRow.setHeight((short) 600);
+
+        createCell(headerRow, 1, "센터명", headerStyle, null);
+        createCell(headerRow, 2, "정수기", headerStyle, null);
+        createCell(headerRow, 3, "공기청정기", headerStyle, null);
+        createCell(headerRow, 4, "비데", headerStyle, null);
+        createCell(headerRow, 5, "월 렌탈금액", headerStyle, null);
+    }
+
+    private void adjustSummaryColumnWidths(Sheet sheet) {
+        sheet.setColumnWidth(1, 5000);
+        sheet.setColumnWidth(2, 5000);
+        sheet.setColumnWidth(3, 5000);
+        sheet.setColumnWidth(4, 5000);
+        sheet.setColumnWidth(5, 5000);
+    }
+
     private void createCell(Row row, int column, Object value, CellStyle borderStyle, CellStyle centeredStyle) {
         Cell cell = row.createCell(column);
 
@@ -236,6 +449,23 @@ public class RentalExcelServiceImpl implements RentalExcelService {
         sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 10));
 
         for (int i = 1; i <= 10; i++) {
+            Cell cell = titleRow.createCell(i);
+            cell.setCellValue(i == 1 ? "재단본부 렌탈제품 현황" : "");
+            CellStyle combinedStyle = sheet.getWorkbook().createCellStyle();
+            combinedStyle.cloneStyleFrom(titleStyle);
+            combinedStyle.setBorderBottom(BorderStyle.THIN);
+            combinedStyle.setBorderTop(BorderStyle.THIN);
+            cell.setCellStyle(combinedStyle);
+        }
+    }
+
+    private void createSumTitle(Sheet sheet, CellStyle titleStyle) {
+        Row titleRow = sheet.createRow(1);
+        titleRow.setHeight((short) 700);
+
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 5));
+
+        for (int i = 1; i <= 5; i++) {
             Cell cell = titleRow.createCell(i);
             cell.setCellValue(i == 1 ? "재단본부 렌탈제품 현황" : "");
             CellStyle combinedStyle = sheet.getWorkbook().createCellStyle();
@@ -321,6 +551,23 @@ public class RentalExcelServiceImpl implements RentalExcelService {
         CellStyle style = wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
+        return style;
+    }
+
+    private CellStyle createCenterNameStyle(Workbook wb) {
+        XSSFCellStyle style = (XSSFCellStyle) wb.createCellStyle();
+        XSSFColor color = new XSSFColor(new java.awt.Color(217, 225, 242), null);
+        style.setFillForegroundColor(color);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+
         return style;
     }
 }
