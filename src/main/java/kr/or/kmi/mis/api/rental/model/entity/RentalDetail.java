@@ -1,10 +1,7 @@
 package kr.or.kmi.mis.api.rental.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.sql.Timestamp;
 
@@ -19,8 +16,8 @@ public class RentalDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long detailId;
 
-    @Column
-    private Long draftId;
+    @Column(length = 20)
+    private String instCd;
 
     @Column(length = 100)
     private String category;
@@ -35,10 +32,10 @@ public class RentalDetail {
     private String modelNm;
 
     @Column
-    private Timestamp installDate;
+    private String installDate;
 
     @Column
-    private Timestamp expiryDate;
+    private String expiryDate;
 
     @Column(length = 20)
     private String rentalFee;
@@ -54,5 +51,24 @@ public class RentalDetail {
 
     @Column(length = 1)
     private String status;
+
+    @Builder
+    public RentalDetail(String instCd, String category, String companyNm, String contractNum,
+                        String modelNm, String installDate, String expiryDate, String rentalFee,
+                        String location, String installationSite, String specialNote, String status) {
+        this.instCd = instCd;
+        this.category = category;
+        this.companyNm = companyNm;
+        this.contractNum = contractNum;
+        this.modelNm = modelNm;
+        this.installDate = installDate;
+        this.expiryDate = expiryDate;
+        this.rentalFee = rentalFee;
+        this.location = location;
+        this.installationSite = installationSite;
+        this.specialNote = specialNote;
+        this.status = status;
+    }
+
 
 }
