@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RentalDetailRepository extends JpaRepository<RentalDetail, Long> {
+    List<RentalDetail> findAllByDetailIdIn(List<Long> detailIds);
     boolean existsByContractNum(String contractNum);
     Optional<RentalDetail> findByContractNum(String contractNum);
     Optional<List<RentalDetail>> findByInstCd(String instCd);

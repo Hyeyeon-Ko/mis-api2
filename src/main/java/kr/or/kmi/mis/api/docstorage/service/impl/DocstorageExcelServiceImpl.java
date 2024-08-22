@@ -35,7 +35,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         byte[] excelData = generateExcel(detailIds);
 
         try {
-            String encodedFileName = URLEncoder.encode("문서보관 목록표.xlsx", StandardCharsets.UTF_8.toString());
+            String encodedFileName = URLEncoder.encode("문서보관 목록표.xlsx", StandardCharsets.UTF_8);
 
             // HTTP 응답에 엑셀 파일 첨부
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

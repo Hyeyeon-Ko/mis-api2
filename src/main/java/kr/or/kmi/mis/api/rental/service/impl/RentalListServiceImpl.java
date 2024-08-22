@@ -38,6 +38,7 @@ public class RentalListServiceImpl implements RentalListService {
 
     @Override
     public RentalTotalListResponseDTO getTotalRentalList() {
+
         // 모든 센터 정보 조회
         List<CenterResponseDTO> centerList = fetchAllCenters();
 

@@ -9,7 +9,7 @@ import java.util.List;
 public interface RentalExcelService {
 
     /* 렌탈현황 내역 엑셀 파일 다운로드 */
-    void downloadExcel(HttpServletResponse response, List<Long> detailIds);
+    void downloadExcel(HttpServletResponse response, List<Long> detailIds) throws IOException;
 
     /* 렌탈현황 내역 엑셀 파일 생성 */
     byte[] generateExcel(List<Long> detailIds) throws IOException;
