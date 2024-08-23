@@ -14,11 +14,14 @@ public class RentalTotalListResponseDTO {
 
     private List<CenterResponseDTO> centerResponses;
     private List<CenterRentalListResponseDTO> centerRentalResponses;
+    private List<RentalSummaryResponseDTO> summaryResponses;
 
-    public static RentalTotalListResponseDTO of(List<CenterResponseDTO> centerResponses, List<CenterRentalListResponseDTO> centerRentalResponses) {
+    public static RentalTotalListResponseDTO of(List<CenterResponseDTO> centerResponses, List<CenterRentalListResponseDTO> centerRentalResponses,
+                                                List<RentalSummaryResponseDTO> summaryResponses) {
         return RentalTotalListResponseDTO.builder()
                 .centerResponses(centerResponses)
                 .centerRentalResponses(centerRentalResponses)
+                .summaryResponses(summaryResponses)
                 .build();
     }
 }

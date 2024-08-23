@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.docstorage.domain.response.CenterResponseDTO;
 import kr.or.kmi.mis.api.rental.model.entity.RentalDetail;
 import kr.or.kmi.mis.api.rental.model.response.CenterRentalListResponseDTO;
 import kr.or.kmi.mis.api.rental.model.response.RentalResponseDTO;
+import kr.or.kmi.mis.api.rental.model.response.RentalSummaryResponseDTO;
 import kr.or.kmi.mis.api.rental.model.response.RentalTotalListResponseDTO;
 import kr.or.kmi.mis.api.rental.repository.RentalDetailRepository;
 import kr.or.kmi.mis.api.rental.service.RentalListService;
@@ -48,8 +49,6 @@ public class RentalListServiceImpl implements RentalListService {
 
     @Override
     public RentalTotalListResponseDTO getTotalRentalList() {
-
-        // 모든 센터 정보 조회
         List<CenterResponseDTO> centerList = fetchAllCenters();
 
         List<RentalResponseDTO> foundationResponses = getCenterRentalListByStatus("100", "E");
@@ -62,17 +61,60 @@ public class RentalListServiceImpl implements RentalListService {
         List<RentalResponseDTO> gwangjuResponses = getCenterRentalListByStatus("711", "E");
         List<RentalResponseDTO> jejuResponses = getCenterRentalListByStatus("811", "E");
 
-        // 센터별 렌탈 목록을 CenterRentalListResponseDTO에 담음
+        List<RentalSummaryResponseDTO> summary = List.of(
+                createSummary("재단본부", foundationResponses),
+                createSummary("광화문", gwanghwamunResponses),
+                createSummary("여의도", yeouidoResponses),
+                createSummary("강남센터", gangnamResponses),
+                createSummary("수원센터", suwonResponses),
+                createSummary("대구센터", daeguResponses),
+                createSummary("부산센터", busanResponses),
+                createSummary("광주센터", gwangjuResponses),
+                createSummary("제주센터", jejuResponses)
+        );
+
         CenterRentalListResponseDTO centerRentalResponses = CenterRentalListResponseDTO.of(
                 foundationResponses, gwanghwamunResponses, yeouidoResponses, gangnamResponses,
                 suwonResponses, daeguResponses, busanResponses, gwangjuResponses, jejuResponses
         );
 
-        // CenterRentalListResponseDTO 리스트 생성
         List<CenterRentalListResponseDTO> centerRentalResponsesList = List.of(centerRentalResponses);
 
-        // 센터 정보와 센터별 렌탈 현황을 포함한 객체 반환
-        return RentalTotalListResponseDTO.of(centerList, centerRentalResponsesList);
+        return RentalTotalListResponseDTO.of(centerList, centerRentalResponsesList, summary);
+    }
+
+    private RentalSummaryResponseDTO createSummary(String centerName, List<RentalResponseDTO> rentalResponses) {
+        int waterPurifierCount = 0;
+        int airPurifierCount = 0;
+        int bidetCount = 0;
+        double totalRentalFee = 0.0;
+
+        for (RentalResponseDTO detail : rentalResponses) {
+            switch (detail.getCategory()) {
+                case "정수기":
+                    waterPurifierCount++;
+                    break;
+                case "공기청정기":
+                    airPurifierCount++;
+                    break;
+                case "비데":
+                    bidetCount++;
+                    break;
+            }
+            try {
+                totalRentalFee += Double.parseDouble(detail.getRentalFee().replace(",", ""));
+            } catch (NumberFormatException e) {
+                totalRentalFee += 0.0;
+            }
+        }
+
+        return RentalSummaryResponseDTO.builder()
+                .center(centerName)
+                .waterPurifier(waterPurifierCount)
+                .airPurifier(airPurifierCount)
+                .bidet(bidetCount)
+                .monthlyRentalFee((int) totalRentalFee)
+                .build();
     }
 
     /* 모든 센터 정보 조회 */
