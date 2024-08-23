@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.rental.service.impl;
 
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.rental.model.entity.RentalDetail;
+import kr.or.kmi.mis.api.rental.model.request.RentalBulkUpdateRequestDTO;
 import kr.or.kmi.mis.api.rental.model.request.RentalRequestDTO;
 import kr.or.kmi.mis.api.rental.model.response.RentalResponseDTO;
 import kr.or.kmi.mis.api.rental.repository.RentalDetailRepository;
@@ -72,6 +73,37 @@ public class RentalServiceImpl implements RentalService {
         }
 
         rentalDetailRepository.save(rentalDetail);
+    }
+
+    @Override
+    @Transactional
+    public void bulkUpdateRentalInfo(RentalBulkUpdateRequestDTO rentalBulkUpdateRequestDTO) {
+
+        List<Long> detailIds = rentalBulkUpdateRequestDTO.getDetailIds();
+        detailIds.forEach(detailId -> {
+            RentalDetail existingDetail = rentalDetailRepository.findById(detailId)
+                    .orElseThrow(() -> new EntityNotFoundException("Rental Detail Not Found: " + detailId));
+
+            RentalDetail newRentalDetail = RentalDetail.builder()
+                    .detailId(existingDetail.getDetailId())
+                    .instCd(existingDetail.getInstCd())
+                    .contractNum(existingDetail.getContractNum())
+                    .category(!rentalBulkUpdateRequestDTO.getCategory().isEmpty() ? rentalBulkUpdateRequestDTO.getCategory() : existingDetail.getCategory())
+                    .companyNm(!rentalBulkUpdateRequestDTO.getCompanyNm().isEmpty() ? rentalBulkUpdateRequestDTO.getCompanyNm() : existingDetail.getCompanyNm())
+                    .modelNm(!rentalBulkUpdateRequestDTO.getModelNm().isEmpty() ? rentalBulkUpdateRequestDTO.getModelNm() : existingDetail.getModelNm())
+                    .installDate(!rentalBulkUpdateRequestDTO.getInstallDate().isEmpty() ? rentalBulkUpdateRequestDTO.getInstallDate() : existingDetail.getInstallDate())
+                    .expiryDate(!rentalBulkUpdateRequestDTO.getExpiryDate().isEmpty() ? rentalBulkUpdateRequestDTO.getExpiryDate() : existingDetail.getExpiryDate())
+                    .rentalFee(!rentalBulkUpdateRequestDTO.getRentalFee().isEmpty() ? rentalBulkUpdateRequestDTO.getRentalFee() : existingDetail.getRentalFee())
+                    .location(!rentalBulkUpdateRequestDTO.getLocation().isEmpty() ? rentalBulkUpdateRequestDTO.getLocation() : existingDetail.getLocation())
+                    .installationSite(!rentalBulkUpdateRequestDTO.getInstallationSite().isEmpty() ? rentalBulkUpdateRequestDTO.getInstallationSite() : existingDetail.getInstallationSite())
+                    .specialNote(!rentalBulkUpdateRequestDTO.getSpecialNote().isEmpty() ? rentalBulkUpdateRequestDTO.getSpecialNote() : existingDetail.getSpecialNote())
+                    .build();
+
+            newRentalDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+            newRentalDetail.setUpdtrId(infoService.getUserInfo().getUserId());
+
+            rentalDetailRepository.save(newRentalDetail);
+        });
     }
 
     void checkDuplicateCNm(String NewContractNum, String oriContractNum) {

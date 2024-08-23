@@ -54,9 +54,10 @@ public class RentalDetail extends BaseSystemFieldEntity {
     private String status;
 
     @Builder
-    public RentalDetail(String instCd, String category, String companyNm, String contractNum,
+    public RentalDetail(Long detailId, String instCd, String category, String companyNm, String contractNum,
                         String modelNm, String installDate, String expiryDate, String rentalFee,
                         String location, String installationSite, String specialNote) {
+        this.detailId = detailId;
         this.instCd = instCd;
         this.category = category;
         this.companyNm = companyNm;

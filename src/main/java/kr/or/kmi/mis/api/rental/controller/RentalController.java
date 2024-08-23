@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.rental.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.rental.model.request.RentalBulkUpdateRequestDTO;
 import kr.or.kmi.mis.api.rental.model.request.RentalRequestDTO;
 import kr.or.kmi.mis.api.rental.service.RentalService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
@@ -36,6 +37,13 @@ public class RentalController {
     @PutMapping("/")
     public ApiResponse<?> updateRentalInfo(@RequestParam("detailId") Long detailId, @RequestBody RentalRequestDTO rentalRequestDTO) {
         rentalService.updateRentalInfo(detailId, rentalRequestDTO);
+        return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "modify Rental info", description = "렌탈현황 관련 정보 수정")
+    @PutMapping("/bulkUpdate")
+    public ApiResponse<?> bulkUpdateRentalInfo(@RequestBody RentalBulkUpdateRequestDTO rentalBulkUpdateRequestDTO) {
+        rentalService.bulkUpdateRentalInfo(rentalBulkUpdateRequestDTO);
         return ResponseWrapper.success();
     }
 
