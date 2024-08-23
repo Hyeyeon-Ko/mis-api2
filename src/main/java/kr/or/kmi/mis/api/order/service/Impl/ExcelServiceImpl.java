@@ -129,12 +129,20 @@ public class ExcelServiceImpl implements ExcelService {
                 divisionValue = "2안";
             }
 
+            String teamNm = "000".equals(detail.getTeamCd())
+                    ? detail.getTeamNm()
+                    : stdBcdService.getTeamNm(detail.getTeamCd()).getFirst();
+
+            String gradeNm = "000".equals(detail.getGradeCd())
+                    ?detail.getGradeNm()
+                    : stdBcdService.getGradeNm(detail.getGradeCd()).getFirst();
+
             // 앞면 정보
             createCell(row, 0, no.getAndIncrement(), thickBorderStyle, centeredStyle);
             createCell(row, 1, divisionValue, thinBorderStyle, centeredStyle);
             createCell(row, 2, stdBcdService.getInstNm(detail.getInstCd()), thinBorderStyle, centeredStyle);
-            createCell(row, 3, stdBcdService.getTeamNm(detail.getTeamCd()).getFirst(), thinBorderStyle, centeredStyle);
-            createCell(row, 4, stdBcdService.getGradeNm(detail.getGradeCd()).getFirst(), thinBorderStyle, centeredStyle);
+            createCell(row, 3, teamNm, thinBorderStyle, centeredStyle);
+            createCell(row, 4, gradeNm, thinBorderStyle, centeredStyle);
             createCell(row, 5, detail.getKorNm(), thinBorderStyle, centeredStyle);
             createCell(row, 6, detail.getEngNm(), thinBorderStyle, centeredStyle);
             createCell(row, 7, formatPhoneNumber(detail.getExtTel(), false), thinBorderStyle, centeredStyle);
@@ -153,15 +161,27 @@ public class ExcelServiceImpl implements ExcelService {
             Row rowBack = sheet.createRow(rowNum.getAndIncrement());
             rowBack.setHeight((short) 600); // 세로 너비 설정
 
+            String engTeamNm = "000".equals(detail.getTeamCd())
+                    ? detail.getEngteamNm()
+                    : stdBcdService.getTeamNm(detail.getTeamCd()).getLast();
+
+            String enGradeNm = "000".equals(detail.getGradeCd())
+                    ?detail.getEngradeNm()
+                    : stdBcdService.getTeamNm(detail.getTeamCd()).getLast();
+
             createCell(rowBack, 0, "", thickBorderStyle, centeredStyle);
             createCell(rowBack, 1, "", thinBorderStyle, centeredStyle);
-            if (detail.getGradeCd().equals("999")) {
-                createCell(rowBack, 2, detail.getEngradeNm() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
-                        , thinBorderStyle, centeredStyle);
-            } else {
-                createCell(rowBack, 2, stdBcdService.getGradeNm(
-                                detail.getGradeCd()).getLast() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast()
-                        , thinBorderStyle, centeredStyle);
+            if ("000".equals(detail.getGradeCd()) && "000".equals(detail.getTeamCd())) {
+                createCell(rowBack, 2, enGradeNm + " - " + engTeamNm, thinBorderStyle, centeredStyle);
+            }
+            else if ("000".equals(detail.getGradeCd())) {
+                createCell(rowBack, 2, enGradeNm + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast(), thinBorderStyle, centeredStyle);
+            }
+            else if ("000".equals(detail.getTeamCd())) {
+                createCell(rowBack, 2, stdBcdService.getGradeNm(detail.getGradeCd()).getLast() + " - " + engTeamNm, thinBorderStyle, centeredStyle);
+            }
+            else {
+                createCell(rowBack, 2, stdBcdService.getGradeNm(detail.getGradeCd()).getLast() + " - " + stdBcdService.getTeamNm(detail.getTeamCd()).getLast(), thinBorderStyle, centeredStyle);
             }
             createCell(rowBack, 3, "", thinBorderStyle, centeredStyle);
             createCell(rowBack, 4, "", thinBorderStyle, centeredStyle);
@@ -252,17 +272,25 @@ public class ExcelServiceImpl implements ExcelService {
         createOrderTitle(sheet, titleStyle);
         createOrderHeader(sheet, headerStyle);
 
-        AtomicInteger rowNum = new AtomicInteger(2); // 첫 번째 데이터 행 번호
-        AtomicInteger no = new AtomicInteger(1); // 순번 초기화
+        AtomicInteger rowNum = new AtomicInteger(2);
+        AtomicInteger no = new AtomicInteger(1);
 
         bcdDetails.forEach(detail -> {
             Row row = sheet.createRow(rowNum.getAndIncrement());
-            row.setHeight((short) 800);
+            row.setHeight((short) 600);
+
+            String teamNm = "000".equals(detail.getTeamCd())
+                    ? detail.getTeamNm()
+                    : stdBcdService.getTeamNm(detail.getTeamCd()).getFirst();
+
+            String gradeNm = "000".equals(detail.getGradeCd())
+                    ?detail.getGradeNm()
+                    : stdBcdService.getGradeNm(detail.getGradeCd()).getFirst();
 
             createOrderCell(row, 0, no.getAndIncrement(), thinBorderStyle, centeredStyle);
             createOrderCell(row, 1, stdBcdService.getInstNm(detail.getInstCd()), thinBorderStyle, centeredStyle);
-            createOrderCell(row, 2, stdBcdService.getTeamNm(detail.getTeamCd()).getFirst(), thinBorderStyle, centeredStyle);
-            createOrderCell(row, 3, stdBcdService.getGradeNm(detail.getGradeCd()).getFirst(), thinBorderStyle, centeredStyle);
+            createOrderCell(row, 2, teamNm, thinBorderStyle, centeredStyle);
+            createOrderCell(row, 3, gradeNm, thinBorderStyle, centeredStyle);
             createOrderCell(row, 4, detail.getKorNm(), thinBorderStyle, centeredStyle);
             createOrderCell(row, 5, detail.getEngNm(), thinBorderStyle, centeredStyle);
             createOrderCell(row, 6, formatPhoneNumber(detail.getExtTel(), false), thinBorderStyle, centeredStyle);
