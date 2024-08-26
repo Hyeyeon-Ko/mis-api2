@@ -29,15 +29,17 @@ public class ApplyController {
     @GetMapping(value = "/applyList")
     public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam(required = false) String documentType,
                                                          @RequestParam(required = false) LocalDate startDate,
-                                                         @RequestParam(required = false) LocalDate endDate) {
+                                                         @RequestParam(required = false) LocalDate endDate,
+                                                         @RequestParam String instCd) {
 
-        return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate));
+        return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, instCd));
     }
 
     @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/pendingList")
-    public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam(required = true) String documentType) {
-        return ResponseWrapper.success(applyService.getPendingListByType(documentType));
+    public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam(required = true) String documentType,
+                                                               @RequestParam String instCd) {
+        return ResponseWrapper.success(applyService.getPendingListByType(documentType, instCd));
     }
 
 

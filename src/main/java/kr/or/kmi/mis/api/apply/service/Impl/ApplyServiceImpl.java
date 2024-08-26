@@ -30,7 +30,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate) {
+    public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate, String instCd) {
 
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
@@ -40,18 +40,18 @@ public class ApplyServiceImpl implements ApplyService {
         if (documentType != null && !documentType.isEmpty()) {
             switch (documentType) {
                 case "명함신청":
-                    bcdApplyLists = bcdService.getBcdApplyByDateRange(timestamps[0], timestamps[1]);
+                    bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
                     break;
                 case "문서수발신":
-                    docApplyLists = docService.getDocApplyByDateRange(timestamps[0], timestamps[1]);
+                    docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
                     break;
                 default:
                     break;
             }
         } else {
             // 전체 신청 목록을 조회합니다.
-            bcdApplyLists = bcdService.getBcdApplyByDateRange(timestamps[0], timestamps[1]);
-            docApplyLists = docService.getDocApplyByDateRange(timestamps[0], timestamps[1]);
+            bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+            docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
         }
 
         return ApplyResponseDTO.of(bcdApplyLists, docApplyLists);
@@ -87,12 +87,12 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getPendingListByType(String documentType) {
+    public PendingResponseDTO getPendingListByType(String documentType, String instCd) {
         switch (documentType) {
             case "명함신청":
-                return PendingResponseDTO.of(bcdService.getPendingList(), null);
+                return PendingResponseDTO.of(bcdService.getPendingList(instCd), null);
             case "문서수발신":
-                return PendingResponseDTO.of(null, docService.getDocPendingList());
+                return PendingResponseDTO.of(null, docService.getDocPendingList(instCd));
             default:
                 throw new IllegalArgumentException("Invalid document type: " + documentType);
         }

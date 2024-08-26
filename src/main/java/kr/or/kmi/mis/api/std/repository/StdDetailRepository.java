@@ -18,9 +18,11 @@ public interface StdDetailRepository extends JpaRepository<StdDetail, StdDetailI
 
     Optional<StdDetail> findByEtcItem1(String userId);
 
-    Optional<StdDetail> findByGroupCdAndDetailNm(StdGroup groupCd, String detailNm);
+    Optional<List<StdDetail>> findByGroupCdAndDetailNm(StdGroup groupCd, String detailNm);
 
     Optional<StdDetail> findByGroupCdAndDetailCd(StdGroup groupCd, String detailCd);
+
+    Optional<StdDetail> findByGroupCdAndDetailCdAndEtcItem1(StdGroup groupCd, String detailCd, String etcItem1);
 
     Optional<List<StdDetail>> findByGroupCdAndEtcItem3(StdGroup groupCd, String etcItem3);
 

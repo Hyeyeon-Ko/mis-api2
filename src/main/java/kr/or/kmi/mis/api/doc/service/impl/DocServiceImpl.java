@@ -130,8 +130,8 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
+    public List<DocMasterResponseDTO> getDocApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd) {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
         if (docMasters == null) {
             docMasters = new ArrayList<>();
         }
@@ -148,8 +148,8 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList() {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
+    public List<DocPendingResponseDTO> getDocPendingList(String instCd) {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
 
         return docMasters.stream()
                 .map(docMaster -> {

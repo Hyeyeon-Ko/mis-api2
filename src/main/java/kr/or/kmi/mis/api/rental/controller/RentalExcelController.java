@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -33,7 +35,7 @@ public class RentalExcelController {
     @GetMapping("/totalExcel")
     public void downloadTotalExcel(HttpServletResponse response) throws IOException {
         byte[] excelData = rentalExcelService.generateTotalExcel();
-        String encodedFileName = "전국센터 렌탈제품 사용현황.xlsx";
+        String encodedFileName = URLEncoder.encode("전국센터 렌탈제품 사용현황.xlsx", StandardCharsets.UTF_8.toString());
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedFileName);

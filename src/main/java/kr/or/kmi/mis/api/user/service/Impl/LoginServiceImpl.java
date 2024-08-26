@@ -36,20 +36,21 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
-        // userDetailInfo로부터 로그인 한 사람의 팀 이름 불러오기
-        ResponseData.ResultData resultData = authorityService.fetchUserInfo(loginRequestDTO.getUserId()).block();
-        String teamNm = Objects.requireNonNull(resultData).getOrgdeptnm();
 
-        // 기준자료에서 팀이름을 이용해 사이드바 권한 가져오기
+        // 기준자료에서 사번을 이용해 사이드바 권한 가져오기
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
                 .orElseThrow(() -> new EntityNotFoundException("B002"));
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup, teamNm)
-                .orElseThrow(() -> new EntityNotFoundException("B002"));
 
-        List<String> sidebarPermissions = Arrays.asList(
-                stdDetail.getEtcItem1(), stdDetail.getEtcItem2(), stdDetail.getEtcItem3(),
-                stdDetail.getEtcItem4(), stdDetail.getEtcItem5(), stdDetail.getEtcItem6()
-        );
+        Optional<StdDetail> stdDetailOpt = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, loginRequestDTO.getUserId());
+
+        List<String> sidebarPermissions = null;
+        if (stdDetailOpt.isPresent()) {
+            StdDetail stdDetail = stdDetailOpt.get();
+            sidebarPermissions = Arrays.asList(
+                    stdDetail.getEtcItem1(), stdDetail.getEtcItem2(), stdDetail.getEtcItem3(), stdDetail.getEtcItem4(),
+                    stdDetail.getEtcItem5(), stdDetail.getEtcItem6(), stdDetail.getEtcItem7(), stdDetail.getEtcItem8()
+            );
+        }
 
         Map responseMap = webClientBuilder.build()
                 .post()
@@ -62,10 +63,11 @@ public class LoginServiceImpl implements LoginService {
         if (responseMap != null && "0000".equals(responseMap.get("resultCd"))) {
             LoginResponseDTO responseDTO = new LoginResponseDTO();
             responseDTO.setHngNm((String) responseMap.get("hngnm"));
-            responseDTO.setTeamCd((String) responseMap.get("orgdeptcd"));
 
             String instCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getInstCd();
+            String teamCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getTeamCd();
             responseDTO.setInstCd(instCd);
+            responseDTO.setTeamCd(teamCd);
 
             // teamCd, instCd -> deptCd
             StdGroup teamStdGroup = stdGroupRepository.findByGroupCd("A003")

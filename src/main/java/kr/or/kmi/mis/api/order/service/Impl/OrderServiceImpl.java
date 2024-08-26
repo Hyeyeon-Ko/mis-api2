@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,7 +46,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderListResponseDTO> getOrderList() {
+    public List<OrderListResponseDTO> getOrderList(String instCd) {
+
         List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndOrderDateIsNull("B")
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster"));
 
@@ -54,18 +56,23 @@ public class OrderServiceImpl implements OrderService {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new EntityNotFoundException("BcdDetail"));
 
-                    Integer quantity = bcdDetail.getQuantity();
+                    if (bcdDetail.getInstCd().equals(instCd)) {
+                        Integer quantity = bcdDetail.getQuantity();
 
-                    return OrderListResponseDTO.builder()
-                            .draftId(bcdDetail.getDraftId())
-                            .instNm(stdBcdService.getInstNm(bcdDetail.getInstCd()))
-                            .title(bcdMaster.getTitle())
-                            .draftDate(bcdMaster.getDraftDate())
-                            .respondDate(bcdMaster.getRespondDate())
-                            .drafter(bcdMaster.getDrafter())
-                            .quantity(quantity)
-                            .build();
+                        return OrderListResponseDTO.builder()
+                                .draftId(bcdDetail.getDraftId())
+                                .instNm(stdBcdService.getInstNm(bcdDetail.getInstCd()))
+                                .title(bcdMaster.getTitle())
+                                .draftDate(bcdMaster.getDraftDate())
+                                .respondDate(bcdMaster.getRespondDate())
+                                .drafter(bcdMaster.getDrafter())
+                                .quantity(quantity)
+                                .build();
+                    } else {
+                        return null;
+                    }
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

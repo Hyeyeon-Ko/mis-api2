@@ -26,8 +26,8 @@ public class OrderController {
 
     @Operation(summary = "get order list", description = "발주 목록 조회")
     @GetMapping
-    public ApiResponse<List<OrderListResponseDTO>> getOrderList() {
-        return ResponseWrapper.success(orderService.getOrderList());
+    public ApiResponse<List<OrderListResponseDTO>> getOrderList(String instCd) {
+        return ResponseWrapper.success(orderService.getOrderList(instCd));
     }
 
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")

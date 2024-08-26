@@ -20,6 +20,6 @@ public interface DocService {
     DocDetailResponseDTO getDoc(Long draftId);
     List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startTime, Timestamp endTime);
     List<DocPendingResponseDTO> getMyDocPendingList();
-    List<DocMasterResponseDTO> getDocApplyByDateRange(Timestamp timestamp, Timestamp timestamp1);
-    List<DocPendingResponseDTO> getDocPendingList();
+    List<DocMasterResponseDTO> getDocApplyByDateRangeAndInstCd(Timestamp timestamp, Timestamp timestamp1, String instCd);
+    List<DocPendingResponseDTO> getDocPendingList(String instCd);
 }

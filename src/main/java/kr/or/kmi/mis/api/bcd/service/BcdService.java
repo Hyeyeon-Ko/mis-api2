@@ -12,10 +12,10 @@ public interface BcdService {
     void applyBcd(BcdRequestDTO bcdRequestDTO);
     void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO);
     void cancelBcdApply(Long draftId);
-    List<BcdMasterResponseDTO> getBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
+    List<BcdMasterResponseDTO> getBcdApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd);
     List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate);
 //    BcdDetailResponseDTO getBcd(Long draftId);
-    List<BcdPendingResponseDTO> getPendingList();
+    List<BcdPendingResponseDTO> getPendingList(String instCd);
     List<BcdPendingResponseDTO> getMyPendingList();
     void completeBcdApply(Long draftId);
 
