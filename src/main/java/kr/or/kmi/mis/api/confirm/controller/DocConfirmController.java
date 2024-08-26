@@ -29,4 +29,11 @@ public class DocConfirmController {
         docConfirmService.delete(draftId);
         return ResponseWrapper.success();
     }
+
+    @Operation(summary = "revert doc apply", description = "삭제 후 되돌리기")
+    @PutMapping("/revert")
+    public ApiResponse<?> revert(@RequestParam("draftId") Long draftId) {
+        docConfirmService.revert(draftId);
+        return ResponseWrapper.success();
+    }
 }

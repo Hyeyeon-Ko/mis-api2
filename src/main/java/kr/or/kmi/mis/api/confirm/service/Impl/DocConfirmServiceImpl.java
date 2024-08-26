@@ -62,6 +62,19 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         docMasterRepository.save(docMaster);
     }
 
+    @Override
+    @Transactional
+    public void revert(Long draftId) {
+
+        DocMaster docMaster = docMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("docMaster not found: " + draftId));
+
+        // 신청 취소 상태 되돌리기
+        docMaster.revert("E");
+
+        docMasterRepository.save(docMaster);
+    }
+
     public static String createDocId(String lastDocId) {
 
         int num = 1;

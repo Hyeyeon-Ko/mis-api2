@@ -57,6 +57,11 @@ public class DocMaster extends BaseSystemFieldEntity {
         this.respondDate = new Timestamp(System.currentTimeMillis());
     }
 
+    public void revert(String status) {
+        this.status = status;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+    }
+
     @Builder
     public DocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd) {
         this.title =  String.format("문서수발신 신청서 (%s)", drafter);
