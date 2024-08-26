@@ -17,6 +17,9 @@ public interface DocstorageListService {
     /* 센터별 문서보관 내역 */
     List<DocstorageResponseDTO> getDocstorageCenterList(String instCd);
 
+    /* 센터 전체 문서보관 내역 */
+    List<DocstorageResponseDTO> getTotalCenterDocstorageList(String instCd);
+
     /* 전국센터 문서보관 내역 */
     DocstorageTotalListResponseDTO getTotalDocstorageList();
 

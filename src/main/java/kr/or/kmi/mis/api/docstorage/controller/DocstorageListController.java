@@ -37,6 +37,11 @@ public class DocstorageListController {
         return ResponseWrapper.success(docstorageListService.getDocstorageCenterList(deptCd));
     }
 
+    @GetMapping("/totalDept")
+    public ApiResponse<List<DocstorageResponseDTO>> getTotalCenterDocstorageList(String instCd) {
+        return ResponseWrapper.success(docstorageListService.getTotalCenterDocstorageList(instCd));
+    }
+
     @GetMapping("/total")
     public ApiResponse<DocstorageTotalListResponseDTO> getTotalDocstorageList() {
         return ResponseWrapper.success(docstorageListService.getTotalDocstorageList());

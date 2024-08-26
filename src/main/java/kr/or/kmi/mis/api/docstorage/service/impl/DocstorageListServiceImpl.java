@@ -89,6 +89,50 @@ public class DocstorageListServiceImpl implements DocstorageListService {
         return convertToResponseDTOListUsingMasterStatus(finalFilteredDetails);
     }
 
+    /* 센터 전체 문서보관 목록표 */
+    @Override
+    public List<DocstorageResponseDTO> getTotalCenterDocstorageList(String instCd) {
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        List<StdDetail> stdDetailList = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        List<DocstorageResponseDTO> responseList = new ArrayList<>();
+
+        for (StdDetail stdDetail : stdDetailList) {
+            List<DocStorageDetail> docstorageDetails = docStorageDetailRepository.findByDeptCd(stdDetail.getDetailCd())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+            for (DocStorageDetail docstorageDetail : docstorageDetails) {
+                DocStorageMaster docStorageMaster = docStorageMasterRepository.findById(docstorageDetail.getDraftId())
+                        .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                DocstorageResponseDTO responseDTO = DocstorageResponseDTO.builder()
+                        .detailId(docstorageDetail.getDetailId())
+                        .draftId(docstorageDetail.getDraftId())
+                        .teamNm(docstorageDetail.getTeamNm())
+                        .docId(docstorageDetail.getDocId())
+                        .location(docstorageDetail.getLocation())
+                        .docNm(docstorageDetail.getDocNm())
+                        .manager(docstorageDetail.getManager())
+                        .subManager(docstorageDetail.getSubManager())
+                        .storageYear(docstorageDetail.getStorageYear())
+                        .createDate(docstorageDetail.getCreateDate())
+                        .transferDate(docstorageDetail.getTransferDate())
+                        .tsdNum(docstorageDetail.getTsdNum())
+                        .disposalDate(docstorageDetail.getDisposalDate())
+                        .dpdraftNum(docstorageDetail.getDpdNum())
+                        .type(docStorageMaster.getType())
+                        .status(docstorageDetail.getStatus())
+                        .build();
+
+                responseList.add(responseDTO);
+            }
+        }
+
+        return responseList;
+    }
+
     /* 전국 센터별 문서보관 목록표 */
     @Override
     public DocstorageTotalListResponseDTO getTotalDocstorageList() {
