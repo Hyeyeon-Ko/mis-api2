@@ -146,6 +146,8 @@ public class StdDetailServiceImpl implements StdDetailService {
                         .etcItem6(stdDetailRequestDTO.getEtcItem6())
                         .etcItem7(stdDetailRequestDTO.getEtcItem7())
                         .etcItem8(stdDetailRequestDTO.getEtcItem8())
+                        .etcItem9(stdDetailRequestDTO.getEtcItem9())
+                        .etcItem10(stdDetailRequestDTO.getEtcItem10())
                         .build();
                 newStdDetail.setRgstrId(oriStdDetail.getRgstrId());
                 newStdDetail.setRgstDt(oriStdDetail.getRgstDt());

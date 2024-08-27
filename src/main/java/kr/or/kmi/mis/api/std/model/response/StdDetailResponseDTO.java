@@ -23,6 +23,8 @@ public class StdDetailResponseDTO {
     private String etcItem6;
     private String etcItem7;
     private String etcItem8;
+    private String etcItem9;
+    private String etcItem10;
 
     public static StdDetailResponseDTO of(StdDetail stdDetail) {
 
@@ -40,6 +42,8 @@ public class StdDetailResponseDTO {
                 .etcItem6(stdDetail.getEtcItem6())
                 .etcItem7(stdDetail.getEtcItem7())
                 .etcItem8(stdDetail.getEtcItem8())
+                .etcItem9(stdDetail.getEtcItem9())
+                .etcItem10(stdDetail.getEtcItem10())
                 .build();
     }
 }
