@@ -1,13 +1,9 @@
 package kr.or.kmi.mis.api.seal.model.entity;
 
 import jakarta.persistence.*;
-import kr.or.kmi.mis.api.seal.model.request.ImprintRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ImprintUpdateRequestDTO;
-import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
-
-import java.sql.Timestamp;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -23,7 +19,7 @@ public class SealImprintDetail extends BaseSystemFieldEntity {
     @Column(length = 50)
     private String submission;
 
-    private Timestamp useDate;
+    private String useDate;
 
     @Column(length = 20)
     private String corporateSeal;
@@ -41,7 +37,7 @@ public class SealImprintDetail extends BaseSystemFieldEntity {
     private String notes;
 
     @Builder
-    public SealImprintDetail(Long draftId, String submission, Timestamp useDate, String corporateSeal, String facsimileSeal,
+    public SealImprintDetail(Long draftId, String submission, String useDate, String corporateSeal, String facsimileSeal,
                              String companySeal, String purpose, String notes) {
         this.draftId = draftId;
         this.submission = submission;
@@ -56,9 +52,9 @@ public class SealImprintDetail extends BaseSystemFieldEntity {
     public void update(ImprintUpdateRequestDTO imprintUpdateRequestDTO) {
         this.submission = imprintUpdateRequestDTO.getSubmission();
         this.useDate = imprintUpdateRequestDTO.getUseDate();
-        this.corporateSeal = corporateSeal;
-        this.facsimileSeal = facsimileSeal;
-        this.companySeal = companySeal;
+        this.corporateSeal = imprintUpdateRequestDTO.getCorporateSeal();
+        this.facsimileSeal = imprintUpdateRequestDTO.getFacsimileSeal();
+        this.companySeal = imprintUpdateRequestDTO.getCompanySeal();
         this.purpose = imprintUpdateRequestDTO.getPurpose();
         this.notes = imprintUpdateRequestDTO.getNotes();
     }

@@ -9,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.sql.Timestamp;
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -26,7 +24,7 @@ public class SealRegisterDetail {
     private String sealNm;
 
     @Column(length = 100)
-    private Timestamp sealImage;
+    private String sealImage;
 
     @Column(length = 50)
     private String useDept;

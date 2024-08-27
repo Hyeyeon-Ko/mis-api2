@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/seal/imprint")
 @RequiredArgsConstructor
-@Tag(name = "SealImprintApply", description = "인장 날인신청 관련 API")
+@Tag(name = "Seal Imprint Apply", description = "인장 날인신청 관련 API")
 public class SealImprintController {
 
     private final SealImprintService sealImprintService;

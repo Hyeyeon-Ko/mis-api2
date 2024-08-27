@@ -5,9 +5,6 @@ import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
-import java.sql.Timestamp;
-
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -27,7 +24,7 @@ public class SealImprintHistory extends BaseSystemFieldEntity {
     @Column(length = 50)
     private String submission;
 
-    private Timestamp useDate;
+    private String useDate;
 
     @Column(length = 20)
     private String corporateSeal;

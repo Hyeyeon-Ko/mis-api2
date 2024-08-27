@@ -27,10 +27,14 @@ public class SealImprintServiceImpl implements SealImprintService {
     public void applyImprint(ImprintRequestDTO imprintRequestDTO) {
 
         SealMaster sealMaster = imprintRequestDTO.toMasterEntity();
+        sealMaster.setRgstrId(imprintRequestDTO.getDrafterId());
+        sealMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
         sealMaster = sealMasterRepository.save(sealMaster);
 
         Long draftId = sealMaster.getDraftId();
         SealImprintDetail sealImprintDetail = imprintRequestDTO.toDetailEntity(draftId);
+        sealImprintDetail.setRgstrId(imprintRequestDTO.getDrafterId());
+        sealImprintDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         sealImprintDetailRepository.save(sealImprintDetail);
     }
 
@@ -49,11 +53,13 @@ public class SealImprintServiceImpl implements SealImprintService {
 
         // 날인신청 수정사항 저장
         sealImprintDetailInfo.update(imprintUpdateRequestDTO);
-        sealMasterRepository.save(sealMaster);
-
         sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealMaster.setUpdtrId(sealMaster.getDrafterId());
+        sealMasterRepository.save(sealMaster);
+
         sealImprintDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealImprintDetailInfo.setUpdtrId(sealMaster.getDrafterId());
+        sealImprintDetailRepository.save(sealImprintDetailInfo);
     }
 
     @Override
@@ -63,5 +69,6 @@ public class SealImprintServiceImpl implements SealImprintService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         sealMaster.updateStatus("F");
+        sealMasterRepository.save(sealMaster);
     }
 }

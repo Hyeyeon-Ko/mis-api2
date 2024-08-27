@@ -51,11 +51,12 @@ public class SealMaster extends BaseSystemFieldEntity {
     private String status;
 
     @Builder
-    public SealMaster(String drafter, String drafterId, Timestamp draftDate, String status) {
+    public SealMaster(String drafter, String drafterId, Timestamp draftDate, String status, String title) {
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.draftDate = draftDate;
         this.status = status;
+        this.title = String.format("인장신청 (%s)", drafter);;
     }
 
     public void updateStatus(String status) {

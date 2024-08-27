@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 public class ImprintUpdateRequestDTO {
 
     private String submission;
-    private Timestamp useDate;
+    private String useDate;
     private String corporateSeal;
     private String facsimileSeal;
     private String companySeal;

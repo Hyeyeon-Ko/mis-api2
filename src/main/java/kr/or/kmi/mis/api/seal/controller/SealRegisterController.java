@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/seal/register")
 @RequiredArgsConstructor
-@Tag(name = "SealRegister", description = "인장 등록 관련 API")
+@Tag(name = "Seal Register", description = "인장 등록 관련 API")
 public class SealRegisterController {
 
     private final SealRegisterService sealRegisterService;

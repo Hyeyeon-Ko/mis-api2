@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.sql.Timestamp;
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -28,9 +26,9 @@ public class SealExportDetail {
     @Column(length = 20)
     private String expNm;
 
-    private Timestamp expDate;
+    private String expDate;
 
-    private Timestamp returnDate;
+    private String returnDate;
 
     @Column(length = 20)
     private String corporateSeal;

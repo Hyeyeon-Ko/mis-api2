@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/seal/export")
 @RequiredArgsConstructor
-@Tag(name = "SealExportApply", description = "인장 반출신청 관련 API")
+@Tag(name = "Seal Export Apply", description = "인장 반출신청 관련 API")
 public class SealExportController {
 
     private final SealExportService sealExportService;

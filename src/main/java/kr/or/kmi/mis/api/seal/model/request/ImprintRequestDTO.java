@@ -13,7 +13,7 @@ public class ImprintRequestDTO {
     private String drafter;
     private String drafterId;
     private String submission;
-    private Timestamp useDate;
+    private String useDate;
     private String corporateSeal;
     private String facsimileSeal;
     private String companySeal;

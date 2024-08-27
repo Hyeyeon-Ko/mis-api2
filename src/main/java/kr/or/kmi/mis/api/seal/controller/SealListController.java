@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/seal")
-@Tag(name = "Seal", description = "인장 관련 API")
+@Tag(name = "Seal List", description = "인장 관련 API")
 public class SealListController {
 
     private final SealListService sealListService;
