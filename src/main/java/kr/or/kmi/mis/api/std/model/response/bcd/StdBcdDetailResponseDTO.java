@@ -23,6 +23,7 @@ public class StdBcdDetailResponseDTO {
     String etcItem8;
     String etcItem9;
     String etcItem10;
+    String etcItem11;
 
     public static List<StdBcdDetailResponseDTO> of(List<StdDetail> stdDetails) {
         return stdDetails.stream()
@@ -39,6 +40,7 @@ public class StdBcdDetailResponseDTO {
                         .etcItem8(stdDetail.getEtcItem8())
                         .etcItem9(stdDetail.getEtcItem9())
                         .etcItem10(stdDetail.getEtcItem10())
+                        .etcItem11(stdDetail.getEtcItem11())
                         .build())
                 .collect(Collectors.toList());
     }
