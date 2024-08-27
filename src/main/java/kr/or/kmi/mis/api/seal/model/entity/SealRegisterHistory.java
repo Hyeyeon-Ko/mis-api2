@@ -43,4 +43,7 @@ public class SealRegisterHistory {
     @Column(length = 20)
     private String subManager;
 
+    @Column(length = 20)
+    private String instCd;
+
 }
