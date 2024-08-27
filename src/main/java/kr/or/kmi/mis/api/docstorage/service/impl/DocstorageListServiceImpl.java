@@ -13,10 +13,7 @@ import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,7 +86,6 @@ public class DocstorageListServiceImpl implements DocstorageListService {
         return convertToResponseDTOListUsingMasterStatus(finalFilteredDetails);
     }
 
-    /* 센터 전체 문서보관 목록표 */
     @Override
     public List<DocstorageResponseDTO> getTotalCenterDocstorageList(String instCd) {
 
@@ -101,12 +97,17 @@ public class DocstorageListServiceImpl implements DocstorageListService {
         List<DocstorageResponseDTO> responseList = new ArrayList<>();
 
         for (StdDetail stdDetail : stdDetailList) {
-            List<DocStorageDetail> docstorageDetails = docStorageDetailRepository.findByDeptCd(stdDetail.getDetailCd())
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+            List<DocStorageDetail> docstorageDetails = docStorageDetailRepository.findByDeptCdAndStatus(stdDetail.getDetailCd(), "E")
+                    .orElse(Collections.emptyList());
 
             for (DocStorageDetail docstorageDetail : docstorageDetails) {
-                DocStorageMaster docStorageMaster = docStorageMasterRepository.findById(docstorageDetail.getDraftId())
+                if (docstorageDetail.getDraftId() == null) {
+                    continue;
+                }
+
+                DocStorageMaster docStorageMaster = docStorageMasterRepository.findByDraftId(docstorageDetail.getDraftId())
                         .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
                 DocstorageResponseDTO responseDTO = DocstorageResponseDTO.builder()
                         .detailId(docstorageDetail.getDetailId())
                         .draftId(docstorageDetail.getDraftId())

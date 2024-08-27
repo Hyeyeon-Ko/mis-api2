@@ -45,6 +45,9 @@ public class DocMaster extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String instCd;
 
+    @Column(length = 20)
+    private String deptCd;
+
     public void confirm(String status, String approver, String approverId) {
         this.status = status;
         this.respondDate = new Timestamp(System.currentTimeMillis());
@@ -63,13 +66,14 @@ public class DocMaster extends BaseSystemFieldEntity {
     }
 
     @Builder
-    public DocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd) {
+    public DocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd, String deptCd) {
         this.title =  String.format("문서수발신 신청서 (%s)", drafter);
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.status = status;
         this.instCd = instCd;
+        this.deptCd = deptCd;
     }
 
     public void updateStatus(String status) {
