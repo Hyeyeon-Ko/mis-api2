@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.corpdoc.model.entity;
 import jakarta.persistence.*;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "hrmtcorpd_hist")
 @IdClass(DraftSeqPK.class)
-public class CorpDocHist extends BaseSystemFieldEntity {
+public class CorpDocHistory extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "draft_id")
@@ -53,4 +54,21 @@ public class CorpDocHist extends BaseSystemFieldEntity {
 
     @Column(length = 1000)
     private String notes;
+
+    @Builder
+    public CorpDocHistory(CorpDocDetail corpDocDetail, Long seqId) {
+        this.draftId = corpDocDetail.getDraftId();
+        this.seqId = seqId;
+        this.submission = corpDocDetail.getSubmission();
+        this.purpose = corpDocDetail.getPurpose();
+        this.useDate = corpDocDetail.getUseDate();
+        this.fileName = corpDocDetail.getFileName();
+        this.filePath = corpDocDetail.getFilePath();
+        this.certCorpseal = corpDocDetail.getCertCorpseal();
+        this.certCoregister = corpDocDetail.getCertCoregister();
+        this.certUsesignet = corpDocDetail.getCertUsesignet();
+        this.warrant = corpDocDetail.getWarrant();
+        this.type = corpDocDetail.getType();
+        this.notes = corpDocDetail.getNotes();
+    }
 }

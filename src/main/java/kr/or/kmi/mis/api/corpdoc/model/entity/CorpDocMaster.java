@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.corpdoc.model.entity;
 import jakarta.persistence.*;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -56,5 +57,15 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
 
     @Column(length = 20)
     private String instCd;
+
+    @Builder
+    public CorpDocMaster(Timestamp draftDate, String drafter, String drafterId, String instCd) {
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.drafterId = drafterId;
+        this.title = String.format("법인서류 신청서 (%s)", drafter);
+        this.status = "A";
+        this.instCd = instCd;
+    }
 
 }

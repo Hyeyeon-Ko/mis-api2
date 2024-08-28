@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -51,5 +52,22 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
 
     @Column(length = 1000)
     private String notes;
+
+    @Builder
+    public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, String fileName, String filePath,
+                         String certCorpseal, String certCoregister, String certUsesignet, String warrant, String type, String notes) {
+        this.draftId = draftId;
+        this.submission = submission;
+        this.purpose = purpose;
+        this.useDate = useDate;
+        this.fileName = fileName;
+        this.filePath = filePath;
+        this.certCorpseal = certCorpseal;
+        this.certCoregister = certCoregister;
+        this.certUsesignet = certUsesignet;
+        this.warrant = warrant;
+        this.type = type;
+        this.notes = notes;
+    }
 
 }
