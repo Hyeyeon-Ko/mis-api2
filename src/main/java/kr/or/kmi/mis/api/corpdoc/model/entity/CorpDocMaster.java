@@ -59,12 +59,12 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
     private String instCd;
 
     @Builder
-    public CorpDocMaster(Timestamp draftDate, String drafter, String drafterId, String instCd) {
+    public CorpDocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd) {
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.title = String.format("법인서류 신청서 (%s)", drafter);
-        this.status = "A";
+        this.status = status;
         this.instCd = instCd;
     }
 

@@ -35,17 +35,17 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     @Column(length = 255)
     private String filePath;
 
-    @Column(length = 10)
-    private String certCorpseal;
+    @Column
+    private int certCorpseal;
 
-    @Column(length = 10)
-    private String certCoregister;
+    @Column
+    private int certCoregister;
 
-    @Column(length = 10)
-    private String certUsesignet;
+    @Column
+    private int certUsesignet;
 
-    @Column(length = 10)
-    private String warrant;
+    @Column
+    private int warrant;
 
     @Column(length = 1)
     private String type;
@@ -55,7 +55,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
 
     @Builder
     public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, String fileName, String filePath,
-                         String certCorpseal, String certCoregister, String certUsesignet, String warrant, String type, String notes) {
+                         int certCorpseal, int certCoregister, int certUsesignet, int warrant, String type, String notes) {
         this.draftId = draftId;
         this.submission = submission;
         this.purpose = purpose;
