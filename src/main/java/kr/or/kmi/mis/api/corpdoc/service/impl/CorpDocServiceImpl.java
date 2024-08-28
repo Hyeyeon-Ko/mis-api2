@@ -1,0 +1,104 @@
+package kr.or.kmi.mis.api.corpdoc.service.impl;
+
+import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
+import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
+import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
+import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
+
+@Service
+@RequiredArgsConstructor
+public class CorpDocServiceImpl implements CorpDocService {
+
+    private final CorpDocMasterRepository corpDocMasterRepository;
+    private final CorpDocDetailRepository corpDocDetailRepository;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    @Override
+    @Transactional
+    public void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws IOException {
+        CorpDocMaster corpDocMaster = corpDocRequestDTO.toMasterEntity();
+        corpDocMaster.setRgstrId(corpDocRequestDTO.getDrafterId());
+        corpDocMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        corpDocMaster = corpDocMasterRepository.save(corpDocMaster);
+
+        String[] savedFileInfo = saveFile(file);
+        CorpDocDetail corpDocDetail = corpDocRequestDTO.toDetailEntity(
+                corpDocMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        corpDocDetailRepository.save(corpDocDetail);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CorpDocDetailResponseDTO getCorpDocApply(Long draftId) {
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public void updateCorpDocApply(Long draftId, CorpDocRequestDTO corpDocRequestDTO, MultipartFile file, boolean isFileDeleted) {
+
+    }
+
+    @Override
+    @Transactional
+    public void cancelCorpDocApply(Long draftId) {
+
+    }
+
+    private String[] saveFile(MultipartFile file) throws IOException {
+        return saveFile(file, null);
+    }
+
+    private String[] saveFile(MultipartFile file, String existingFilePath) throws IOException {
+        String fileName = null;
+        String filePath = null;
+
+        if (file != null && !file.isEmpty()) {
+            String originalFileName = file.getOriginalFilename();
+            String baseFileName = originalFileName.substring(0, originalFileName.lastIndexOf("."));
+            String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            fileName = baseFileName.replaceAll("\\s+", "_") + fileExtension;
+
+            Path fileStoragePath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            if (Files.notExists(fileStoragePath)) {
+                Files.createDirectories(fileStoragePath);
+            }
+
+            Path targetLocation = fileStoragePath.resolve(fileName);
+
+            int count = 1;
+            while (Files.exists(targetLocation)) {
+                String newFileName = baseFileName.replaceAll("\\s+", "_") + " (" + count + ")" + fileExtension;
+                targetLocation = fileStoragePath.resolve(newFileName);
+                count++;
+            }
+
+            fileName = targetLocation.getFileName().toString();
+            Files.copy(file.getInputStream(), targetLocation);
+            filePath = targetLocation.toString();
+
+            if (existingFilePath != null) {
+                Path oldFilePath = Paths.get(existingFilePath);
+                Files.deleteIfExists(oldFilePath);
+            }
+        }
+
+        return new String[]{fileName, filePath};
+    }
+}
