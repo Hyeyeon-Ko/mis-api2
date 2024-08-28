@@ -4,9 +4,12 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +30,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
+    private final InfoService infoService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -40,6 +46,8 @@ public class CorpDocServiceImpl implements CorpDocService {
         String[] savedFileInfo = saveFile(file);
         CorpDocDetail corpDocDetail = corpDocRequestDTO.toDetailEntity(
                 corpDocMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        corpDocDetail.setRgstrId(corpDocRequestDTO.getDrafterId());
+        corpDocDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         corpDocDetailRepository.save(corpDocDetail);
     }
 
@@ -59,6 +67,48 @@ public class CorpDocServiceImpl implements CorpDocService {
     @Transactional
     public void cancelCorpDocApply(Long draftId) {
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CorpDocPendingResponseDTO> getMyPendingList() {
+        String userId = infoService.getUserInfo().getUserId();
+        return new ArrayList<>(this.getMyCorpDocPendingList(userId));
+    }
+
+    @Override
+    public List<CorpDocPendingResponseDTO> getPendingList(String instCd) {
+        return List.of();
+    }
+
+    @Override
+    public List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
+        String userId = infoService.getUserInfo().getUserId();
+        return new ArrayList<>(this.getMyCorpDocList(userId, startDate, endDate));
+    }
+
+    private List<CorpDocMyResponseDTO> getMyCorpDocList(String userId, Timestamp startDate, Timestamp endDate) {
+        List<CorpDocMaster> corpDocMasterList = corpDocMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
+                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+
+        return corpDocMasterList.stream()
+                .map(corpDocMaster -> {
+                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Not found"));
+                    return CorpDocMyResponseDTO.of(corpDocMaster);
+                }).toList();
+    }
+
+    public List<CorpDocPendingResponseDTO> getMyCorpDocPendingList(String userId) {
+        List<CorpDocMaster> corpDocMasterList = corpDocMasterRepository.findByDrafterIdAndStatus(userId, "A")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return corpDocMasterList.stream()
+                .map(corpDocMaster -> {
+                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+                    return CorpDocPendingResponseDTO.of(corpDocMaster, corpDocDetail);
+                }).toList();
     }
 
     private String[] saveFile(MultipartFile file) throws IOException {
