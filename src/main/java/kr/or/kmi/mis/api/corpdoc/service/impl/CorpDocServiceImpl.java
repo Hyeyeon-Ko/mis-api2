@@ -12,6 +12,7 @@ import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ public class CorpDocServiceImpl implements CorpDocService {
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
     private final CorpDocHistoryService corpDocHistoryService;
+    private final StdBcdService stdBcdService;
     private final InfoService infoService;
 
     @Value("${file.upload-dir}")
@@ -109,8 +111,19 @@ public class CorpDocServiceImpl implements CorpDocService {
     }
 
     @Override
-    public List<CorpDocPendingResponseDTO> getPendingList(String instCd) {
-        return List.of();
+    @Transactional(readOnly = true)
+    public List<CorpDocPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate) {
+        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
+                .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
+
+        return corpDocMasters.stream()
+                .map(corpDocMaster -> {
+                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    CorpDocPendingResponseDTO corpDocPendingResponseDTO = CorpDocPendingResponseDTO.of(corpDocMaster, corpDocDetail);
+                    corpDocPendingResponseDTO.setInstNm(stdBcdService.getInstNm(corpDocMaster.getInstCd()));
+                    return corpDocPendingResponseDTO;
+                }).toList();
     }
 
     @Override

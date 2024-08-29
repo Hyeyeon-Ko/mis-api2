@@ -114,11 +114,13 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getPendingListByType(String documentType, String instCd) {
+    public PendingResponseDTO getPendingListByType(String documentType, LocalDate startDate, LocalDate endDate, String instCd) {
+        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+
         return switch (documentType) {
             case "명함신청" -> PendingResponseDTO.of(bcdService.getPendingList(instCd), null, null, null);
             case "문서수발신" -> PendingResponseDTO.of(null, docService.getDocPendingList(instCd), null, null);
-            case "법인서류" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(instCd), null);
+            case "법인서류" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(timestamps[0], timestamps[1]), null);
             case "인장신청" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(instCd));
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
         };

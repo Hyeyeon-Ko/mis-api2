@@ -26,9 +26,9 @@ public interface CorpDocService {
     /** 법인서류 나의 승인대기내역 조회 */
     List<CorpDocPendingResponseDTO> getMyPendingList(String userId);
     /** 법인서류 전체 승인대기내역, 센터별 조회 */
-    List<CorpDocPendingResponseDTO> getPendingList(String instCd);
+    List<CorpDocPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate);
     /** 법인서류 나의 신청내역, 신청일자로 조회 */
     List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId);
     /** 법인서류 전체 신청내역, 신청일자로 센터별 조회 */
-    List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRangeAndInstCd(Timestamp timestamp, Timestamp timestamp1, String instCd);
+    List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd);
 }

@@ -15,6 +15,7 @@ public class CorpDocPendingResponseDTO {
     private Long draftId;
     private String title;
     private String instCd;
+    private String instNm;
     private Timestamp draftDate;
     private String drafter;
     private Timestamp lastUpdateDate;
