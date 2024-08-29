@@ -94,7 +94,11 @@ public class CorpDocServiceImpl implements CorpDocService {
     @Override
     @Transactional
     public void cancelCorpDocApply(Long draftId) {
+        CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        corpDocMaster.updateStatus("F");
+        corpDocMasterRepository.save(corpDocMaster);
     }
 
     @Override

@@ -68,4 +68,7 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
         this.instCd = instCd;
     }
 
+    public void updateStatus(String newStatus) {
+        this.status = newStatus;
+    }
 }
