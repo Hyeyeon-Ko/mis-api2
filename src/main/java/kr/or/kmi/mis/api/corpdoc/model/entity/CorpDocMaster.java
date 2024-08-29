@@ -71,4 +71,19 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
     public void updateStatus(String newStatus) {
         this.status = newStatus;
     }
+
+    public void approve(String approver, String approverId) {
+        this.status = "B";
+        this.approver = approver;
+        this.approverId = approverId;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+    }
+
+    public void disapprove(String disapprover, String disapproverId, String rejectReason) {
+        this.status = "C";
+        this.disapprover = disapprover;
+        this.disapproverId = disapproverId;
+        this.rejectReason = rejectReason;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+    }
 }

@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocUpdateRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
@@ -113,8 +114,27 @@ public class CorpDocServiceImpl implements CorpDocService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
         return new ArrayList<>(this.getMyCorpDocList(userId, startDate, endDate));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd) {
+        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
+                .findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+
+        if(corpDocMasters == null) {
+            corpDocMasters = new ArrayList<>();
+        }
+
+        return corpDocMasters.stream()
+                .map(corpDocMaster -> {
+                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    return CorpDocMasterResponseDTO.of(corpDocMaster);
+                }).toList();
     }
 
     private List<CorpDocMyResponseDTO> getMyCorpDocList(String userId, Timestamp startDate, Timestamp endDate) {

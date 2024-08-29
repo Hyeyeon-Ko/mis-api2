@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
@@ -41,6 +42,7 @@ public class ApplyServiceImpl implements ApplyService {
 
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
+        List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
         List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
@@ -53,6 +55,9 @@ public class ApplyServiceImpl implements ApplyService {
                 case "문서수발신":
                     docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
                     break;
+                case "법인서류":
+                    corpDocApplyLists = corpDocService.getCorpDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+                    break;
                 case "인장신청":
                     sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
                 default:
@@ -62,10 +67,11 @@ public class ApplyServiceImpl implements ApplyService {
             // 전체 신청 목록을 조회합니다.
             bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
             docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+            corpDocApplyLists = corpDocService.getCorpDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
             sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
         }
 
-        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, sealApplyLists);
+        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
     }
 
     @Override
