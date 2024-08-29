@@ -13,6 +13,7 @@ public class SealPendingResponseDTO {
     private Long draftId;
     private String title;
     private String instCd;
+    private String instNm;
     private Timestamp draftDate;
     private String drafter;
     private Timestamp lastUpdateDate;
@@ -22,7 +23,7 @@ public class SealPendingResponseDTO {
 
     public static SealPendingResponseDTO of(SealMaster sealMaster) {
 
-        String docType = "A".equals(sealMaster.getDivision()) ? "날인신청" : "반출신청";
+        String docType = "A".equals(sealMaster.getDivision()) ? "인장신청(날인)" : "인장신청(반출)";
 
         return SealPendingResponseDTO.builder()
                 .draftId(sealMaster.getDraftId())

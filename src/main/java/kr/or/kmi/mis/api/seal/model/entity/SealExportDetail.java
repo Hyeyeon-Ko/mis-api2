@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.seal.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.seal.model.request.ExportRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ExportUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
@@ -66,7 +67,22 @@ public class SealExportDetail extends BaseSystemFieldEntity {
         this.filePath = filePath;
     }
 
-    public void update(ExportUpdateRequestDTO exportUpdateRequestDTO) {
+    public void update(ExportRequestDTO exportRequestDTO, String fileName, String filePath) {
+        this.submission = exportRequestDTO.getSubmission();
+        this.useDept = exportRequestDTO.getUseDept();
+        this.expNm = exportRequestDTO.getExpNm();
+        this.expDate = exportRequestDTO.getExpDate();
+        this.returnDate = exportRequestDTO.getReturnDate();
+        this.corporateSeal = exportRequestDTO.getCorporateSeal();
+        this.facsimileSeal = exportRequestDTO.getFacsimileSeal();
+        this.companySeal = exportRequestDTO.getCompanySeal();
+        this.purpose = exportRequestDTO.getPurpose();
+        this.fileName = fileName;
+        this.filePath = filePath;
+
+    }
+
+    public void updateFile(ExportUpdateRequestDTO exportUpdateRequestDTO, String fileName, String filePath) {
         this.submission = exportUpdateRequestDTO.getSubmission();
         this.useDept = exportUpdateRequestDTO.getUseDept();
         this.expNm = exportUpdateRequestDTO.getExpNm();
@@ -76,7 +92,7 @@ public class SealExportDetail extends BaseSystemFieldEntity {
         this.facsimileSeal = exportUpdateRequestDTO.getFacsimileSeal();
         this.companySeal = exportUpdateRequestDTO.getCompanySeal();
         this.purpose = exportUpdateRequestDTO.getPurpose();
-        this.fileName = exportUpdateRequestDTO.getFileName();
-        this.filePath = exportUpdateRequestDTO.getFilePath();
+        this.fileName = fileName;
+        this.filePath = filePath;
     }
 }

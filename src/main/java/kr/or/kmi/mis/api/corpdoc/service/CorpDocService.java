@@ -17,7 +17,7 @@ public interface CorpDocService {
     void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
                             MultipartFile file, boolean isFileDeleted) throws IOException;
     void cancelCorpDocApply(Long draftId);
-    List<CorpDocPendingResponseDTO> getMyPendingList();
+    List<CorpDocPendingResponseDTO> getMyPendingList(String userId);
     List<CorpDocPendingResponseDTO> getPendingList(String instCd);
-    List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate);
+    List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId);
 }

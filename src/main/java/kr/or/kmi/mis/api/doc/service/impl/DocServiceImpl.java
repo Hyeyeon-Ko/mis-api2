@@ -104,8 +104,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
-        String userId = infoService.getUserInfo().getUserId();
+    public List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
         return new ArrayList<>(this.getMyDocMasterList(userId, startDate, endDate));
     }
 
@@ -123,8 +122,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getMyDocPendingList() {
-        String userId = infoService.getUserInfo().getUserId();
+    public List<DocPendingResponseDTO> getMyDocPendingList(String userId) {
         return new ArrayList<>(this.getMyDocPendingMasterList(userId));
     }
 

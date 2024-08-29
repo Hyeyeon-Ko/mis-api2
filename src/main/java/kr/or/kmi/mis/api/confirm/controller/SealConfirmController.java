@@ -46,11 +46,4 @@ public class SealConfirmController {
         sealConfirmService.disapprove(draftId, rejectReason);
         return ResponseWrapper.success();
     }
-
-    @Operation(summary = "get seal application history by drafter", description = "기안자의 인장신청 이력 조회")
-    @GetMapping("/history")
-    public ApiResponse<List<SealHistoryResponseDTO>> getApplicationHistory(@RequestParam String userId) {
-        return ResponseWrapper.success(sealConfirmService.getSealApplicationHistory(userId));
-    }
-
 }

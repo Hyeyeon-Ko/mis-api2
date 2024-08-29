@@ -133,8 +133,8 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMyResponseDTO> getMySealApplyByDateRange(Timestamp startDate, Timestamp endDate) {
-        String userId = infoService.getUserInfo().getUserId();
+    public List<SealMyResponseDTO> getMySealApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
+        System.out.println(userId);
         return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
     }
 
@@ -148,8 +148,7 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealPendingResponseDTO> getMySealPendingList() {
-        String userId = infoService.getUserInfo().getUserId();
+    public List<SealPendingResponseDTO> getMySealPendingList(String userId) {
         return new ArrayList<>(this.getMySealPendingMasterList(userId));
     }
 

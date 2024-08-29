@@ -14,6 +14,4 @@ public class ExportUpdateRequestDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
-    private String fileName;
-    private String filePath;
 }

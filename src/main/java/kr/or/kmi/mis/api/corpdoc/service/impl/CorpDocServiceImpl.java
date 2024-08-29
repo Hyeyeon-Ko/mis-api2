@@ -103,8 +103,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocPendingResponseDTO> getMyPendingList() {
-        String userId = infoService.getUserInfo().getUserId();
+    public List<CorpDocPendingResponseDTO> getMyPendingList(String userId) {
         return new ArrayList<>(this.getMyCorpDocPendingList(userId));
     }
 
@@ -114,8 +113,7 @@ public class CorpDocServiceImpl implements CorpDocService {
     }
 
     @Override
-    public List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
-        String userId = infoService.getUserInfo().getUserId();
+    public List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
         return new ArrayList<>(this.getMyCorpDocList(userId, startDate, endDate));
     }
 

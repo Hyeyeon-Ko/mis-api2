@@ -70,7 +70,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate) {
+    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate, String userId) {
 
         List<BcdMyResponseDTO> myBcdApplyList = new ArrayList<>();
         List<DocMyResponseDTO> myDocApplyList = new ArrayList<>();
@@ -83,24 +83,24 @@ public class ApplyServiceImpl implements ApplyService {
         if (documentType != null) {
             switch (documentType) {
                 case "명함신청":
-                    myBcdApplyList = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1]);
+                    myBcdApplyList = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1], userId);
                     break;
                 case "문서수발신":
-                    myDocApplyList = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1]);
+                    myDocApplyList = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1], userId);
                     break;
                 case "법인서류":
-                    myCorpDocApplyList = corpDocService.getMyCorpDocApplyByDateRange(timestamps[0], timestamps[1]);
+                    myCorpDocApplyList = corpDocService.getMyCorpDocApplyByDateRange(timestamps[0], timestamps[1], userId);
                 case "인장신청":
-                    mySealApplyList = sealListService.getMySealApplyByDateRange(timestamps[0], timestamps[1]);
+                    mySealApplyList = sealListService.getMySealApplyByDateRange(timestamps[0], timestamps[1], userId);
                 default:
                     break;
             }
         } else {
             // 전체 신청 목록을 조회합니다.
-            myBcdApplyList = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1]);
-            myDocApplyList = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1]);
-            myCorpDocApplyList = corpDocService.getMyCorpDocApplyByDateRange(timestamps[0], timestamps[1]);
-            mySealApplyList = sealListService.getMySealApplyByDateRange(timestamps[0], timestamps[1]);
+            myBcdApplyList = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1], userId);
+            myDocApplyList = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1], userId);
+            myCorpDocApplyList = corpDocService.getMyCorpDocApplyByDateRange(timestamps[0], timestamps[1], userId);
+            mySealApplyList = sealListService.getMySealApplyByDateRange(timestamps[0], timestamps[1], userId);
         }
 
         return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
@@ -120,13 +120,13 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getMyPendingList() {
+    public PendingResponseDTO getMyPendingList(String userId) {
 
         return PendingResponseDTO.of(
-                bcdService.getMyPendingList(),
-                docService.getMyDocPendingList(),
-                corpDocService.getMyPendingList(),
-                sealListService.getMySealPendingList());
+                bcdService.getMyPendingList(userId),
+                docService.getMyDocPendingList(userId),
+                corpDocService.getMyPendingList(userId),
+                sealListService.getMySealPendingList(userId));
     }
 
     public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {

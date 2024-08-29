@@ -19,7 +19,4 @@ public interface SealConfirmService {
 
     /* 반려 */
     void disapprove(Long draftId, String rejectReason);
-
-    /* 인장 신청이력 조회 */
-    List<SealHistoryResponseDTO> getSealApplicationHistory(String userId);
 }

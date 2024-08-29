@@ -75,11 +75,4 @@ public class SealConfirmServiceImpl implements SealConfirmService {
         sealMaster.reject("C", disapprover, disapproverId, rejectReason);
         sealMasterRepository.save(sealMaster);
     }
-
-    @Override
-    // TODO: 신청이력 총무팀에게 질문!!
-    // 날인 / 반출 따로 띄워야 하는지?
-    public List<SealHistoryResponseDTO> getSealApplicationHistory(String userId) {
-        return null;
-    }
 }

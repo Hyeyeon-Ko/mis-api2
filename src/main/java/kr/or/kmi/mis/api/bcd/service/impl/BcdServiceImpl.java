@@ -114,14 +114,11 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
+    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
 
         List<BcdMyResponseDTO> results = new ArrayList<>();
 
-        // 1. 로그인한 사용자 정보 호출
-        String userId = infoService.getUserInfo().getUserId();
-
-        // 2. 나의 모든 명함신청 내역을 호출한다.
+        // 나의 모든 명함신청 내역을 호출한다.
         results.addAll(this.getMyMasterList(userId, startDate, endDate));
         results.addAll(this.getAnotherMasterList(userId, startDate, endDate));
         return results;
@@ -193,14 +190,11 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdPendingResponseDTO> getMyPendingList() {
+    public List<BcdPendingResponseDTO> getMyPendingList(String userId) {
 
         List<BcdPendingResponseDTO> results = new ArrayList<>();
 
-        // 1. 로그인 세션에서 사번 정보를 가져온다.
-        String userId = infoService.getUserInfo().getUserId();
-
-        // 2. 나의 모든 명함신청 승인대기 내역을 호출한다.
+        // 나의 모든 명함신청 승인대기 내역을 호출한다.
         results.addAll(this.getMyPndMasterList(userId));
         results.addAll(this.getAnotherPndMasterList(userId));
         return results;

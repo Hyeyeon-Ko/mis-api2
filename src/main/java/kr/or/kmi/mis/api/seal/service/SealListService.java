@@ -27,8 +27,8 @@ public interface SealListService {
     List<SealPendingResponseDTO> getSealPendingList(String instCd);
 
     /* 인장 나의 전체신청내역 */
-    List<SealMyResponseDTO> getMySealApplyByDateRange(Timestamp startDate, Timestamp endDate);
+    List<SealMyResponseDTO> getMySealApplyByDateRange(Timestamp startDate, Timestamp endDate,String userId);
 
     /* 인장 나의 승인대기내역 */
-    List<SealPendingResponseDTO> getMySealPendingList();
+    List<SealPendingResponseDTO> getMySealPendingList(String userId);
 }

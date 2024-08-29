@@ -47,15 +47,16 @@ public class ApplyController {
     @GetMapping(value = "/myApplyList")
     public ApiResponse<MyApplyResponseDTO> getAllMyApplyList(@RequestParam(required = false) String documentType,
                                                              @RequestParam(required = false) LocalDate startDate,
-                                                             @RequestParam(required = false) LocalDate endDate) {
+                                                             @RequestParam(required = false) LocalDate endDate,
+                                                             @RequestParam String userId) {
 
-        return ResponseWrapper.success(applyService.getAllMyApplyList(documentType, startDate, endDate));
+        return ResponseWrapper.success(applyService.getAllMyApplyList(documentType, startDate, endDate, userId));
     }
 
     @Operation(summary = "나의 신청내역 > 승인대기 목록 호출", description = "나의 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/myPendingList")
-    public ApiResponse<PendingResponseDTO> getMyPendingApplyList() {
+    public ApiResponse<PendingResponseDTO> getMyPendingApplyList(String userId) {
 
-        return ResponseWrapper.success(applyService.getMyPendingList());
+        return ResponseWrapper.success(applyService.getMyPendingList(userId));
     }
 }

@@ -23,7 +23,7 @@ public class SealMasterResponseDTO {
 
     public static SealMasterResponseDTO of(SealMaster sealMaster) {
 
-        String docType = "A".equals(sealMaster.getDivision()) ? "날인신청" : "반출신청";
+        String docType = "A".equals(sealMaster.getDivision()) ? "인장신청(날인)" : "인장신청(반출)";
 
         return SealMasterResponseDTO.builder()
                 .draftId(sealMaster.getDraftId())
