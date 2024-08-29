@@ -18,6 +18,8 @@ public class SealExportDetailResponseDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+    private String fileName;
+    private String filePath;
 
     public static SealExportDetailResponseDTO of(SealExportDetail sealExportDetail) {
         return SealExportDetailResponseDTO.builder()
@@ -31,6 +33,8 @@ public class SealExportDetailResponseDTO {
                 .facsimileSeal(sealExportDetail.getFacsimileSeal())
                 .companySeal(sealExportDetail.getCompanySeal())
                 .purpose(sealExportDetail.getPurpose())
+                .fileName(sealExportDetail.getFileName())
+                .filePath(sealExportDetail.getFilePath())
                 .build();
     }
 }

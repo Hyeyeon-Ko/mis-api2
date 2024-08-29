@@ -21,18 +21,6 @@ public class SealConfirmController {
 
     private final SealConfirmService sealConfirmService;
 
-    @Operation(summary = "get detail imprint application", description = "날인신청 상세정보 조회")
-    @GetMapping("/imprint/{draftId}")
-    public ApiResponse<ImprintDetailResponseDTO> getImprintApplyList(@PathVariable Long draftId) {
-        return ResponseWrapper.success(sealConfirmService.getImprintDetailInfo(draftId));
-    }
-
-    @Operation(summary = "get detail export application", description = "반출신청 상세정보 조회")
-    @GetMapping("/export/{draftId}")
-    public ApiResponse<ExportDetailResponseDTO> getExportApplyList(@PathVariable Long draftId) {
-        return ResponseWrapper.success(sealConfirmService.getExportDetailInfo(draftId));
-    }
-
     @Operation(summary = "approve application", description = "인장신청 승인")
     @PostMapping("/confirm")
     public ApiResponse<?> approve(@RequestParam Long draftId) {
