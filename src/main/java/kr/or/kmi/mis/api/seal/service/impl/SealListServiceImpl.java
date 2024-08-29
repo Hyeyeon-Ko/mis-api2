@@ -134,7 +134,6 @@ public class SealListServiceImpl implements SealListService {
     @Override
     @Transactional(readOnly = true)
     public List<SealMyResponseDTO> getMySealApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
-        System.out.println(userId);
         return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
     }
 

@@ -6,24 +6,22 @@ import lombok.Data;
 
 @Data
 @Builder
-public class RegistrationListResponseDTO {
+public class SealDetailResponseDTO {
 
     private Long draftId;
     private String sealNm;
     private String sealImage;
-    private String sealImagePath;
     private String useDept;
     private String purpose;
     private String manager;
     private String subManager;
     private String draftDate;
 
-    public static RegistrationListResponseDTO of(SealRegisterDetail sealRegisterDetail) {
-        return RegistrationListResponseDTO.builder()
+    public static SealDetailResponseDTO of(SealRegisterDetail sealRegisterDetail) {
+        return SealDetailResponseDTO.builder()
                 .draftId(sealRegisterDetail.getDraftId())
                 .sealNm(sealRegisterDetail.getSealNm())
                 .sealImage(sealRegisterDetail.getSealImage())
-                .sealImagePath(sealRegisterDetail.getSealImagePath())
                 .useDept(sealRegisterDetail.getUseDept())
                 .purpose(sealRegisterDetail.getPurpose())
                 .manager(sealRegisterDetail.getManager())

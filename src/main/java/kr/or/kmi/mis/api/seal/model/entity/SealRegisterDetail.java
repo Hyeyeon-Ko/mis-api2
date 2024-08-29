@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.seal.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
@@ -58,12 +59,23 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
         this.instCd = instCd;
     }
 
-    public void update(SealUpdateRequestDTO sealUpdateRequestDTO) {
+    public void update(SealRegisterRequestDTO sealRegisterRequestDTO, String newSealImage, String newSealImagePath) {
+        this.sealNm = sealRegisterRequestDTO.getSealNm();
+        this.sealImage = newSealImage;
+        this.sealImagePath = newSealImagePath;
+        this.useDept = sealRegisterRequestDTO.getUseDept();
+        this.purpose = sealRegisterRequestDTO.getPurpose();
+        this.manager = sealRegisterRequestDTO.getManager();
+        this.subManager = sealRegisterRequestDTO.getSubManager();
+    }
+
+    public void updateFile(SealUpdateRequestDTO sealUpdateRequestDTO, String sealImage, String sealImagePath) {
         this.sealNm = sealUpdateRequestDTO.getSealNm();
-        this.sealImage = sealUpdateRequestDTO.getSealImage();
         this.useDept = sealUpdateRequestDTO.getUseDept();
         this.purpose = sealUpdateRequestDTO.getPurpose();
         this.manager = sealUpdateRequestDTO.getManager();
         this.subManager = sealUpdateRequestDTO.getSubManager();
+        this.sealImage = sealImage;
+        this.sealImagePath = sealImagePath;
     }
 }

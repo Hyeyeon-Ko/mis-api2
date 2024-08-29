@@ -54,7 +54,6 @@ public class SealExportController {
     @Operation(summary = "get export detail", description = "반출신청 상세조회")
     @GetMapping(value = "/{draftId}")
     public ApiResponse<SealExportDetailResponseDTO> getSealExportDetail(@PathVariable Long draftId) {
-        System.out.println(draftId);
         return ResponseWrapper.success(sealExportService.getSealExportDetail(draftId));
     }
 }

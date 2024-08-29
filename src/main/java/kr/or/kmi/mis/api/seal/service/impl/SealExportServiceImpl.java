@@ -113,7 +113,6 @@ public class SealExportServiceImpl implements SealExportService {
 
     @Override
     public SealExportDetailResponseDTO getSealExportDetail(Long draftId) {
-        System.out.println(draftId);
         SealExportDetail sealExportDetail = sealExportDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
