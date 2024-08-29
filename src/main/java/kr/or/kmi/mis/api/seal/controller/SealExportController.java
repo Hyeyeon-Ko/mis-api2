@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.seal.model.request.ExportRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ExportUpdateRequestDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealExportDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealExportService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -50,4 +51,10 @@ public class SealExportController {
         return ResponseWrapper.success();
     }
 
+    @Operation(summary = "get export detail", description = "반출신청 상세조회")
+    @GetMapping(value = "/{draftId}")
+    public ApiResponse<SealExportDetailResponseDTO> getSealExportDetail(@PathVariable Long draftId) {
+        System.out.println(draftId);
+        return ResponseWrapper.success(sealExportService.getSealExportDetail(draftId));
+    }
 }

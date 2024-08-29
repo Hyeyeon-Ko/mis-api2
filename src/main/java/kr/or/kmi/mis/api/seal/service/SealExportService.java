@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.seal.service;
 
 import kr.or.kmi.mis.api.seal.model.request.ExportRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ExportUpdateRequestDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealExportDetailResponseDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -16,4 +17,7 @@ public interface SealExportService {
 
     /* 반출취소 */
     void cancelExport(Long draftId);
+
+    /* 반출신청 상세조회 */
+    SealExportDetailResponseDTO getSealExportDetail(Long draftId);
 }

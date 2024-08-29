@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.model.request.ImprintRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ImprintUpdateRequestDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealImprintDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealImprintDetailRepository;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.service.SealImprintHistoryService;
@@ -54,13 +55,13 @@ public class SealImprintServiceImpl implements SealImprintService {
 
         // 날인신청 수정사항 저장
         sealImprintDetailInfo.update(imprintUpdateRequestDTO);
-        sealMaster.setUpdtrId(sealMaster.getDrafterId());
-        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-        sealMasterRepository.save(sealMaster);
-
         sealImprintDetailInfo.setUpdtrId(sealMaster.getDrafterId());
         sealImprintDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealImprintDetailRepository.save(sealImprintDetailInfo);
+
+        sealMaster.setUpdtrId(sealMaster.getDrafterId());
+        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealMasterRepository.save(sealMaster);
     }
 
     @Override
@@ -72,5 +73,13 @@ public class SealImprintServiceImpl implements SealImprintService {
 
         sealMaster.updateStatus("F");
         sealMasterRepository.save(sealMaster);
+    }
+
+    @Override
+    public SealImprintDetailResponseDTO getSealImprintDetail(Long draftId) {
+        SealImprintDetail sealImprintDetail = sealImprintDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return SealImprintDetailResponseDTO.of(sealImprintDetail);
     }
 }

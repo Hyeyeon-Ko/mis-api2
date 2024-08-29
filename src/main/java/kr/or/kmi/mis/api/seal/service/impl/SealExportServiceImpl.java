@@ -6,6 +6,7 @@ import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.model.request.ExportRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ExportUpdateRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealExportDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealExportDetailRepository;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.service.SealExportHistoryService;
@@ -108,6 +109,15 @@ public class SealExportServiceImpl implements SealExportService {
 
         sealMaster.updateStatus("F");
         sealMasterRepository.save(sealMaster);
+    }
+
+    @Override
+    public SealExportDetailResponseDTO getSealExportDetail(Long draftId) {
+        System.out.println(draftId);
+        SealExportDetail sealExportDetail = sealExportDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return SealExportDetailResponseDTO.of(sealExportDetail);
     }
 
     private String[] saveFile(MultipartFile file) throws IOException {

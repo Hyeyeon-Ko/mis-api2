@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.seal.model.request.ImprintRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.ImprintUpdateRequestDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealImprintDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealImprintService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -43,5 +44,12 @@ public class SealImprintController {
         sealImprintService.cancelImprint(draftId);
 
         return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "get imprint detail", description = "날인신청 상세조회")
+    @GetMapping(value = "/{draftId}")
+    public ApiResponse<SealImprintDetailResponseDTO> getSealImprintDetail(@PathVariable Long draftId) {
+
+        return ResponseWrapper.success(sealImprintService.getSealImprintDetail(draftId));
     }
 }
