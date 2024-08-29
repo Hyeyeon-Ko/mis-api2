@@ -22,6 +22,9 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     @Column(length = 100)
     private String sealImage;
 
+    @Column(length = 100)
+    private String sealImagePath;
+
     @Column(length = 50)
     private String useDept;
 
@@ -35,18 +38,23 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     private String subManager;
 
     @Column(length = 20)
+    private String draftDate;
+
+    @Column(length = 20)
     private String instCd;
 
     @Builder
-    public SealRegisterDetail(Long draftId, String sealNm, String sealImage, String useDept,
-                              String purpose, String manager, String subManager, String instCd) {
+    public SealRegisterDetail(Long draftId, String sealNm, String sealImage, String sealImagePath, String useDept,
+                              String purpose, String manager, String subManager, String draftDate, String instCd) {
         this.draftId = draftId;
         this.sealNm = sealNm;
         this.sealImage = sealImage;
+        this.sealImagePath = sealImagePath;
         this.useDept = useDept;
         this.purpose = purpose;
         this.manager = manager;
         this.subManager = subManager;
+        this.draftDate = draftDate;
         this.instCd = instCd;
     }
 

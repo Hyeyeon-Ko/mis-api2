@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.seal.service.impl;
 import kr.or.kmi.mis.api.seal.model.entity.SealRegisterDetail;
 import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealRegisterDetailRepository;
 import kr.or.kmi.mis.api.seal.service.SealRegisterHistoryService;
 import kr.or.kmi.mis.api.seal.service.SealRegisterService;
@@ -23,7 +24,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
     @Transactional
     public void registerSeal(SealRegisterRequestDTO sealRegisterRequestDTO) {
 
-        SealRegisterDetail sealRegisterDetail = sealRegisterRequestDTO.toDetailEntity();
+        SealRegisterDetail sealRegisterDetail = sealRegisterRequestDTO.toDetailEntity(sealRegisterRequestDTO.getSealImage(), sealRegisterRequestDTO.getSealImagePath());
         sealRegisterDetail.setRgstrId(sealRegisterRequestDTO.getDrafterId());
         sealRegisterDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         sealRegisterDetailRepository.save(sealRegisterDetail);
@@ -50,5 +51,13 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
         // TODO: 삭제한거도 History에 남겨야하나..?
         sealRegisterDetailRepository.deleteById(draftId);
+    }
+
+    @Override
+    public SealDetailResponseDTO getSealDetail(Long draftId) {
+        SealRegisterDetail sealRegisterDetail = sealRegisterDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return SealDetailResponseDTO.of(sealRegisterDetail);
     }
 }
