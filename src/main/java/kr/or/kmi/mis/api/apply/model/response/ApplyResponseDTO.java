@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.apply.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,12 +22,15 @@ public class ApplyResponseDTO {
 
     private List<BcdMasterResponseDTO> bcdMasterResponses;
     private List<DocMasterResponseDTO> docMasterResponses;
+    private List<SealMasterResponseDTO> sealMasterResponses;
 
     public static ApplyResponseDTO of(List<BcdMasterResponseDTO> bcdMasterResponses,
-                                      List<DocMasterResponseDTO> docMasterResponses) {
+                                      List<DocMasterResponseDTO> docMasterResponses,
+                                      List<SealMasterResponseDTO> sealMasterResponses) {
         return ApplyResponseDTO.builder()
                 .bcdMasterResponses(bcdMasterResponses)
                 .docMasterResponses(docMasterResponses)
+                .sealMasterResponses(sealMasterResponses)
                 .build();
     }
 

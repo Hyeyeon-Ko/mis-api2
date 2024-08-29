@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class RegistrationListResponseDTO {
+public class TotalRegistrationListResponseDTO {
 
     private Long draftId;
     private String sealNm;
@@ -17,8 +17,8 @@ public class RegistrationListResponseDTO {
     private String subManager;
     private String instCd;
 
-    public static RegistrationListResponseDTO of(SealRegisterDetail sealRegisterDetail) {
-        return RegistrationListResponseDTO.builder()
+    public static TotalRegistrationListResponseDTO of(SealRegisterDetail sealRegisterDetail) {
+        return TotalRegistrationListResponseDTO.builder()
                 .draftId(sealRegisterDetail.getDraftId())
                 .sealNm(sealRegisterDetail.getSealNm())
                 .sealImage(sealRegisterDetail.getSealImage())

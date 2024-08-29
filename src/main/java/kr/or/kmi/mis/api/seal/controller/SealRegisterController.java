@@ -18,7 +18,7 @@ public class SealRegisterController {
 
     private final SealRegisterService sealRegisterService;
 
-    @Operation(summary = "create seal register", description = "유저 > 인장 등록 시 사용")
+    @Operation(summary = "create seal register", description = "인장 등록 시 사용")
     @PostMapping
     public ApiResponse<?> createSealRegister(@RequestBody SealRegisterRequestDTO sealRegisterRequestDTO) {
 
@@ -27,7 +27,7 @@ public class SealRegisterController {
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "modify seal register", description = "유저 > 나의 신청내역 > 승인 대기 중인 인장 등록 수정 시 사용")
+    @Operation(summary = "modify seal register", description = "등록한 인장 수정 시 사용")
     @PostMapping(value = "/update")
     public ApiResponse<?> updateSealRegister(@RequestParam Long draftId, @RequestBody SealUpdateRequestDTO sealUpdateRequestDTO) {
 
@@ -36,7 +36,7 @@ public class SealRegisterController {
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "delete seal register", description = "유저 > 나의 신청내역 > 승인 대기 중인 인장 등록 삭제 시 사용")
+    @Operation(summary = "delete seal register", description = "등록한 인장 삭제 시 사용")
     @PutMapping(value = "/{draftId}")
     public ApiResponse<?> deleteSealRegister(@PathVariable Long draftId) {
 

@@ -24,6 +24,7 @@ public class SealImprintHistory extends BaseSystemFieldEntity {
     @Column(length = 50)
     private String submission;
 
+    @Column(length = 20)
     private String useDate;
 
     @Column(length = 20)

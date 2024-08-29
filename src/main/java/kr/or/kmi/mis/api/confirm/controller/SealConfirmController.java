@@ -1,11 +1,11 @@
-package kr.or.kmi.mis.api.seal.controller;
+package kr.or.kmi.mis.api.confirm.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.confirm.model.response.SealHistoryResponseDTO;
-import kr.or.kmi.mis.api.confirm.service.SealConfirmService;
 import kr.or.kmi.mis.api.seal.model.response.ExportDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.ImprintDetailResponseDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealHistoryResponseDTO;
+import kr.or.kmi.mis.api.confirm.service.SealConfirmService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class SealConfirmController {
 
     @Operation(summary = "get seal application history by drafter", description = "기안자의 인장신청 이력 조회")
     @GetMapping("/history")
-    public ApiResponse<List<SealHistoryResponseDTO>> getApplicationHistory(@RequestParam Long userId) {
+    public ApiResponse<List<SealHistoryResponseDTO>> getApplicationHistory(@RequestParam String userId) {
         return ResponseWrapper.success(sealConfirmService.getSealApplicationHistory(userId));
     }
 

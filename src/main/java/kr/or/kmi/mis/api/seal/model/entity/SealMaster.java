@@ -22,8 +22,6 @@ public class SealMaster extends BaseSystemFieldEntity {
 
     private Timestamp respondDate;
 
-    private Timestamp endDate;
-
     @Column(nullable = false, length = 20)
     private String drafter;
 
@@ -50,16 +48,37 @@ public class SealMaster extends BaseSystemFieldEntity {
 
     private String status;
 
+    private String division;  // A: 날인, B: 반출
+
+    private String instCd;
+
     @Builder
-    public SealMaster(String drafter, String drafterId, Timestamp draftDate, String status, String title) {
+    public SealMaster(String drafter, String drafterId, Timestamp draftDate, String status, String division, String instCd) {
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.draftDate = draftDate;
         this.status = status;
-        this.title = String.format("인장신청 (%s)", drafter);;
+        this.title = String.format("인장신청 (%s)", drafter);
+        this.division = division;
+        this.instCd = instCd;
     }
 
     public void updateStatus(String status) {
         this.status = status;
+    }
+
+    public void confirm(String status, String approver, String approverId) {
+        this.status = status;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.approver = approver;
+        this.approverId = approverId;
+    }
+
+    public void reject(String status, String disapprover, String disapproverId, String rejectReason) {
+        this.status = status;
+        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.disapprover = disapprover;
+        this.disapproverId = disapproverId;
+        this.rejectReason = rejectReason;
     }
 }

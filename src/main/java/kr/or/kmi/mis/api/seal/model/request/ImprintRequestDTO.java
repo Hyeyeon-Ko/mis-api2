@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.seal.model.request;
 
-import jakarta.persistence.Column;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import lombok.Getter;
@@ -19,18 +18,19 @@ public class ImprintRequestDTO {
     private String companySeal;
     private String purpose;
     private String notes;
+    private String instCd;
 
-    // SealImprintRequest Dto -> SealMaster Entity
     public SealMaster toMasterEntity() {
         return SealMaster.builder()
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .status("A")
+                .division("A")
+                .instCd(instCd)
                 .build();
     }
 
-    // SealImprintRequest Dto -> SealImprintDetail Entity
     public SealImprintDetail toDetailEntity(Long draftId) {
         return SealImprintDetail.builder()
                 .draftId(draftId)

@@ -1,23 +1,19 @@
 package kr.or.kmi.mis.api.seal.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
 @Entity
 @Table(name = "hrmtregd")
-public class SealRegisterDetail {
+public class SealRegisterDetail extends BaseSystemFieldEntity {
 
     @Id
-    @Column(name = "draft_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long draftId;
 
     @Column(length = 20)
@@ -30,7 +26,7 @@ public class SealRegisterDetail {
     private String useDept;
 
     @Column(length = 1000)
-    private int purpose;
+    private String purpose;
 
     @Column(length = 20)
     private String manager;
@@ -41,4 +37,25 @@ public class SealRegisterDetail {
     @Column(length = 20)
     private String instCd;
 
+    @Builder
+    public SealRegisterDetail(Long draftId, String sealNm, String sealImage, String useDept,
+                              String purpose, String manager, String subManager, String instCd) {
+        this.draftId = draftId;
+        this.sealNm = sealNm;
+        this.sealImage = sealImage;
+        this.useDept = useDept;
+        this.purpose = purpose;
+        this.manager = manager;
+        this.subManager = subManager;
+        this.instCd = instCd;
+    }
+
+    public void update(SealUpdateRequestDTO sealUpdateRequestDTO) {
+        this.sealNm = sealUpdateRequestDTO.getSealNm();
+        this.sealImage = sealUpdateRequestDTO.getSealImage();
+        this.useDept = sealUpdateRequestDTO.getUseDept();
+        this.purpose = sealUpdateRequestDTO.getPurpose();
+        this.manager = sealUpdateRequestDTO.getManager();
+        this.subManager = sealUpdateRequestDTO.getSubManager();
+    }
 }

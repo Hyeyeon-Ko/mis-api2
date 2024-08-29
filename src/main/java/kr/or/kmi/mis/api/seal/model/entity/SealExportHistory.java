@@ -2,10 +2,7 @@ package kr.or.kmi.mis.api.seal.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -32,8 +29,10 @@ public class SealExportHistory {
     @Column(length = 20)
     private String expNm;
 
+    @Column(length = 20)
     private String expDate;
 
+    @Column(length = 20)
     private String returnDate;
 
     @Column(length = 20)
@@ -47,5 +46,20 @@ public class SealExportHistory {
 
     @Column(length = 1000)
     private String purpose;
+
+    @Builder
+    public SealExportHistory(SealExportDetail sealExportDetail, Long seqId) {
+        this.draftId = sealExportDetail.getDraftId();
+        this.seqId = seqId;
+        this.submission = sealExportDetail.getSubmission();
+        this.useDept = sealExportDetail.getUseDept();
+        this.expNm = sealExportDetail.getExpNm();
+        this.expDate = sealExportDetail.getExpDate();
+        this.returnDate = sealExportDetail.getReturnDate();
+        this.corporateSeal = sealExportDetail.getCorporateSeal();
+        this.facsimileSeal = sealExportDetail.getFacsimileSeal();
+        this.companySeal = sealExportDetail.getCompanySeal();
+        this.purpose = sealExportDetail.getPurpose();
+    }
 
 }

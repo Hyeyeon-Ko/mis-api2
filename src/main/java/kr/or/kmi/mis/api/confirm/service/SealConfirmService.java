@@ -1,8 +1,8 @@
 package kr.or.kmi.mis.api.confirm.service;
 
-import kr.or.kmi.mis.api.confirm.model.response.SealHistoryResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.ExportDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.ImprintDetailResponseDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealHistoryResponseDTO;
 
 import java.util.List;
 
@@ -21,5 +21,5 @@ public interface SealConfirmService {
     void disapprove(Long draftId, String rejectReason);
 
     /* 인장 신청이력 조회 */
-    List<SealHistoryResponseDTO> getSealApplicationHistory(Long userId);
+    List<SealHistoryResponseDTO> getSealApplicationHistory(String userId);
 }

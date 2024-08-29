@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.seal.model.response.ExportListResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.ManagementListResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.RegistrationListResponseDTO;
+import kr.or.kmi.mis.api.seal.model.response.TotalRegistrationListResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -25,25 +26,33 @@ public class SealListController {
 
     private final SealListService sealListService;
 
-    @Operation(summary = "get seal management list", description = "인장관리대장 조회")
+    @Operation(summary = "get seal management list", description = "센터별 인장관리대장 조회")
     @GetMapping("/managementList")
     public ApiResponse<List<ManagementListResponseDTO>> getSealManagementList(@RequestParam(required = false) LocalDate startDate,
-                                                                              @RequestParam(required = false) LocalDate endDate) {
-        return ResponseWrapper.success(sealListService.getSealManagementList(startDate, endDate));
+                                                                              @RequestParam(required = false) LocalDate endDate,
+                                                                              @RequestParam String instCd) {
+        return ResponseWrapper.success(sealListService.getSealManagementList(startDate, endDate, instCd));
     }
 
-    @Operation(summary = "get seal export list", description = "인장반출대장 조회")
+    @Operation(summary = "get seal export list", description = "센터별 인장반출대장 조회")
     @GetMapping("/exportList")
     public ApiResponse<List<ExportListResponseDTO>> getSealExportList(@RequestParam(required = false) LocalDate startDate,
-                                                                  @RequestParam(required = false) LocalDate endDate) {
-        return ResponseWrapper.success(sealListService.getSealExportList(startDate, endDate));
+                                                                      @RequestParam(required = false) LocalDate endDate,
+                                                                      @RequestParam String instCd) {
+        return ResponseWrapper.success(sealListService.getSealExportList(startDate, endDate, instCd));
     }
 
-    @Operation(summary = "get seal registration list", description = "인장등록대장 조회")
+    @Operation(summary = "get seal registration list", description = "센터별 인장등록대장 조회")
     @GetMapping("/registrationList")
-    public ApiResponse<List<RegistrationListResponseDTO>> getSealRegistrationList(@RequestParam(required = false) LocalDate startDate,
-                                                                              @RequestParam(required = false) LocalDate endDate) {
-        return ResponseWrapper.success(sealListService.getSealRegistrationList(startDate, endDate));
+    public ApiResponse<List<RegistrationListResponseDTO>> getSealRegistrationList(@RequestParam String instCd) {
+        return ResponseWrapper.success(sealListService.getSealRegistrationList(instCd));
+    }
+
+    @Operation(summary = "get total seal registration list", description = "전국 인장등록대장 조회")
+    @GetMapping("/totalRegistrationList")
+    public ApiResponse<List<TotalRegistrationListResponseDTO>> getTotalSealRegistrationList() {
+
+        return ResponseWrapper.success(sealListService.getTotalSealRegistrationList());
     }
 
 }

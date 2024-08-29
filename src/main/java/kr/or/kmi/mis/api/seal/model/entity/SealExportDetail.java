@@ -1,17 +1,16 @@
 package kr.or.kmi.mis.api.seal.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import kr.or.kmi.mis.api.seal.model.request.ExportUpdateRequestDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
 @Entity
 @Table(name = "hrmtexpd")
-public class SealExportDetail {
+public class SealExportDetail extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "draft_id")
@@ -26,8 +25,10 @@ public class SealExportDetail {
     @Column(length = 20)
     private String expNm;
 
+    @Column(length = 20)
     private String expDate;
 
+    @Column(length = 20)
     private String returnDate;
 
     @Column(length = 20)
@@ -42,4 +43,40 @@ public class SealExportDetail {
     @Column(length = 1000)
     private String purpose;
 
+    @Column(length = 255)
+    private String fileName;
+
+    @Column(length = 255)
+    private String filePath;
+
+    @Builder
+    public SealExportDetail(Long draftId, String submission, String useDept, String expNm, String expDate, String returnDate,
+                            String corporateSeal, String facsimileSeal, String companySeal, String purpose, String fileName, String filePath) {
+        this.draftId = draftId;
+        this.submission = submission;
+        this.useDept = useDept;
+        this.expNm = expNm;
+        this.expDate = expDate;
+        this.returnDate = returnDate;
+        this.corporateSeal = corporateSeal;
+        this.facsimileSeal = facsimileSeal;
+        this.companySeal = companySeal;
+        this.purpose = purpose;
+        this.fileName = fileName;
+        this.filePath = filePath;
+    }
+
+    public void update(ExportUpdateRequestDTO exportUpdateRequestDTO) {
+        this.submission = exportUpdateRequestDTO.getSubmission();
+        this.useDept = exportUpdateRequestDTO.getUseDept();
+        this.expNm = exportUpdateRequestDTO.getExpNm();
+        this.expDate = exportUpdateRequestDTO.getExpDate();
+        this.returnDate = exportUpdateRequestDTO.getReturnDate();
+        this.corporateSeal = exportUpdateRequestDTO.getCorporateSeal();
+        this.facsimileSeal = exportUpdateRequestDTO.getFacsimileSeal();
+        this.companySeal = exportUpdateRequestDTO.getCompanySeal();
+        this.purpose = exportUpdateRequestDTO.getPurpose();
+        this.fileName = exportUpdateRequestDTO.getFileName();
+        this.filePath = exportUpdateRequestDTO.getFilePath();
+    }
 }

@@ -2,10 +2,8 @@ package kr.or.kmi.mis.api.seal.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
+import lombok.*;
 
 import java.sql.Timestamp;
 
@@ -15,7 +13,7 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "hrmtregd_hist")
 @IdClass(DraftSeqPK.class)
-public class SealRegisterHistory {
+public class SealRegisterHistory extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "draft_id")
@@ -35,7 +33,7 @@ public class SealRegisterHistory {
     private String useDept;
 
     @Column(length = 1000)
-    private int purpose;
+    private String purpose;
 
     @Column(length = 20)
     private String manager;
@@ -46,4 +44,16 @@ public class SealRegisterHistory {
     @Column(length = 20)
     private String instCd;
 
+    @Builder
+    public SealRegisterHistory(SealRegisterDetail sealRegisterDetail, Long seqId) {
+        this.draftId = sealRegisterDetail.getDraftId();
+        this.seqId = seqId;
+        this.sealNm = sealRegisterDetail.getSealNm();
+        this.sealImage = sealRegisterDetail.getSealImage();
+        this.useDept = sealRegisterDetail.getUseDept();
+        this.purpose = sealRegisterDetail.getPurpose();
+        this.manager = sealRegisterDetail.getManager();
+        this.subManager = sealRegisterDetail.getSubManager();
+        this.instCd = sealRegisterDetail.getInstCd();
+    }
 }

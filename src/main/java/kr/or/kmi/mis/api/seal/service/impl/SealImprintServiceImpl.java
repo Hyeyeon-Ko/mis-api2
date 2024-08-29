@@ -39,6 +39,7 @@ public class SealImprintServiceImpl implements SealImprintService {
     }
 
     @Override
+    @Transactional
     public void updateImprint(Long draftId, ImprintUpdateRequestDTO imprintUpdateRequestDTO) {
 
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
@@ -53,16 +54,17 @@ public class SealImprintServiceImpl implements SealImprintService {
 
         // 날인신청 수정사항 저장
         sealImprintDetailInfo.update(imprintUpdateRequestDTO);
-        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealMaster.setUpdtrId(sealMaster.getDrafterId());
+        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealMasterRepository.save(sealMaster);
 
-        sealImprintDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealImprintDetailInfo.setUpdtrId(sealMaster.getDrafterId());
+        sealImprintDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealImprintDetailRepository.save(sealImprintDetailInfo);
     }
 
     @Override
+    @Transactional
     public void cancelImprint(Long draftId) {
 
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
