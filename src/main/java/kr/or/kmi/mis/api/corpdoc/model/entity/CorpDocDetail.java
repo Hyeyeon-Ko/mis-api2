@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -70,4 +71,17 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
         this.notes = notes;
     }
 
+    public void update(CorpDocUpdateRequestDTO corpDocUpdateRequestDTO, String newFileName, String newFilePath) {
+        this.submission = corpDocUpdateRequestDTO.getSubmission();
+        this.purpose = corpDocUpdateRequestDTO.getPurpose();
+        this.useDate = corpDocUpdateRequestDTO.getUseDate();
+        this.fileName = newFileName;
+        this.filePath = newFilePath;
+        this.certCorpseal = corpDocUpdateRequestDTO.getCertCorpseal();
+        this.certCoregister = corpDocUpdateRequestDTO.getCertCoregister();
+        this.certUsesignet = corpDocUpdateRequestDTO.getCertUsesignet();
+        this.warrant = corpDocUpdateRequestDTO.getWarrant();
+        this.type = corpDocUpdateRequestDTO.getType();
+        this.notes = corpDocUpdateRequestDTO.getNotes();
+    }
 }

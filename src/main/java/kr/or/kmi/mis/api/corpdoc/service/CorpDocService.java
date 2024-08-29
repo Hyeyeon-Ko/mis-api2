@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.corpdoc.service;
 
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
+import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocUpdateRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
@@ -13,7 +14,8 @@ import java.util.List;
 public interface CorpDocService {
     void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws IOException;
     CorpDocDetailResponseDTO getCorpDocApply(Long draftId);
-    void updateCorpDocApply(Long draftId, CorpDocRequestDTO corpDocRequestDTO, MultipartFile file, boolean isFileDeleted);
+    void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
+                            MultipartFile file, boolean isFileDeleted) throws IOException;
     void cancelCorpDocApply(Long draftId);
     List<CorpDocPendingResponseDTO> getMyPendingList();
     List<CorpDocPendingResponseDTO> getPendingList(String instCd);

@@ -3,11 +3,13 @@ package kr.or.kmi.mis.api.corpdoc.service.impl;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
+import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocUpdateRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
+import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
+    private final CorpDocHistoryService corpDocHistoryService;
     private final InfoService infoService;
 
     @Value("${file.upload-dir}")
@@ -54,13 +57,38 @@ public class CorpDocServiceImpl implements CorpDocService {
     @Override
     @Transactional(readOnly = true)
     public CorpDocDetailResponseDTO getCorpDocApply(Long draftId) {
-        return null;
+        CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        return CorpDocDetailResponseDTO.of(corpDocDetail);
     }
 
     @Override
     @Transactional
-    public void updateCorpDocApply(Long draftId, CorpDocRequestDTO corpDocRequestDTO, MultipartFile file, boolean isFileDeleted) {
+    public void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
+                                   MultipartFile file, boolean isFileDeleted) throws IOException {
+        CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        corpDocHistoryService.createCorpDocHistory(corpDocDetail);
+
+        String[] savedFileInfo;
+        if (file != null) {
+            savedFileInfo = saveFile(file, corpDocDetail.getFilePath());
+        } else if (isFileDeleted) {
+            savedFileInfo = new String[]{null, null};
+            if (corpDocDetail.getFilePath() != null) {
+                Path oldFilePath = Paths.get(corpDocDetail.getFilePath());
+                Files.deleteIfExists(oldFilePath);
+            }
+        } else {
+            savedFileInfo = new String[]{corpDocDetail.getFileName(), corpDocDetail.getFilePath()};
+        }
+
+        corpDocDetail.update(corpDocUpdateRequestDTO, savedFileInfo[0], savedFileInfo[1]);
+        corpDocDetail.setUpdtrId(infoService.getUserInfo().getUserName());
+        corpDocDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+
+        corpDocDetailRepository.save(corpDocDetail);
     }
 
     @Override

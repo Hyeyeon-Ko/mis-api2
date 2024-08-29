@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.corpdoc.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
+import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocUpdateRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
@@ -24,7 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@RequestMapping("/api/corpdoc")
+@RequestMapping("/api/corpDoc")
 @RequiredArgsConstructor
 @Tag(name="CorpDocCRUD", description = "법인서류 관련 CRUD API")
 public class CorpDocController {
@@ -55,10 +56,10 @@ public class CorpDocController {
     @PostMapping(value = "/update")
     public ApiResponse<?> updateCorpDocApply(
             @RequestParam("draftId") Long draftId,
-            @RequestPart("corpDocRequest") CorpDocRequestDTO corpDocRequestDTO,
+            @RequestPart("corpDocUpdateRequest") CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
             @RequestPart(value = "file", required = false) MultipartFile file, boolean isFileDeleted) throws IOException {
 
-        corpDocService.updateCorpDocApply(draftId, corpDocRequestDTO, file, isFileDeleted);
+        corpDocService.updateCorpDocApply(draftId, corpDocUpdateRequestDTO, file, isFileDeleted);
         return ResponseWrapper.success();
     }
 
