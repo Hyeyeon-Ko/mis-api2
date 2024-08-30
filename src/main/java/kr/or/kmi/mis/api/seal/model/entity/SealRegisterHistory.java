@@ -48,6 +48,9 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String draftDate;
 
+    @Column
+    private Timestamp changedDate;
+
     @Column(length = 20)
     private String instCd;
 

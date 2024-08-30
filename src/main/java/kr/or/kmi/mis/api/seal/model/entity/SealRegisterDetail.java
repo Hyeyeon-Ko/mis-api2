@@ -6,6 +6,8 @@ import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -41,12 +43,15 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String draftDate;
 
+    @Column
+    private Timestamp lastUpdateDate;
+
     @Column(length = 20)
     private String instCd;
 
     @Builder
     public SealRegisterDetail(Long draftId, String sealNm, String sealImage, String sealImagePath, String useDept,
-                              String purpose, String manager, String subManager, String draftDate, String instCd) {
+                              String purpose, String manager, String subManager, String draftDate, String instCd, Timestamp lastUpdateDate) {
         this.draftId = draftId;
         this.sealNm = sealNm;
         this.sealImage = sealImage;
@@ -57,6 +62,7 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
         this.subManager = subManager;
         this.draftDate = draftDate;
         this.instCd = instCd;
+        this.lastUpdateDate = lastUpdateDate;
     }
 
     public void update(SealRegisterRequestDTO sealRegisterRequestDTO, String newSealImage, String newSealImagePath) {
