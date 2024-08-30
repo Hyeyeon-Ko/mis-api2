@@ -28,7 +28,10 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     private String purpose;
 
     @Column(length = 20)
-    private String useDate;
+    private String useDate;     // 서류 사용일자
+
+    @Column(length = 20)
+    private String issueDate;   // 서류 발급일자
 
     @Column(length = 255)
     private String fileName;
@@ -40,7 +43,13 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     private int certCorpseal;
 
     @Column
+    private int totalCorpseal;
+
+    @Column
     private int certCoregister;
+
+    @Column
+    private int totalCoregister;
 
     @Column
     private int certUsesignet;
