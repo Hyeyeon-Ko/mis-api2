@@ -15,8 +15,8 @@ public interface CorpDocMasterRepository extends JpaRepository<CorpDocMaster, Lo
 
     Optional<List<CorpDocMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp startDate, Timestamp endDate);
 
-    List<CorpDocMaster> findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc
-            (String status, Timestamp startDate, Timestamp endDate, String instCd);
+    List<CorpDocMaster> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc
+            (String status, Timestamp startDate, Timestamp endDate);
 
     List<CorpDocMaster> findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc(String status, Timestamp startDate, Timestamp endDate);
 }

@@ -134,9 +134,9 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
-                .findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+                .findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
 
         if(corpDocMasters == null) {
             corpDocMasters = new ArrayList<>();
@@ -144,9 +144,9 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         return corpDocMasters.stream()
                 .map(corpDocMaster -> {
-                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    return CorpDocMasterResponseDTO.of(corpDocMaster);
+                    CorpDocMasterResponseDTO corpDocMasterResponseDTO = CorpDocMasterResponseDTO.of(corpDocMaster);
+                    corpDocMasterResponseDTO.setInstNm(stdBcdService.getInstNm(corpDocMaster.getInstCd()));
+                    return corpDocMasterResponseDTO;
                 }).toList();
     }
 

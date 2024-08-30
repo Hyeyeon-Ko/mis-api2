@@ -56,7 +56,7 @@ public class ApplyServiceImpl implements ApplyService {
                     docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
                     break;
                 case "법인서류":
-                    corpDocApplyLists = corpDocService.getCorpDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+                    corpDocApplyLists = corpDocService.getCorpDocApplyByDateRange(timestamps[0], timestamps[1]);
                     break;
                 case "인장신청":
                     sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
@@ -67,7 +67,7 @@ public class ApplyServiceImpl implements ApplyService {
             // 전체 신청 목록을 조회합니다.
             bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
             docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
-            corpDocApplyLists = corpDocService.getCorpDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+            corpDocApplyLists = corpDocService.getCorpDocApplyByDateRange(timestamps[0], timestamps[1]);
             sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
         }
 

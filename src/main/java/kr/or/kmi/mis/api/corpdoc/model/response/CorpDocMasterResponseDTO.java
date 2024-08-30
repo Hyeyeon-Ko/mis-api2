@@ -19,6 +19,7 @@ public class CorpDocMasterResponseDTO {
     private String title;
     private String applyStatus;
     private String instCd;
+    private String instNm;
     private String docType;
 
     public static CorpDocMasterResponseDTO of(CorpDocMaster corpDocMaster) {
