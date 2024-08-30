@@ -82,7 +82,7 @@ public class SealExportServiceImpl implements SealExportService {
 
         // 반출신청 수정사항 저장
         updateSealExportDetail(exportUpdateRequestDTO, draftId, savedFileInfo);
-        sealMaster.setUpdtrId(String.valueOf(draftId));
+        sealMaster.setUpdtrId(sealExportDetailInfo.getRgstrId());
         sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
         sealMasterRepository.save(sealMaster);
     }

@@ -32,7 +32,6 @@ public class SealListServiceImpl implements SealListService {
     private final SealImprintDetailRepository sealImprintDetailRepository;
     private final SealExportDetailRepository sealExportDetailRepository;
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
-    private final InfoService infoService;
 
     @Override
     @Transactional(readOnly = true)

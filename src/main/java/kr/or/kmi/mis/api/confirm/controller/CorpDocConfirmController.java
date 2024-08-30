@@ -17,14 +17,14 @@ public class CorpDocConfirmController {
     public final CorpDocConfirmService corpDocConfirmService;
 
     @Operation(summary = "approve corpDoc apply", description = "법인서류 신청 승인")
-    @PutMapping("/approve")
+    @PostMapping("/approve")
     public ApiResponse<?> approve(@RequestParam("draftId") Long draftId) {
         corpDocConfirmService.approve(draftId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "reject corpDoc apply", description = "법인서류 신청 반려")
-    @PutMapping("/reject")
+    @PostMapping("/reject")
     public ApiResponse<?> reject(@RequestParam("draftId") Long draftId, @RequestBody String rejectReason) {
         corpDocConfirmService.reject(draftId, rejectReason);
         return ResponseWrapper.success();
