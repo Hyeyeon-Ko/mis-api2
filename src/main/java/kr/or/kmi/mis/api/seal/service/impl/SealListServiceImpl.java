@@ -100,8 +100,7 @@ public class SealListServiceImpl implements SealListService {
                 .stream()
                 .map(sealRegisterDetail -> {
                     if (sealRegisterDetail != null) {
-                        TotalRegistrationListResponseDTO totalRegistrationListResponseDTO = TotalRegistrationListResponseDTO.of(sealRegisterDetail);
-                        return totalRegistrationListResponseDTO;
+                        return TotalRegistrationListResponseDTO.of(sealRegisterDetail);
                     }
                     return null;
                 })

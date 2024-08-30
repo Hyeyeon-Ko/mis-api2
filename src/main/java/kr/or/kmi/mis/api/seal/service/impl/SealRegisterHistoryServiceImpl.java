@@ -29,7 +29,7 @@ public class SealRegisterHistoryServiceImpl implements SealRegisterHistoryServic
                 .seqId(maxSeqId + 1)
                 .build();
 
-        sealRegisterHistory.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealRegisterHistory.update(new Timestamp(System.currentTimeMillis()));
 
         sealRegisterHistoryRepository.save(sealRegisterHistory);
 

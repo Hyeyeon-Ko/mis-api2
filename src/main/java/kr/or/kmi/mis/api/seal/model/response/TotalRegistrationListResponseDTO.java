@@ -15,6 +15,7 @@ public class TotalRegistrationListResponseDTO {
     private String purpose;
     private String manager;
     private String subManager;
+    private String draftDate;
     private String instCd;
 
     public static TotalRegistrationListResponseDTO of(SealRegisterDetail sealRegisterDetail) {
@@ -26,6 +27,8 @@ public class TotalRegistrationListResponseDTO {
                 .purpose(sealRegisterDetail.getPurpose())
                 .manager(sealRegisterDetail.getManager())
                 .subManager(sealRegisterDetail.getSubManager())
+                .draftDate(sealRegisterDetail.getDraftDate())
+
                 .instCd(sealRegisterDetail.getInstCd())
                 .build();
     }

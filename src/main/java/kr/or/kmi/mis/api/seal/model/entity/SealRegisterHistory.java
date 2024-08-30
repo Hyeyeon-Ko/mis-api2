@@ -68,4 +68,8 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
         this.draftDate = sealRegisterDetail.getDraftDate();
         this.instCd = sealRegisterDetail.getInstCd();
     }
+
+    public void update(Timestamp changedDate) {
+        this.changedDate = changedDate;
+    }
 }

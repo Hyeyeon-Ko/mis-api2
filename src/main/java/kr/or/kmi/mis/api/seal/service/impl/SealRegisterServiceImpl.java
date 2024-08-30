@@ -37,6 +37,8 @@ public class SealRegisterServiceImpl implements SealRegisterService {
         sealRegisterDetail.setRgstrId(sealRegisterRequestDTO.getDrafterId());
         sealRegisterDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         sealRegisterDetailRepository.save(sealRegisterDetail);
+
+        sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
     }
 
     @Override
@@ -79,6 +81,11 @@ public class SealRegisterServiceImpl implements SealRegisterService {
     @Override
     @Transactional
     public void deleteSeal(Long draftId) {
+        SealRegisterDetail sealRegisterDetail = sealRegisterDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
+
         sealRegisterDetailRepository.deleteById(draftId);
     }
 

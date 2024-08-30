@@ -54,5 +54,4 @@ public class SealListController {
 
         return ResponseWrapper.success(sealListService.getTotalSealRegistrationList());
     }
-
 }
