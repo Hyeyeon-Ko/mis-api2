@@ -15,4 +15,5 @@ public class OrderRequestDTO {
     private String fileName;
     private String fromEmail;
     private String toEmail;
+    private String password;
 }

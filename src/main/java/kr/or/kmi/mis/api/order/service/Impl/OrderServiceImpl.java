@@ -19,7 +19,7 @@ import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +29,7 @@ import java.security.GeneralSecurityException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +42,6 @@ public class OrderServiceImpl implements OrderService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
     private final ExcelService excelService;
-    private final JavaMailSender mailSender;
     private final StdBcdService stdBcdService;
 
     @Override
@@ -78,15 +78,25 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
-
         // 엑셀 데이터 생성
         byte[] excelData = excelService.generateExcel(orderRequest.getDraftIds());
 
         // 엑셀 파일 암호화
         byte[] encryptedExcelData = excelService.getEncryptedExcelBytes(excelData, "password@!");
 
-        // 첨부 파일과 함께 이메일 전송
-        sendEmailWithAttachment(orderRequest.getFromEmail(), orderRequest.getToEmail(), encryptedExcelData, orderRequest.getEmailSubject(), orderRequest.getEmailBody(), orderRequest.getFileName());
+        // 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
+        sendEmailWithDynamicCredentials(
+                "smtps.hiworks.com",
+                465,
+                orderRequest.getFromEmail(),
+                orderRequest.getPassword(),
+                orderRequest.getFromEmail(),
+                orderRequest.getToEmail(),
+                encryptedExcelData,
+                orderRequest.getEmailSubject(),
+                orderRequest.getEmailBody(),
+                orderRequest.getFileName()
+        );
 
         // 발주일시 업데이트
         orderRequest.getDraftIds().forEach(draftId -> {
@@ -101,29 +111,42 @@ public class OrderServiceImpl implements OrderService {
     public EmailSettingsResponseDTO getEmailSettings() {
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
                 .orElseThrow(() -> new EntityNotFoundException("B003"));
-        StdDetail stdDetail1 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
-                .orElseThrow(() -> new EntityNotFoundException("003"));
-        StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "002")
-                .orElseThrow(() -> new EntityNotFoundException("002"));
+        StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "001")
+                .orElseThrow(() -> new EntityNotFoundException("001"));
 
-        return new EmailSettingsResponseDTO(stdDetail1.getEtcItem2(), stdDetail2.getEtcItem2());
+        return new EmailSettingsResponseDTO(stdDetail2.getEtcItem2());
     }
 
-    private void sendEmailWithAttachment(String fromEmail, String toEmail, byte[] excelData, String subject, String body, String fileName) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
+    private void sendEmailWithDynamicCredentials(String smtpHost, int smtpPort, String username, String password, String fromEmail, String toEmail, byte[] excelData, String subject, String body, String fileName) throws MessagingException {
+
+        JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
+        mailSenderImpl.setHost(smtpHost);
+        mailSenderImpl.setPort(smtpPort);
+        mailSenderImpl.setUsername(username); // 사용자가 입력한 이메일 ID
+        mailSenderImpl.setPassword(password); // 사용자가 입력한 이메일 비밀번호
+
+        Properties props = mailSenderImpl.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+        props.put("mail.smtp.ssl.trust", smtpHost);
+        props.put("mail.smtp.ssl.enable", "true");
+
+        MimeMessage message = mailSenderImpl.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         // 이메일 설정
-        helper.setFrom(fromEmail); // 발신자 이메일 주소
-        helper.setTo(toEmail); // 수신자 이메일 주소
-        helper.setSubject(subject); // 이메일 제목
-        helper.setText(body); // 이메일 내용
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(body);
 
         // 엑셀 파일 첨부
         String fileFullName = fileName + ".xlsx";
         helper.addAttachment(fileFullName, new ByteArrayResource(excelData));
 
         // 이메일 전송
-        mailSender.send(message);
+        mailSenderImpl.send(message);
     }
 }
