@@ -10,23 +10,6 @@ spring:
     database-platform: org.hibernate.dialect.MariaDBDialect  # JPA ?????? ??? ??
     hibernate:
       ddl-auto: update  # Hibernate ?? DDL ?? (??)
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: khy33355@gmail.com
-    password: lhvwwazvwxoxgekp
-    properties:
-      mail:
-        debug: true
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          mime:
-            charset: UTF-8
-          transport:
-            protocol: smtp
-    default-encoding: UTF-8
   servlet:
     multipart:
       max-file-size: 10MB

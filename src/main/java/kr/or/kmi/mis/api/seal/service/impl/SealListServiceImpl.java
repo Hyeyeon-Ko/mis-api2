@@ -9,6 +9,7 @@ import kr.or.kmi.mis.api.seal.repository.SealImprintDetailRepository;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.repository.SealRegisterDetailRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
+import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class SealListServiceImpl implements SealListService {
     private final SealImprintDetailRepository sealImprintDetailRepository;
     private final SealExportDetailRepository sealExportDetailRepository;
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
+    private final StdBcdService stdBcdService;
 
     @Override
     @Transactional(readOnly = true)
@@ -117,7 +119,13 @@ public class SealListServiceImpl implements SealListService {
         }
 
         return sealMasters.stream()
-                .map(SealMasterResponseDTO::of).toList();
+                .map(sealMaster -> {
+                    SealMasterResponseDTO sealMasterResponseDTO = SealMasterResponseDTO.of(sealMaster);
+                    String instNm = stdBcdService.getInstNm(sealMaster.getInstCd());
+                    sealMasterResponseDTO.setInstNm(instNm);
+                    return sealMasterResponseDTO;
+                })
+                .toList();
     }
 
     @Override
