@@ -35,7 +35,7 @@ public class CorpDocIssueResponseDTO {
                 .draftDate(sdf.format(corpDocMaster.getDraftDate()))
                 .useDate(corpDocDetail.getUseDate())
                 .issueDate(corpDocDetail.getIssueDate())
-                .drafter(corpDocMaster.getDrafter())
+                .drafter("X".equals(corpDocMaster.getStatus()) ? "" : corpDocMaster.getDrafter())
                 .status(corpDocMaster.getStatus())
                 .submission(corpDocDetail.getSubmission())
                 .purpose(corpDocDetail.getPurpose())

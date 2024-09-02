@@ -11,6 +11,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -31,7 +34,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     private String useDate;     // 서류 사용일자
 
     @Column(length = 20)
-    private String issueDate;   // 서류 발급일자
+    private String issueDate;   // 서류 입고/발급일자
 
     @Column(length = 255)
     private String fileName;
@@ -65,7 +68,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
 
     @Builder
     public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, String fileName, String filePath,
-                         int certCorpseal, int certCoregister, int certUsesignet, int warrant, String type, String notes) {
+                         int certCorpseal, int certCoregister, int certUsesignet, int warrant, String type, String notes, String issueDate) {
         this.draftId = draftId;
         this.submission = submission;
         this.purpose = purpose;
@@ -78,6 +81,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
         this.warrant = warrant;
         this.type = type;
         this.notes = notes;
+        this.issueDate = issueDate;
     }
 
     public void update(CorpDocUpdateRequestDTO corpDocUpdateRequestDTO, String newFileName, String newFilePath) {
@@ -92,5 +96,12 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
         this.warrant = corpDocUpdateRequestDTO.getWarrant();
         this.type = corpDocUpdateRequestDTO.getType();
         this.notes = corpDocUpdateRequestDTO.getNotes();
+    }
+
+    public void updateDateAndTotal(int totalCorpseal, int totalCoregister) {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        this.issueDate = new SimpleDateFormat("yyyy-MM-dd").format(timestamp);
+        this.totalCorpseal = totalCorpseal;
+        this.totalCoregister = totalCoregister;
     }
 }
