@@ -128,26 +128,44 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<DocMasterResponseDTO> getDocApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
         List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+
         if (docMasters == null) {
             docMasters = new ArrayList<>();
         }
 
         return docMasters.stream()
+                .filter(docMaster -> {
+                    if (searchType != null && keyword != null) {
+                        switch (searchType) {
+                            case "전체":
+                                return docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
+                            case "제목":
+                                return docMaster.getTitle().contains(keyword);
+                            case "신청자":
+                                return docMaster.getDrafter().contains(keyword);
+                            default:
+                                return true;
+                        }
+                    }
+                    return true;
+                })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
                     DocMasterResponseDTO docMasterResponseDTO = DocMasterResponseDTO.of(docMaster, docDetail.getDivision());
                     docMasterResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
                     return docMasterResponseDTO;
-                }).toList();
+                })
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(String instCd) {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
+    public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
+        List<DocMaster> docMasters = docMasterRepository
+                .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
         return docMasters.stream()
                 .map(docMaster -> {

@@ -30,9 +30,11 @@ public class ApplyController {
     public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam(required = false) String documentType,
                                                          @RequestParam(required = false) LocalDate startDate,
                                                          @RequestParam(required = false) LocalDate endDate,
+                                                         @RequestParam(required = false) String searchType,
+                                                         @RequestParam(required = false) String keyword,
                                                          @RequestParam String instCd) {
 
-        return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, instCd));
+        return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, searchType, keyword, instCd));
     }
 
     @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
@@ -41,6 +43,8 @@ public class ApplyController {
                                                                @RequestParam(required = false) LocalDate startDate,
                                                                @RequestParam(required = false) LocalDate endDate,
                                                                @RequestParam String instCd) {
+        System.out.println("startDate = " + startDate);
+        System.out.println("endDate = " + endDate);
         return ResponseWrapper.success(applyService.getPendingListByType(documentType, startDate, endDate, instCd));
     }
 

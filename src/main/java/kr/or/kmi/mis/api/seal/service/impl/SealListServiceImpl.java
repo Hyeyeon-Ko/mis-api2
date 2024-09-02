@@ -112,13 +112,30 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMasterResponseDTO> getSealApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd) {
-        List<SealMaster> sealMasters = sealMasterRepository.findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+    public List<SealMasterResponseDTO> getSealApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
+        List<SealMaster> sealMasters = sealMasterRepository
+                .findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+
         if (sealMasters == null) {
             sealMasters = new ArrayList<>();
         }
 
         return sealMasters.stream()
+                .filter(sealMaster -> {
+                    if (searchType != null && keyword != null) {
+                        switch (searchType) {
+                            case "전체":
+                                return sealMaster.getTitle().contains(keyword) || sealMaster.getDrafter().contains(keyword);
+                            case "제목":
+                                return sealMaster.getTitle().contains(keyword);
+                            case "신청자":
+                                return sealMaster.getDrafter().contains(keyword);
+                            default:
+                                return true;
+                        }
+                    }
+                    return true;
+                })
                 .map(sealMaster -> {
                     SealMasterResponseDTO sealMasterResponseDTO = SealMasterResponseDTO.of(sealMaster);
                     String instNm = stdBcdService.getInstNm(sealMaster.getInstCd());
@@ -130,8 +147,9 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealPendingResponseDTO> getSealPendingList(String instCd) {
-        List<SealMaster> sealMasters = sealMasterRepository.findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
+    public List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate,String instCd) {
+        List<SealMaster> sealMasters = sealMasterRepository
+                .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
         return sealMasters.stream()
                 .map(SealPendingResponseDTO::of).toList();

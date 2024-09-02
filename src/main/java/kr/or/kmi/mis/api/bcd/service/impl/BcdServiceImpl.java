@@ -82,34 +82,34 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getBcdApplyByDateRangeAndInstCd(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<BcdMasterResponseDTO> getBcdApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
 
-        // 1. 모든 명함신청 내역을 호출한다.
-        //  - 이때, 취소된 명함신청 내역은 제외한다.
-        //  - 기안 일자 범위를 기준으로 내림차순 정렬한다.
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        // 2. bcdMasters 리스트에서 각 bcdMaster의 draftId에 해당하는 bcdDetail을 찾고,
-        //    해당 BcdDetail의 instCd가 파라미터로 받아온 instCd와 일치하는 경우에만 필터링
-        List<BcdMasterResponseDTO> filteredResponses = bcdMasters.stream()
-                .map(bcdMaster -> {
+        return bcdMasters.stream()
+                .filter(bcdMaster -> {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
+                    if (!bcdDetail.getInstCd().equals(instCd)) return false;
 
-                    // 필터링 조건: BcdDetail의 instCd가 파라미터 instCd와 일치하는 경우만 처리
-                    if (bcdDetail.getInstCd().equals(instCd)) {
-                        BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
-                        result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
-                        return result;
-                    } else {
-                        return null;
+                    if (searchType != null && keyword != null) {
+                        return switch (searchType) {
+                            case "전체" ->
+                                    bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
+                            case "제목" -> bcdMaster.getTitle().contains(keyword);
+                            case "신청자" -> bcdMaster.getDrafter().contains(keyword);
+                            default -> true;
+                        };
                     }
+                    return true;
                 })
-                .filter(Objects::nonNull)
+                .map(bcdMaster -> {
+                    BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
+                    result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
+                    return result;
+                })
                 .toList();
-
-        return filteredResponses;
     }
 
     @Override
@@ -163,11 +163,12 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
-    public List<BcdPendingResponseDTO> getPendingList(String instCd) {
+    public List<BcdPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
 
         // 1. 승인대기 상태인 신청목록 모두 호출
         //    - 기안일자 기준 내림차순 정렬
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
+        List<BcdMaster> bcdMasters = bcdMasterRepository
+                .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
 
         // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
         return bcdMasters.stream()

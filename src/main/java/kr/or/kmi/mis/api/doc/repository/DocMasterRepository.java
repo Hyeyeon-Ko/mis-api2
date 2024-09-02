@@ -21,5 +21,5 @@ public interface DocMasterRepository extends JpaRepository<DocMaster, Long> {
 
     List<DocMaster> findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc(String status, Timestamp startDate, Timestamp endDate, String instCd);
 
-    List<DocMaster> findAllByStatusAndInstCdOrderByDraftDateDesc(String status, String instCd);
+    List<DocMaster> findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, Timestamp startDate, Timestamp endDate);
 }

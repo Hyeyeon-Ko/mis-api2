@@ -38,37 +38,35 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate, String instCd) {
-
+    public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
         List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
         List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
-        // 특정 유형(ex.명함신청)만 조회합니다.
         if (documentType != null && !documentType.isEmpty()) {
             switch (documentType) {
                 case "명함신청":
-                    bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+                    bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCdAndSearch(timestamps[0], timestamps[1], searchType, keyword, instCd);
                     break;
                 case "문서수발신":
-                    docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+                    docApplyLists = docService.getDocApplyByDateRangeAndInstCdAndSearch(timestamps[0], timestamps[1], searchType, keyword, instCd);
                     break;
                 case "법인서류":
-                    corpDocApplyLists = corpDocService.getCorpDocApplyByDateRange(timestamps[0], timestamps[1]);
+                    corpDocApplyLists = corpDocService.getCorpDocApplyByDateRangeAndSearch(timestamps[0], timestamps[1], searchType, keyword);
                     break;
                 case "인장신청":
-                    sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+                    sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCdAndSearch(timestamps[0], timestamps[1], searchType, keyword, instCd);
+                    break;
                 default:
                     break;
             }
         } else {
-            // 전체 신청 목록을 조회합니다.
-            bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
-            docApplyLists = docService.getDocApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
-            corpDocApplyLists = corpDocService.getCorpDocApplyByDateRange(timestamps[0], timestamps[1]);
-            sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCd(timestamps[0], timestamps[1], instCd);
+            bcdApplyLists = bcdService.getBcdApplyByDateRangeAndInstCdAndSearch(timestamps[0], timestamps[1], instCd, searchType, keyword);
+            docApplyLists = docService.getDocApplyByDateRangeAndInstCdAndSearch(timestamps[0], timestamps[1], instCd, searchType, keyword);
+            corpDocApplyLists = corpDocService.getCorpDocApplyByDateRangeAndSearch(timestamps[0], timestamps[1], searchType, keyword);
+            sealApplyLists = sealListService.getSealApplyByDateRangeAndInstCdAndSearch(timestamps[0], timestamps[1], instCd, searchType, keyword);
         }
 
         return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
@@ -118,10 +116,10 @@ public class ApplyServiceImpl implements ApplyService {
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         return switch (documentType) {
-            case "명함신청" -> PendingResponseDTO.of(bcdService.getPendingList(instCd), null, null, null);
-            case "문서수발신" -> PendingResponseDTO.of(null, docService.getDocPendingList(instCd), null, null);
+            case "명함신청" -> PendingResponseDTO.of(bcdService.getPendingList(timestamps[0], timestamps[1], instCd), null, null, null);
+            case "문서수발신" -> PendingResponseDTO.of(null, docService.getDocPendingList(timestamps[0], timestamps[1], instCd), null, null);
             case "법인서류" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(timestamps[0], timestamps[1]), null);
-            case "인장신청" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(instCd));
+            case "인장신청" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(timestamps[0], timestamps[1], instCd));
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
         };
     }

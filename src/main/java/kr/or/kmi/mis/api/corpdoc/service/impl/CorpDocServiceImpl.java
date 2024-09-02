@@ -134,7 +134,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate) {
+    public List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRangeAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
                 .findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
 
@@ -143,11 +143,27 @@ public class CorpDocServiceImpl implements CorpDocService {
         }
 
         return corpDocMasters.stream()
+                .filter(corpDocMaster -> {
+                    if (searchType != null && keyword != null) {
+                        switch (searchType) {
+                            case "전체":
+                                return corpDocMaster.getTitle().contains(keyword) || corpDocMaster.getDrafter().contains(keyword);
+                            case "제목":
+                                return corpDocMaster.getTitle().contains(keyword);
+                            case "신청자":
+                                return corpDocMaster.getDrafter().contains(keyword);
+                            default:
+                                return true;
+                        }
+                    }
+                    return true;
+                })
                 .map(corpDocMaster -> {
                     CorpDocMasterResponseDTO corpDocMasterResponseDTO = CorpDocMasterResponseDTO.of(corpDocMaster);
                     corpDocMasterResponseDTO.setInstNm(stdBcdService.getInstNm(corpDocMaster.getInstCd()));
                     return corpDocMasterResponseDTO;
-                }).toList();
+                })
+                .toList();
     }
 
     private List<CorpDocMyResponseDTO> getMyCorpDocList(String userId, Timestamp startDate, Timestamp endDate) {

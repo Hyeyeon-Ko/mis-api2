@@ -19,6 +19,6 @@ public interface SealMasterRepository extends JpaRepository<SealMaster, Long> {
 
     List<SealMaster> findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc(String status, Timestamp startDate, Timestamp endDate, String instCd);
 
-    List<SealMaster> findAllByStatusAndInstCdOrderByDraftDateDesc(String status, String instCd);
+    List<SealMaster> findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, Timestamp startDate, Timestamp endDate);
 
 }
