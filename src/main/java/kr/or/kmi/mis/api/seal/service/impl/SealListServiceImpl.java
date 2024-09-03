@@ -52,7 +52,7 @@ public class SealListServiceImpl implements SealListService {
                     SealImprintDetail sealImprintDetail = sealImprintDetailRepository.findById(sealMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("SealImprintDetail not found for draftId: " + sealMaster.getDraftId()));
 
-                    return ManagementListResponseDTO.of(sealImprintDetail);
+                    return ManagementListResponseDTO.of(sealImprintDetail, sealMaster.getDrafter());
                 })
                 .collect(Collectors.toList());
     }
@@ -74,7 +74,7 @@ public class SealListServiceImpl implements SealListService {
                     SealExportDetail sealExportDetail = sealExportDetailRepository.findById(sealMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("SealExportDetail not found for draftId: " + sealMaster.getDraftId()));
 
-                    return ExportListResponseDTO.of(sealExportDetail);
+                    return ExportListResponseDTO.of(sealExportDetail, sealMaster.getDrafter());
                 })
                 .collect(Collectors.toList());
     }

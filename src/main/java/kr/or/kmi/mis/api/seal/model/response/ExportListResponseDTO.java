@@ -8,8 +8,8 @@ import lombok.Data;
 @Builder
 public class ExportListResponseDTO {
 
-    // TODO: 인장관리대장에 불러와야할 데이터 다시 확인!!
     private String draftId;
+    private String drafter;
     private String submission;
     private String useDept;
     private String expNm;
@@ -22,9 +22,10 @@ public class ExportListResponseDTO {
     private String fileName;
     private String filePath;
 
-    public static ExportListResponseDTO of(SealExportDetail sealExportDetail) {
+    public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter) {
         return ExportListResponseDTO.builder()
                 .draftId(sealExportDetail.getRgstrId())
+                .drafter(drafter)
                 .submission(sealExportDetail.getSubmission())
                 .useDept(sealExportDetail.getUseDept())
                 .expNm(sealExportDetail.getFacsimileSeal())

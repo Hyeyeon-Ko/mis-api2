@@ -8,8 +8,8 @@ import lombok.Data;
 @Builder
 public class ManagementListResponseDTO {
 
-    // TODO: 인장관리대장에 불러와야할 데이터 다시 확인!!
     private Long draftId;
+    private String drafter;
     private String submission;
     private String useDate;
     private String corporateSeal;
@@ -18,9 +18,10 @@ public class ManagementListResponseDTO {
     private String purpose;
     private String notes;
 
-    public static ManagementListResponseDTO of(SealImprintDetail sealImprintDetail) {
+    public static ManagementListResponseDTO of(SealImprintDetail sealImprintDetail, String drafter) {
         return ManagementListResponseDTO.builder()
                 .draftId(sealImprintDetail.getDraftId())
+                .drafter(drafter)
                 .submission(sealImprintDetail.getSubmission())
                 .useDate(sealImprintDetail.getUseDate())
                 .corporateSeal(sealImprintDetail.getCorporateSeal())
