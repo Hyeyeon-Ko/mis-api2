@@ -33,8 +33,8 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String useDate;     // 서류 사용일자
 
-    @Column(length = 20)
-    private String issueDate;   // 서류 입고/발급일자
+    @Column
+    private Timestamp issueDate;   // 서류 입고/발급일자
 
     @Column(length = 255)
     private String fileName;
@@ -68,7 +68,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
 
     @Builder
     public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, String fileName, String filePath,
-                         int certCorpseal, int certCoregister, int certUsesignet, int warrant, String type, String notes, String issueDate) {
+                         int certCorpseal, int certCoregister, int certUsesignet, int warrant, String type, String notes, Timestamp issueDate) {
         this.draftId = draftId;
         this.submission = submission;
         this.purpose = purpose;
@@ -99,8 +99,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     }
 
     public void updateDateAndTotal(int totalCorpseal, int totalCoregister) {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        this.issueDate = new SimpleDateFormat("yyyy-MM-dd").format(timestamp);
+        this.issueDate = new Timestamp(System.currentTimeMillis());
         this.totalCorpseal = totalCorpseal;
         this.totalCoregister = totalCoregister;
     }

@@ -43,8 +43,6 @@ public class ApplyController {
                                                                @RequestParam(required = false) LocalDate startDate,
                                                                @RequestParam(required = false) LocalDate endDate,
                                                                @RequestParam String instCd) {
-        System.out.println("startDate = " + startDate);
-        System.out.println("endDate = " + endDate);
         return ResponseWrapper.success(applyService.getPendingListByType(documentType, startDate, endDate, instCd));
     }
 

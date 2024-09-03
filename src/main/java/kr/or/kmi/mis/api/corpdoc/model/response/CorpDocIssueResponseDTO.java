@@ -26,6 +26,8 @@ public class CorpDocIssueResponseDTO {
     private int totalCorpseal;
     private int certCoregister;
     private int totalCoregister;
+    private int certUsesignet;
+    private int warrant;
 
     public static CorpDocIssueResponseDTO of(CorpDocMaster corpDocMaster, CorpDocDetail corpDocDetail) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -34,7 +36,7 @@ public class CorpDocIssueResponseDTO {
                 .draftId(corpDocMaster.getDraftId())
                 .draftDate(sdf.format(corpDocMaster.getDraftDate()))
                 .useDate(corpDocDetail.getUseDate())
-                .issueDate(corpDocDetail.getIssueDate())
+                .issueDate(sdf.format(corpDocDetail.getIssueDate()))
                 .drafter("X".equals(corpDocMaster.getStatus()) ? "" : corpDocMaster.getDrafter())
                 .status(corpDocMaster.getStatus())
                 .submission(corpDocDetail.getSubmission())
@@ -43,6 +45,8 @@ public class CorpDocIssueResponseDTO {
                 .totalCorpseal(corpDocDetail.getTotalCorpseal())
                 .certCoregister(corpDocDetail.getCertCoregister())
                 .totalCoregister(corpDocDetail.getTotalCoregister())
+                .certUsesignet(corpDocDetail.getCertUsesignet())
+                .warrant(corpDocDetail.getWarrant())
                 .build();
 
     }

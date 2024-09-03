@@ -27,7 +27,6 @@ public class CorpDocListServiceImpl implements CorpDocListService {
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
     private final StdBcdService stdBcdService;
-    private final DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration;
 
     @Override
     @Transactional(readOnly = true)

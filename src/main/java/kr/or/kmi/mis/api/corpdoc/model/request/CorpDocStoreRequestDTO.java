@@ -4,13 +4,14 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.sql.Timestamp;
+
 @Getter
 @ToString
 public class CorpDocStoreRequestDTO {
     private String userId;
     private String userNm;
     private String instCd;
-    private String storeDate;
     private String purpose;
     private int certCorpseal;
     private int certCoregister;
@@ -21,7 +22,7 @@ public class CorpDocStoreRequestDTO {
         return CorpDocDetail.builder()
                 .draftId(draftId)
                 .purpose(purpose)
-                .issueDate(storeDate)
+                .issueDate(new Timestamp(System.currentTimeMillis()))
                 .certCorpseal(certCorpseal)
                 .certCoregister(certCoregister)
                 .build();
