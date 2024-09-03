@@ -30,8 +30,8 @@ public class CorpDocListController {
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")
     @GetMapping(value = "/rnpList")
-    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnpList() {
-        return ResponseWrapper.success(corpDocListService.getCorpDocRnpList());
+    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnpList(@RequestParam("instCd") String instCd) {
+        return ResponseWrapper.success(corpDocListService.getCorpDocRnpList(instCd));
     }
 
     @Operation(summary = "issue corpDoc", description = "법인서류 발급")

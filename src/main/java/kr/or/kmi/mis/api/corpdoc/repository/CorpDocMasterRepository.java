@@ -22,5 +22,5 @@ public interface CorpDocMasterRepository extends JpaRepository<CorpDocMaster, Lo
 
     List<CorpDocMaster> findAllByStatusOrderByDraftDateAsc(String status);
 
-    List<CorpDocMaster> findAllByStatusOrderByEndDateAsc(String status);
+    List<CorpDocMaster> findAllByStatusAndInstCdOrderByEndDateAsc(String status, String instCd);
 }

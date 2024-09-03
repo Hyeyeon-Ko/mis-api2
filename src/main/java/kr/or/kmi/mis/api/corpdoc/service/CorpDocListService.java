@@ -12,7 +12,7 @@ public interface CorpDocListService {
     CorpDocIssueListResponseDTO getCorpDocIssueList();
 
     /** 법인서류 수불대장 내역 조회 */
-    List<CorpDocRnpResponseDTO> getCorpDocRnpList();
+    List<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd);
 
     void issueCorpDoc(Long draftId, CorpDocLeftRequestDTO corpDocLeftRequestDTO);
 

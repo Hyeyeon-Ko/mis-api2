@@ -59,8 +59,8 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocRnpResponseDTO> getCorpDocRnpList() {
-        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusOrderByEndDateAsc("E");
+    public List<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd) {
+        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusAndInstCdOrderByEndDateAsc("E", instCd);
         return corpDocMasters.stream()
                 .map(corpDocMaster -> {
                     CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
