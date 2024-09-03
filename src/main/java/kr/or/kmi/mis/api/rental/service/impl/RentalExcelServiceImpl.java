@@ -68,6 +68,35 @@ public class RentalExcelServiceImpl implements RentalExcelService {
     public void saveRentalDetails(List<RentalExcelResponseDTO> details) {
 
         List<RentalDetail> entities = details.stream().map(dto -> {
+
+            if (dto.getCategory() == null || dto.getCategory().isEmpty()) {
+                throw new IllegalArgumentException("카테고리가 비어 있습니다: " + dto);
+            }
+            if (dto.getCompanyNm() == null || dto.getCompanyNm().isEmpty()) {
+                throw new IllegalArgumentException("업체명이 비어 있습니다: " + dto);
+            }
+            if (dto.getContractNum() == null || dto.getContractNum().isEmpty()) {
+                throw new IllegalArgumentException("계약번호가 비어 있습니다: " + dto);
+            }
+            if (dto.getModelNm() == null || dto.getModelNm().isEmpty()) {
+                throw new IllegalArgumentException("모델명이 비어 있습니다: " + dto);
+            }
+            if (dto.getInstallDate() == null) {
+                throw new IllegalArgumentException("설치일자가 비어 있습니다: " + dto);
+            }
+            if (dto.getExpiryDate() == null) {
+                throw new IllegalArgumentException("만료일자가 비어 있습니다: " + dto);
+            }
+            if (dto.getRentalFee() == null) {
+                throw new IllegalArgumentException("렌탈료가 비어 있습니다: " + dto);
+            }
+            if (dto.getLocation() == null || dto.getLocation().isEmpty()) {
+                throw new IllegalArgumentException("위치분류가 비어 있습니다: " + dto);
+            }
+            if (dto.getInstallationSite() == null || dto.getInstallationSite().isEmpty()) {
+                throw new IllegalArgumentException("설치위치가 비어 있습니다: " + dto);
+            }
+
             if (rentalDetailRepository.existsByContractNum(dto.getContractNum())) {
                 throw new IllegalArgumentException("계약번호가 중복됩니다: " + dto.getContractNum());
             }
