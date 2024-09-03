@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 @Builder
@@ -16,7 +17,7 @@ public class CorpDocIssueResponseDTO {
     private Long draftId;
     private String draftDate;
     private String useDate;
-    private String issueDate;
+    private Timestamp issueDate;
     private String drafter;
     private String instNm;
     private String status;
@@ -36,8 +37,8 @@ public class CorpDocIssueResponseDTO {
                 .draftId(corpDocMaster.getDraftId())
                 .draftDate(sdf.format(corpDocMaster.getDraftDate()))
                 .useDate(corpDocDetail.getUseDate())
-                .issueDate(sdf.format(corpDocDetail.getIssueDate()))
-                .drafter("X".equals(corpDocMaster.getStatus()) ? "" : corpDocMaster.getDrafter())
+                .issueDate(corpDocDetail.getIssueDate())
+                .drafter(corpDocMaster.getDrafter())
                 .status(corpDocMaster.getStatus())
                 .submission(corpDocDetail.getSubmission())
                 .purpose(corpDocDetail.getPurpose())
