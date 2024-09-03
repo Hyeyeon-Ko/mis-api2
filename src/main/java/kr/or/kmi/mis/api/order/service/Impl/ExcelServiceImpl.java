@@ -4,6 +4,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.order.service.ExcelService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.poifs.crypt.EncryptionInfo;
@@ -23,6 +27,7 @@ import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,6 +36,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     private final BcdDetailRepository bcdDetailRepository;
     private final StdBcdService stdBcdService;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     public void downloadExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
@@ -50,8 +57,8 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
-    public void downloadOrderExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
-        byte[] excelData = generateOrderExcel(draftIds);
+    public void downloadOrderExcel(HttpServletResponse response, List<Long> draftIds, String instCd) throws IOException {
+        byte[] excelData = generateOrderExcel(draftIds, instCd);
 
         try {
             // HTTP 응답에 엑셀 파일 첨부
@@ -91,9 +98,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
-    public byte[] generateOrderExcel(List<Long> draftIds) throws IOException {
+    public byte[] generateOrderExcel(List<Long> draftIds, String instCd) throws IOException {
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
-        return createOrderExcelData(bcdDetails);
+        return createOrderExcelData(bcdDetails, instCd);
     }
 
     private byte[] createExcelData(List<BcdDetail> bcdDetails) throws IOException {
@@ -256,10 +263,10 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private byte[] createOrderExcelData(List<BcdDetail> bcdDetails) throws IOException {
+    private byte[] createOrderExcelData(List<BcdDetail> bcdDetails, String instCd) throws IOException {
 
         Workbook wb = new XSSFWorkbook();
-        Sheet sheet = wb.createSheet("명함 발주내역");
+        Sheet sheet = wb.createSheet("명함 완료내역");
 
         // 스타일 설정
         CellStyle headerStyle = createHeaderStyle(wb);
@@ -275,6 +282,7 @@ public class ExcelServiceImpl implements ExcelService {
         AtomicInteger rowNum = new AtomicInteger(2);
         AtomicInteger no = new AtomicInteger(1);
 
+        // 필터링된 데이터로 테이블 생성
         bcdDetails.forEach(detail -> {
             Row row = sheet.createRow(rowNum.getAndIncrement());
             row.setHeight((short) 600);
@@ -284,7 +292,7 @@ public class ExcelServiceImpl implements ExcelService {
                     : stdBcdService.getTeamNm(detail.getTeamCd()).getFirst();
 
             String gradeNm = "000".equals(detail.getGradeCd())
-                    ?detail.getGradeNm()
+                    ? detail.getGradeNm()
                     : stdBcdService.getGradeNm(detail.getGradeCd()).getFirst();
 
             createOrderCell(row, 0, no.getAndIncrement(), thinBorderStyle, centeredStyle);
@@ -313,46 +321,43 @@ public class ExcelServiceImpl implements ExcelService {
         sheet.setColumnWidth(9, 7000);
         sheet.setColumnWidth(10, 2000);
 
+        // 합계 행 추가
         int newTableStartRow = rowNum.get();
 
-        sheet.addMergedRegion(new CellRangeAddress(newTableStartRow, newTableStartRow + 11, 0, 2));
-        Row mergedRow = sheet.createRow(newTableStartRow);
+        Row mergedRow = sheet.createRow(newTableStartRow+1);
         Cell mergedCell = mergedRow.createCell(0);
         mergedCell.setCellValue("발주 건수 및 수량");
         mergedCell.setCellStyle(sumCenterStyle);
 
-        String[] centers = {"재단본부", "광화문", "본원센터", "여의도센터", "강남센터", "수원센터", "대구센터", "부산센터", "광주센터", "제주센터", "합계"};
-        int[] counts = new int[centers.length];
-        int[] quantities = new int[centers.length];
-        int[] amounts = new int[centers.length];
+        // 센터별 합계 계산
+        int count = 0;
+        int quantity = 0;
+        int amount = 0;
 
-        bcdDetails.forEach(detail -> {
-            String instName = stdBcdService.getInstNm(detail.getInstCd());
-            for (int i = 0; i < centers.length; i++) {
-                if (instName.equals(centers[i])) {
-                    counts[i]++;
-                    quantities[i] += detail.getQuantity();
-                    amounts[i] += detail.getQuantity() * 13000;
-                }
-            }
-            counts[centers.length - 1]++;
-            quantities[centers.length - 1] += detail.getQuantity();
-            amounts[centers.length - 1] += detail.getQuantity() * 13000;
-        });
-
-        for (int i = 0; i < centers.length; i++) {
-            Row rowCount = sheet.createRow(++newTableStartRow);
-            rowCount.setHeight((short) 500);
-            createSumCell(rowCount, 3, centers[i], thinBorderStyle, sumCenterStyle); // 센터 이름
-            createSumCell(rowCount, 4, counts[i] + "건", thinBorderStyle, sumCenterStyle); // 건수
-            createSumCell(rowCount, 5, quantities[i] + "통", thinBorderStyle, sumCenterStyle); // 수량
-            createSumCell(rowCount, 6, amounts[i] + "원", thinBorderStyle, sumCenterStyle); // 금액
+        for (BcdDetail detail : bcdDetails) {
+            count++;
+            quantity += detail.getQuantity();
+            amount += detail.getQuantity() * 13000;
         }
 
-        sheet.setColumnWidth(3, 4000);
+        // 합계 행 추가
+        Row sumRow = sheet.createRow(++newTableStartRow);
+        sumRow.setHeight((short) 500);
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        createSumCell(sumRow, 1, stdDetail.getDetailNm(), thinBorderStyle, sumCenterStyle);
+        createSumCell(sumRow, 2, count + "건", thinBorderStyle, sumCenterStyle);
+        createSumCell(sumRow, 3, quantity + "통", thinBorderStyle, sumCenterStyle);
+        createSumCell(sumRow, 4, amount + "원", thinBorderStyle, sumCenterStyle);
+
+        sheet.setColumnWidth(1, 4000);
+        sheet.setColumnWidth(2, 5000);
+        sheet.setColumnWidth(3, 5000);
         sheet.setColumnWidth(4, 5000);
-        sheet.setColumnWidth(5, 5000);
-        sheet.setColumnWidth(6, 5000);
 
         // 엑셀 파일을 ByteArrayOutputStream에 쓰기
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

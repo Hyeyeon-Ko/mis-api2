@@ -32,7 +32,7 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String instCd) {
+    public List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
 
         LocalDate[] localDates = dateSet(startDate, endDate);
 
@@ -40,12 +40,28 @@ public class DocListServiceImpl implements DocListService {
                 .stream()
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
-                    if(docMaster != null) {
+                    if (docMaster != null) {
                         LocalDate draftDate = docMaster.getDraftDate().toLocalDateTime().toLocalDate();
-                        if(!draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1])){
-                            DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
-                            docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                            return docResponseDTO;
+                        if (!draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1])) {
+                            boolean matchesSearch = true;
+
+                            if (searchType != null && keyword != null) {
+                                matchesSearch = switch (searchType) {
+                                    case "전체" -> docDetail.getDocTitle().contains(keyword) ||
+                                            docMaster.getDrafter().contains(keyword) ||
+                                            docDetail.getSender().contains(keyword);
+                                    case "발신처" -> docDetail.getSender().contains(keyword);
+                                    case "제목" -> docDetail.getDocTitle().contains(keyword);
+                                    case "접수인" -> docMaster.getDrafter().contains(keyword);
+                                    default -> true;
+                                };
+                            }
+
+                            if (matchesSearch) {
+                                DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
+                                docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                                return docResponseDTO;
+                            }
                         }
                     }
                     return null;
@@ -74,7 +90,7 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String instCd) {
+    public List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
 
         LocalDate[] localDates = dateSet(startDate, endDate);
 
@@ -82,12 +98,29 @@ public class DocListServiceImpl implements DocListService {
                 .stream()
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
-                    if(docMaster != null) {
+                    if (docMaster != null) {
                         LocalDate draftDate = docMaster.getDraftDate().toLocalDateTime().toLocalDate();
-                        if(!draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1])) {
-                            DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster);
-                            docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                            return docResponseDTO;
+                        if (!draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1])) {
+                            boolean matchesSearch = true;
+
+                            // 검색 조건에 따른 필터링
+                            if (searchType != null && keyword != null) {
+                                matchesSearch = switch (searchType) {
+                                    case "전체" -> docDetail.getDocTitle().contains(keyword) ||
+                                            docMaster.getDrafter().contains(keyword) ||
+                                            docDetail.getReceiver().contains(keyword);
+                                    case "수신처" -> docDetail.getReceiver().contains(keyword);
+                                    case "제목" -> docDetail.getDocTitle().contains(keyword);
+                                    case "접수인" -> docMaster.getDrafter().contains(keyword);
+                                    default -> true;
+                                };
+                            }
+
+                            if (matchesSearch) {
+                                DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster);
+                                docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                                return docResponseDTO;
+                            }
                         }
                     }
                     return null;

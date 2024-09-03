@@ -33,7 +33,6 @@ public class ApplyController {
                                                          @RequestParam(required = false) String searchType,
                                                          @RequestParam(required = false) String keyword,
                                                          @RequestParam String instCd) {
-
         return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, searchType, keyword, instCd));
     }
 

@@ -89,12 +89,14 @@ public class ApplyServiceImpl implements ApplyService {
                 case "명함신청":
                     myBcdApplyList = bcdService.getMyBcdApplyByDateRange(timestamps[0], timestamps[1], userId);
                     break;
-                case "문서수발신":
+                case "문서수신":
+                case "문서발신":
                     myDocApplyList = docService.getMyDocApplyByDateRange(timestamps[0], timestamps[1], userId);
                     break;
                 case "법인서류":
                     myCorpDocApplyList = corpDocService.getMyCorpDocApplyByDateRange(timestamps[0], timestamps[1], userId);
-                case "인장신청":
+                case "인장신청(날인)":
+                case "인장신청(반출)":
                     mySealApplyList = sealListService.getMySealApplyByDateRange(timestamps[0], timestamps[1], userId);
                 default:
                     break;

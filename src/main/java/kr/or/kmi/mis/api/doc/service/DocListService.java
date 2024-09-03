@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface DocListService {
-    List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String instCd);
+    List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd);
     List<DocResponseDTO> getDeptReceiveApplyList(String deptCd);
-    List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String instCd);
+    List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd);
     List<DeptResponseDTO> getDeptList(String instCd);
 }
