@@ -58,8 +58,16 @@ public class CorpDocListServiceImpl implements CorpDocListService {
     }
 
     @Override
-    public List<CorpDocRnpResponseDTO> getCorpDocRnPList() {
-        return List.of();
+    @Transactional(readOnly = true)
+    public List<CorpDocRnpResponseDTO> getCorpDocRnpList() {
+        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusOrderByEndDateAsc("E");
+        return corpDocMasters.stream()
+                .map(corpDocMaster -> {
+                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Not found corp doc detail"));
+
+                    return CorpDocRnpResponseDTO.of(corpDocMaster, corpDocDetail);
+                }).toList();
     }
 
     @Override
@@ -113,5 +121,15 @@ public class CorpDocListServiceImpl implements CorpDocListService {
         corpDocDetail.setRgstrId(corpDocStoreRequestDTO.getUserId());
         corpDocDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         corpDocDetailRepository.save(corpDocDetail);
+    }
+
+    @Override
+    @Transactional
+    public void completeCorpDoc(Long draftId) {
+        CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not found corp doc master: " + draftId));
+
+        corpDocMaster.end(draftId);
+        corpDocMasterRepository.save(corpDocMaster);
     }
 }

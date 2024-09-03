@@ -86,4 +86,9 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
         this.rejectReason = rejectReason;
         this.respondDate = new Timestamp(System.currentTimeMillis());
     }
+
+    public void end(Long draftId) {
+        this.status = "E";
+        this.endDate = new Timestamp(System.currentTimeMillis());
+    }
 }

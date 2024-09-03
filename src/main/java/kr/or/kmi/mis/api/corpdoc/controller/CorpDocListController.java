@@ -29,9 +29,9 @@ public class CorpDocListController {
     }
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")
-    @GetMapping(value = "/RnPList")
-    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnPList() {
-        return ResponseWrapper.success(corpDocListService.getCorpDocRnPList());
+    @GetMapping(value = "/rnpList")
+    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnpList() {
+        return ResponseWrapper.success(corpDocListService.getCorpDocRnpList());
     }
 
     @Operation(summary = "issue corpDoc", description = "법인서류 발급")
@@ -48,5 +48,10 @@ public class CorpDocListController {
         return ResponseWrapper.success();
     }
 
-
+    @Operation(summary = "complete corpDoc apply", description = "법인서류 수령 확인")
+    @PutMapping(value = "/completeApply")
+    public ApiResponse<?> completeCorpDoc(@RequestParam("draftId") Long draftId) {
+        corpDocListService.completeCorpDoc(draftId);
+        return ResponseWrapper.success();
+    }
 }
