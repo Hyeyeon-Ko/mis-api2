@@ -171,7 +171,10 @@ public class RentalExcelServiceImpl implements RentalExcelService {
                 rentalFee = 0.0;
             }
 
-            createCell(row, 7, rentalFee, thinBorderStyle, centeredStyle);
+            // 세 자리마다 콤마 추가하여 문자열로 포맷
+            String formattedRentalFee = String.format("%,.0f", rentalFee);
+
+            createCell(row, 7, formattedRentalFee, thinBorderStyle, centeredStyle);
             createCell(row, 8, detail.getLocation(), thinBorderStyle, centeredStyle);
             createCell(row, 9, detail.getInstallationSite(), thinBorderStyle, centeredStyle);
             createCell(row, 10, detail.getSpecialNote(), thinBorderStyle, centeredStyle);
@@ -354,7 +357,10 @@ public class RentalExcelServiceImpl implements RentalExcelService {
                 rentalFee = 0.0;
             }
 
-            createCell(row, 7, rentalFee, thinBorderStyle, centeredStyle);
+            // 세 자리마다 콤마 추가하여 문자열로 포맷
+            String formattedRentalFee = String.format("%,.0f", rentalFee);
+
+            createCell(row, 7, formattedRentalFee, thinBorderStyle, centeredStyle);
             createCell(row, 8, detail.getLocation(), thinBorderStyle, centeredStyle);
             createCell(row, 9, detail.getInstallationSite(), thinBorderStyle, centeredStyle);
             createCell(row, 10, detail.getSpecialNote(), thinBorderStyle, centeredStyle);
