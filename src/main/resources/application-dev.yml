@@ -16,9 +16,9 @@ spring:
       max-request-size: 10MB
 external:
   login:
-    url: http://172.16.250.84/mis/login
+    url: http://172.16.250.85/mis/login
   userInfo:
-    url: http://172.16.250.84/mis/userDeptInfo
+    url: http://172.16.250.85/mis/userDeptInfo
 
 file:
   upload-dir: uploads/
@@ -42,5 +42,5 @@ logging:
     root: info
 
 server:
-  port: 9090
+  port: 8080
 
