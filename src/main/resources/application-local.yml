@@ -2,23 +2,23 @@ spring:
   application:
     name: mis
   datasource:
-    url: jdbc:mariadb://10.1.10.216:3306/mis  # ???DB ?? URL
-    username: user  # ?????? ??? ??
-    password: kmi12345  # ?????? ????
-    driver-class-name: org.mariadb.jdbc.Driver  # ???DB JDBC ???? ???
+    url: jdbc:mariadb://10.1.10.216:3306/mis  # 마리아DB 연결 URL
+    username: user  # 데이터베이스 사용자 이름
+    password: kmi12345  # 데이터베이스 비밀번호
+    driver-class-name: org.mariadb.jdbc.Driver  # 마리아DB JDBC 드라이버 클래스
   jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect  # JPA ?????? ??? ??
+    database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
     hibernate:
-      ddl-auto: update  # Hibernate ?? DDL ?? (??)
+      ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 external:
   login:
-    url: http://172.16.250.85/mis/login
+    url: http://172.16.250.84/mis/login
   userInfo:
-    url: http://172.16.250.85/mis/userDeptInfo
+    url: http://172.16.250.84/mis/userDeptInfo
 
 file:
   upload-dir: uploads/
