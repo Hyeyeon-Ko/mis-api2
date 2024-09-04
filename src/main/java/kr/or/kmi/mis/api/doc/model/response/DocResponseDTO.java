@@ -18,6 +18,12 @@ public class DocResponseDTO {
     private String resSender;
     private String title;
     private String status;
+    private String fileName;
+    private String filePath;
+
+    public String getFileUrl() {
+        return filePath != null ? "/api/doc/download/" + fileName : null;
+    }
 
     static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -30,6 +36,8 @@ public class DocResponseDTO {
                 .resSender(docDetail.getReceiver())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
+                .fileName(docDetail.getFileName())
+                .filePath(docDetail.getFilePath())
                 .build();
     }
 
@@ -42,6 +50,8 @@ public class DocResponseDTO {
                 .resSender(docDetail.getSender())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
+                .fileName(docDetail.getFileName())
+                .filePath(docDetail.getFilePath())
                 .build();
     }
 }

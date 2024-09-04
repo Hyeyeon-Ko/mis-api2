@@ -61,6 +61,15 @@ public class StdDetailHist extends BaseSystemFieldEntity {
     @Column(name = "etc_item8", length = 100)
     private String etcItem8;
 
+    @Column(name = "etc_item9", length = 100)
+    private String etcItem9;
+
+    @Column(name = "etc_item10", length = 100)
+    private String etcItem10;
+
+    @Column(name = "etc_item11", length = 100)
+    private String etcItem11;
+
     @Builder
     public StdDetailHist(StdDetail stdDetail) {
         this.detailCd = stdDetail;
@@ -75,6 +84,9 @@ public class StdDetailHist extends BaseSystemFieldEntity {
         this.etcItem6 = stdDetail.getEtcItem6();
         this.etcItem7 = stdDetail.getEtcItem7();
         this.etcItem8 = stdDetail.getEtcItem8();
+        this.etcItem9 = stdDetail.getEtcItem9();
+        this.etcItem10 = stdDetail.getEtcItem10();
+        this.etcItem11 = stdDetail.getEtcItem11();
     }
 
 }

@@ -34,7 +34,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         // 승인 상태 변경
         String approver = infoService.getUserInfo().getUserName();
         String approverId = infoService.getUserInfo().getUserId();
-        docMaster.confirm("B", approver, approverId);
+        docMaster.confirm("E", approver, approverId);
 
         // 문서번호 생성해, 업데이트
         DocDetail lastDocDetail = docDetailRepository

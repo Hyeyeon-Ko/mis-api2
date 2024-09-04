@@ -17,6 +17,7 @@ public class DocRequestDTO {
     private String docTitle;
     private String purpose;
     private String instCd;
+    private String deptCd;
 
     // DocRequest Dto -> DocMaster Entity
     public DocMaster toMasterEntity() {
@@ -26,11 +27,12 @@ public class DocRequestDTO {
                 .drafterId(drafterId)
                 .status("A")
                 .instCd(instCd)
+                .deptCd(deptCd)
                 .build();
     }
 
     // DocRequest Dto -> DocDetail Entity
-    public DocDetail toDetailEntity(Long draftId) {
+    public DocDetail toDetailEntity(Long draftId, String fileName, String filePath) {
         return DocDetail.builder()
                 .draftId(draftId)
                 .division(division)
@@ -38,6 +40,8 @@ public class DocRequestDTO {
                 .receiver(receiver)
                 .docTitle(docTitle)
                 .purpose(purpose)
+                .fileName(fileName)
+                .filePath(filePath)
                 .build();
     }
 }

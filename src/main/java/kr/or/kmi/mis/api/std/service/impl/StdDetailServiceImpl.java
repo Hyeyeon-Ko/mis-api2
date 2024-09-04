@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,10 +80,6 @@ public class StdDetailServiceImpl implements StdDetailService {
                     .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
 
             if (Objects.equals(existStdDetail.getUseAt(), "N")) {
-                // 기존 데이터를 히스토리 테이블에 저장
-                this.saveDetailIntoHist(existStdDetail);
-
-                // 기존 객체를 업데이트할 새로운 객체를 생성
                 StdDetail newStdDetail = stdDetailRequestDTO.toEntity(stdGroup);
                 String userId = infoService.getUserInfo().getUserId();
                 newStdDetail.setRgstrId(userId);
@@ -103,23 +100,67 @@ public class StdDetailServiceImpl implements StdDetailService {
 
     @Override
     @Transactional
-    public void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
+    public void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO, String oriDetailCd) {
 
         // 1. 기존 기준자료 값 조회
         StdGroup stdGroup = stdGroupRepository.findById(stdDetailRequestDTO.getGroupCd())
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + stdDetailRequestDTO.getGroupCd()));
-        StdDetail oriStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, stdDetailRequestDTO.getDetailCd())
-                .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + stdDetailRequestDTO.getDetailCd()));
+        StdDetail oriStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, oriDetailCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + oriDetailCd));
 
-        // 2. 기준자료 hist 생성 후, 수정된 내용 반영해 update
+        // 2. 기존 기준자료 값 Hist 저장
         this.saveDetailIntoHist(oriStdDetail);
 
+        // 3. 기준자료 수정
+        Optional<StdDetail> optionalStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, stdDetailRequestDTO.getDetailCd());
         String lstUpdtr = infoService.getUserInfo().getUserName();
-        oriStdDetail.update(stdDetailRequestDTO);
-        oriStdDetail.setUpdtrId(lstUpdtr);
-        oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-        stdDetailRepository.save(oriStdDetail);
 
+        //  1) detailCd 변경 없이 상세 정보만 수정할 경우
+        if(Objects.equals(stdDetailRequestDTO.getDetailCd(), oriDetailCd)) {
+            oriStdDetail.update(stdDetailRequestDTO);
+            oriStdDetail.setUpdtrId(lstUpdtr);
+            oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        }
+        //  2) detailCd 포함해 상세 정보를 수정할 경우
+        //     - 변경 할 detailCd가 DB에 존재할 때 : 해당 데이터 update 후, 사용여부 "Y"로 변경, 기존 데이터 사용여부 "N"으로 변경
+        //     - 변경 할 detailCd가 DB에 존재하지 않을 때 : 새롭게 생성한 후, 기존 데이터 사용여부 "N"으로 변경
+        else {
+            if (optionalStdDetail.isPresent()) {
+                StdDetail stdDetail = optionalStdDetail.get();
+                stdDetail.update(stdDetailRequestDTO);
+                stdDetail.updateUseAt("Y");
+                stdDetail.setUpdtrId(lstUpdtr);
+                stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+                stdDetailRepository.save(stdDetail);
+            }
+            else {
+                StdDetail newStdDetail = StdDetail.builder()
+                        .detailCd(stdDetailRequestDTO.getDetailCd())
+                        .groupCd(stdGroup)
+                        .detailNm(stdDetailRequestDTO.getDetailNm())
+                        .etcItem1(stdDetailRequestDTO.getEtcItem1())
+                        .etcItem2(stdDetailRequestDTO.getEtcItem2())
+                        .etcItem3(stdDetailRequestDTO.getEtcItem3())
+                        .etcItem4(stdDetailRequestDTO.getEtcItem4())
+                        .etcItem5(stdDetailRequestDTO.getEtcItem5())
+                        .etcItem6(stdDetailRequestDTO.getEtcItem6())
+                        .etcItem7(stdDetailRequestDTO.getEtcItem7())
+                        .etcItem8(stdDetailRequestDTO.getEtcItem8())
+                        .etcItem9(stdDetailRequestDTO.getEtcItem9())
+                        .etcItem10(stdDetailRequestDTO.getEtcItem10())
+                        .etcItem11(stdDetailRequestDTO.getEtcItem11())
+                        .build();
+                newStdDetail.setRgstrId(oriStdDetail.getRgstrId());
+                newStdDetail.setRgstDt(oriStdDetail.getRgstDt());
+                newStdDetail.setUpdtrId(lstUpdtr);
+                newStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+                stdDetailRepository.save(newStdDetail);
+            }
+            oriStdDetail.updateUseAt("N");
+            oriStdDetail.setUpdtrId(lstUpdtr);
+            oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        }
+        stdDetailRepository.save(oriStdDetail);
     }
 
     public void saveDetailIntoHist(StdDetail stdDetail) {
@@ -140,15 +181,16 @@ public class StdDetailServiceImpl implements StdDetailService {
 
         StdGroup stdGroup = stdGroupRepository.findById(groupCd)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdDetail.class.getName()));
-
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + detailCd));
 
         stdDetail.updateToDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-        stdDetail.updateUseAt("N");
+        this.saveDetailIntoHist(stdDetail);
+
         String deleter = infoService.getUserInfo().getUserId();
         stdDetail.setUpdtrId(deleter);
         stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        stdDetail.updateUseAt("N");
         stdDetailRepository.save(stdDetail);
     }
 

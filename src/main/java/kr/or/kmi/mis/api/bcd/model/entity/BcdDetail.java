@@ -44,6 +44,12 @@ public class BcdDetail {
     private String teamCd;
 
     @Column(length = 20)
+    private String teamNm;
+
+    @Column(length = 20)
+    private String engteamNm;
+
+    @Column(length = 20)
     private String gradeCd;
 
     @Column(length = 20)
@@ -74,8 +80,9 @@ public class BcdDetail {
 
     @Builder
     public BcdDetail(Long draftId, String division, String userId, String korNm, String engNm,
-                     String instCd, String deptCd, String teamCd, String gradeCd, String gradeNm, String enGradeNm,
-                     String extTel, String faxTel, String phoneTel, String email, String address, String engAddress, Integer quantity) {
+                     String instCd, String deptCd, String teamCd, String teamNm, String engteamNm,
+                     String gradeCd, String gradeNm, String enGradeNm, String extTel, String faxTel, String phoneTel,
+                     String email, String address, String engAddress, Integer quantity) {
         this.draftId = draftId;
         this.division = division;
         this.userId = userId;
@@ -84,6 +91,8 @@ public class BcdDetail {
         this.instCd = instCd;
         this.deptCd = deptCd;
         this.teamCd = teamCd;
+        this.teamNm = teamNm;
+        this.engteamNm = engteamNm;
         this.gradeCd = gradeCd;
         this.gradeNm = gradeNm;
         this.engradeNm = enGradeNm;
@@ -103,6 +112,8 @@ public class BcdDetail {
         this.instCd = bcdUpdateRequestDTO.getInstCd();
         this.deptCd = bcdUpdateRequestDTO.getDeptCd();
         this.teamCd = bcdUpdateRequestDTO.getTeamCd();
+        this.teamNm = bcdUpdateRequestDTO.getTeamNm();
+        this.engteamNm = bcdUpdateRequestDTO.getEngTeamNm();
         this.gradeCd = bcdUpdateRequestDTO.getGradeCd();
         this.gradeNm = bcdUpdateRequestDTO.getGradeNm();
         this.engradeNm = bcdUpdateRequestDTO.getEnGradeNm();
