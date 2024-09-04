@@ -10,28 +10,18 @@ spring:
     database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
     hibernate:
       ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: khy33355@gmail.com
-    password: lhvwwazvwxoxgekp
-    properties:
-      mail:
-        debug: true
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          mime:
-            charset: UTF-8
-          transport:
-            protocol: smtp
-    default-encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 external:
   login:
     url: http://172.16.250.84/mis/login
   userInfo:
     url: http://172.16.250.84/mis/userDeptInfo
+
+file:
+  upload-dir: uploads/
 
 logging:
   level:
@@ -52,4 +42,5 @@ logging:
     root: info
 
 server:
-  port: 8080
+  port: 9090
+
