@@ -42,5 +42,5 @@ logging:
     root: info
 
 server:
-  port: 9090
+  port: 8080
 
