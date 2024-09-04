@@ -31,16 +31,24 @@ public class DocStorageMaster {
     private String deptCd;
 
     @Column(length = 1)
+    private String type;       // A: 이관, B: 파쇄
+
+    @Column(length = 1)
     private String status;
 
     @Builder
     public DocStorageMaster(Timestamp draftDate, String drafter, String drafterId,
-                            String instCd, String deptCd, String status) {
+                            String instCd, String deptCd, String type, String status) {
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.instCd = instCd;
         this.deptCd = deptCd;
+        this.type = type;
         this.status = status;
+    }
+
+    public void updateStatus(String newStatus) {
+        this.status = newStatus;
     }
 }

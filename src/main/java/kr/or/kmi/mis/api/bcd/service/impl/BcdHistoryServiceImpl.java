@@ -25,18 +25,28 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
         // 기준자료에서 각각의 명칭 담아 저장
         String instNm = stdBcdService.getInstNm(bcdDetail.getInstCd());
         String deptNm = stdBcdService.getDeptNm(bcdDetail.getDeptCd());
-        String teamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getFirst();
-        String engTeamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getLast();
+        String teamNm = "";
+        String engTeamnm = "";
+        if (bcdDetail.getEngteamNm() == null) {
+            // 기준자료 내 팀 정보
+            teamNm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getFirst();
+            engTeamnm = stdBcdService.getTeamNm(bcdDetail.getTeamCd()).getLast();
+        } else {
+            // 직접 입력받은 팀명
+            teamNm = bcdDetail.getTeamNm();
+            engTeamnm = bcdDetail.getTeamNm();
+        }
         String grade = "";
         String engGrade = "";
-        if (stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst().equals("직접입력")) {
-            grade = bcdDetail.getGradeNm();
-            engGrade = bcdDetail.getEngradeNm();
-        } else {
+        if (bcdDetail.getGradeNm() == null) {
+            // 기준자료 내 직급/직책 정보
             grade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getFirst();
             engGrade = stdBcdService.getGradeNm(bcdDetail.getGradeCd()).getLast();
+        } else {
+            // 직접 입력받은 직급/직책 정보
+            grade = bcdDetail.getGradeNm();
+            engGrade = bcdDetail.getEngradeNm();
         }
-
 
         // seqId 설정
         Long maxSeqId = bcdHistoryRepository.findTopByDraftIdOrderBySeqIdDesc(bcdDetail.getDraftId())
@@ -49,7 +59,7 @@ public class BcdHistoryServiceImpl implements BcdHistoryService {
                 .instNm(instNm)
                 .deptNm(deptNm)
                 .teamNm(teamNm)
-                .engTeamnm(engTeamNm)
+                .engTeamnm(engTeamnm)
                 .grade(grade)
                 .engGrade(engGrade)
                 .build();

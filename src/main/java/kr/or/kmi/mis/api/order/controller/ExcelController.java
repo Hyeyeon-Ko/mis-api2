@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.order.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.or.kmi.mis.api.order.model.request.ExcelRequestDTO;
 import kr.or.kmi.mis.api.order.service.ExcelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class ExcelController {
 
     @Operation(summary = "download order excel", description = "발주 완료내역 엑셀 파일 다운로드")
     @PostMapping("/applyList/orderExcel")
-    public void downloadOrderExcel(HttpServletResponse response, @RequestBody List<Long> draftIds) throws IOException {
-        excelService.downloadOrderExcel(response, draftIds);
+    public void downloadOrderExcel(HttpServletResponse response, @RequestBody ExcelRequestDTO request) throws IOException {
+        excelService.downloadOrderExcel(response, request.getSelectedApplications(), request.getInstCd());
     }
 }

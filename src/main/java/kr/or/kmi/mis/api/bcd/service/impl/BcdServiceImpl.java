@@ -13,6 +13,7 @@ import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BcdServiceImpl implements BcdService {
 
     private final BcdMasterRepository bcdMasterRepository;
@@ -53,6 +55,8 @@ public class BcdServiceImpl implements BcdService {
         // 1. 명함상세 조회
         BcdDetail existingDetailOpt = bcdDetailRepository.findById(draftId)
                 .orElseThrow(()-> new IllegalArgumentException("명함 신청 이력이 없습니다."));
+        BcdMaster existingMasterOpt = bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("명함 신청 이력이 없습니다."));
 
         // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
         bcdHistoryService.createBcdHistory(existingDetailOpt);
@@ -62,7 +66,8 @@ public class BcdServiceImpl implements BcdService {
         //   2) 정보 업데이트
         String updtr = infoService.getUserInfo().getUserName();
         existingDetailOpt.update(updateBcdRequestDTO, updtr);
-        BcdDetail bcdDetail = bcdDetailRepository.save(existingDetailOpt);
+        existingMasterOpt.updateTitle(updateBcdRequestDTO);
+        bcdDetailRepository.save(existingDetailOpt);
     }
 
     @Override
@@ -77,37 +82,43 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
-
-        // 1. 모든 명함신청 내역을 호출한다.
-        //  - 이때, 취소된 명함신청 내역은 제외한다.
-        //  - 기안 일자 범위를 기준으로 내림차순 정렬한다.
+    public List<BcdMasterResponseDTO> getBcdApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
 
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
-                .orElseThrow(()-> new  IllegalArgumentException("Not Found"));
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        // 2. 신청 내역을 하나씩 꺼내, response dto 와 매핑하여 반환한다.
         return bcdMasters.stream()
-                .map(bcdMaster -> {
+                .filter(bcdMaster -> {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
+                    if (!bcdDetail.getInstCd().equals(instCd)) return false;
 
-                    BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, bcdDetail.getInstCd());
+                    if (searchType != null && keyword != null) {
+                        return switch (searchType) {
+                            case "전체" ->
+                                    bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
+                            case "제목" -> bcdMaster.getTitle().contains(keyword);
+                            case "신청자" -> bcdMaster.getDrafter().contains(keyword);
+                            default -> true;
+                        };
+                    }
+                    return true;
+                })
+                .map(bcdMaster -> {
+                    BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
                     result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
                     return result;
-                }).toList();
+                })
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate) {
+    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
 
         List<BcdMyResponseDTO> results = new ArrayList<>();
 
-        // 1. 로그인한 사용자 정보 호출
-        String userId = infoService.getUserInfo().getUserId();
-
-        // 2. 나의 모든 명함신청 내역을 호출한다.
+        // 나의 모든 명함신청 내역을 호출한다.
         results.addAll(this.getMyMasterList(userId, startDate, endDate));
         results.addAll(this.getAnotherMasterList(userId, startDate, endDate));
         return results;
@@ -151,51 +162,40 @@ public class BcdServiceImpl implements BcdService {
                 }).toList();
     }
 
-/*    @Override
-    @Transactional(readOnly = true)
-    public BcdDetailResponseDTO getBcd(Long draftId) {
-
-        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
-                .orElseThrow(()-> new  IllegalArgumentException("Not Found"));
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new  IllegalArgumentException("Not Found"));
-
-        // 기준자료에서 각 기준자료 코드에 해당하는 명칭 불러오기
-        List<String> names = stdBcdService.getBcdStdNames(bcdDetail);
-
-        return BcdDetailResponseDTO.of(bcdDetail, bcdMaster.getDrafter(), names);
-
-    }*/
-
     @Override
-    public List<BcdPendingResponseDTO> getPendingList() {
+    public List<BcdPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
 
         // 1. 승인대기 상태인 신청목록 모두 호출
-        //   - 기안일자 기준 내림차순 정렬
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
+        //    - 기안일자 기준 내림차순 정렬
+        List<BcdMaster> bcdMasters = bcdMasterRepository
+                .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
 
         // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
         return bcdMasters.stream()
                 .map(bcdMaster -> {
-                            BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                                    .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
+                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
 
-                            BcdPendingResponseDTO result = BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
-                            result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
-                            return result;
-                }).toList();
+                    // 3. instCd가 파라미터 instCd와 같은 경우만 처리
+                    if (bcdDetail.getInstCd().equals(instCd)) {
+                        BcdPendingResponseDTO result = BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
+                        result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
+                        return result;
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdPendingResponseDTO> getMyPendingList() {
+    public List<BcdPendingResponseDTO> getMyPendingList(String userId) {
 
         List<BcdPendingResponseDTO> results = new ArrayList<>();
 
-        // 1. 로그인 세션에서 사번 정보를 가져온다.
-        String userId = infoService.getUserInfo().getUserId();
-
-        // 2. 나의 모든 명함신청 승인대기 내역을 호출한다.
+        // 나의 모든 명함신청 승인대기 내역을 호출한다.
         results.addAll(this.getMyPndMasterList(userId));
         results.addAll(this.getAnotherPndMasterList(userId));
         return results;
@@ -253,8 +253,4 @@ public class BcdServiceImpl implements BcdService {
         bcdMaster.updateEndDate(new Timestamp(System.currentTimeMillis()));
     }
 
-/*    @Override
-    public BcdSampleResponseDTO getDetailNm(String groupCd, String detailCd) {
-        return bcdSampleQueryRepositoryImpl.getBcdSampleNm(groupCd, detailCd);
-    }*/
 }

@@ -5,11 +5,13 @@ import lombok.Getter;
 @Getter
 public class BcdUpdateRequestDTO {
 
+    String korNm;
     String engNm;
     String instCd;
     String deptCd;
     String teamCd;
     String teamNm;
+    String engTeamNm;
     String gradeCd;
     String gradeNm;
     String enGradeNm;
@@ -19,7 +21,7 @@ public class BcdUpdateRequestDTO {
     String email;
     String address;
     String engAddress;
-    String division;    // 명함구분
+    String division;
     Integer quantity;
 
 }

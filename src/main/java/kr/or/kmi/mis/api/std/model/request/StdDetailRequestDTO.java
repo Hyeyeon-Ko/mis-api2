@@ -25,14 +25,15 @@ public class StdDetailRequestDTO {
     private String etcItem6;
     private String etcItem7;
     private String etcItem8;
+    private String etcItem9;
+    private String etcItem10;
+    private String etcItem11;
 
     public StdDetail toEntity(StdGroup groupCd) {
         return StdDetail.builder()
                 .detailCd(detailCd)
                 .groupCd(groupCd)
                 .detailNm(detailNm)
-                .fromDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-                .toDd("991231")
                 .etcItem1(etcItem1)
                 .etcItem2(etcItem2)
                 .etcItem3(etcItem3)
@@ -41,6 +42,9 @@ public class StdDetailRequestDTO {
                 .etcItem6(etcItem6)
                 .etcItem7(etcItem7)
                 .etcItem8(etcItem8)
+                .etcItem9(etcItem9)
+                .etcItem10(etcItem10)
+                .etcItem11(etcItem11)
                 .build();
     }
 }

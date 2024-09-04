@@ -12,7 +12,7 @@ import java.util.List;
 public interface OrderService {
 
     /* 승인 완료된 목록 불러오기 */
-    List<OrderListResponseDTO> getOrderList();
+    List<OrderListResponseDTO> getOrderList(String instCd);
 
     /* 발주 요청 -> 이메일로 엑셀 파일 전송 */
     void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException;

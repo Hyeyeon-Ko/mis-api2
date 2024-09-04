@@ -69,9 +69,10 @@ public class StdController {
 
     @Operation(summary = "update Detail Info", description = "기준자료 > 상세 정보 수정 시 사용")
     @PutMapping("/detailInfo")
-    public ApiResponse<?> updateDetailInfo(@RequestBody StdDetailUpdateRequestDTO stdDetailRequestDTO) {
+    public ApiResponse<?> updateDetailInfo(@RequestBody StdDetailUpdateRequestDTO stdDetailRequestDTO,
+                                           @RequestParam("oriDetailCd") String oriDetailCd) {
 
-        stdDetailService.updateInfo(stdDetailRequestDTO);
+        stdDetailService.updateInfo(stdDetailRequestDTO, oriDetailCd);
 
         return ResponseWrapper.success();
     }

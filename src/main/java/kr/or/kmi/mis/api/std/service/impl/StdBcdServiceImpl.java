@@ -124,10 +124,15 @@ public class StdBcdServiceImpl implements StdBcdService {
         List<String> names = new ArrayList<>();
         names.add(this.getInstNm(bcdDetail.getInstCd()));
         names.add(this.getDeptNm(bcdDetail.getDeptCd()));
-        names.add(this.getTeamNm(bcdDetail.getTeamCd()).getFirst() + " | " + this.getTeamNm(bcdDetail.getTeamCd()).getLast());
 
-        if (this.getGradeNm(bcdDetail.getGradeCd()).getFirst().equals("직접입력")) {
-            names.add(bcdDetail.getGradeNm() + "| " + bcdDetail.getEngradeNm());
+        if (bcdDetail.getEngteamNm() != null){
+            names.add("(직접입력)");
+        } else {
+            names.add(this.getTeamNm(bcdDetail.getTeamCd()).getFirst() + " | " + this.getTeamNm(bcdDetail.getTeamCd()).getLast());
+        }
+
+        if (bcdDetail.getEngradeNm() != null) {
+            names.add("(직접입력)");
         } else {
             names.add(this.getGradeNm(bcdDetail.getGradeCd()).getFirst() + " | " + this.getGradeNm(bcdDetail.getGradeCd()).getLast());
         }
