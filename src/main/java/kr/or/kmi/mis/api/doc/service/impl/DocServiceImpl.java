@@ -36,7 +36,6 @@ public class DocServiceImpl implements DocService {
     private final DocDetailRepository docDetailRepository;
     private final DocHistoryService docHistoryService;
     private final StdBcdService stdBcdService;
-    private final InfoService infoService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -104,12 +103,12 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
-        return new ArrayList<>(this.getMyDocMasterList(userId, startDate, endDate));
+    public List<DocMyResponseDTO> getMyDocApply(String userId) {
+        return new ArrayList<>(this.getMyDocMasterList(userId));
     }
 
-    public List<DocMyResponseDTO> getMyDocMasterList(String userId, Timestamp startDate, Timestamp endDate) {
-        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
+    public List<DocMyResponseDTO> getMyDocMasterList(String userId) {
+        List<DocMaster> docMasterList = docMasterRepository.findByDrafterId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
@@ -128,29 +127,14 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+    public List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd) {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdOrderByDraftDateDesc("F", instCd);
 
         if (docMasters == null) {
             docMasters = new ArrayList<>();
         }
 
         return docMasters.stream()
-                .filter(docMaster -> {
-                    if (searchType != null && keyword != null) {
-                        switch (searchType) {
-                            case "전체":
-                                return docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
-                            case "제목":
-                                return docMaster.getTitle().contains(keyword);
-                            case "신청자":
-                                return docMaster.getDrafter().contains(keyword);
-                            default:
-                                return true;
-                        }
-                    }
-                    return true;
-                })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
@@ -163,9 +147,9 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<DocPendingResponseDTO> getDocPendingList(String instCd) {
         List<DocMaster> docMasters = docMasterRepository
-                .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
+                .findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
 
         return docMasters.stream()
                 .map(docMaster -> {

@@ -82,27 +82,16 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getBcdApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
+    public List<BcdMasterResponseDTO> getBcdApplyByInstCd(String instCd) {
 
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotOrderByDraftDateDesc("F")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return bcdMasters.stream()
                 .filter(bcdMaster -> {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
-                    if (!bcdDetail.getInstCd().equals(instCd)) return false;
-
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" ->
-                                    bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
-                            case "제목" -> bcdMaster.getTitle().contains(keyword);
-                            case "신청자" -> bcdMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
+                    return bcdDetail.getInstCd().equals(instCd);
                 })
                 .map(bcdMaster -> {
                     BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
@@ -114,25 +103,23 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMyResponseDTO> getMyBcdApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<BcdMyResponseDTO> getMyBcdApply(String userId) {
 
         List<BcdMyResponseDTO> results = new ArrayList<>();
 
         // 나의 모든 명함신청 내역을 호출한다.
-        results.addAll(this.getMyMasterList(userId, startDate, endDate));
-        results.addAll(this.getAnotherMasterList(userId, startDate, endDate));
+        results.addAll(this.getMyMasterList(userId));
+        results.addAll(this.getAnotherMasterList(userId));
         return results;
     }
 
     /**
      * 2-1. 내가 신청한 나의 명함신청 내역
      * @param userId
-     * @param startDate
-     * @param endDate
      * @return List<BcdMyResponseDTO>
      */
-    public List<BcdMyResponseDTO> getMyMasterList(String userId, Timestamp startDate, Timestamp endDate) {
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
+    public List<BcdMyResponseDTO> getMyMasterList(String userId) {
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return bcdMasters.stream()
@@ -142,11 +129,9 @@ public class BcdServiceImpl implements BcdService {
     /**
      * 2-2. 타인이 신청한 나의 명함신청 내역
      * @param userId
-     * @param startDate
-     * @param endDate
      * @return List<BcdMyResponseDTO>
      */
-    public List<BcdMyResponseDTO> getAnotherMasterList(String userId, Timestamp startDate, Timestamp endDate) {
+    public List<BcdMyResponseDTO> getAnotherMasterList(String userId) {
         // 2-2. 타인이 신청해준 나의 명함신청 내역
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
@@ -154,7 +139,7 @@ public class BcdServiceImpl implements BcdService {
                 .flatMap(bcdDetail -> {
                     // startDate, endDate 사이에 있는 BcdMaster 조회
                     List<BcdMaster> newBcdMasters = bcdMasterRepository
-                            .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
+                            .findByDraftIdAndDrafterIdNot(bcdDetail.getDraftId(), userId)
                             .orElse(new ArrayList<>());
 
                     return newBcdMasters.stream()
@@ -163,12 +148,12 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
-    public List<BcdPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<BcdPendingResponseDTO> getPendingList(String instCd) {
 
         // 1. 승인대기 상태인 신청목록 모두 호출
         //    - 기안일자 기준 내림차순 정렬
         List<BcdMaster> bcdMasters = bcdMasterRepository
-                .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
+                .findAllByStatusOrderByDraftDateDesc("A");
 
         // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
         return bcdMasters.stream()
