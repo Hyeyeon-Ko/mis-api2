@@ -10,24 +10,31 @@ import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.BcdConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.api.noti.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
+    private final NotificationService notificationService;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
 
@@ -48,6 +55,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     /* 승인 */
     @Override
+    @Transactional
     public void approve(Long id) {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
@@ -65,10 +73,14 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     /* 반려 */
     @Override
+    @Transactional
     public void disapprove(Long id, String rejectReason) {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
+        BcdDetail bcdDetail = bcdDetailRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
+        // 1. 명함신청 반려
         BcdDisapproveRequestDTO disapproveRequest = BcdDisapproveRequestDTO.builder()
                 .disapproverId(infoService.getUserInfo().getUserId())
                 .disapprover(infoService.getUserInfo().getUserName())
@@ -79,6 +91,23 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
         bcdMaster.updateDisapprove(disapproveRequest);
         bcdMasterRepository.save(bcdMaster);
+
+        // 2. 알림 전송
+        SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        String content = "[반려] " + simpleDataFormat.format(bcdMaster.getDraftDate())
+                + " [명함신청]이 반려되었습니다./반려 사유를 확인하세요.";
+        String type = "BCD";
+        String now = simpleDateTimeFormat.format(new Timestamp(System.currentTimeMillis()));
+
+        SseResponseDTO sseResponseDTO = SseResponseDTO.of(bcdMaster.getDraftId(), content, type, now);
+        // 명함 신청자와 대상자 다를 경우, 대상자에게도 알림 전송
+        if (!Objects.equals(bcdMaster.getDrafterId(), bcdDetail.getUserId())) {
+            Long userId = Long.parseLong(bcdDetail.getUserId());
+            notificationService.customNotify(userId, sseResponseDTO, "명함신청 반려");
+        }
+        Long drafterId = Long.parseLong(bcdMaster.getDrafterId());
+        notificationService.customNotify(drafterId, sseResponseDTO, "명함신청 반려");
     }
 
     /*신청이력조회*/
