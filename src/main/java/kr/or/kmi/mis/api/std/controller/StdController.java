@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import kr.or.kmi.mis.api.std.model.request.StdGroupRequestDTO;
 import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.StdGroupResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.StdResponseDTO;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
@@ -93,4 +94,10 @@ public class StdController {
         return ResponseWrapper.success(stdDetailService.getSelectedInfo(groupCd, detailCd));
     }
 
+    @Operation(summary = "조직도 정보 조회", description = "계층형 조직도 정보 조회")
+    @GetMapping("/orgChart")
+    public ApiResponse<List<StdResponseDTO>> getOrgChart(String deptCd, String teamCd) {
+        List<StdResponseDTO> orgChart = stdDetailService.getOrgChart(deptCd, teamCd);
+        return ResponseWrapper.success(orgChart);
+    }
 }

@@ -8,6 +8,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
 import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
+import kr.or.kmi.mis.api.std.model.response.StdResponseDTO;
 import kr.or.kmi.mis.api.std.repository.StdDetailHistRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
@@ -206,4 +207,28 @@ public class StdDetailServiceImpl implements StdDetailService {
         return StdDetailResponseDTO.of(stdDetail);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<StdResponseDTO> getOrgChart(String deptCd, String teamCd) {
+
+        StdGroup teamGroup = stdGroupRepository.findByGroupCd("A003")
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + teamCd));
+        StdDetail teamDetail = stdDetailRepository.findByGroupCdAndEtcItem1AndEtcItem3(teamGroup, deptCd, teamCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String foundTeamCd  = teamDetail.getDetailCd();
+
+        StdGroup chatGroup = stdGroupRepository.findByGroupCd("C001")
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdGroup.class.getName()));
+        List<StdDetail> details = stdDetailRepository.findByGroupCd(chatGroup)
+                .orElseThrow(() -> new EntityNotFoundException("Not found"));
+
+        return details.stream()
+                .map(detail -> {
+                    StdResponseDTO dto = StdResponseDTO.fromEntity(detail);
+                    dto.setFoundTeamCd(foundTeamCd);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }
