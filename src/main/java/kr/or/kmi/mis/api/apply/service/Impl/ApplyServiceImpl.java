@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.apply.service.Impl;
 
 import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
@@ -9,10 +10,12 @@ import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocService;
+import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealListService;
@@ -35,10 +38,12 @@ public class ApplyServiceImpl implements ApplyService {
     private final DocService docService;
     private final CorpDocService corpDocService;
     private final SealListService sealListService;
+    private final CorpDocListService corpDocListService;
+    private final OrderService orderService;
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllApplyList(String documentType, String instCd) {
+    public ApplyResponseDTO getAllApplyList(String documentType, String instCd, String userId) {
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
         List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
@@ -46,10 +51,10 @@ public class ApplyServiceImpl implements ApplyService {
 
         switch (documentType) {
             case "명함신청":
-                bcdApplyLists = bcdService.getBcdApplyByInstCd(instCd);
+                bcdApplyLists = bcdService.getBcdApplyByInstCd(instCd, userId);
                 break;
             case "문서수발신":
-                docApplyLists = docService.getDocApplyByInstCd(instCd);
+                docApplyLists = docService.getDocApplyByInstCd(instCd, userId);
                 break;
             case "법인서류":
                 corpDocApplyLists = corpDocService.getCorpDocApply();
@@ -78,15 +83,30 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getPendingListByType(String documentType, String instCd) {
+    public PendingResponseDTO getPendingListByType(String documentType, String instCd, String userId) {
 
         return switch (documentType) {
-            case "명함신청" -> PendingResponseDTO.of(bcdService.getPendingList(instCd), null, null, null);
-            case "문서수발신" -> PendingResponseDTO.of(null, docService.getDocPendingList(instCd), null, null);
+            case "명함신청" -> PendingResponseDTO.of(bcdService.getPendingList(instCd, userId), null, null, null);
+            case "문서수발신" -> PendingResponseDTO.of(null, docService.getDocPendingList(instCd, userId), null, null);
             case "법인서류" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(), null);
             case "인장신청" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(instCd));
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
         };
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public PendingCountResponseDTO getPendingCountList(String instCd, String userId) {
+
+        int bcdPendingCount = bcdService.getPendingList(instCd, userId).size();
+        int docPendingCount = docService.getDocPendingList(instCd, userId).size();
+        int corpDocPendingCount = corpDocService.getPendingList().size();
+        int sealPendingCount = sealListService.getSealPendingList(instCd).size();
+        int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingList();
+        int orderPendingCount = orderService.getOrderList(instCd).size();
+
+        return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount, corpDocIssuePendingCount, orderPendingCount);
     }
 
     @Override

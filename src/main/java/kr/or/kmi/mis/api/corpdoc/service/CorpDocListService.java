@@ -11,6 +11,8 @@ public interface CorpDocListService {
     /** 법인서류 발급대장 내역 조회 */
     CorpDocIssueListResponseDTO getCorpDocIssueList();
 
+    int getCorpDocIssuePendingList();
+
     /** 법인서류 수불대장 내역 조회 */
     List<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd);
 

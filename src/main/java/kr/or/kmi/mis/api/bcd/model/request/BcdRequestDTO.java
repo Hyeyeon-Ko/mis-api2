@@ -4,6 +4,8 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class BcdRequestDTO {
 
@@ -29,13 +31,19 @@ public class BcdRequestDTO {
     String division;    // 명함구분
     Integer quantity;
 
+    List<String> approverIds;  // 결재자 ID 리스트 추가
+    Integer currentApproverIndex;
+
     // BcdRequest Dto -> BcdMaster Entity
     public BcdMaster toMasterEntity() {
+        String approverChain = String.join(",", approverIds);
+
         return BcdMaster.builder()
                 .drafter(drafter)
                 .drafterId(drafterId)
-                .teamNm(teamNm)         // 얘는,,,
+                .teamNm(teamNm)
                 .korNm(korNm)
+                .approverChain(approverChain)
                 .build();
     }
 

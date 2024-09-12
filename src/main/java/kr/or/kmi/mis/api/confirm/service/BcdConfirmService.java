@@ -11,7 +11,7 @@ public interface BcdConfirmService {
     BcdDetailResponseDTO getBcdDetailInfo(Long id);
 
     /* 승인 */
-    void approve(Long id);
+    void approve(Long id, String userId);
 
     /* 반려 */
     void disapprove(Long id, String rejectReason);

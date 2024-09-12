@@ -28,8 +28,8 @@ public class BcdConfirmController {
 
     @Operation(summary = "approve application", description = "명함신청 승인")
     @PostMapping("/{draftId}")
-    public ApiResponse<?> approve(@PathVariable Long draftId) {
-        bcdConfirmService.approve(draftId);
+    public ApiResponse<?> approve(@PathVariable Long draftId, @RequestBody String userId) {
+        bcdConfirmService.approve(draftId, userId);
         return ResponseWrapper.success();
     }
 

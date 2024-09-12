@@ -82,16 +82,22 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getBcdApplyByInstCd(String instCd) {
+    public List<BcdMasterResponseDTO> getBcdApplyByInstCd(String instCd, String userId) {
 
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotOrderByDraftDateDesc("F")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return bcdMasters.stream()
                 .filter(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
-                    return bcdDetail.getInstCd().equals(instCd);
+                    if (bcdMaster.getStatus().equals("A")) {
+                        String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
+                        int currentIndex = bcdMaster.getCurrentApproverIndex();
+
+                        if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
+                            return false;
+                        }
+                    }
+                    return true;
                 })
                 .map(bcdMaster -> {
                     BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
@@ -148,15 +154,22 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
-    public List<BcdPendingResponseDTO> getPendingList(String instCd) {
+    public List<BcdPendingResponseDTO> getPendingList(String instCd, String userId) {
 
         // 1. 승인대기 상태인 신청목록 모두 호출
         //    - 기안일자 기준 내림차순 정렬
-        List<BcdMaster> bcdMasters = bcdMasterRepository
-                .findAllByStatusOrderByDraftDateDesc("A");
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusOrderByDraftDateDesc("A");
 
         // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
         return bcdMasters.stream()
+                .filter(bcdMaster -> {
+                    // 승인자 체인을 확인하고 현재 승인자가 userId인지 확인
+                    String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
+                    int currentIndex = bcdMaster.getCurrentApproverIndex();
+
+                    // 현재 승인자가 userId가 아닐 경우 필터링
+                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
+                })
                 .map(bcdMaster -> {
                     BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));

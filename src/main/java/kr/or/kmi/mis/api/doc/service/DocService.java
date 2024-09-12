@@ -20,6 +20,6 @@ public interface DocService {
     DocDetailResponseDTO getDoc(Long draftId);
     List<DocMyResponseDTO> getMyDocApply(String userId);
     List<DocPendingResponseDTO> getMyDocPendingList(String userId);
-    List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd);
-    List<DocPendingResponseDTO> getDocPendingList(String instCd);
+    List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd, String userId);
+    List<DocPendingResponseDTO> getDocPendingList(String instCd, String userId);
 }

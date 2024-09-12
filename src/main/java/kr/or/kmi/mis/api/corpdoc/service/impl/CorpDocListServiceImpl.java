@@ -36,7 +36,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
         List<CorpDocMaster> corpDocPendingMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("B");
 
         List<CorpDocIssueResponseDTO> sortedIssueList = this.intoDTO(corpDocMasters).stream()
-                .sorted(Comparator.comparing(CorpDocIssueResponseDTO::getIssueDate)) // issueDate 기준으로 정렬
+                .sorted(Comparator.comparing(CorpDocIssueResponseDTO::getIssueDate))
                 .toList();
         return CorpDocIssueListResponseDTO.of(sortedIssueList, this.intoDTO(corpDocPendingMasters));
     }
@@ -55,6 +55,13 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
                     return corpDocIssueResponseDTO;
                 }).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getCorpDocIssuePendingList() {
+        List<CorpDocMaster> corpDocPendingMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("B");
+        return corpDocPendingMasters.size();
     }
 
     @Override

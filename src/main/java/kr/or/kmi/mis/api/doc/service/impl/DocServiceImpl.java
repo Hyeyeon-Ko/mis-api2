@@ -127,7 +127,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd) {
+    public List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdOrderByDraftDateDesc("F", instCd);
 
         if (docMasters == null) {
@@ -147,7 +147,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(String instCd) {
+    public List<DocPendingResponseDTO> getDocPendingList(String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository
                 .findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
 
