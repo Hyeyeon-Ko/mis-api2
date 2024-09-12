@@ -31,7 +31,7 @@ public class BcdRequestDTO {
     String division;    // 명함구분
     Integer quantity;
 
-    List<String> approverIds;  // 결재자 ID 리스트 추가
+    List<String> approverIds;
     Integer currentApproverIndex;
 
     // BcdRequest Dto -> BcdMaster Entity

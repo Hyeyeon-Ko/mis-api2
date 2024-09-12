@@ -60,11 +60,9 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
-        // 현재 결재자가 맞는지 확인
         if (!bcdMaster.getCurrentApproverId().equals(userId)) {
             throw new IllegalArgumentException("현재 결재자가 아닙니다.");
         }
-        // 마지막 결재자인지 확인
         boolean isLastApprover = bcdMaster.getCurrentApproverIndex() == bcdMaster.getApproverChain().split(", ").length - 1;
 
         BcdApproveRequestDTO approveRequest = BcdApproveRequestDTO.builder()
@@ -74,12 +72,9 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 .status(isLastApprover ? "B" : "A")  // 마지막 결재자라면 B(완료), 아니면 A(승인 대기)
                 .build();
 
-        // 결재 처리
         if (isLastApprover) {
-            // 마지막 결재자이면 승인 완료로 처리
             bcdMaster.updateApprove(approveRequest);
         } else {
-            // 마지막 결재자가 아니면 다음 결재자로 넘김
             bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
             bcdMaster.updateApprove(approveRequest);
         }

@@ -77,7 +77,7 @@ public class BcdServiceImpl implements BcdService {
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + draftId));
 
-        bcdMaster.updateStatus("F");   // F(신청 취소)
+        bcdMaster.updateStatus("F");
     }
 
     @Override
@@ -97,7 +97,10 @@ public class BcdServiceImpl implements BcdService {
                             return false;
                         }
                     }
-                    return true;
+
+                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
+                    return bcdDetail.getInstCd().equals(instCd);
                 })
                 .map(bcdMaster -> {
                     BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
@@ -163,11 +166,9 @@ public class BcdServiceImpl implements BcdService {
         // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
         return bcdMasters.stream()
                 .filter(bcdMaster -> {
-                    // 승인자 체인을 확인하고 현재 승인자가 userId인지 확인
                     String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
                     int currentIndex = bcdMaster.getCurrentApproverIndex();
 
-                    // 현재 승인자가 userId가 아닐 경우 필터링
                     return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
                 })
                 .map(bcdMaster -> {
