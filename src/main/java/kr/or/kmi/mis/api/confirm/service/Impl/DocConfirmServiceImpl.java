@@ -6,15 +6,12 @@ import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
-import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
-import kr.or.kmi.mis.api.noti.service.NotificationService;
+import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -23,7 +20,7 @@ import java.util.Objects;
 public class DocConfirmServiceImpl implements DocConfirmService {
 
     private final InfoService infoService;
-    private final NotificationService notificationService;
+    private final NotificationSendService notificationSendService;
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
 
@@ -55,19 +52,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         docDetail.updateDocId(docId);
 
         // 2. 알림 전송
-        SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy.MM.dd");
-        SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-
-        String type = "DOC";
-        String now = simpleDateTimeFormat.format(new Timestamp(System.currentTimeMillis()));
-        String docType = Objects.equals(docDetail.getDivision(), "A") ? "수신문서" : "발신문서";
-
-        String content = "[승인완료] " + simpleDataFormat.format(docMaster.getDraftDate())
-                + " 신청한 [" + docType + "] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
-
-        SseResponseDTO sseResponseDTO = SseResponseDTO.of(docMaster.getDraftId(), content, type, now);
-        Long drafterId = Long.parseLong(docMaster.getDrafterId());
-        notificationService.customNotify(drafterId, sseResponseDTO, "문서수발신신청 승인완료");
+        notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
     }
 
     @Override

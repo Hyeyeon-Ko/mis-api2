@@ -15,26 +15,23 @@ public class Notification {
     @Column(name = "notification_id")
     private Long id;
 
+    private String userId;
+
     private String content;
-
-    private String url;
-
-    private String receiver;
 
     private String type;
 
     private Boolean isRead;
 
-
     @Builder
-    public Notification(String receiver, String type, String content, String url, Boolean isRead) {
-        this.receiver = receiver;
-        this.type = type;
+    public Notification(String userId, String content, String type, Boolean isRead) {
+        this.userId = userId;
         this.content = content;
-        this.url = url;
+        this.type = type;
         this.isRead = isRead;
     }
 
-
-
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }

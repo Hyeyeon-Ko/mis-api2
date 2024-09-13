@@ -10,17 +10,15 @@ import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.BcdConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
-import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
+import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
-import kr.or.kmi.mis.api.noti.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
-    private final NotificationService notificationService;
+    private final NotificationSendService notificationSendService;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
 
@@ -91,7 +89,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         BcdDetail bcdDetail = bcdDetailRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
 
-        // 1. 명함신청 반려
+        // 1. 명함신청 반려 처리
         BcdDisapproveRequestDTO disapproveRequest = BcdDisapproveRequestDTO.builder()
                 .disapproverId(infoService.getUserInfo().getUserId())
                 .disapprover(infoService.getUserInfo().getUserName())
@@ -104,21 +102,12 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         bcdMasterRepository.save(bcdMaster);
 
         // 2. 알림 전송
-        SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy.MM.dd");
-        SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-        String content = "[반려] " + simpleDataFormat.format(bcdMaster.getDraftDate())
-                + " [명함신청]이 반려되었습니다./반려 사유를 확인하세요.";
-        String type = "BCD";
-        String now = simpleDateTimeFormat.format(new Timestamp(System.currentTimeMillis()));
-
-        SseResponseDTO sseResponseDTO = SseResponseDTO.of(bcdMaster.getDraftId(), content, type, now);
-        // 명함 신청자와 대상자 다를 경우, 대상자에게도 알림 전송
+        //  - 명함 신청자와 대상자가 다를 경우, 대상자에게도 알림 전송
         if (!Objects.equals(bcdMaster.getDrafterId(), bcdDetail.getUserId())) {
-            Long userId = Long.parseLong(bcdDetail.getUserId());
-            notificationService.customNotify(userId, sseResponseDTO, "명함신청 반려");
+            notificationSendService.sendBcdRejection(bcdMaster.getDraftDate(), bcdDetail.getUserId());
         }
-        Long drafterId = Long.parseLong(bcdMaster.getDrafterId());
-        notificationService.customNotify(drafterId, sseResponseDTO, "명함신청 반려");
+        notificationSendService.sendBcdRejection(bcdMaster.getDraftDate(), bcdMaster.getDrafterId());
+
     }
 
     /*신청이력조회*/
