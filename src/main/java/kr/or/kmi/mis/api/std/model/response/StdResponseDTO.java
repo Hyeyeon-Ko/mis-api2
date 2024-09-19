@@ -12,7 +12,6 @@ public class StdResponseDTO {
     private String parentCd;
     private int level;
     private String teamCd;
-    private String foundTeamCd;
 
     public static StdResponseDTO fromEntity(StdDetail stdDetail) {
         return StdResponseDTO.builder()

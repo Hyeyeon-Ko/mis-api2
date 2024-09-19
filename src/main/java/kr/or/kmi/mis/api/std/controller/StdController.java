@@ -96,8 +96,8 @@ public class StdController {
 
     @Operation(summary = "조직도 정보 조회", description = "계층형 조직도 정보 조회")
     @GetMapping("/orgChart")
-    public ApiResponse<List<StdResponseDTO>> getOrgChart(String deptCd, String teamCd) {
-        List<StdResponseDTO> orgChart = stdDetailService.getOrgChart(deptCd, teamCd);
+    public ApiResponse<List<StdResponseDTO>> getOrgChart(String instCd) {
+        List<StdResponseDTO> orgChart = stdDetailService.getOrgChart(instCd);
         return ResponseWrapper.success(orgChart);
     }
 }

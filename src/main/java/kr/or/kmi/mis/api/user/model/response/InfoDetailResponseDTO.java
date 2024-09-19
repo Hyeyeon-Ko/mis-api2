@@ -13,9 +13,12 @@ public class InfoDetailResponseDTO {
     String email;
     String instCd;
     String teamCd;
+    String deptNm;
+    String roleNm;
+    String positionNm;
 
     public static InfoDetailResponseDTO of(String userId, String userName, String telNum, String email,
-                                           String instCd, String teamCd) {
+                                           String instCd, String teamCd, String deptNm, String roleNm, String positionNm) {
         return InfoDetailResponseDTO.builder()
                 .userId(userId)
                 .userName(userName)
@@ -23,6 +26,9 @@ public class InfoDetailResponseDTO {
                 .email(email)
                 .instCd(instCd)
                 .teamCd(teamCd)
+                .deptNm(deptNm)
+                .roleNm(roleNm)
+                .positionNm(positionNm)
                 .build();
     }
 }

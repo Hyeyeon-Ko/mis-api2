@@ -209,26 +209,15 @@ public class StdDetailServiceImpl implements StdDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StdResponseDTO> getOrgChart(String deptCd, String teamCd) {
-
-        StdGroup teamGroup = stdGroupRepository.findByGroupCd("A003")
-                .orElseThrow(() -> new EntityNotFoundException("Not found: " + teamCd));
-        StdDetail teamDetail = stdDetailRepository.findByGroupCdAndEtcItem1AndEtcItem3(teamGroup, deptCd, teamCd)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        String foundTeamCd  = teamDetail.getDetailCd();
+    public List<StdResponseDTO> getOrgChart(String instCd) {
 
         StdGroup chatGroup = stdGroupRepository.findByGroupCd("C001")
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdGroup.class.getName()));
-        List<StdDetail> details = stdDetailRepository.findByGroupCd(chatGroup)
+        List<StdDetail> details = stdDetailRepository.findByGroupCdAndEtcItem4(chatGroup, instCd)
                 .orElseThrow(() -> new EntityNotFoundException("Not found"));
 
         return details.stream()
-                .map(detail -> {
-                    StdResponseDTO dto = StdResponseDTO.fromEntity(detail);
-                    dto.setFoundTeamCd(foundTeamCd);
-                    return dto;
-                })
+                .map(StdResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 }

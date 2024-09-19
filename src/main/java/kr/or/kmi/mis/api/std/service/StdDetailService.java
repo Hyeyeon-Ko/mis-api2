@@ -15,5 +15,5 @@ public interface StdDetailService {
     void updateInfo(StdDetailUpdateRequestDTO stdDetailRequestDTO, String oriDetailCd);
     void deleteInfo(String groupCd, String detailCd);
     StdDetailResponseDTO getSelectedInfo(String groupCd, String detailCd);
-    List<StdResponseDTO> getOrgChart(String deptCd, String teamCd);
+    List<StdResponseDTO> getOrgChart(String instCd);
 }

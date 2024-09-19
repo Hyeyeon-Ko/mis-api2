@@ -145,7 +145,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         Authority authorityInfo = Authority.builder()
                 .userId(resultData.getUserid())
                 .hngNm(resultData.getUsernm())
-                .instCd(resultData.getOrginstcd())
+                .instCd(resultData.getBzbzplceCd())
                 .deptCd(resultData.getOrgdeptcd())
                 .deptNm(resultData.getOrgdeptnm())
                 .email(resultData.getEmail())

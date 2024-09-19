@@ -1,9 +1,7 @@
 package kr.or.kmi.mis.api.user.service.Impl;
 
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
-import kr.or.kmi.mis.api.authority.model.response.ResponseData;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
-import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -28,7 +26,6 @@ public class LoginServiceImpl implements LoginService {
     private final AuthorityRepository authorityRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
-    private final AuthorityService authorityService;
     private final InfoService infoService;
 
     @Value("${external.login.url}")

@@ -71,6 +71,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 .build();
 
         if (isLastApprover) {
+            bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
             bcdMaster.updateApprove(approveRequest);
         } else {
             bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);

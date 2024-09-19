@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +31,6 @@ public class BcdServiceImpl implements BcdService {
     private final BcdHistoryService bcdHistoryService;
     private final InfoService infoService;
     private final StdBcdService stdBcdService;
-
-    private final BcdSampleQueryRepositoryImpl bcdSampleQueryRepositoryImpl;
 
     @Override
     @Transactional
@@ -113,10 +112,8 @@ public class BcdServiceImpl implements BcdService {
     @Override
     @Transactional(readOnly = true)
     public List<BcdMyResponseDTO> getMyBcdApply(String userId) {
-
         List<BcdMyResponseDTO> results = new ArrayList<>();
 
-        // 나의 모든 명함신청 내역을 호출한다.
         results.addAll(this.getMyMasterList(userId));
         results.addAll(this.getAnotherMasterList(userId));
         return results;
@@ -132,7 +129,8 @@ public class BcdServiceImpl implements BcdService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return bcdMasters.stream()
-                .map(BcdMyResponseDTO::of).toList();
+                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
+                .toList();
     }
 
     /**
@@ -152,7 +150,7 @@ public class BcdServiceImpl implements BcdService {
                             .orElse(new ArrayList<>());
 
                     return newBcdMasters.stream()
-                            .map(BcdMyResponseDTO::of);
+                            .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
                 }).toList();
     }
 
@@ -208,7 +206,7 @@ public class BcdServiceImpl implements BcdService {
      * @return List<BcdPendingResponseDTO>
      */
     public List<BcdPendingResponseDTO> getMyPndMasterList(String userId) {
-        List<BcdMaster> myBcdMasters = bcdMasterRepository.findByDrafterIdAndStatus(userId, "A")
+        List<BcdMaster> myBcdMasters = bcdMasterRepository.findByDrafterIdAndStatusAndCurrentApproverIndex(userId, "A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         return myBcdMasters.stream()
                 .map(bcdMaster -> {
@@ -233,7 +231,7 @@ public class BcdServiceImpl implements BcdService {
         // 2. 명함상세의 draftId로 BcdMaster와 매핑해 PendingResponseDTO로 반환한다.
         return bcdDetails.stream()
                 .map(bcdDetail -> {
-                    return bcdMasterRepository.findByDraftIdAndStatusAndDrafterIdNot(bcdDetail.getDraftId(), "A", userId)
+                    return bcdMasterRepository.findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(bcdDetail.getDraftId(), "A", 0, userId)
                             .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
                             .orElse(null);
                 }).filter(Objects::nonNull).toList();

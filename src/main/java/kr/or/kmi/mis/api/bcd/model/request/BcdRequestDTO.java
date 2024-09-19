@@ -36,7 +36,7 @@ public class BcdRequestDTO {
 
     // BcdRequest Dto -> BcdMaster Entity
     public BcdMaster toMasterEntity() {
-        String approverChain = String.join(",", approverIds);
+        String approverChain = String.join(", ", approverIds);
 
         return BcdMaster.builder()
                 .drafter(drafter)
