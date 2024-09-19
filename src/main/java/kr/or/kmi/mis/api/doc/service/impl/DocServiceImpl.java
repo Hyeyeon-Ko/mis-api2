@@ -34,6 +34,7 @@ public class DocServiceImpl implements DocService {
 
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
+    private final InfoService infoService;
     private final DocHistoryService docHistoryService;
     private final StdBcdService stdBcdService;
 
@@ -115,7 +116,7 @@ public class DocServiceImpl implements DocService {
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
-                    return DocMyResponseDTO.of(docMaster, docDetail.getDivision());
+                    return DocMyResponseDTO.of(docMaster, docDetail.getDivision(), infoService);
                 }).toList();
     }
 
@@ -152,17 +153,25 @@ public class DocServiceImpl implements DocService {
                 .findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
 
         return docMasters.stream()
+                .filter(docMaster -> {
+                    String[] approverChainArray = docMaster.getApproverChain().split(", ");
+                    int currentIndex = docMaster.getCurrentApproverIndex();
+
+                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
+                })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+
                     DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
                     docPendingResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
+
                     return docPendingResponseDTO;
                 }).toList();
     }
 
     public List<DocPendingResponseDTO> getMyDocPendingMasterList(String userId) {
-        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndStatus(userId, "A")
+        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndStatusAndCurrentApproverIndex(userId, "A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()

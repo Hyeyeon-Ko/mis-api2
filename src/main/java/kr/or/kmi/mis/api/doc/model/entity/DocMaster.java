@@ -39,6 +39,12 @@ public class DocMaster extends BaseSystemFieldEntity {
     @Column(length = 500)
     private String title;
 
+    @Column(length = 1000)
+    private String approverChain;
+
+    @Column(nullable = false)
+    private Integer currentApproverIndex;
+
     @Column(length = 1)
     private String status;
 
@@ -61,14 +67,24 @@ public class DocMaster extends BaseSystemFieldEntity {
     }
 
     @Builder
-    public DocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd, String deptCd) {
+    public DocMaster(Timestamp draftDate, String drafter, String drafterId, String approverChain, String status, String instCd, String deptCd) {
         this.title =  String.format("문서수발신 신청서 (%s)", drafter);
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
+        this.approverChain = approverChain;
+        this.currentApproverIndex = 0;
         this.status = status;
         this.instCd = instCd;
         this.deptCd = deptCd;
+    }
+
+    public String getCurrentApproverId() {
+        return this.approverChain.split(", ")[this.currentApproverIndex];
+    }
+
+    public void updateCurrentApproverIndex(Integer currentApproverIndex) {
+        this.currentApproverIndex = currentApproverIndex;
     }
 
     public void updateStatus(String status) {

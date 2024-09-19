@@ -80,6 +80,7 @@ public class InfoServiceImpl implements InfoService {
                         .userId(data.getUserid())
                         .userNm(data.getUsername())
                         .deptCd(data.getDeptcode())
+                        .roleNm(data.getRolename())
                         .positionNm(data.getPositionname())
                         .build())
                 .collect(Collectors.toList());

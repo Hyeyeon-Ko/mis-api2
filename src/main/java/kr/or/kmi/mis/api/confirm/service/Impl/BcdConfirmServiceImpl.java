@@ -70,13 +70,8 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 .status(isLastApprover ? "B" : "A")  // 마지막 결재자라면 B(완료), 아니면 A(승인 대기)
                 .build();
 
-        if (isLastApprover) {
-            bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
-            bcdMaster.updateApprove(approveRequest);
-        } else {
-            bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
-            bcdMaster.updateApprove(approveRequest);
-        }
+        bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
+        bcdMaster.updateApprove(approveRequest);
 
         bcdMasterRepository.save(bcdMaster);
     }

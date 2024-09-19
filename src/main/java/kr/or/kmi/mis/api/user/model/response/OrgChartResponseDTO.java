@@ -10,5 +10,6 @@ public class OrgChartResponseDTO {
     private String userId;
     private String userNm;
     private String deptCd;
+    private String roleNm;
     private String positionNm;
 }

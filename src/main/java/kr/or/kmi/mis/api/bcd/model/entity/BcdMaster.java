@@ -68,23 +68,13 @@ public class BcdMaster {
         this.title = String.format("[%s]명함신청서(%s)", teamNm, korNm);
         this.drafterId = drafterId;
         this.drafter = drafter;
-        this.approverChain = approverChain; // 결재자 리스트를 ','로 구분하여 저장
-        this.currentApproverIndex = 0; // 첫 번째 결재자부터 시작
-        this.status = "A"; // 초기 상태는 승인 대기
+        this.approverChain = approverChain;
+        this.currentApproverIndex = 0;
+        this.status = "A";
     }
 
-    // 현재 결재자 정보를 반환하는 메서드
     public String getCurrentApproverId() {
         return this.approverChain.split(", ")[this.currentApproverIndex];
-    }
-
-    // 결재 승인 처리 메서드
-    public void approveCurrentApproverId() {
-        if (this.currentApproverIndex < this.approverChain.split(", ").length - 1) {
-            this.currentApproverIndex++; // 다음 결재자로 이동
-        } else {
-            this.status = "A"; // 모든 결재자가 승인되면 상태 완료로 변경
-        }
     }
 
     public void updateEndDate(Timestamp endDate) {

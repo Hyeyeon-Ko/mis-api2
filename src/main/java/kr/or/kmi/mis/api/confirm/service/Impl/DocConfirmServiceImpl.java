@@ -26,7 +26,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
 
     @Override
     @Transactional
-    public void confirm(Long draftId) {
+    public void confirm(Long draftId, String userId) {
 
         // 1. 문서수발신신청 승인
         DocMaster docMaster = docMasterRepository.findById(draftId)
@@ -34,10 +34,17 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         DocDetail docDetail = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("docDetail not found: " + draftId));
 
+        if (!docMaster.getCurrentApproverId().equals(userId)) {
+            throw new IllegalArgumentException("현재 결재자가 아닙니다.");
+        }
+        boolean isLastApprover = docMaster.getCurrentApproverIndex() == docMaster.getApproverChain().split(", ").length - 1;
+
         // 승인 상태 변경
         String approver = infoService.getUserInfo().getUserName();
         String approverId = infoService.getUserInfo().getUserId();
-        docMaster.confirm("E", approver, approverId);
+        docMaster.confirm(isLastApprover ? "E" : "A", approver, approverId);
+
+        docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex() + 1);
 
         // 문서번호 생성해, 업데이트
         DocDetail lastDocDetail = docDetailRepository

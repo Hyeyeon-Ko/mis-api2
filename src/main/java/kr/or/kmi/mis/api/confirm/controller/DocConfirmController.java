@@ -18,8 +18,8 @@ public class DocConfirmController {
 
     @Operation(summary = "confirm doc apply", description = "문서수발신 신청 승인")
     @PutMapping("/confirm")
-    public ApiResponse<?> confirm(@RequestParam("draftId") Long draftId) {
-        docConfirmService.confirm(draftId);
+    public ApiResponse<?> confirm(@RequestParam("draftId") Long draftId, @RequestParam String userId) {
+        docConfirmService.confirm(draftId, userId);
         return ResponseWrapper.success();
     }
 
