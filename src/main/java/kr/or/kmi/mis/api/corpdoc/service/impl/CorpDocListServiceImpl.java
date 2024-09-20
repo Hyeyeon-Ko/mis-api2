@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +32,14 @@ public class CorpDocListServiceImpl implements CorpDocListService {
     @Override
     @Transactional(readOnly = true)
     public CorpDocIssueListResponseDTO getCorpDocIssueList() {
+
+        // 1. 발급완료+입고된 법인서류, 발급대기 중인 법인서류 모두 호출
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("G");
         corpDocMasters.addAll(corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("X"));
         List<CorpDocMaster> corpDocPendingMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("B");
 
+        // 2. 각각 responseDTO 형태로 반환
+        //    - 이때, 발급대장은 발급/입고일을 기준으로 정렬해 반환
         List<CorpDocIssueResponseDTO> sortedIssueList = this.intoDTO(corpDocMasters).stream()
                 .sorted(Comparator.comparing(CorpDocIssueResponseDTO::getIssueDate))
                 .toList();
@@ -85,14 +90,18 @@ public class CorpDocListServiceImpl implements CorpDocListService {
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found corp doc detail: " + draftId));
 
-        // 법인서류 잔고 계산
+        // 1. 법인서류 잔고 계산
+        //    - pdf 요청 서류일 경우, 잔고 계산 x
         int totalCorpseal = corpDocLeftRequestDTO.getTotalCorpseal();
-        totalCorpseal -= corpDocDetail.getCertCorpseal();
         int totalCoregister = corpDocLeftRequestDTO.getTotalCoregister();
-        totalCoregister -= corpDocDetail.getCertCoregister();
 
-        if (totalCorpseal < 0 || totalCoregister < 0) {
-            throw new IllegalArgumentException("서류 잔고 부족");
+        if(!Objects.equals(corpDocDetail.getType(), "P")) {
+            totalCorpseal -= corpDocDetail.getCertCorpseal();
+            totalCoregister -= corpDocDetail.getCertCoregister();
+
+            if (totalCorpseal < 0 || totalCoregister < 0) {
+                throw new IllegalArgumentException("서류 잔고 부족");
+            }
         }
 
         // 법인서류 detail 발급 처리
