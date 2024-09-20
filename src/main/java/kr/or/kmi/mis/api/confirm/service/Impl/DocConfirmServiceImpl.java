@@ -70,7 +70,9 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         docDetail.updateDocId(docId);
 
         // 2. 알림 전송
-        notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
+        if(isLastApprover) {
+            notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
+        }
 
         // 3. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
         StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("C002")
