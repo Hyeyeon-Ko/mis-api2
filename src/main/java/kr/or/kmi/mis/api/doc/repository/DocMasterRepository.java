@@ -17,6 +17,8 @@ public interface DocMasterRepository extends JpaRepository<DocMaster, Long> {
 
     Optional<List<DocMaster>> findByDrafterIdAndStatusAndCurrentApproverIndex(String userId, String status, Integer approverIndex);
 
+    Optional<List<DocMaster>> findAllByStatusAndCurrentApproverIndex(String status, Integer approverIndex);
+
     List<DocMaster> findAllByDeptCd(String deptCd);
 
     List<DocMaster> findAllByStatusNotAndInstCdOrderByDraftDateDesc(String status, String instCd);

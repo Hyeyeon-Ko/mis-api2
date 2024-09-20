@@ -1,5 +1,9 @@
 package kr.or.kmi.mis.api.bcd.service.impl;
 
+import kr.or.kmi.mis.api.authority.model.entity.Authority;
+import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
+import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
+import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
@@ -10,7 +14,12 @@ import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.repository.impl.BcdSampleQueryRepositoryImpl;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,23 +37,59 @@ public class BcdServiceImpl implements BcdService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
+    private final AuthorityRepository authorityRepository;
     private final BcdHistoryService bcdHistoryService;
     private final InfoService infoService;
     private final StdBcdService stdBcdService;
+    private final AuthorityService authorityService;
+    private final StdDetailService stdDetailService;
+    private final StdGroupRepository stdGroupRepository;
 
     @Override
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
 
-        // 명함신청
+        // 명함 신청 로직
         BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity();
         bcdMaster = bcdMasterRepository.save(bcdMaster);
 
-        // 명함상세
         Long draftId = bcdMaster.getDraftId();
         BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId);
         bcdDetailRepository.save(bcdDetail);
 
+        // ADMIN 권한 부여
+        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
+
+        String firstApproverId = bcdRequestDTO.getApproverIds().getFirst();
+        InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(firstApproverId);
+        String userNm = infoDetailResponseDTO.getUserName();
+        String instNm = infoDetailResponseDTO.getInstNm();
+        String deptNm = infoDetailResponseDTO.getDeptNm();
+
+        boolean authorityExists = authorityList.stream()
+                .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
+
+        if (!authorityExists) {
+            AuthorityRequestDTO requestDTO = AuthorityRequestDTO.builder()
+                    .userId(firstApproverId)
+                    .userNm(userNm)
+                    .userRole("ADMIN")
+                    .detailRole(null)
+                    .build();
+
+            authorityService.addAdmin(requestDTO);
+
+            // 사이드바 권한 부여
+            StdDetailRequestDTO stdDetailRequestDTO = StdDetailRequestDTO.builder()
+                    .detailCd(firstApproverId)
+                    .groupCd("B002")
+                    .detailNm(instNm + " " + deptNm)
+                    .etcItem1(userNm)
+                    .etcItem2("A-2")
+                    .build();
+
+            stdDetailService.addInfo(stdDetailRequestDTO);
+        }
     }
 
     @Override

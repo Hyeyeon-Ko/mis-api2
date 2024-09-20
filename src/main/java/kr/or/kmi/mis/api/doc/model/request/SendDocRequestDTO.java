@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Getter
-public class DocRequestDTO {
+public class SendDocRequestDTO {
 
     String drafterId;
     String drafter;

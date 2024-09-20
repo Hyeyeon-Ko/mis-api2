@@ -79,6 +79,11 @@ public class DocMaster extends BaseSystemFieldEntity {
         this.deptCd = deptCd;
     }
 
+    public void updateApproverChain(String approverChain) {
+        this.approverChain = approverChain;
+        this.currentApproverIndex = 0;
+    }
+
     public String getCurrentApproverId() {
         return this.approverChain.split(", ")[this.currentApproverIndex];
     }

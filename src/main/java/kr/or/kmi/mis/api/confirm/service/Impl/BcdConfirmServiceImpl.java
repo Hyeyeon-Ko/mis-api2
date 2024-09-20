@@ -1,5 +1,7 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
+import kr.or.kmi.mis.api.authority.model.entity.Authority;
+import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
@@ -11,6 +13,10 @@ import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.BcdConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.noti.service.NotificationSendService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +41,9 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     private final NotificationSendService notificationSendService;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
+    private final AuthorityRepository authorityRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,16 +60,18 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         return BcdDetailResponseDTO.of(bcdDetail, drafter, names);
     }
 
-    /* 승인 */
     @Override
     @Transactional
     public void approve(Long id, String userId) {
+
+        // 1. 승인
         BcdMaster bcdMaster = bcdMasterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
 
         if (!bcdMaster.getCurrentApproverId().equals(userId)) {
             throw new IllegalArgumentException("현재 결재자가 아닙니다.");
         }
+
         boolean isLastApprover = bcdMaster.getCurrentApproverIndex() == bcdMaster.getApproverChain().split(", ").length - 1;
 
         BcdApproveRequestDTO approveRequest = BcdApproveRequestDTO.builder()
@@ -74,6 +85,51 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         bcdMaster.updateApprove(approveRequest);
 
         bcdMasterRepository.save(bcdMaster);
+
+        // 2. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
+        StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("C001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String instCd = infoService.getUserInfoDetail(userId).getInstCd();
+        List<StdDetail> stdDetail1 = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup1, instCd)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        boolean userIdExistsInStdDetail = stdDetail1.stream()
+                .anyMatch(detail -> userId.equals(detail.getEtcItem2()) || userId.equals(detail.getEtcItem3()));
+
+        if (userIdExistsInStdDetail) {
+            return;
+        }
+
+        // 권한 취소 여부 결정
+        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found1"));
+
+        boolean shouldCancelAdmin = true;
+
+        for (BcdMaster master : bcdMasterList) {
+            if (master.getCurrentApproverId().equals(userId)) {
+                shouldCancelAdmin = false;
+                break;
+            }
+        }
+
+        if (shouldCancelAdmin) {
+            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
+
+            // ADMIN 권한 취소
+            authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
+            authorityRepository.save(authority);
+
+            // 사이드바 권한 취소
+            StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("B002")
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found3"));
+            StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup2, userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found4"));
+
+            stdDetailRepository.delete(stdDetail2);
+        }
     }
 
     /* 반려 */

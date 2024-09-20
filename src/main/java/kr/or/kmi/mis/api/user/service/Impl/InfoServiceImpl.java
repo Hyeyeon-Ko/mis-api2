@@ -58,12 +58,13 @@ public class InfoServiceImpl implements InfoService {
         String telNum = Objects.requireNonNull(resultData).getMpphonno();             // 전화번호
         String userEmail = Objects.requireNonNull(resultData).getEmail();             // 이메일
         String instCd = Objects.requireNonNull(resultData).getBzbzplceCd();           // 센터코드
+        String instNm = Objects.requireNonNull(resultData).getBzbzplceNm();           // 센터명
         String teamCd = Objects.requireNonNull(resultData).getOrgdeptcd();            // 부서코드
         String deptNm = Objects.requireNonNull(resultData).getDeptname();             // 부서이름
         String roleNm = Objects.requireNonNull(resultData).getRolename();             // 직책
         String positionNm = Objects.requireNonNull(resultData).getPositionname();     // 직위
 
-        return InfoDetailResponseDTO.of(userId, userNm, telNum, userEmail, instCd, teamCd, deptNm, roleNm, positionNm);
+        return InfoDetailResponseDTO.of(userId, userNm, telNum, userEmail, instCd, instNm, teamCd, deptNm, roleNm, positionNm);
     }
 
     @Override

@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
+import kr.or.kmi.mis.api.doc.model.request.SendDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
@@ -62,7 +62,7 @@ public class DocDetail extends BaseSystemFieldEntity {
         this.filePath = filePath;
     }
 
-    public void update(DocRequestDTO requestDTO, String fileName, String filePath) {
+    public void update(SendDocRequestDTO requestDTO, String fileName, String filePath) {
         this.division = requestDTO.getDivision();
         this.receiver = requestDTO.getReceiver();
         this.sender = requestDTO.getSender();
