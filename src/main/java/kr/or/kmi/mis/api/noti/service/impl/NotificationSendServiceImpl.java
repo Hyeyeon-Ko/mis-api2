@@ -23,7 +23,6 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     private final NotificationService notificationService;
 
     private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy.MM.dd");
-    private static final SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 
     @Override
     @Transactional
@@ -31,7 +30,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
         String content = "[반려] " + simpleDataFormat.format(draftDate)
                 + " [명함신청]이 반려되었습니다./반려 사유를 확인하세요.";
 
-        Notification notification = this.createNotification(drafterId, content, "CORPDOC");
+        Notification notification = this.createNotification(drafterId, content, "BCD");
         notificationRepository.save(notification);
 
         this.sendNotification(notification, drafterId, "명함신청 반려");
@@ -39,14 +38,14 @@ public class NotificationSendServiceImpl implements NotificationSendService {
 
     @Override
     @Transactional
-    public void sendBcdOrder(Timestamp draftDate, String drafterId) {
-        String content = "[반려] " + simpleDataFormat.format(draftDate)
-                + " [명함신청]이 반려되었습니다./반려 사유를 확인하세요.";
+    public void sendBcdOrder(Timestamp draftDate, String userId) {
+        String content = "[수령확인] " + simpleDataFormat.format(draftDate)
+                + " 신청한 명함이 [발주요청] 되었습니다./수령하신 후, 수령확인 버튼을 눌러주세요.";
 
-        Notification notification = this.createNotification(drafterId, content, "CORPDOC");
+        Notification notification = this.createNotification(userId, content, "BCD");
         notificationRepository.save(notification);
 
-        this.sendNotification(notification, drafterId, "명함신청 반려");
+        this.sendNotification(notification, userId, "명함신청 수령안내");
     }
 
     @Override
@@ -75,8 +74,8 @@ public class NotificationSendServiceImpl implements NotificationSendService {
 
     @Override
     @Transactional
-    public void sendDocApproval(Timestamp draftDate, String drafterId, String divsion) {
-        String docType = Objects.equals(divsion, "A") ? "수신문서" : "발신문서";
+    public void sendDocApproval(Timestamp draftDate, String drafterId, String division) {
+        String docType = Objects.equals(division, "A") ? "수신문서" : "발신문서";
 
         String content = "[승인완료] " + simpleDataFormat.format(draftDate)
                 + " 신청한 ["+ docType + "] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
@@ -123,10 +122,9 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     }
 
     private void sendNotification(Notification notification, String drafterId, String comment) {
-        String nowDateTime = simpleDateTimeFormat.format(new Timestamp(System.currentTimeMillis()));
-        SseResponseDTO sseResponseDTO = SseResponseDTO.of(notification, nowDateTime);
+        SseResponseDTO sseResponseDTO = SseResponseDTO.of(notification);
 
         Long receiverId = Long.parseLong(drafterId);
-        notificationService.customNotify(receiverId, sseResponseDTO, "법인서류신청 반려");
+        notificationService.customNotify(receiverId, sseResponseDTO, comment);
     };
 }

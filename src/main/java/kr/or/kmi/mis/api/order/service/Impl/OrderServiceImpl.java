@@ -117,15 +117,6 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found with id " + draftId));
             notificationSendService.sendBcdOrder(bcdMaster.getDraftDate(), bcdDetail.getUserId());
 
-            String type = "BCD";
-            String now = simpleDateTimeFormat.format(new Timestamp(System.currentTimeMillis()));
-            String content = "[수령확인] " + simpleDataFormat.format(bcdMaster.getDraftDate())
-                    + " 신청한 명함이 [발주요청] 되었습니다./수령하신 후, 수령확인 버튼을 눌러주세요.";
-
-//            SseResponseDTO sseResponseDTO = SseResponseDTO.of(bcdMaster.getDraftId(), content, type, now);
-//            Long userId = Long.parseLong(bcdDetail.getUserId());
-//            notificationService.customNotify(userId, sseResponseDTO, "명함신청 수령안내");
-
         });
     }
 

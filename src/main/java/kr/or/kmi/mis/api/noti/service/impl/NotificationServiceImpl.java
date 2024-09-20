@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.noti.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.noti.model.entity.Notification;
+import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
 import kr.or.kmi.mis.api.noti.respository.EmitterRepository;
 import kr.or.kmi.mis.api.noti.respository.NotificationRepository;
 import kr.or.kmi.mis.api.noti.service.NotificationService;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -96,6 +98,15 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
         notification.markAsRead();
         notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SseResponseDTO> getAllNotification(String userId) {
+        List<Notification> notifications = notificationRepository.findAllByUserIdOrderByCreatedAtAsc(userId);
+
+        return notifications.stream()
+                .map(SseResponseDTO::of).toList();
     }
 
 }

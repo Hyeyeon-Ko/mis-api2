@@ -1,10 +1,13 @@
 package kr.or.kmi.mis.api.noti.service;
 
-import org.springframework.transaction.annotation.Transactional;
+import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.List;
 
 public interface NotificationService {
     SseEmitter subscribe(String userId);
     <T> void customNotify(Long userId, T data, String comment);
     void markAsRead(Long notificationId);
+    List<SseResponseDTO> getAllNotification(String userId);
 }

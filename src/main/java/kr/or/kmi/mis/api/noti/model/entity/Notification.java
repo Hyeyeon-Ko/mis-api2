@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
 
 @Entity
 @NoArgsConstructor
@@ -22,6 +25,9 @@ public class Notification {
     private String type;
 
     private Boolean isRead;
+
+    @CreationTimestamp
+    private Timestamp createdAt;
 
     @Builder
     public Notification(String userId, String content, String type, Boolean isRead) {
