@@ -22,6 +22,7 @@ public class ReceiveDocRequestDTO {
     // DocRequest Dto -> DocMaster Entity
     public DocMaster toMasterEntity() {
         return DocMaster.builder()
+                .title(String.format("문서수신 신청서 (%s)", drafter))
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .drafter(drafter)
                 .drafterId(drafterId)

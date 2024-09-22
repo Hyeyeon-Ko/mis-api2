@@ -8,6 +8,8 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.user.model.request.LoginRequestDTO;
+import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
+import kr.or.kmi.mis.api.user.model.response.InfoResponseDTO;
 import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.api.user.service.LoginService;
@@ -61,10 +63,13 @@ public class LoginServiceImpl implements LoginService {
             LoginResponseDTO responseDTO = new LoginResponseDTO();
             responseDTO.setHngNm((String) responseMap.get("hngnm"));
 
-            String instCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getInstCd();
-            String teamCd = infoService.getUserInfoDetail(loginRequestDTO.getUserId()).getTeamCd();
+            InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(loginRequestDTO.getUserId());
+            String instCd = infoDetailResponseDTO.getInstCd();
+            String teamCd = infoDetailResponseDTO.getTeamCd();
+            String roleNm = infoDetailResponseDTO.getRoleNm();
             responseDTO.setInstCd(instCd);
             responseDTO.setTeamCd(teamCd);
+            responseDTO.setRoleNm(roleNm);
 
             // teamCd, instCd -> deptCd
             StdGroup teamStdGroup = stdGroupRepository.findByGroupCd("A003")

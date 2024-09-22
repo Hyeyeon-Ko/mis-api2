@@ -61,6 +61,9 @@ public class DocServiceImpl implements DocService {
     @Override
     @Transactional
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
+
+        System.out.println("receiveDocRequestDTO.getReceiver() = " + receiveDocRequestDTO.getReceiver());
+        System.out.println("receiveDocRequestDTO.getSender() = " + receiveDocRequestDTO.getSender());
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity();
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")

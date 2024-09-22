@@ -29,6 +29,7 @@ public class SendDocRequestDTO {
         String approverChain = String.join(", ", approverIds);
 
         return DocMaster.builder()
+                .title(String.format("문서발신 신청서 (%s)", drafter))
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .drafter(drafter)
                 .drafterId(drafterId)

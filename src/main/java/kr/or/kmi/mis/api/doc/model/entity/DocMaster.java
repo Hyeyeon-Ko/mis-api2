@@ -67,8 +67,8 @@ public class DocMaster extends BaseSystemFieldEntity {
     }
 
     @Builder
-    public DocMaster(Timestamp draftDate, String drafter, String drafterId, String approverChain, String status, String instCd, String deptCd) {
-        this.title =  String.format("문서수발신 신청서 (%s)", drafter);
+    public DocMaster(String title, Timestamp draftDate, String drafter, String drafterId, String approverChain, String status, String instCd, String deptCd) {
+        this.title = title;
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
