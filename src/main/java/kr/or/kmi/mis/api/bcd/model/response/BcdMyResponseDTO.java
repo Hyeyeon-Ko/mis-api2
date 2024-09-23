@@ -32,17 +32,24 @@ public class BcdMyResponseDTO {
     public static BcdMyResponseDTO of(BcdMaster bcdMaster, InfoService infoService) {
         List<ApprovalLineResponseDTO> approvalLineResponses = new ArrayList<>();
 
-        String[] approverIds = bcdMaster.getApproverChain().split(", ");
-        for (int i = 0; i < approverIds.length; i++) {
-            String approverId = approverIds[i];
-            InfoDetailResponseDTO userInfo = infoService.getUserInfoDetail(approverId);
-            approvalLineResponses.add(ApprovalLineResponseDTO.builder()
-                    .userId(approverId)
-                    .userName(userInfo.getUserName())
-                    .roleNm(userInfo.getRoleNm())
-                    .positionNm(userInfo.getPositionNm())
-                    .currentApproverIndex(bcdMaster.getCurrentApproverIndex())
-                    .build());
+        if (bcdMaster.getApproverChain() != null && !bcdMaster.getApproverChain().isEmpty()) {
+            approvalLineResponses = new ArrayList<>();
+            String[] approverIds = bcdMaster.getApproverChain().split(", ");
+
+            for (String approverId : approverIds) {
+                if (approverId == null || approverId.trim().isEmpty()) {
+                    continue;
+                }
+
+                InfoDetailResponseDTO userInfo = infoService.getUserInfoDetail(approverId);
+                approvalLineResponses.add(ApprovalLineResponseDTO.builder()
+                        .userId(approverId)
+                        .userName(userInfo.getUserName())
+                        .roleNm(userInfo.getRoleNm())
+                        .positionNm(userInfo.getPositionNm())
+                        .currentApproverIndex(bcdMaster.getCurrentApproverIndex())
+                        .build());
+            }
         }
 
         return BcdMyResponseDTO.builder()

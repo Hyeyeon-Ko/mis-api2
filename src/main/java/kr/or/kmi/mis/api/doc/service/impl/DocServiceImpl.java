@@ -39,7 +39,6 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -63,7 +62,7 @@ public class DocServiceImpl implements DocService {
     @Transactional
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
-        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity();
+        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("A");
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -75,6 +74,17 @@ public class DocServiceImpl implements DocService {
 
         String[] savedFileInfo = saveFile(file);
         saveReceiveDocDetail(receiveDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+    }
+
+    @Override
+    public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
+        // 문서발신 로직
+        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("B");
+        docMaster = docMasterRepository.save(docMaster);
+
+        String[] savedFileInfo = saveFile(file);
+        saveReceiveDocDetail(receiveDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+
     }
 
     @Override

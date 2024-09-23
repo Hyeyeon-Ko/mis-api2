@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.authority.service.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
@@ -230,6 +231,9 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .bodyValue(requestData)
                 .retrieve()
                 .bodyToMono(String.class)
+                .doOnNext(responseJson -> {
+                    System.out.println("Response from Groupware API: " + responseJson);
+                })
                 .flatMap(responseJson -> {
                     if (responseJson == null) {
                         return Mono.error(new EntityNotFoundException("User response data not found for userId: " + userId));
@@ -241,9 +245,14 @@ public class AuthorityServiceImpl implements AuthorityService {
                             return Mono.error(new EntityNotFoundException("User information not found for userId: " + userId));
                         }
                         return Mono.just(resultData);
+                    } catch (JsonProcessingException e) {
+                        System.err.println("Error parsing JSON response: " + e.getMessage());
+                        return Mono.error(new RuntimeException("Failed to parse JSON from groupware API", e));
                     } catch (Exception e) {
-                        return Mono.error(new RuntimeException("Error processing response from groupware API", e));
+                        System.err.println("General error: " + e.getMessage());
+                        return Mono.error(new RuntimeException("General error while processing groupware API", e));
                     }
+
                 });
     }
 

@@ -45,6 +45,15 @@ public class DocController {
         return ResponseWrapper.success();
     }
 
+    @Operation(summary = "create receive doc apply by leader", description = "팀원 제외 유저 > 문서수신 신청")
+    @PostMapping("/receive/leader")
+    public ApiResponse<?> createReceiveDocByLeader(
+            @RequestPart("docRequest") ReceiveDocRequestDTO docRequestDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        docService.applyReceiveDocByLeader(docRequestDTO, file);
+        return ResponseWrapper.success();
+    }
+
     @Operation(summary = "create send doc apply", description = "유저 > 문서발신 신청")
     @PostMapping("/send")
     public ApiResponse<?> createSendDoc(
