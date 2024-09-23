@@ -112,9 +112,9 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate) {
+    public List<CorpDocPendingResponseDTO> getPendingList() {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
-                .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
+                .findAllByStatusOrderByDraftDateDesc("A");
 
         return corpDocMasters.stream()
                 .map(corpDocMaster -> {
@@ -128,36 +128,21 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMyResponseDTO> getMyCorpDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
-        return new ArrayList<>(this.getMyCorpDocList(userId, startDate, endDate));
+    public List<CorpDocMyResponseDTO> getMyCorpDocApply(String userId) {
+        return new ArrayList<>(this.getMyCorpDocList(userId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMasterResponseDTO> getCorpDocApplyByDateRangeAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword) {
+    public List<CorpDocMasterResponseDTO> getCorpDocApply() {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
-                .findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
+                .findAllByStatusNotOrderByDraftDateDesc("F");
 
         if(corpDocMasters == null) {
             corpDocMasters = new ArrayList<>();
         }
 
         return corpDocMasters.stream()
-                .filter(corpDocMaster -> {
-                    if (searchType != null && keyword != null) {
-                        switch (searchType) {
-                            case "전체":
-                                return corpDocMaster.getTitle().contains(keyword) || corpDocMaster.getDrafter().contains(keyword);
-                            case "제목":
-                                return corpDocMaster.getTitle().contains(keyword);
-                            case "신청자":
-                                return corpDocMaster.getDrafter().contains(keyword);
-                            default:
-                                return true;
-                        }
-                    }
-                    return true;
-                })
                 .map(corpDocMaster -> {
                     CorpDocMasterResponseDTO corpDocMasterResponseDTO = CorpDocMasterResponseDTO.of(corpDocMaster);
                     corpDocMasterResponseDTO.setInstNm(stdBcdService.getInstNm(corpDocMaster.getInstCd()));
@@ -166,8 +151,8 @@ public class CorpDocServiceImpl implements CorpDocService {
                 .toList();
     }
 
-    private List<CorpDocMyResponseDTO> getMyCorpDocList(String userId, Timestamp startDate, Timestamp endDate) {
-        List<CorpDocMaster> corpDocMasterList = corpDocMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
+    private List<CorpDocMyResponseDTO> getMyCorpDocList(String userId) {
+        List<CorpDocMaster> corpDocMasterList = corpDocMasterRepository.findByDrafterId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found"));
 
         return corpDocMasterList.stream()

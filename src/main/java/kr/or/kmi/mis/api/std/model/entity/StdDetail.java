@@ -117,5 +117,9 @@ public class StdDetail extends BaseSystemFieldEntity {
     public void updateToDd(String toDd) {
         this.toDd = toDd;
     }
+
+    public void updateEtcItem3(String etcItem3) {
+        this.etcItem3 = etcItem3;
+    }
 }
 

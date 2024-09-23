@@ -11,5 +11,6 @@ public class LoginResponseDTO {
     private String instCd;
     private String deptCd;
     private String teamCd;
+    private String roleNm;
     private List<String> sidebarPermissions;
 }

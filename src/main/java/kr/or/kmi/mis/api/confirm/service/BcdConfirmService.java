@@ -11,10 +11,10 @@ public interface BcdConfirmService {
     BcdDetailResponseDTO getBcdDetailInfo(Long id);
 
     /* 승인 */
-    void approve(Long id);
+    void approve(Long id, String userId);
 
     /* 반려 */
-    void disapprove(Long id, String rejectReason);
+    void disapprove(Long id, String rejectReason, String userId);
 
     /* 명함 신청이력 조회 */
     List<BcdHistoryResponseDTO> getBcdApplicationHistory(Long draftId);

@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -54,18 +55,26 @@ public class BcdMaster {
     @Column(length = 1000)
     private String rejectReason;
 
+    @Column(length = 1000)
+    private String approverChain;
+
+    @Column(nullable = false)
+    private Integer currentApproverIndex;
+
     private String status;
 
     @Builder
-    public BcdMaster(String drafterId, String drafter, String teamNm, String korNm) {
+    public BcdMaster(String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
         this.title = String.format("[%s]명함신청서(%s)", teamNm, korNm);
         this.drafterId = drafterId;
         this.drafter = drafter;
-        this.status = "A";        // 명함 생성 시, A(승인대기)를 default 값으로 설정
+        this.approverChain = approverChain;
+        this.currentApproverIndex = 0;
+        this.status = status;
     }
 
-    public void updateDate(Timestamp draftDate) {
-        this.draftDate = draftDate;
+    public String getCurrentApproverId() {
+        return this.approverChain.split(", ")[this.currentApproverIndex];
     }
 
     public void updateEndDate(Timestamp endDate) {
@@ -93,6 +102,9 @@ public class BcdMaster {
         this.status = bcdDisapproveRequestDTO.getStatus();
     }
 
+    public void updateCurrentApproverIndex(Integer currentApproverIndex) {
+        this.currentApproverIndex = currentApproverIndex;
+    }
 
     // 발주 -> 발주일시 업데이트
     public void updateOrder(Timestamp deletedt) {

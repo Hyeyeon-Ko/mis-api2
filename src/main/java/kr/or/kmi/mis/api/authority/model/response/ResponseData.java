@@ -12,10 +12,13 @@ public class ResponseData {
     public static class ResultData {
         private String usernm;
         private String userid;
-        private String orginstnm;
-        private String orginstcd;
+        private String bzbzplceNm;
+        private String bzbzplceCd;
         private String orgdeptnm;
         private String orgdeptcd;
+        private String deptname;
+        private String rolename;
+        private String positionname;
         private String email;
         private String mpphonno;
     }

@@ -2,7 +2,8 @@ package kr.or.kmi.mis.api.doc.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
+import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
+import kr.or.kmi.mis.api.doc.model.request.SendDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocService;
@@ -35,16 +36,34 @@ public class DocController {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @Operation(summary = "create doc apply", description = "문서수발신 신청")
-    @PostMapping
-    public ApiResponse<?> createDocApply(
-            @RequestPart("docRequest") DocRequestDTO docRequestDTO,
+    @Operation(summary = "create receive doc apply", description = "유저 > 문서수신 신청")
+    @PostMapping("/receive")
+    public ApiResponse<?> createReceiveDoc(
+            @RequestPart("docRequest") ReceiveDocRequestDTO docRequestDTO,
             @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
-        docService.applyDoc(docRequestDTO, file);
+        docService.applyReceiveDoc(docRequestDTO, file);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "modify doc apply", description = "문서수발신 수정")
+    @Operation(summary = "create send doc apply", description = "유저 > 문서발신 신청")
+    @PostMapping("/send")
+    public ApiResponse<?> createSendDoc(
+            @RequestPart("docRequest") SendDocRequestDTO docRequestDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        docService.applySendDoc(docRequestDTO, file);
+        return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "create send doc apply by leader", description = "팀원 제외 유저 > 문서발신 신청")
+    @PostMapping("/send/leader")
+    public ApiResponse<?> createSendDocByLeader(
+            @RequestPart("docRequest") SendDocRequestDTO docRequestDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        docService.applySendDocByLeader(docRequestDTO, file);
+        return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "modify doc apply", description = "유저 > 문서수발신 수정")
     @PostMapping(value = "/update")
     public ApiResponse<?> updateDocApply(
             @RequestParam("draftId") Long draftId,
@@ -54,14 +73,14 @@ public class DocController {
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "cancel doc apply", description = "문서수발신 취소")
+    @Operation(summary = "cancel doc apply", description = "유저 > 문서수발신 취소")
     @PutMapping(value = "/{draftId}")
     public ApiResponse<?> cancelDoc(@PathVariable Long draftId) {
         docService.cancelDocApply(draftId);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "get doc detail", description = "문서수발신 상세 정보 조회")
+    @Operation(summary = "get doc detail", description = "유저 > 문서수발신 상세 정보 조회")
     @GetMapping(value = "/{draftId}")
     public ApiResponse<DocDetailResponseDTO> getBcdDetail(@PathVariable Long draftId) {
         return ResponseWrapper.success(docService.getDoc(draftId));
