@@ -39,6 +39,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -62,8 +63,6 @@ public class DocServiceImpl implements DocService {
     @Transactional
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
-        System.out.println("receiveDocRequestDTO.getReceiver() = " + receiveDocRequestDTO.getReceiver());
-        System.out.println("receiveDocRequestDTO.getSender() = " + receiveDocRequestDTO.getSender());
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity();
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
@@ -83,7 +82,7 @@ public class DocServiceImpl implements DocService {
     public void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
 
         // 문서발신 로직
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity();
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("A");
         docMaster = docMasterRepository.save(docMaster);
 
         String[] savedFileInfo = saveFile(file);
@@ -122,6 +121,33 @@ public class DocServiceImpl implements DocService {
 
             stdDetailService.addInfo(stdDetailRequestDTO);
         }
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, firstApproverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        boolean needsUpdate = false;
+
+        if (!"D-2".equals(stdDetail.getEtcItem2()) && !"D-2".equals(stdDetail.getEtcItem3())) {
+            stdDetail.updateEtcItem3("D-2");
+            needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+            stdDetailRepository.save(stdDetail);
+        }
+    }
+
+    @Override
+    public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+
+        // 문서발신 로직
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("B");
+        docMaster = docMasterRepository.save(docMaster);
+
+        String[] savedFileInfo = saveFile(file);
+        saveSendDocDetail(sendDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class LoginServiceImpl implements LoginService {
         if (stdDetailOpt.isPresent()) {
             StdDetail stdDetail = stdDetailOpt.get();
             sidebarPermissions = Arrays.asList(
-                    stdDetail.getEtcItem1(), stdDetail.getEtcItem2(), stdDetail.getEtcItem3(), stdDetail.getEtcItem4(),
+                    stdDetail.getEtcItem2(), stdDetail.getEtcItem3(), stdDetail.getEtcItem4(),
                     stdDetail.getEtcItem5(), stdDetail.getEtcItem6(), stdDetail.getEtcItem7(), stdDetail.getEtcItem8()
             );
         }

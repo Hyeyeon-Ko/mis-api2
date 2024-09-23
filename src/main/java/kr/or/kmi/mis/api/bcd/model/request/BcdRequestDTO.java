@@ -35,7 +35,7 @@ public class BcdRequestDTO {
     Integer currentApproverIndex;
 
     // BcdRequest Dto -> BcdMaster Entity
-    public BcdMaster toMasterEntity() {
+    public BcdMaster toMasterEntity(String status) {
         String approverChain = String.join(", ", approverIds);
 
         return BcdMaster.builder()
@@ -44,6 +44,7 @@ public class BcdRequestDTO {
                 .teamNm(teamNm)
                 .korNm(korNm)
                 .approverChain(approverChain)
+                .status(status)
                 .build();
     }
 

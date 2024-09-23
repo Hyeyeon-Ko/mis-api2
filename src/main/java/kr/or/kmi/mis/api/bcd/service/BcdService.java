@@ -10,6 +10,7 @@ import java.util.List;
 public interface BcdService {
 
     void applyBcd(BcdRequestDTO bcdRequestDTO);
+    void applyBcdByLeader(BcdRequestDTO bcdRequestDTO);
     void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO);
     void cancelBcdApply(Long draftId);
     List<BcdMasterResponseDTO> getBcdApplyByInstCd(String instCd, String userId);

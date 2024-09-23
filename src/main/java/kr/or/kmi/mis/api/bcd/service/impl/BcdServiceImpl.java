@@ -14,8 +14,10 @@ import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.repository.impl.BcdSampleQueryRepositoryImpl;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
@@ -44,13 +46,14 @@ public class BcdServiceImpl implements BcdService {
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
     private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
 
         // 명함 신청 로직
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity();
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("A");
         bcdMaster = bcdMasterRepository.save(bcdMaster);
 
         Long draftId = bcdMaster.getDraftId();
@@ -90,6 +93,33 @@ public class BcdServiceImpl implements BcdService {
 
             stdDetailService.addInfo(stdDetailRequestDTO);
         }
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, firstApproverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        boolean needsUpdate = false;
+
+        if (!"A-2".equals(stdDetail.getEtcItem2()) && !"A-2".equals(stdDetail.getEtcItem3())) {
+            stdDetail.updateEtcItem3("A-2");
+            needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+            stdDetailRepository.save(stdDetail);
+        }
+    }
+
+    @Override
+    public void applyBcdByLeader(BcdRequestDTO bcdRequestDTO) {
+        // 명함 신청 로직
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("B");
+        bcdMaster = bcdMasterRepository.save(bcdMaster);
+
+        Long draftId = bcdMaster.getDraftId();
+        BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId);
+        bcdDetailRepository.save(bcdDetail);
     }
 
     @Override

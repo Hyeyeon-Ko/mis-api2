@@ -25,7 +25,7 @@ public class SendDocRequestDTO {
 
 
     // DocRequest Dto -> DocMaster Entity
-    public DocMaster toMasterEntity() {
+    public DocMaster toMasterEntity(String status) {
         String approverChain = String.join(", ", approverIds);
 
         return DocMaster.builder()
@@ -33,7 +33,7 @@ public class SendDocRequestDTO {
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .drafter(drafter)
                 .drafterId(drafterId)
-                .status("A")
+                .status(status)
                 .instCd(instCd)
                 .deptCd(deptCd)
                 .approverChain(approverChain)

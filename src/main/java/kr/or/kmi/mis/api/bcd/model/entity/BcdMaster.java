@@ -64,13 +64,13 @@ public class BcdMaster {
     private String status;
 
     @Builder
-    public BcdMaster(String drafterId, String drafter, String teamNm, String korNm, String approverChain) {
+    public BcdMaster(String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
         this.title = String.format("[%s]명함신청서(%s)", teamNm, korNm);
         this.drafterId = drafterId;
         this.drafter = drafter;
         this.approverChain = approverChain;
         this.currentApproverIndex = 0;
-        this.status = "A";
+        this.status = status;
     }
 
     public String getCurrentApproverId() {

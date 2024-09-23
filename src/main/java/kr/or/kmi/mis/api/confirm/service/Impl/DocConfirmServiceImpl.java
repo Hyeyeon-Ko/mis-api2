@@ -2,6 +2,8 @@ package kr.or.kmi.mis.api.confirm.service.Impl;
 
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
+import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.confirm.service.DocConfirmService;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
@@ -34,6 +36,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
     private final AuthorityRepository authorityRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
+    private final BcdMasterRepository bcdMasterRepository;
 
     @Override
     @Transactional
@@ -89,19 +92,30 @@ public class DocConfirmServiceImpl implements DocConfirmService {
             return;
         }
 
+        // 권한 취소 여부 결정
+        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        boolean shouldCancelAdmin = true;
+        boolean shouldCancelAdminByBcd = true;
+        boolean shouldCancelAdminByDoc = true;
 
-        for (DocMaster master : docMasterList) {
+        for (BcdMaster master : bcdMasterList) {
             if (master.getCurrentApproverId().equals(userId)) {
-                shouldCancelAdmin = false;
+                shouldCancelAdminByBcd = false;
                 break;
             }
         }
 
-        if (shouldCancelAdmin) {
+        for (DocMaster master : docMasterList) {
+            if (master.getCurrentApproverId().equals(userId)) {
+                shouldCancelAdminByDoc = false;
+                break;
+            }
+        }
+
+        if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
             Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
 
