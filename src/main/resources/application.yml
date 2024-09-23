@@ -4,6 +4,7 @@ spring:
 
 logging:
   level:
+    kr.or.kmi.mis.api: DEBUG
     org:
       springframework:
         web: DEBUG
@@ -18,8 +19,8 @@ logging:
         type:
           descriptor:
             sql: info
-    web: DEBUG
-    root: DEBUG
+    web: info
+    root: info
   file:
     name: /app/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
   pattern:
