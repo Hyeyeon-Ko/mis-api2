@@ -19,7 +19,8 @@ external:
     url: http://172.16.250.85/mis/login
   userInfo:
     url: http://172.16.250.85/mis/userDeptInfo
-
+  orgChart:
+    url: http://172.16.250.85/mis/userList
 file:
   upload-dir: uploads/
 
