@@ -24,6 +24,32 @@ external:
 file:
   upload-dir: uploads/
 
+
+logging:
+  level:
+    org:
+      springframework:
+        web: info
+        transaction: info
+        orm:
+          jpa: info
+        jdbc:
+          core:
+            JdbcTemplate: debug
+            StatementCreatorUtils: trace
+      hibernate:
+        type:
+          descriptor:
+            sql: info
+    web: info
+    root: info
+  file:
+    name: /app/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 콘솔 출력 형식
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 파일 출력 형식
+
+
 server:
   port: 8080
 
