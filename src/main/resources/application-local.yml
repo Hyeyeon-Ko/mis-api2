@@ -45,7 +45,7 @@ logging:
           descriptor:
             sql: info
     web: DEBUG
-    root: info
+    root: DEBUG
   file:
     name: /app/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
   pattern:
