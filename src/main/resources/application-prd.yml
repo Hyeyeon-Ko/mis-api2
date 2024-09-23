@@ -24,24 +24,6 @@ external:
 file:
   upload-dir: uploads/
 
-logging:
-  level:
-    org:
-      springframework:
-        transaction: info
-        orm:
-          jpa: info
-        jdbc:
-          core:
-            JdbcTemplate: debug
-            StatementCreatorUtils: trace
-      hibernate:
-        type:
-          descriptor:
-            sql: info
-    web: info
-    root: info
-
 server:
   port: 8080
 
