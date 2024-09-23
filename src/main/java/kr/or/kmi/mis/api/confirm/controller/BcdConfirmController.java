@@ -28,15 +28,15 @@ public class BcdConfirmController {
 
     @Operation(summary = "approve application", description = "명함신청 승인")
     @PostMapping("/{draftId}")
-    public ApiResponse<?> approve(@PathVariable Long draftId) {
-        bcdConfirmService.approve(draftId);
+    public ApiResponse<?> approve(@PathVariable Long draftId, @RequestBody String userId) {
+        bcdConfirmService.approve(draftId, userId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason) {
-        bcdConfirmService.disapprove(draftId, rejectReason);
+    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason, @RequestBody String userId) {
+        bcdConfirmService.disapprove(draftId, rejectReason, userId);
         return ResponseWrapper.success();
     }
 

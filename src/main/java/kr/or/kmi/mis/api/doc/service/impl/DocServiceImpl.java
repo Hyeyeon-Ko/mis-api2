@@ -1,8 +1,13 @@
 package kr.or.kmi.mis.api.doc.service.impl;
 
+import kr.or.kmi.mis.api.authority.model.entity.Authority;
+import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
+import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
+import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
-import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
+import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
+import kr.or.kmi.mis.api.doc.model.request.SendDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
@@ -12,7 +17,14 @@ import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +39,7 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -34,21 +47,107 @@ public class DocServiceImpl implements DocService {
 
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
+    private final AuthorityRepository authorityRepository;
+    private final InfoService infoService;
     private final DocHistoryService docHistoryService;
     private final StdBcdService stdBcdService;
-    private final InfoService infoService;
+    private final AuthorityService authorityService;
+    private final StdDetailService stdDetailService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     @Override
     @Transactional
-    public void applyDoc(DocRequestDTO docRequestDTO, MultipartFile file) throws IOException {
-        DocMaster docMaster = docRequestDTO.toMasterEntity();
+    public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
+
+        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity();
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        List<StdDetail> stdDetail = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, receiveDocRequestDTO.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        docMaster.updateApproverChain(stdDetail.getFirst().getEtcItem3());
         docMaster = docMasterRepository.save(docMaster);
 
         String[] savedFileInfo = saveFile(file);
-        saveDocDetail(docRequestDTO, docMaster.getDraftId(), savedFileInfo);
+        saveReceiveDocDetail(receiveDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+    }
+
+    @Override
+    @Transactional
+    public void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+
+        // 문서발신 로직
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("A");
+        docMaster = docMasterRepository.save(docMaster);
+
+        String[] savedFileInfo = saveFile(file);
+        saveSendDocDetail(sendDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+
+        // ADMIN 권한 부여
+        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
+
+        String firstApproverId = sendDocRequestDTO.getApproverIds().getFirst();
+        InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(firstApproverId);
+        String userNm = infoDetailResponseDTO.getUserName();
+        String instNm = infoDetailResponseDTO.getInstNm();
+        String deptNm = infoDetailResponseDTO.getDeptNm();
+
+        boolean authorityExists = authorityList.stream()
+                .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
+
+        if (!authorityExists) {
+            AuthorityRequestDTO requestDTO = AuthorityRequestDTO.builder()
+                    .userId(firstApproverId)
+                    .userNm(userNm)
+                    .userRole("ADMIN")
+                    .detailRole(null)
+                    .build();
+
+            authorityService.addAdmin(requestDTO);
+
+            // 사이드바 권한 부여
+            StdDetailRequestDTO stdDetailRequestDTO = StdDetailRequestDTO.builder()
+                    .detailCd(firstApproverId)
+                    .groupCd("B002")
+                    .detailNm(instNm + " " + deptNm)
+                    .etcItem1(userNm)
+                    .etcItem2("D-2")
+                    .build();
+
+            stdDetailService.addInfo(stdDetailRequestDTO);
+        }
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, firstApproverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        boolean needsUpdate = false;
+
+        if (!"D-2".equals(stdDetail.getEtcItem2()) && !"D-2".equals(stdDetail.getEtcItem3())) {
+            stdDetail.updateEtcItem3("D-2");
+            needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+            stdDetailRepository.save(stdDetail);
+        }
+    }
+
+    @Override
+    public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+
+        // 문서발신 로직
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("B");
+        docMaster = docMasterRepository.save(docMaster);
+
+        String[] savedFileInfo = saveFile(file);
+        saveSendDocDetail(sendDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
     }
 
     @Override
@@ -104,19 +203,19 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyResponseDTO> getMyDocApplyByDateRange(Timestamp startDate, Timestamp endDate, String userId) {
-        return new ArrayList<>(this.getMyDocMasterList(userId, startDate, endDate));
+    public List<DocMyResponseDTO> getMyDocApply(String userId) {
+        return new ArrayList<>(this.getMyDocMasterList(userId));
     }
 
-    public List<DocMyResponseDTO> getMyDocMasterList(String userId, Timestamp startDate, Timestamp endDate) {
-        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
+    public List<DocMyResponseDTO> getMyDocMasterList(String userId) {
+        List<DocMaster> docMasterList = docMasterRepository.findByDrafterId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
-                    return DocMyResponseDTO.of(docMaster, docDetail.getDivision());
+                    return DocMyResponseDTO.of(docMaster, docDetail.getDivision(), infoService);
                 }).toList();
     }
 
@@ -128,29 +227,14 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc("F", startDate, endDate, instCd);
+    public List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd, String userId) {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdOrderByDraftDateDesc("F", instCd);
 
         if (docMasters == null) {
             docMasters = new ArrayList<>();
         }
 
         return docMasters.stream()
-                .filter(docMaster -> {
-                    if (searchType != null && keyword != null) {
-                        switch (searchType) {
-                            case "전체":
-                                return docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
-                            case "제목":
-                                return docMaster.getTitle().contains(keyword);
-                            case "신청자":
-                                return docMaster.getDrafter().contains(keyword);
-                            default:
-                                return true;
-                        }
-                    }
-                    return true;
-                })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
@@ -163,22 +247,30 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<DocPendingResponseDTO> getDocPendingList(String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository
-                .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
+                .findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
 
         return docMasters.stream()
+                .filter(docMaster -> {
+                    String[] approverChainArray = docMaster.getApproverChain().split(", ");
+                    int currentIndex = docMaster.getCurrentApproverIndex();
+
+                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
+                })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
+
                     DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
                     docPendingResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
+
                     return docPendingResponseDTO;
                 }).toList();
     }
 
     public List<DocPendingResponseDTO> getMyDocPendingMasterList(String userId) {
-        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndStatus(userId, "A")
+        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndStatusAndCurrentApproverIndex(userId, "A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
@@ -230,8 +322,13 @@ public class DocServiceImpl implements DocService {
         return new String[]{fileName, filePath};
     }
 
-    private void saveDocDetail(DocRequestDTO docRequestDTO, Long draftId, String[] savedFileInfo) {
-        DocDetail docDetail = docRequestDTO.toDetailEntity(draftId, savedFileInfo[0], savedFileInfo[1]);
+    private void saveSendDocDetail(SendDocRequestDTO sendDocRequestDTO, Long draftId, String[] savedFileInfo) {
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(draftId, savedFileInfo[0], savedFileInfo[1]);
+        docDetailRepository.save(docDetail);
+    }
+
+    private void saveReceiveDocDetail(ReceiveDocRequestDTO receiveDocRequestDTO, Long draftId, String[] savedFileInfo) {
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(draftId, savedFileInfo[0], savedFileInfo[1]);
         docDetailRepository.save(docDetail);
     }
 
@@ -239,8 +336,8 @@ public class DocServiceImpl implements DocService {
         DocDetail existingDocDetail = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        if (docRequestOrUpdateDTO instanceof DocRequestDTO docRequestDTO) {
-            existingDocDetail.update(docRequestDTO, savedFileInfo[0], savedFileInfo[1]);
+        if (docRequestOrUpdateDTO instanceof SendDocRequestDTO sendDocRequestDTO) {
+            existingDocDetail.update(sendDocRequestDTO, savedFileInfo[0], savedFileInfo[1]);
         } else if (docRequestOrUpdateDTO instanceof DocUpdateRequestDTO docUpdateRequestDTO) {
             existingDocDetail.updateFile(docUpdateRequestDTO, savedFileInfo[0], savedFileInfo[1]);
         }

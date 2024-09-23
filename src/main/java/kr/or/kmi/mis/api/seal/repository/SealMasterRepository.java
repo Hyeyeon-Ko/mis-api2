@@ -13,12 +13,12 @@ public interface SealMasterRepository extends JpaRepository<SealMaster, Long> {
 
     Optional<List<SealMaster>> findAllByStatusAndDivisionAndInstCd(String status, String division, String instCd);
 
-    Optional<List<SealMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp startDate, Timestamp endDate);
+    Optional<List<SealMaster>> findByDrafterId(String userId);
 
     Optional<List<SealMaster>> findByDrafterIdAndStatus(String userId, String status);
 
-    List<SealMaster> findAllByStatusNotAndDraftDateBetweenAndInstCdOrderByDraftDateDesc(String status, Timestamp startDate, Timestamp endDate, String instCd);
+    List<SealMaster> findAllByStatusNotAndInstCdOrderByDraftDateDesc(String status, String instCd);
 
-    List<SealMaster> findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, Timestamp startDate, Timestamp endDate);
+    List<SealMaster> findAllByStatusAndInstCdOrderByDraftDateDesc(String status, String instCd);
 
 }

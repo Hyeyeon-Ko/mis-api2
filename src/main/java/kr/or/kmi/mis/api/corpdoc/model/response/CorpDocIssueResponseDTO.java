@@ -29,6 +29,7 @@ public class CorpDocIssueResponseDTO {
     private int totalCoregister;
     private int certUsesignet;
     private int warrant;
+    private String note;
 
     public static CorpDocIssueResponseDTO of(CorpDocMaster corpDocMaster, CorpDocDetail corpDocDetail) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -48,6 +49,7 @@ public class CorpDocIssueResponseDTO {
                 .totalCoregister(corpDocDetail.getTotalCoregister())
                 .certUsesignet(corpDocDetail.getCertUsesignet())
                 .warrant(corpDocDetail.getWarrant())
+                .note("P".equals(corpDocDetail.getType()) ? "PDF" : "")
                 .build();
 
     }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
@@ -28,32 +29,31 @@ public class ApplyController {
     @Operation(summary = "신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList")
     public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam(required = false) String documentType,
-                                                         @RequestParam(required = false) LocalDate startDate,
-                                                         @RequestParam(required = false) LocalDate endDate,
-                                                         @RequestParam(required = false) String searchType,
-                                                         @RequestParam(required = false) String keyword,
-                                                         @RequestParam String instCd) {
-        return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, searchType, keyword, instCd));
+                                                         @RequestParam String instCd,
+                                                         @RequestParam String userId) {
+        return ResponseWrapper.success(applyService.getAllApplyList(documentType, instCd, userId));
     }
 
     @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/pendingList")
-    public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam(required = true) String documentType,
-                                                               @RequestParam(required = false) LocalDate startDate,
-                                                               @RequestParam(required = false) LocalDate endDate,
-                                                               @RequestParam String instCd) {
-        return ResponseWrapper.success(applyService.getPendingListByType(documentType, startDate, endDate, instCd));
+    public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam(required = false) String documentType,
+                                                               @RequestParam String instCd,
+                                                               @RequestParam String userId) {
+        return ResponseWrapper.success(applyService.getPendingListByType(documentType, instCd, userId));
     }
 
+    @Operation(summary = "승인대기내역 개수", description = "승인대기 내역의 개수를 알려줍니다.")
+    @GetMapping(value = "/pendingCount")
+    public ApiResponse<PendingCountResponseDTO> getPendingCountList(@RequestParam String instCd,
+                                                                    @RequestParam String userId) {
+        return ResponseWrapper.success(applyService.getPendingCountList(instCd, userId));
+    }
 
     @Operation(summary = "나의 신청내역 > 전체 신청목록 호출", description = "나의 모든 신청 내역을 호출합니다.")
     @GetMapping(value = "/myApplyList")
-    public ApiResponse<MyApplyResponseDTO> getAllMyApplyList(@RequestParam(required = false) String documentType,
-                                                             @RequestParam(required = false) LocalDate startDate,
-                                                             @RequestParam(required = false) LocalDate endDate,
-                                                             @RequestParam String userId) {
+    public ApiResponse<MyApplyResponseDTO> getAllMyApplyList(@RequestParam String userId) {
 
-        return ResponseWrapper.success(applyService.getAllMyApplyList(documentType, startDate, endDate, userId));
+        return ResponseWrapper.success(applyService.getAllMyApplyList(userId));
     }
 
     @Operation(summary = "나의 신청내역 > 승인대기 목록 호출", description = "나의 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")

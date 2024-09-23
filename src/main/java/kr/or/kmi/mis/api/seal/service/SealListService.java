@@ -21,13 +21,13 @@ public interface SealListService {
     List<TotalRegistrationListResponseDTO> getTotalSealRegistrationList();
 
     /* 인장 전체신청내역 */
-    List<SealMasterResponseDTO> getSealApplyByDateRangeAndInstCdAndSearch(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd);
+    List<SealMasterResponseDTO> getSealApplyByInstCd(String instCd);
 
     /* 인장 승인대기내역 */
-    List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate, String instCd);
+    List<SealPendingResponseDTO> getSealPendingList(String instCd);
 
     /* 인장 나의 전체신청내역 */
-    List<SealMyResponseDTO> getMySealApplyByDateRange(Timestamp startDate, Timestamp endDate,String userId);
+    List<SealMyResponseDTO> getMySealApply(String userId);
 
     /* 인장 나의 승인대기내역 */
     List<SealPendingResponseDTO> getMySealPendingList(String userId);

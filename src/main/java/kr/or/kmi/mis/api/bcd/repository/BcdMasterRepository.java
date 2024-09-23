@@ -12,19 +12,23 @@ import java.util.Optional;
 @Repository
 public interface BcdMasterRepository extends JpaRepository<BcdMaster, Long> {
 
-    Optional<List<BcdMaster>> findByDrafterIdAndStatus(String drafterId, @Param("status") String status);
+    Optional<List<BcdMaster>> findByDrafterIdAndStatusAndCurrentApproverIndex(String drafterId, @Param("status") String status, Integer approverIndex);
 
-    Optional<List<BcdMaster>> findByDrafterIdAndDraftDateBetween(String drafterId, Timestamp startDate, Timestamp endDate);
+    Optional<List<BcdMaster>> findByDrafterId(String drafterId);
 
-    Optional<List<BcdMaster>> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc(@Param("status") String status, Timestamp startDate, Timestamp endDate);
+    Optional<List<BcdMaster>> findAllByStatusNotOrderByDraftDateDesc(@Param("status") String status);
 
-    List<BcdMaster> findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc(String status, Timestamp startDate, Timestamp endDate);
+    List<BcdMaster> findAllByStatusOrderByDraftDateDesc(String status);
 
     Optional<BcdMaster> findByDraftIdAndStatusAndDrafterIdNot(Long draftId, String status, String drafterId);
 
+    Optional<BcdMaster> findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(Long draftId, String status, Integer approverIndex, String drafterId);
+
+    Optional<List<BcdMaster>> findAllByStatusAndCurrentApproverIndex(String status, Integer approverIndex);
+
     Optional<List<BcdMaster>> findAllByStatusAndOrderDateIsNull(String status);
 
-    Optional<List<BcdMaster>> findByDraftIdAndDraftDateBetweenAndDrafterIdNot(Long draftId, Timestamp startDate, Timestamp endDate, String drafterId);
+    Optional<List<BcdMaster>> findByDraftIdAndDrafterIdNot(Long draftId, String drafterId);
 
     Optional<List<BcdMaster>> findAllByDrafterId(String drafterId);
 }

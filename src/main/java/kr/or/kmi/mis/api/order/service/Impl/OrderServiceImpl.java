@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.EmailSettingsResponseDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -43,6 +45,7 @@ public class OrderServiceImpl implements OrderService {
     private final StdDetailRepository stdDetailRepository;
     private final ExcelService excelService;
     private final StdBcdService stdBcdService;
+    private final NotificationSendService notificationSendService;
 
     @Override
     @Transactional(readOnly = true)
@@ -77,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
         // 엑셀 데이터 생성
         byte[] excelData = excelService.generateExcel(orderRequest.getDraftIds());
@@ -98,16 +102,26 @@ public class OrderServiceImpl implements OrderService {
                 orderRequest.getFileName()
         );
 
+        SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+
         // 발주일시 업데이트
         orderRequest.getDraftIds().forEach(draftId -> {
             BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                     .orElseThrow(() -> new EntityNotFoundException("Draft not found with id " + draftId));
             bcdMaster.updateOrder(new Timestamp(System.currentTimeMillis()));
             bcdMasterRepository.save(bcdMaster);
+
+            // 알림 전송
+            BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
+                    .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found with id " + draftId));
+            notificationSendService.sendBcdOrder(bcdMaster.getDraftDate(), bcdDetail.getUserId());
+
         });
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EmailSettingsResponseDTO getEmailSettings() {
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
                 .orElseThrow(() -> new EntityNotFoundException("B003"));
