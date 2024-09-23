@@ -20,7 +20,7 @@ logging:
     web: info
     root: info
   file:
-    name: /var/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
+    name: /app/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 콘솔 출력 형식
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 파일 출력 형식
