@@ -31,17 +31,24 @@ public class DocMyResponseDTO {
 
         List<ApprovalLineResponseDTO> approvalLineResponses = new ArrayList<>();
 
-        String[] approverIds = docMaster.getApproverChain().split(", ");
-        for (int i = 0; i < approverIds.length; i++) {
-            String approverId = approverIds[i];
-            InfoDetailResponseDTO userInfo = infoService.getUserInfoDetail(approverId);
-            approvalLineResponses.add(ApprovalLineResponseDTO.builder()
-                    .userId(approverId)
-                    .userName(userInfo.getUserName())
-                    .roleNm(userInfo.getRoleNm())
-                    .positionNm(userInfo.getPositionNm())
-                    .currentApproverIndex(docMaster.getCurrentApproverIndex())
-                    .build());
+        if (docMaster.getApproverChain() != null && !docMaster.getApproverChain().isEmpty()) {
+            approvalLineResponses = new ArrayList<>();
+            String[] approverIds = docMaster.getApproverChain().split(", ");
+
+            for (String approverId : approverIds) {
+                if (approverId == null || approverId.trim().isEmpty()) {
+                    continue;
+                }
+
+                InfoDetailResponseDTO userInfo = infoService.getUserInfoDetail(approverId);
+                approvalLineResponses.add(ApprovalLineResponseDTO.builder()
+                        .userId(approverId)
+                        .userName(userInfo.getUserName())
+                        .roleNm(userInfo.getRoleNm())
+                        .positionNm(userInfo.getPositionNm())
+                        .currentApproverIndex(docMaster.getCurrentApproverIndex())
+                        .build());
+            }
         }
 
         String docType = "A".equals(division) ? "문서수신" : "문서발신";
