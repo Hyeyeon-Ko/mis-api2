@@ -31,6 +31,9 @@ FROM eclipse-temurin:22-jre-alpine
 # 최종 이미지 내 작업 디렉터리 설정
 WORKDIR /app
 
+# 시간대 환경 변수 설정
+ENV TZ=Asia/Seoul
+
 # 빌드 단계에서 생성된 JAR 파일을 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 
