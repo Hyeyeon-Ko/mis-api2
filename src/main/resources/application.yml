@@ -1,3 +1,37 @@
 spring:
   profiles:
     active: local
+
+# Prometheus 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  metrics:
+    distribution:
+      percentiles:
+        http:
+          server:
+            requests: 0.5,0.95,0.99
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+      minimum-expected-value:
+        http:
+          server:
+            requests: 1ms
+      maximum-expected-value:
+        http:
+          server:
+            requests: 10s
+prometheus:
+  metrics:
+    export:
+      enabled: true
