@@ -10,6 +10,14 @@ spring:
     database-platform: org.hibernate.dialect.MariaDBDialect  # JPA ?????? ??? ??
     hibernate:
       ddl-auto: update  # Hibernate ?? DDL ?? (??)
+    show-sql: true  # 쿼리 로그를 JPA 레벨에서도 출력
+    properties:
+      hibernate:
+        format_sql: true  # SQL 포맷팅
+        use_sql_comments: true  # SQL에 주석 추가
+        cache:
+          use_second_level_cache: false  # 2차 캐시 비활성화
+          use_query_cache: false         # 쿼리 캐시 비활성화
   servlet:
     multipart:
       max-file-size: 10MB
@@ -38,9 +46,11 @@ logging:
             JdbcTemplate: debug
             StatementCreatorUtils: trace
       hibernate:
+        SQL: DEBUG
         type:
           descriptor:
-            sql: info
+            sql:
+              BasicBinder: TRACE
     web: info
     root: info
 
