@@ -4,7 +4,6 @@ import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
@@ -39,6 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static kr.or.kmi.mis.api.confirm.service.Impl.DocConfirmServiceImpl.createDocId;
@@ -118,22 +118,25 @@ public class DocServiceImpl implements DocService {
         DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
         docDetailRepository.save(docDetail);
 
-        // ADMIN 권한 부여
-        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
-
         String firstApproverId = sendDocRequestDTO.getApproverIds().getFirst();
         InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(firstApproverId);
-        String userNm = infoDetailResponseDTO.getUserName();
-        String instNm = infoDetailResponseDTO.getInstNm();
-        String deptNm = infoDetailResponseDTO.getDeptNm();
 
-        boolean authorityExists = authorityList.stream()
+        // ADMIN 권한 부여
+        grantAdminAuthorityIfAbsent(firstApproverId, infoDetailResponseDTO);
+
+        // 권한 업데이트 필요 여부 체크 및 업데이트
+        updateSidebarPermissionsIfNeeded(firstApproverId);
+    }
+
+    private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetailResponseDTO) {
+        boolean authorityExists = authorityRepository.findAllByDeletedtIsNull()
+                .stream()
                 .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
 
         if (!authorityExists) {
             AuthorityRequestDTO requestDTO = AuthorityRequestDTO.builder()
                     .userId(firstApproverId)
-                    .userNm(userNm)
+                    .userNm(infoDetailResponseDTO.getUserName())
                     .userRole("ADMIN")
                     .detailRole(null)
                     .build();
@@ -141,32 +144,56 @@ public class DocServiceImpl implements DocService {
             authorityService.addAdmin(requestDTO);
 
             // 사이드바 권한 부여
-            StdDetailRequestDTO stdDetailRequestDTO = StdDetailRequestDTO.builder()
-                    .detailCd(firstApproverId)
-                    .groupCd("B002")
-                    .detailNm(instNm + " " + deptNm)
-                    .etcItem1(userNm)
-                    .etcItem2("D-2")
-                    .build();
-
-            stdDetailService.addInfo(stdDetailRequestDTO);
+            stdDetailService.addInfo(
+                    StdDetailRequestDTO.builder()
+                            .detailCd(firstApproverId)
+                            .groupCd("B002")
+                            .detailNm(infoDetailResponseDTO.getInstNm() + " " + infoDetailResponseDTO.getDeptNm())
+                            .etcItem1(infoDetailResponseDTO.getUserName())
+                            .etcItem2("D-2")
+                            .build()
+            );
         }
+    }
 
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, firstApproverId)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+    private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
+        StdGroup groupB002 = findStdGroup("B002");
+        StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
 
-        if (!"D-2".equals(stdDetail.getEtcItem2()) && !"D-2".equals(stdDetail.getEtcItem3())) {
-            stdDetail.updateEtcItem3("D-2");
+        List<String> allowedValues = Arrays.asList("D", "D-1", "D-2");
+
+        if (!allowedValues.contains(detailB002.getEtcItem1()) && !allowedValues.contains(detailB002.getEtcItem3()) && !allowedValues.contains(detailB002.getEtcItem5())) {
+            detailB002.updateEtcItem3("D-2");
             needsUpdate = true;
         }
 
-        if (needsUpdate) {
-            stdDetailRepository.save(stdDetail);
+        StdGroup stdGroupC002 = findStdGroup("C002");
+        List<StdDetail> detailsC002 = findAllActiveDetails(stdGroupC002);
+
+        if (detailsC002.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+            needsUpdate = false;
         }
+
+        if (needsUpdate) {
+            stdDetailRepository.save(detailB002);
+        }
+    }
+
+    private StdGroup findStdGroup(String groupCd) {
+        return stdGroupRepository.findByGroupCd(groupCd)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
+    }
+
+    private StdDetail findStdDetail(StdGroup group, String detailCd) {
+        return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
+                .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
+    }
+
+    private List<StdDetail> findAllActiveDetails(StdGroup group) {
+        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
+                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
     }
 
     @Override

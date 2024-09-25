@@ -12,6 +12,7 @@ import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,9 +25,11 @@ public class CorpDocListController {
 
     @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
     @GetMapping(value = "/issueList")
-    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(@RequestParam(required = false) String searchType,
+    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(@RequestParam(required = false) LocalDate startDate,
+                                                                        @RequestParam(required = false) LocalDate endDate,
+                                                                        @RequestParam(required = false) String searchType,
                                                                         @RequestParam(required = false) String keyword) {
-        return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(searchType, keyword));
+        return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(startDate, endDate, searchType, keyword));
     }
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")

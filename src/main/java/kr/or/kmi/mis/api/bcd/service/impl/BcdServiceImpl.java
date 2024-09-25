@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.bcd.service.impl;
 
-import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
@@ -11,7 +10,6 @@ import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.*;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
-import kr.or.kmi.mis.api.bcd.repository.impl.BcdSampleQueryRepositoryImpl;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
@@ -53,148 +51,176 @@ public class BcdServiceImpl implements BcdService {
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
 
         // 명함 신청 로직
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("A");
-        bcdMaster = bcdMasterRepository.save(bcdMaster);
-
-        Long draftId = bcdMaster.getDraftId();
-        BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId);
-        bcdDetailRepository.save(bcdDetail);
-
-        // ADMIN 권한 부여
-        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
+        BcdMaster bcdMaster = saveBcdMaster(bcdRequestDTO);
+        saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
 
         String firstApproverId = bcdRequestDTO.getApproverIds().getFirst();
-        InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(firstApproverId);
-        String userNm = infoDetailResponseDTO.getUserName();
-        String instNm = infoDetailResponseDTO.getInstNm();
-        String deptNm = infoDetailResponseDTO.getDeptNm();
+        InfoDetailResponseDTO infoDetail = infoService.getUserInfoDetail(firstApproverId);
 
-        boolean authorityExists = authorityList.stream()
+        // ADMIN 권한 부여 및 사이드바 권한 부여
+        grantAdminAuthorityIfAbsent(firstApproverId, infoDetail);
+
+        // 권한 업데이트 필요 여부 체크 및 업데이트
+        updateSidebarPermissionsIfNeeded(firstApproverId);
+    }
+
+    private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetail) {
+        boolean authorityExists = authorityRepository.findAllByDeletedtIsNull()
+                .stream()
                 .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
 
         if (!authorityExists) {
-            AuthorityRequestDTO requestDTO = AuthorityRequestDTO.builder()
+            AuthorityRequestDTO authorityRequest = AuthorityRequestDTO.builder()
                     .userId(firstApproverId)
-                    .userNm(userNm)
+                    .userNm(infoDetail.getUserName())
                     .userRole("ADMIN")
-                    .detailRole(null)
                     .build();
 
-            authorityService.addAdmin(requestDTO);
+            authorityService.addAdmin(authorityRequest);
 
-            // 사이드바 권한 부여
-            StdDetailRequestDTO stdDetailRequestDTO = StdDetailRequestDTO.builder()
-                    .detailCd(firstApproverId)
-                    .groupCd("B002")
-                    .detailNm(instNm + " " + deptNm)
-                    .etcItem1(userNm)
-                    .etcItem2("A-2")
-                    .build();
-
-            stdDetailService.addInfo(stdDetailRequestDTO);
-        }
-
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, firstApproverId)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        boolean needsUpdate = false;
-
-        if (!"A-2".equals(stdDetail.getEtcItem2()) && !"A-2".equals(stdDetail.getEtcItem3())) {
-            stdDetail.updateEtcItem3("A-2");
-            needsUpdate = true;
-        }
-
-        if (needsUpdate) {
-            stdDetailRepository.save(stdDetail);
+            // 사이드바 권한 추가
+            stdDetailService.addInfo(
+                    StdDetailRequestDTO.builder()
+                            .detailCd(firstApproverId)
+                            .groupCd("B002")
+                            .detailNm(infoDetail.getInstNm() + " " + infoDetail.getDeptNm())
+                            .etcItem1(infoDetail.getUserName())
+                            .etcItem2("A-2")
+                            .build()
+            );
         }
     }
 
-    @Override
-    public void applyBcdByLeader(BcdRequestDTO bcdRequestDTO) {
-        // 명함 신청 로직
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("B");
-        bcdMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
-        bcdMaster = bcdMasterRepository.save(bcdMaster);
+    private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
+        StdGroup groupB002 = findStdGroup("B002");
+        StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
-        Long draftId = bcdMaster.getDraftId();
+        boolean needsUpdate = false;
+
+        List<String> allowedValues = Arrays.asList("A", "A-1", "A-2");
+
+        if (!allowedValues.contains(detailB002.getEtcItem2()) && !allowedValues.contains(detailB002.getEtcItem3())) {
+            detailB002.updateEtcItem3("A-2");
+            needsUpdate = true;
+        }
+
+        StdGroup stdGroupC002 = findStdGroup("C002");
+        List<StdDetail> detailsC002 = findAllActiveDetails(stdGroupC002);
+
+        if (detailsC002.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+            needsUpdate = false;
+        }
+
+        if (needsUpdate) {
+            stdDetailRepository.save(detailB002);
+        }
+    }
+
+    private BcdMaster saveBcdMaster(BcdRequestDTO bcdRequestDTO) {
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("A");
+        return bcdMasterRepository.save(bcdMaster);
+    }
+
+    private void saveBcdDetail(BcdRequestDTO bcdRequestDTO, Long draftId) {
         BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId);
         bcdDetailRepository.save(bcdDetail);
+    }
+
+    private StdGroup findStdGroup(String groupCd) {
+        return stdGroupRepository.findByGroupCd(groupCd)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
+    }
+
+    private StdDetail findStdDetail(StdGroup group, String detailCd) {
+        return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
+                .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
+    }
+
+    private List<StdDetail> findAllActiveDetails(StdGroup group) {
+        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
+                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
+    }
+
+    @Override
+    @Transactional
+    public void applyBcdByLeader(BcdRequestDTO bcdRequestDTO) {
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("B");
+        bcdMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        bcdMasterRepository.save(bcdMaster);
+
+        saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
     }
 
     @Override
     @Transactional
     public void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO) {
+        BcdDetail existingDetail = getBcdDetail(draftId);
+        BcdMaster existingMaster = getBcdMaster(draftId);
 
-        // 1. 명함상세 조회
-        BcdDetail existingDetailOpt = bcdDetailRepository.findById(draftId)
-                .orElseThrow(()-> new IllegalArgumentException("명함 신청 이력이 없습니다."));
-        BcdMaster existingMasterOpt = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new IllegalArgumentException("명함 신청 이력이 없습니다."));
+        bcdHistoryService.createBcdHistory(existingDetail);
 
-        // 2. 현재 명함상세 정보, 상세이력 테이블에 저장
-        bcdHistoryService.createBcdHistory(existingDetailOpt);
-
-        // 3. 수정된 명함상세 정보로 명함상세 update
-        //   1) 수정자 조회
-        //   2) 정보 업데이트
         String updtr = infoService.getUserInfo().getUserName();
-        existingDetailOpt.update(updateBcdRequestDTO, updtr);
-        existingMasterOpt.updateTitle(updateBcdRequestDTO);
-        bcdDetailRepository.save(existingDetailOpt);
+        existingDetail.update(updateBcdRequestDTO, updtr);
+        existingMaster.updateTitle(updateBcdRequestDTO);
+
+        bcdDetailRepository.save(existingDetail);
+    }
+
+    private BcdDetail getBcdDetail(Long draftId) {
+        return bcdDetailRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("BcdDetail not found: " + draftId));
+    }
+
+    private BcdMaster getBcdMaster(Long draftId) {
+        return bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("BcdMaster not found: " + draftId));
     }
 
     @Override
     @Transactional
     public void cancelBcdApply(Long draftId) {
-
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new  IllegalArgumentException("Not Found : " + draftId));
-
+        BcdMaster bcdMaster = getBcdMaster(draftId);
         bcdMaster.updateStatus("F");
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<BcdMasterResponseDTO> getBcdApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
-
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return bcdMasters.stream()
-                .filter(bcdMaster -> {
-                    if (bcdMaster.getStatus().equals("A")) {
-                        String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
-                        int currentIndex = bcdMaster.getCurrentApproverIndex();
+                .filter(bcdMaster -> isValidForSearch(bcdMaster, instCd, searchType, keyword, userId))
+                .map(bcdMaster -> BcdMasterResponseDTO.of(bcdMaster, instCd, stdBcdService.getInstNm(instCd)))
+                .collect(Collectors.toList());
+    }
 
-                        if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
-                            return false;
-                        }
-                    }
+    private boolean isValidForSearch(BcdMaster bcdMaster, String instCd, String searchType, String keyword, String userId) {
+        if (bcdMaster.getStatus().equals("A")) {
+            String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
+            int currentIndex = bcdMaster.getCurrentApproverIndex();
 
-                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
+            if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
+                return false;
+            }
+        }
 
-                    if (!bcdDetail.getInstCd().equals(instCd)) return false;
+        BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
+                .orElseThrow(() -> new IllegalArgumentException("BcdDetail not found: " + bcdMaster.getDraftId()));
 
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" ->
-                                    bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
-                            case "제목" -> bcdMaster.getTitle().contains(keyword);
-                            case "신청자" -> bcdMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
-                })
-                .map(bcdMaster -> {
-                    BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
-                    result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
-                    return result;
-                })
-                .toList();
+        if (!bcdDetail.getInstCd().equals(instCd)) {
+            return false;
+        }
+
+        if (searchType != null && keyword != null) {
+            return switch (searchType) {
+                case "전체" -> bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
+                case "제목" -> bcdMaster.getTitle().contains(keyword);
+                case "신청자" -> bcdMaster.getDrafter().contains(keyword);
+                default -> true;
+            };
+        }
+        return true;
     }
 
     @Override
