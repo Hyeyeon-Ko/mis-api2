@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: prd
 
 # Prometheus 설정
 management:
