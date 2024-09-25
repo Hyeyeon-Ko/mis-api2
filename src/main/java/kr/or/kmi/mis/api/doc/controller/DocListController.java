@@ -10,6 +10,7 @@ import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,10 +23,12 @@ public class DocListController {
 
     @Operation(summary = "get doc receive applyList", description = "문서수신대장 조회")
     @GetMapping("/receiveList")
-    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam(required = false) String searchType,
+    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam(required = false) LocalDate startDate,
+                                                            @RequestParam(required = false) LocalDate endDate,
+                                                            @RequestParam(required = false) String searchType,
                                                             @RequestParam(required = false) String keyword,
                                                             @RequestParam String instCd) {
-        return ResponseWrapper.success(docListService.getReceiveApplyList(searchType, keyword, instCd));
+        return ResponseWrapper.success(docListService.getReceiveApplyList(startDate, endDate, searchType, keyword, instCd));
     }
 
     @Operation(summary = "get doc receive applyList by deptCd", description = "부서별 문서수신대장 조회")
@@ -36,10 +39,12 @@ public class DocListController {
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")
     @GetMapping("/sendList")
-    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam(required = false) String searchType,
+    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam(required = false) LocalDate startDate,
+                                                         @RequestParam(required = false) LocalDate endDate,
+                                                         @RequestParam(required = false) String searchType,
                                                          @RequestParam(required = false) String keyword,
                                                          @RequestParam String instCd) {
-        return ResponseWrapper.success(docListService.getSendApplyList(searchType, keyword, instCd));
+        return ResponseWrapper.success(docListService.getSendApplyList(startDate, endDate, searchType, keyword, instCd));
     }
 
     @Operation(summary = "get deptList", description = "문서수신대장 페이지 조회시 -> 부서 선택")
