@@ -6,10 +6,12 @@ spring:
     username: user  # 데이터베이스 사용자 이름
     password: kmi12345  # 데이터베이스 비밀번호
     driver-class-name: org.mariadb.jdbc.Driver  # 마리아DB JDBC 드라이버 클래스
-    jpa:
-      database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
-      hibernate:
-        ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
+    hikari:
+      maximum-pool-size: 20
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
+    hibernate:
+      ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
     show-sql: true  # 쿼리 로그를 JPA 레벨에서도 출력
     properties:
       hibernate:
@@ -29,6 +31,7 @@ external:
     url: http://172.16.250.85/mis/userDeptInfo
   orgChart:
     url: http://172.16.250.85/mis/userList
+
 
 file:
   upload-dir: uploads/
@@ -52,6 +55,12 @@ logging:
               BasicBinder: TRACE
     web: info
     root: info
+  file:
+    name: /app/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 콘솔 출력 형식
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 파일 출력 형식
+
 
 server:
   port: 9090
