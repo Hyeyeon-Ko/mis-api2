@@ -13,7 +13,7 @@ public interface DocMasterRepository extends JpaRepository<DocMaster, Long> {
 
     Optional<DocMaster> findByDraftIdAndInstCd(Long draftId, String instCd);
 
-    Optional<List<DocMaster>> findByDrafterId(String userId);
+    Optional<List<DocMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp from, Timestamp to);
 
     Optional<List<DocMaster>> findByDrafterIdAndStatusAndCurrentApproverIndex(String userId, String status, Integer approverIndex);
 
@@ -21,7 +21,7 @@ public interface DocMasterRepository extends JpaRepository<DocMaster, Long> {
 
     List<DocMaster> findAllByDeptCd(String deptCd);
 
-    List<DocMaster> findAllByStatusNotAndInstCdOrderByDraftDateDesc(String status, String instCd);
+    List<DocMaster> findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, Timestamp from, Timestamp to);
 
-    List<DocMaster> findAllByStatusAndInstCdOrderByDraftDateDesc(String status, String instCd);
+    List<DocMaster> findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, Timestamp from, Timestamp to);
 }

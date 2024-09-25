@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,13 +235,16 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     /*신청이력조회*/
     @Override
     @Transactional(readOnly = true)
-    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(Long draftId) {
+    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, Long draftId) {
+
+        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
 
         String drafterId = bcdMaster.getDrafterId();
 
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterId(drafterId)
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(drafterId, timestamps[0], timestamps[1])
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + drafterId));
 
         Map<Long, BcdDetail> bcdDetailMap = new HashMap<>();
@@ -260,5 +265,20 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                     .quantity(bcdDetail != null ? bcdDetail.getQuantity() : null)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
+
+        if (startDate == null) {
+            startDate = LocalDate.now().minusMonths(1);
+        }
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
+
+        return new Timestamp[]{startTimestamp, endTimestamp};
     }
 }

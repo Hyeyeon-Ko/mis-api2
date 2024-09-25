@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
@@ -40,6 +41,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import static kr.or.kmi.mis.api.confirm.service.Impl.DocConfirmServiceImpl.createDocId;
+
 @Service
 @RequiredArgsConstructor
 public class DocServiceImpl implements DocService {
@@ -73,18 +76,34 @@ public class DocServiceImpl implements DocService {
         docMaster = docMasterRepository.save(docMaster);
 
         String[] savedFileInfo = saveFile(file);
-        saveReceiveDocDetail(receiveDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        docDetailRepository.save(docDetail);
     }
 
     @Override
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
+
         // 문서발신 로직
-        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("B");
+        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("E");
+        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
         docMaster = docMasterRepository.save(docMaster);
 
         String[] savedFileInfo = saveFile(file);
-        saveReceiveDocDetail(receiveDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
 
+        // 문서번호 생성해, 업데이트
+        DocDetail lastDocDetail = docDetailRepository
+                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
+        String docId = "";
+        if (lastDocDetail != null) {
+            docId = createDocId(lastDocDetail.getDocId());
+        } else {
+            docId = createDocId("");
+        }
+
+        docDetail.updateDocId(docId);
+
+        docDetailRepository.save(docDetail);
     }
 
     @Override
@@ -96,7 +115,8 @@ public class DocServiceImpl implements DocService {
         docMaster = docMasterRepository.save(docMaster);
 
         String[] savedFileInfo = saveFile(file);
-        saveSendDocDetail(sendDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        docDetailRepository.save(docDetail);
 
         // ADMIN 권한 부여
         List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
@@ -153,11 +173,26 @@ public class DocServiceImpl implements DocService {
     public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
 
         // 문서발신 로직
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("B");
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("E");
+        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
         docMaster = docMasterRepository.save(docMaster);
 
         String[] savedFileInfo = saveFile(file);
-        saveSendDocDetail(sendDocRequestDTO, docMaster.getDraftId(), savedFileInfo);
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+
+        // 문서번호 생성해, 업데이트
+        DocDetail lastDocDetail = docDetailRepository
+                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
+        String docId = "";
+        if (lastDocDetail != null) {
+            docId = createDocId(lastDocDetail.getDocId());
+        } else {
+            docId = createDocId("");
+        }
+
+        docDetail.updateDocId(docId);
+
+        docDetailRepository.save(docDetail);
     }
 
     @Override
@@ -213,12 +248,12 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyResponseDTO> getMyDocApply(String userId) {
-        return new ArrayList<>(this.getMyDocMasterList(userId));
+    public List<DocMyResponseDTO> getMyDocApply(Timestamp startDate, Timestamp endDate, String userId) {
+        return new ArrayList<>(this.getMyDocMasterList(startDate, endDate, userId));
     }
 
-    public List<DocMyResponseDTO> getMyDocMasterList(String userId) {
-        List<DocMaster> docMasterList = docMasterRepository.findByDrafterId(userId)
+    public List<DocMyResponseDTO> getMyDocMasterList(Timestamp startDate, Timestamp endDate, String userId) {
+        List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return docMasterList.stream()
@@ -237,14 +272,35 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd, String userId) {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdOrderByDraftDateDesc("F", instCd);
+    public List<DocMasterResponseDTO> getDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
 
         if (docMasters == null) {
             docMasters = new ArrayList<>();
         }
 
         return docMasters.stream()
+                .filter(docMaster -> {
+                    if (docMaster.getStatus().equals("A")) {
+                        String[] approverChainArray = docMaster.getApproverChain().split(", ");
+                        int currentIndex = docMaster.getCurrentApproverIndex();
+
+                        if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
+                            return false;
+                        }
+                    }
+
+                    if (searchType != null && keyword != null) {
+                        return switch (searchType) {
+                            case "전체" ->
+                                    docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
+                            case "제목" -> docMaster.getTitle().contains(keyword);
+                            case "신청자" -> docMaster.getDrafter().contains(keyword);
+                            default -> true;
+                        };
+                    }
+                    return true;
+                })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
@@ -257,9 +313,9 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(String instCd, String userId) {
+    public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository
-                .findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
+                .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
         return docMasters.stream()
                 .filter(docMaster -> {
@@ -330,16 +386,6 @@ public class DocServiceImpl implements DocService {
         }
 
         return new String[]{fileName, filePath};
-    }
-
-    private void saveSendDocDetail(SendDocRequestDTO sendDocRequestDTO, Long draftId, String[] savedFileInfo) {
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(draftId, savedFileInfo[0], savedFileInfo[1]);
-        docDetailRepository.save(docDetail);
-    }
-
-    private void saveReceiveDocDetail(ReceiveDocRequestDTO receiveDocRequestDTO, Long draftId, String[] savedFileInfo) {
-        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(draftId, savedFileInfo[0], savedFileInfo[1]);
-        docDetailRepository.save(docDetail);
     }
 
     private void updateDocDetail(Object docRequestOrUpdateDTO, Long draftId, String[] savedFileInfo) {

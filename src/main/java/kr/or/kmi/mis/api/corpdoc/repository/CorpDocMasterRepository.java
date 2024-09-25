@@ -13,11 +13,11 @@ public interface CorpDocMasterRepository extends JpaRepository<CorpDocMaster, Lo
 
     Optional<List<CorpDocMaster>> findByDrafterIdAndStatus(String userId, String status);
 
-    Optional<List<CorpDocMaster>> findByDrafterId(String userId);
+    Optional<List<CorpDocMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp from, Timestamp to);
 
-    List<CorpDocMaster> findAllByStatusNotOrderByDraftDateDesc(String status);
+    List<CorpDocMaster> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc(String status, Timestamp from, Timestamp to);
 
-    List<CorpDocMaster> findAllByStatusOrderByDraftDateDesc(String status);
+    List<CorpDocMaster> findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc(String status, Timestamp from, Timestamp to);
 
     List<CorpDocMaster> findAllByStatusOrderByDraftDateAsc(String status);
 

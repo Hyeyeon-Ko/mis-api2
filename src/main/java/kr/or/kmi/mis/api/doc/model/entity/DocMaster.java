@@ -95,4 +95,8 @@ public class DocMaster extends BaseSystemFieldEntity {
     public void updateStatus(String status) {
         this.status = status;
     }
+
+    public void updateRespondDate(Timestamp respondDate) {
+        this.respondDate = respondDate;
+    }
 }

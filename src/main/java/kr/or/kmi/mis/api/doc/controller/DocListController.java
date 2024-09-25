@@ -22,8 +22,10 @@ public class DocListController {
 
     @Operation(summary = "get doc receive applyList", description = "문서수신대장 조회")
     @GetMapping("/receiveList")
-    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam String instCd) {
-        return ResponseWrapper.success(docListService.getReceiveApplyList(instCd));
+    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam(required = false) String searchType,
+                                                            @RequestParam(required = false) String keyword,
+                                                            @RequestParam String instCd) {
+        return ResponseWrapper.success(docListService.getReceiveApplyList(searchType, keyword, instCd));
     }
 
     @Operation(summary = "get doc receive applyList by deptCd", description = "부서별 문서수신대장 조회")
@@ -34,8 +36,10 @@ public class DocListController {
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")
     @GetMapping("/sendList")
-    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam String instCd) {
-        return ResponseWrapper.success(docListService.getSendApplyList(instCd));
+    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam(required = false) String searchType,
+                                                         @RequestParam(required = false) String keyword,
+                                                         @RequestParam String instCd) {
+        return ResponseWrapper.success(docListService.getSendApplyList(searchType, keyword, instCd));
     }
 
     @Operation(summary = "get deptList", description = "문서수신대장 페이지 조회시 -> 부서 선택")

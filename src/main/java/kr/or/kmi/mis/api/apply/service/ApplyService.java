@@ -9,9 +9,9 @@ import java.time.LocalDate;
 
 public interface ApplyService {
 
-    ApplyResponseDTO getAllApplyList(String documentType, String instCd, String userId);
-    MyApplyResponseDTO getAllMyApplyList(String userId);
-    PendingResponseDTO getPendingListByType(String documentType, String instCd, String userId);
-    PendingCountResponseDTO getPendingCountList(String instCd, String userId);
+    ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd, String userId);
+    MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate, String userId);
+    PendingResponseDTO getPendingListByType(String documentType, LocalDate startDate, LocalDate endDate, String instCd, String userId);
+    PendingCountResponseDTO getPendingCountList(String documentType, LocalDate startDate, LocalDate endDate, String instCd, String userId);
     PendingResponseDTO getMyPendingList(String userId);
 }

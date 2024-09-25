@@ -9,10 +9,10 @@ import java.util.List;
 public interface SealListService {
 
     /* 인장관리대장 */
-    List<ManagementListResponseDTO> getSealManagementList(LocalDate startDate, LocalDate endDate, String instCd);
+    List<ManagementListResponseDTO> getSealManagementList(String searchType, String keyword, String instCd);
 
     /* 인장반출대장 */
-    List<ExportListResponseDTO> getSealExportList(LocalDate startDate, LocalDate endDate, String instCd);
+    List<ExportListResponseDTO> getSealExportList(String searchType, String keyword, String instCd);
 
     /* 인장등록대장(센터별) */
     List<RegistrationListResponseDTO> getSealRegistrationList(String instCd);
@@ -21,13 +21,13 @@ public interface SealListService {
     List<TotalRegistrationListResponseDTO> getTotalSealRegistrationList();
 
     /* 인장 전체신청내역 */
-    List<SealMasterResponseDTO> getSealApplyByInstCd(String instCd);
+    List<SealMasterResponseDTO> getSealApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd);
 
     /* 인장 승인대기내역 */
-    List<SealPendingResponseDTO> getSealPendingList(String instCd);
+    List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate, String instCd);
 
     /* 인장 나의 전체신청내역 */
-    List<SealMyResponseDTO> getMySealApply(String userId);
+    List<SealMyResponseDTO> getMySealApply(Timestamp startDate, Timestamp endDate, String userId);
 
     /* 인장 나의 승인대기내역 */
     List<SealPendingResponseDTO> getMySealPendingList(String userId);

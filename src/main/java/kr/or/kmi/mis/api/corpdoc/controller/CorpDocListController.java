@@ -24,14 +24,17 @@ public class CorpDocListController {
 
     @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
     @GetMapping(value = "/issueList")
-    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList() {
-        return ResponseWrapper.success(corpDocListService.getCorpDocIssueList());
+    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(@RequestParam(required = false) String searchType,
+                                                                        @RequestParam(required = false) String keyword) {
+        return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(searchType, keyword));
     }
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")
     @GetMapping(value = "/rnpList")
-    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnpList(@RequestParam("instCd") String instCd) {
-        return ResponseWrapper.success(corpDocListService.getCorpDocRnpList(instCd));
+    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnpList(@RequestParam(required = false) String searchType,
+                                                                      @RequestParam(required = false) String keyword,
+                                                                      @RequestParam("instCd") String instCd) {
+        return ResponseWrapper.success(corpDocListService.getCorpDocRnpList(searchType, keyword, instCd));
     }
 
     @Operation(summary = "issue corpDoc", description = "법인서류 발급")

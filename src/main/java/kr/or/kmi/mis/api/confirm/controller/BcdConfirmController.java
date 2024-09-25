@@ -10,6 +10,7 @@ import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -42,7 +43,9 @@ public class BcdConfirmController {
 
     @Operation(summary = "get bcd application history by drafter", description = "기안자의 명함신청 이력 조회")
     @GetMapping("/history/{draftId}")
-    public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@PathVariable Long draftId) {
-        return ResponseWrapper.success(bcdConfirmService.getBcdApplicationHistory(draftId));
+    public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@RequestParam(required = false) LocalDate startDate,
+                                                                          @RequestParam(required = false) LocalDate endDate,
+                                                                          @PathVariable Long draftId) {
+        return ResponseWrapper.success(bcdConfirmService.getBcdApplicationHistory(startDate, endDate, draftId));
     }
 }
