@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,20 +34,27 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public CorpDocIssueListResponseDTO getCorpDocIssueList(String searchType, String keyword) {
+    public CorpDocIssueListResponseDTO getCorpDocIssueList(LocalDate startDate, LocalDate endDate, String searchType, String keyword) {
 
         // 1. 발급완료+입고된 법인서류, 발급대기 중인 법인서류 모두 호출
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("G");
         corpDocMasters.addAll(corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("X"));
         List<CorpDocMaster> corpDocPendingMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("B");
 
-        // 2. searchType과 keyword를 통한 필터링
+        // 2. searchType과 keyword, 그리고 startDate와 endDate를 통한 필터링
         corpDocMasters = corpDocMasters.stream()
                 .filter(corpDocMaster -> {
                     boolean matchesSearchType = true;
 
                     CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+                    if (startDate != null && endDate != null && corpDocDetail.getIssueDate() != null) {
+                        LocalDate issueDate = corpDocDetail.getIssueDate().toLocalDateTime().toLocalDate();
+                        if (issueDate.isBefore(startDate) || issueDate.isAfter(endDate)) {
+                            return false;
+                        }
+                    }
 
                     if (searchType != null && keyword != null && !keyword.isEmpty()) {
                         matchesSearchType = switch (searchType) {

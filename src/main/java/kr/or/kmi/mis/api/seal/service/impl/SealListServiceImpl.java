@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
-import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
@@ -11,20 +10,16 @@ import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.repository.SealRegisterDetailRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static kr.or.kmi.mis.api.doc.service.impl.DocListServiceImpl.dateSet;
 
 @Service
 @RequiredArgsConstructor

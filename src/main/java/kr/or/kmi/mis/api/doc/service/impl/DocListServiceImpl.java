@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.doc.service.impl;
 
+import kr.or.kmi.mis.api.apply.service.Impl.ApplyServiceImpl;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
@@ -16,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,11 +35,14 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getReceiveApplyList(String searchType, String keyword, String instCd) {
+    public List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
+
+        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+
         return docDetailRepository.findAllByDocIdNotNullAndDivision("A")
                 .stream()
                 .filter(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
                     if (docMaster == null) {
                         return false;
                     }
@@ -89,11 +95,14 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getSendApplyList(String searchType, String keyword, String instCd) {
+    public List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
+
+        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+
         return docDetailRepository.findAllByDocIdNotNullAndDivision("B")
                 .stream()
                 .filter(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
                     if (docMaster == null) {
                         return false;
                     }
@@ -140,15 +149,7 @@ public class DocListServiceImpl implements DocListService {
                 .toList();
     }
 
-    public static LocalDate[] dateSet(LocalDate startDate, LocalDate endDate) {
-
-        if(Objects.isNull(endDate)) {
-            endDate = LocalDate.now();
-        }
-        if(Objects.isNull(startDate)) {
-            startDate = endDate.minusMonths(1);
-        }
-
-        return new LocalDate[]{startDate, endDate};
+    public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
+        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
     }
 }

@@ -23,12 +23,13 @@ public class BcdMasterResponseDTO {
     private String docType;
 
     // BcdMaster Entity -> BcdMaster response Dto
-    public static BcdMasterResponseDTO of(BcdMaster bcdMaster, String instCd) {
+    public static BcdMasterResponseDTO of(BcdMaster bcdMaster, String instCd, String instNm) {
 
         return BcdMasterResponseDTO.builder()
                 .draftId(bcdMaster.getDraftId())
                 .title(bcdMaster.getTitle())
                 .instCd(instCd)
+                .instNm(instNm)
                 .draftDate(bcdMaster.getDraftDate())
                 .respondDate(bcdMaster.getRespondDate())
                 .orderDate(bcdMaster.getOrderDate())
