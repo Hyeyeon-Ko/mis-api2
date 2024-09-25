@@ -1,9 +1,9 @@
 package kr.or.kmi.mis.api.seal.model.request;
 
 import kr.or.kmi.mis.api.seal.model.entity.SealRegisterDetail;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class SealRegisterRequestDTO {
 
     private String drafterId;
@@ -15,11 +15,12 @@ public class SealRegisterRequestDTO {
     private String draftDate;
     private String instCd;
 
-    public SealRegisterDetail toDetailEntity(String sealImageName, String sealImagePath) {
+    private String sealImageBase64;
+
+    public SealRegisterDetail toDetailEntity() {
         return SealRegisterDetail.builder()
                 .sealNm(sealNm)
-                .sealImage(sealImageName)
-                .sealImagePath(sealImagePath)
+                .sealImage(sealImageBase64)
                 .useDept(useDept)
                 .purpose(purpose)
                 .manager(manager)
