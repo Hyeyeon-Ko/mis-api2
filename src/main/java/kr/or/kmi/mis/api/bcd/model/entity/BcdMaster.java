@@ -113,6 +113,10 @@ public class BcdMaster {
     }
 
     public void updateTitle(BcdUpdateRequestDTO updateBcdRequestDTO) {
-        this.title = this.title = String.format("[%s]명함신청서(%s)", updateBcdRequestDTO.getTeamNm(), updateBcdRequestDTO.getKorNm());
+        this.title = String.format("[%s]명함신청서(%s)", updateBcdRequestDTO.getTeamNm(), updateBcdRequestDTO.getKorNm());
+    }
+
+    public void updateRespondDate(Timestamp ResponseDate) {
+        this.respondDate = ResponseDate;
     }
 }

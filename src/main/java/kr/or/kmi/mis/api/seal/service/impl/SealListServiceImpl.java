@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
@@ -37,17 +38,33 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ManagementListResponseDTO> getSealManagementList(LocalDate startDate, LocalDate endDate, String instCd) {
-
-        LocalDate[] localDates = dateSet(startDate, endDate);
+    public List<ManagementListResponseDTO> getSealManagementList(String searchType, String keyword, String instCd) {
 
         List<SealMaster> sealMasters = sealMasterRepository.findAllByStatusAndDivisionAndInstCd("E", "A", instCd).orElse(Collections.emptyList());
 
-        return sealMasters.stream()
+        sealMasters = sealMasters.stream()
                 .filter(sealMaster -> {
-                    LocalDate draftDate = sealMaster.getDraftDate().toLocalDateTime().toLocalDate();
-                    return !draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1]);
+                    SealImprintDetail sealImprintDetail = sealImprintDetailRepository.findById(sealMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("SealImprintDetail not found for draftId: " + sealMaster.getDraftId()));
+
+                    boolean matchesSearchType = true;
+
+                    if (searchType != null && keyword != null && !keyword.isEmpty()) {
+                        matchesSearchType = switch (searchType) {
+                            case "전체" -> sealImprintDetail.getUseDate().contains(keyword) ||
+                                    sealImprintDetail.getSubmission().contains(keyword) ||
+                                    sealImprintDetail.getPurpose().contains(keyword);
+                            case "일자" -> sealImprintDetail.getUseDate().contains(keyword);
+                            case "제출처" -> sealImprintDetail.getSubmission().contains(keyword);
+                            case "사용목적" -> sealImprintDetail.getPurpose().contains(keyword);
+                            default -> true;
+                        };
+                    }
+                    return matchesSearchType;
                 })
+                .toList();
+
+        return sealMasters.stream()
                 .map(sealMaster -> {
                     SealImprintDetail sealImprintDetail = sealImprintDetailRepository.findById(sealMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("SealImprintDetail not found for draftId: " + sealMaster.getDraftId()));
@@ -59,17 +76,33 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExportListResponseDTO> getSealExportList(LocalDate startDate, LocalDate endDate, String instCd) {
-
-        LocalDate[] localDates = dateSet(startDate, endDate);
+    public List<ExportListResponseDTO> getSealExportList(String searchType, String keyword, String instCd) {
 
         List<SealMaster> sealMasters = sealMasterRepository.findAllByStatusAndDivisionAndInstCd("E", "B", instCd).orElse(Collections.emptyList());
 
-        return sealMasters.stream()
+        sealMasters = sealMasters.stream()
                 .filter(sealMaster -> {
-                    LocalDate draftDate = sealMaster.getDraftDate().toLocalDateTime().toLocalDate();
-                    return !draftDate.isBefore(localDates[0]) && !draftDate.isAfter(localDates[1]);
+                    SealExportDetail sealExportDetail = sealExportDetailRepository.findById(sealMaster.getDraftId())
+                            .orElseThrow(() -> new IllegalArgumentException("SealExportDetail not found for draftId: " + sealMaster.getDraftId()));
+
+                    boolean matchesSearchType = true;
+
+                    if (searchType != null && keyword != null && !keyword.isEmpty()) {
+                        matchesSearchType = switch (searchType) {
+                            case "전체" -> sealExportDetail.getExpDate().contains(keyword) ||
+                                    sealExportDetail.getReturnDate().contains(keyword) ||
+                                    sealExportDetail.getPurpose().contains(keyword);
+                            case "반출일자" -> sealExportDetail.getExpDate().contains(keyword);
+                            case "반납일자" -> sealExportDetail.getReturnDate().contains(keyword);
+                            case "사용목적" -> sealExportDetail.getPurpose().contains(keyword);
+                            default -> true;
+                        };
+                    }
+                    return matchesSearchType;
                 })
+                .toList();
+
+        return sealMasters.stream()
                 .map(sealMaster -> {
                     SealExportDetail sealExportDetail = sealExportDetailRepository.findById(sealMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("SealExportDetail not found for draftId: " + sealMaster.getDraftId()));
@@ -86,8 +119,7 @@ public class SealListServiceImpl implements SealListService {
                 .stream()
                 .map(sealRegisterDetail -> {
                     if (sealRegisterDetail != null) {
-                        RegistrationListResponseDTO registrationListResponseDTO = RegistrationListResponseDTO.of(sealRegisterDetail);
-                        return registrationListResponseDTO;
+                        return RegistrationListResponseDTO.of(sealRegisterDetail);
                     }
                     return null;
                 })
@@ -112,15 +144,27 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMasterResponseDTO> getSealApplyByInstCd(String instCd) {
+    public List<SealMasterResponseDTO> getSealApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
         List<SealMaster> sealMasters = sealMasterRepository
-                .findAllByStatusNotAndInstCdOrderByDraftDateDesc("F", instCd);
+                .findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
 
         if (sealMasters == null) {
             sealMasters = new ArrayList<>();
         }
 
         return sealMasters.stream()
+                .filter(sealMaster -> {
+                    if (searchType != null && keyword != null) {
+                        return switch (searchType) {
+                            case "전체" ->
+                                    sealMaster.getTitle().contains(keyword) || sealMaster.getDrafter().contains(keyword);
+                            case "제목" -> sealMaster.getTitle().contains(keyword);
+                            case "신청자" -> sealMaster.getDrafter().contains(keyword);
+                            default -> true;
+                        };
+                    }
+                    return true;
+                })
                 .map(sealMaster -> {
                     SealMasterResponseDTO sealMasterResponseDTO = SealMasterResponseDTO.of(sealMaster);
                     String instNm = stdBcdService.getInstNm(sealMaster.getInstCd());
@@ -132,9 +176,9 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealPendingResponseDTO> getSealPendingList(String instCd) {
+    public List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
         List<SealMaster> sealMasters = sealMasterRepository
-                .findAllByStatusAndInstCdOrderByDraftDateDesc("A", instCd);
+                .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
         return sealMasters.stream()
                 .map(SealPendingResponseDTO::of).toList();
@@ -142,12 +186,12 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMyResponseDTO> getMySealApply(String userId) {
-        return new ArrayList<>(this.getMySealMasterList(userId));
+    public List<SealMyResponseDTO> getMySealApply(Timestamp startDate, Timestamp endDate, String userId) {
+        return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
     }
 
-    public List<SealMyResponseDTO> getMySealMasterList(String userId) {
-        List<SealMaster> sealMasterList = sealMasterRepository.findByDrafterId(userId)
+    public List<SealMyResponseDTO> getMySealMasterList(String userId, Timestamp startDate, Timestamp endDate) {
+        List<SealMaster> sealMasterList = sealMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return sealMasterList.stream()

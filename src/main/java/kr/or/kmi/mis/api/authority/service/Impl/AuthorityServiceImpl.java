@@ -231,9 +231,6 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .bodyValue(requestData)
                 .retrieve()
                 .bodyToMono(String.class)
-                .doOnNext(responseJson -> {
-                    System.out.println("Response from Groupware API: " + responseJson);
-                })
                 .flatMap(responseJson -> {
                     if (responseJson == null) {
                         return Mono.error(new EntityNotFoundException("User response data not found for userId: " + userId));

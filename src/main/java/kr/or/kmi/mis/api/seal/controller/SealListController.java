@@ -28,18 +28,18 @@ public class SealListController {
 
     @Operation(summary = "get seal management list", description = "센터별 인장관리대장 조회")
     @GetMapping("/managementList")
-    public ApiResponse<List<ManagementListResponseDTO>> getSealManagementList(@RequestParam(required = false) LocalDate startDate,
-                                                                              @RequestParam(required = false) LocalDate endDate,
+    public ApiResponse<List<ManagementListResponseDTO>> getSealManagementList(@RequestParam(required = false) String searchType,
+                                                                              @RequestParam(required = false) String keyword,
                                                                               @RequestParam String instCd) {
-        return ResponseWrapper.success(sealListService.getSealManagementList(startDate, endDate, instCd));
+        return ResponseWrapper.success(sealListService.getSealManagementList(searchType, keyword, instCd));
     }
 
     @Operation(summary = "get seal export list", description = "센터별 인장반출대장 조회")
     @GetMapping("/exportList")
-    public ApiResponse<List<ExportListResponseDTO>> getSealExportList(@RequestParam(required = false) LocalDate startDate,
-                                                                      @RequestParam(required = false) LocalDate endDate,
+    public ApiResponse<List<ExportListResponseDTO>> getSealExportList(@RequestParam(required = false) String searchType,
+                                                                      @RequestParam(required = false) String keyword,
                                                                       @RequestParam String instCd) {
-        return ResponseWrapper.success(sealListService.getSealExportList(startDate, endDate, instCd));
+        return ResponseWrapper.success(sealListService.getSealExportList(searchType, keyword, instCd));
     }
 
     @Operation(summary = "get seal registration list", description = "센터별 인장등록대장 조회")

@@ -9,12 +9,12 @@ import java.util.List;
 
 public interface CorpDocListService {
     /** 법인서류 발급대장 내역 조회 */
-    CorpDocIssueListResponseDTO getCorpDocIssueList();
+    CorpDocIssueListResponseDTO getCorpDocIssueList(String searchType, String keyword);
 
     int getCorpDocIssuePendingList();
 
     /** 법인서류 수불대장 내역 조회 */
-    List<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd);
+    List<CorpDocRnpResponseDTO> getCorpDocRnpList(String searchType, String keyword, String instCd);
 
     void issueCorpDoc(Long draftId, CorpDocLeftRequestDTO corpDocLeftRequestDTO);
 

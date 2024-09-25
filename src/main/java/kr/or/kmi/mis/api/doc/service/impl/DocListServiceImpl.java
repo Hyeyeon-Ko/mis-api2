@@ -32,10 +32,30 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getReceiveApplyList(String instCd) {
-
+    public List<DocResponseDTO> getReceiveApplyList(String searchType, String keyword, String instCd) {
         return docDetailRepository.findAllByDocIdNotNullAndDivision("A")
                 .stream()
+                .filter(docDetail -> {
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
+                    if (docMaster == null) {
+                        return false;
+                    }
+
+                    boolean matchesSearchType = true;
+                    if (searchType != null) {
+                        matchesSearchType = switch (searchType) {
+                            case "전체" ->  docMaster.getTitle().contains(keyword) || docDetail.getSender().contains(keyword) ||
+                                    docMaster.getDrafter().contains(keyword);
+
+                            case "발신처" -> docDetail.getSender().contains(keyword);
+                            case "제목" -> docDetail.getDocTitle().contains(keyword);
+                            case "접수인" -> docMaster.getDrafter().contains(keyword);
+                            default -> true;
+                        };
+                    }
+
+                    return matchesSearchType;
+                })
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
                     if (docMaster != null) {
@@ -69,10 +89,29 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getSendApplyList(String instCd) {
-
+    public List<DocResponseDTO> getSendApplyList(String searchType, String keyword, String instCd) {
         return docDetailRepository.findAllByDocIdNotNullAndDivision("B")
                 .stream()
+                .filter(docDetail -> {
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
+                    if (docMaster == null) {
+                        return false;
+                    }
+
+                    boolean matchesSearchType = true;
+                    if (searchType != null && keyword != null) {
+                        matchesSearchType = switch (searchType) {
+                            case "전체" -> docDetail.getReceiver().contains(keyword) || docMaster.getTitle().contains(keyword)
+                                    || docMaster.getDrafter().contains(keyword);
+                            case "수신처" -> docDetail.getReceiver().contains(keyword);
+                            case "제목" -> docDetail.getDocTitle().contains(keyword);
+                            case "접수인" -> docMaster.getDrafter().contains(keyword);
+                            default -> true;
+                        };
+                    }
+
+                    return matchesSearchType;
+                })
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
                     if (docMaster != null) {
