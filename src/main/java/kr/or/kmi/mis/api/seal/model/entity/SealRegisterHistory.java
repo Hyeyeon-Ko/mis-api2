@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 
@@ -27,11 +26,8 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String sealNm;
 
-    @Column(length = 100)
+    @Lob
     private String sealImage;
-
-    @Column(length = 100)
-    private String sealImagePath;
 
     @Column(length = 50)
     private String useDept;
@@ -60,7 +56,6 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
         this.seqId = seqId;
         this.sealNm = sealRegisterDetail.getSealNm();
         this.sealImage = sealRegisterDetail.getSealImage();
-        this.sealImagePath = sealRegisterDetail.getSealImagePath();
         this.useDept = sealRegisterDetail.getUseDept();
         this.purpose = sealRegisterDetail.getPurpose();
         this.manager = sealRegisterDetail.getManager();
