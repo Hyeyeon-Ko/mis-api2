@@ -46,6 +46,9 @@ dependencies {
 	/*webflux*/
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	/*Sftp*/
+	implementation 'com.jcraft:jsch:0.1.55'
+
 	/*querydsl*/
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

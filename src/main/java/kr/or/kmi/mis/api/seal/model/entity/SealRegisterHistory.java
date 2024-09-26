@@ -26,7 +26,7 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String sealNm;
 
-    @Lob
+    @Column
     private String sealImage;
 
     @Column(length = 50)

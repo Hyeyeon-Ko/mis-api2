@@ -22,7 +22,7 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String sealNm;
 
-    @Lob
+    @Column
     private String sealImage;
 
     @Column(length = 50)

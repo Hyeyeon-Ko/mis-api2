@@ -9,10 +9,9 @@ import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
+import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,10 +19,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/doc")
@@ -32,15 +33,16 @@ import java.nio.file.Paths;
 public class DocController {
 
     private final DocService docService;
+    private final SftpClient sftpClient;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    @Value("${sftp.remote-directory.doc}")
+    private String docRemoteDirectory;
 
     @Operation(summary = "create receive doc apply", description = "유저 > 문서수신 신청")
     @PostMapping("/receive")
     public ApiResponse<?> createReceiveDoc(
             @RequestPart("docRequest") ReceiveDocRequestDTO docRequestDTO,
-            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+            @RequestPart(value = "file", required = false) MultipartFile file) throws Exception {
         docService.applyReceiveDoc(docRequestDTO, file);
         return ResponseWrapper.success();
     }
@@ -77,7 +79,8 @@ public class DocController {
     public ApiResponse<?> updateDocApply(
             @RequestParam("draftId") Long draftId,
             @RequestPart("docUpdateRequest") DocUpdateRequestDTO docUpdateRequestDTO,
-            @RequestPart(value = "file", required = false) MultipartFile file, boolean isFileDeleted) throws IOException {
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "isFileDeleted", defaultValue = "false") boolean isFileDeleted) throws IOException {
         docService.updateDocApply(draftId, docUpdateRequestDTO, file, isFileDeleted);
         return ResponseWrapper.success();
     }
@@ -91,30 +94,50 @@ public class DocController {
 
     @Operation(summary = "get doc detail", description = "유저 > 문서수발신 상세 정보 조회")
     @GetMapping(value = "/{draftId}")
-    public ApiResponse<DocDetailResponseDTO> getBcdDetail(@PathVariable Long draftId) {
+    public ApiResponse<DocDetailResponseDTO> getDocDetail(@PathVariable Long draftId) {
         return ResponseWrapper.success(docService.getDoc(draftId));
     }
 
-    // 파일 다운로드 API
+    @Operation(summary = "파일 다운로드", description = "유저 > 파일 다운로드")
     @GetMapping("/download/{filename}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
-        try {
-            // 업로드 디렉터리에서 파일을 찾음
-            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
+    public ResponseEntity<byte[]> downloadFile(@PathVariable("filename") String filename) {
+        InputStream inputStream = null;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-            // 파일이 존재할 경우 다운로드 가능하게 설정
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                        .body(resource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        try {
+            inputStream = sftpClient.downloadFile(filename, docRemoteDirectory);
+
+            if (inputStream == null) {
+                throw new IOException("File not found on SFTP server.");
             }
-        } catch (MalformedURLException ex) {
+
+            byte[] temp = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(temp)) != -1) {
+                buffer.write(temp, 0, bytesRead);
+            }
+
+            byte[] fileBytes = buffer.toByteArray();
+            String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"")
+                    .body(fileBytes);
+
+        } catch (Exception e) {
+            System.err.println("Error occurred during file download: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                buffer.close();
+            } catch (IOException e) {
+                System.err.println("Error closing streams: " + e.getMessage());
+            }
         }
     }
-
 }

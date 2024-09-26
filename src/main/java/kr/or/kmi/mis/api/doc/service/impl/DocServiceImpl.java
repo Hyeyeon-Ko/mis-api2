@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.doc.service.impl;
 
-import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
@@ -26,6 +25,7 @@ import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,9 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,11 +55,11 @@ public class DocServiceImpl implements DocService {
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    private final SftpClient sftpClient;
 
-    @Override
-    @Transactional
+    @Value("${sftp.remote-directory.doc}")
+    private String docRemoteDirectory;
+
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("A");
@@ -75,34 +72,28 @@ public class DocServiceImpl implements DocService {
         docMaster.updateApproverChain(stdDetail.getFirst().getEtcItem3());
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] savedFileInfo = saveFile(file);
-        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
+
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
         docDetailRepository.save(docDetail);
     }
 
     @Override
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
-        // 문서발신 로직
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("E");
         docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] savedFileInfo = saveFile(file);
-        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
 
-        // 문서번호 생성해, 업데이트
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
+
         DocDetail lastDocDetail = docDetailRepository
                 .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
-        String docId = "";
-        if (lastDocDetail != null) {
-            docId = createDocId(lastDocDetail.getDocId());
-        } else {
-            docId = createDocId("");
-        }
+        String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
 
         docDetail.updateDocId(docId);
-
         docDetailRepository.save(docDetail);
     }
 
@@ -110,22 +101,58 @@ public class DocServiceImpl implements DocService {
     @Transactional
     public void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
 
-        // 문서발신 로직
         DocMaster docMaster = sendDocRequestDTO.toMasterEntity("A");
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] savedFileInfo = saveFile(file);
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
+
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
         docDetailRepository.save(docDetail);
 
         String firstApproverId = sendDocRequestDTO.getApproverIds().getFirst();
         InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(firstApproverId);
 
-        // ADMIN 권한 부여
         grantAdminAuthorityIfAbsent(firstApproverId, infoDetailResponseDTO);
-
-        // 권한 업데이트 필요 여부 체크 및 업데이트
         updateSidebarPermissionsIfNeeded(firstApproverId);
+    }
+
+    @Override
+    public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("E");
+        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        docMaster = docMasterRepository.save(docMaster);
+
+        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
+
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
+
+        DocDetail lastDocDetail = docDetailRepository
+                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
+        String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
+
+        docDetail.updateDocId(docId);
+        docDetailRepository.save(docDetail);
+    }
+
+    private String[] handleFileUpload(MultipartFile file, Long draftId) throws IOException {
+
+        String[] fileInfo = new String[2];
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = file.getOriginalFilename();
+            String filePath = docRemoteDirectory + "/" + fileName;
+
+            try {
+                sftpClient.uploadFile(file, fileName, filePath);
+                fileInfo[0] = fileName;
+                fileInfo[1] = filePath;
+            } catch (Exception e) {
+                throw new IOException("SFTP 파일 업로드 실패", e);
+            }
+        }
+
+        return fileInfo;
     }
 
     private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetailResponseDTO) {
@@ -143,7 +170,6 @@ public class DocServiceImpl implements DocService {
 
             authorityService.addAdmin(requestDTO);
 
-            // 사이드바 권한 부여
             stdDetailService.addInfo(
                     StdDetailRequestDTO.builder()
                             .detailCd(firstApproverId)
@@ -161,7 +187,6 @@ public class DocServiceImpl implements DocService {
         StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
-
         List<String> allowedValues = Arrays.asList("D", "D-1", "D-2");
 
         if (!allowedValues.contains(detailB002.getEtcItem1()) && !allowedValues.contains(detailB002.getEtcItem3()) && !allowedValues.contains(detailB002.getEtcItem5())) {
@@ -197,32 +222,6 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
-    public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
-
-        // 문서발신 로직
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("E");
-        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
-        docMaster = docMasterRepository.save(docMaster);
-
-        String[] savedFileInfo = saveFile(file);
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
-
-        // 문서번호 생성해, 업데이트
-        DocDetail lastDocDetail = docDetailRepository
-                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
-        String docId = "";
-        if (lastDocDetail != null) {
-            docId = createDocId(lastDocDetail.getDocId());
-        } else {
-            docId = createDocId("");
-        }
-
-        docDetail.updateDocId(docId);
-
-        docDetailRepository.save(docDetail);
-    }
-
-    @Override
     @Transactional
     public void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
         DocMaster docMaster = docMasterRepository.findById(draftId)
@@ -233,17 +232,34 @@ public class DocServiceImpl implements DocService {
 
         docHistoryService.createDocHistory(docDetailInfo);
 
-        String[] savedFileInfo;
-        if (file != null) {
-            savedFileInfo = saveFile(file, docDetailInfo.getFilePath());
-        } else if (isFileDeleted) {
-            savedFileInfo = new String[]{null, null};
-            if (docDetailInfo.getFilePath() != null) {
-                Path oldFilePath = Paths.get(docDetailInfo.getFilePath());
-                Files.deleteIfExists(oldFilePath);
+        String[] savedFileInfo = {docDetailInfo.getFileName(), docDetailInfo.getFilePath()};
+
+        if (file != null && !file.isEmpty()) {
+            if (savedFileInfo[1] != null) {
+                try {
+                    sftpClient.deleteFile(savedFileInfo[1], docRemoteDirectory);
+                } catch (Exception e) {
+                    throw new IOException("SFTP 기존 파일 삭제 실패", e);
+                }
             }
-        } else {
-            savedFileInfo = new String[]{docDetailInfo.getFileName(), docDetailInfo.getFilePath()};
+
+            String newFileName = file.getOriginalFilename();
+            try {
+                sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
+                savedFileInfo[0] = newFileName;
+                savedFileInfo[1] = docRemoteDirectory + "/" + newFileName;
+            } catch (Exception e) {
+                throw new IOException("SFTP 파일 업로드 실패", e);
+            }
+        }
+        else if (isFileDeleted && savedFileInfo[1] != null) {
+            try {
+                sftpClient.deleteFile(savedFileInfo[1], docRemoteDirectory);
+                savedFileInfo[0] = null;
+                savedFileInfo[1] = null;
+            } catch (Exception e) {
+                throw new IOException("SFTP 파일 삭제 실패", e);
+            }
         }
 
         updateDocDetail(docUpdateRequestDTO, draftId, savedFileInfo);
@@ -372,47 +388,6 @@ public class DocServiceImpl implements DocService {
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
                     return DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
                 }).toList();
-    }
-
-    private String[] saveFile(MultipartFile file) throws IOException {
-        return saveFile(file, null);
-    }
-
-    private String[] saveFile(MultipartFile file, String existingFilePath) throws IOException {
-        String fileName = null;
-        String filePath = null;
-
-        if (file != null && !file.isEmpty()) {
-            String originalFileName = file.getOriginalFilename();
-            String baseFileName = originalFileName.substring(0, originalFileName.lastIndexOf("."));
-            String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            fileName = baseFileName.replaceAll("\\s+", "_") + fileExtension;
-
-            Path fileStoragePath = Paths.get(uploadDir).toAbsolutePath().normalize();
-            if (Files.notExists(fileStoragePath)) {
-                Files.createDirectories(fileStoragePath);
-            }
-
-            Path targetLocation = fileStoragePath.resolve(fileName);
-
-            int count = 1;
-            while (Files.exists(targetLocation)) {
-                String newFileName = baseFileName.replaceAll("\\s+", "_") + " (" + count + ")" + fileExtension;
-                targetLocation = fileStoragePath.resolve(newFileName);
-                count++;
-            }
-
-            fileName = targetLocation.getFileName().toString();
-            Files.copy(file.getInputStream(), targetLocation);
-            filePath = targetLocation.toString();
-
-            if (existingFilePath != null) {
-                Path oldFilePath = Paths.get(existingFilePath);
-                Files.deleteIfExists(oldFilePath);
-            }
-        }
-
-        return new String[]{fileName, filePath};
     }
 
     private void updateDocDetail(Object docRequestOrUpdateDTO, Long draftId, String[] savedFileInfo) {

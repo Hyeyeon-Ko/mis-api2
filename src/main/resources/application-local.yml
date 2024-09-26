@@ -32,9 +32,18 @@ external:
   orgChart:
     url: http://172.16.250.85/mis/userList
 
-
 file:
   upload-dir: uploads/
+
+sftp:
+  host: 101.10.1.21
+  port: 22
+  username: kmiout009
+  password: kmiout009!
+  remote-directory:
+    doc: /doc
+    export: /seal
+    corpdoc: /corpdoc
 
 logging:
   level:
