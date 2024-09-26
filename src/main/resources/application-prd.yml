@@ -2,9 +2,9 @@ spring:
   application:
     name: mis
   datasource:
-    url: jdbc:mariadb://10.1.10.216:3306/mis  # 마리아DB 연결 URL
-    username: user  # 데이터베이스 사용자 이름
-    password: kmi12345  # 데이터베이스 비밀번호
+    url: jdbc:mariadb://102.10.1.81:3306/mis  # 마리아DB 연결 URL
+    username: mis  # 데이터베이스 사용자 이름
+    password: kmi$%0703  # 데이터베이스 비밀번호
     driver-class-name: org.mariadb.jdbc.Driver  # 마리아DB JDBC 드라이버 클래스
     hikari:
       maximum-pool-size: 20
