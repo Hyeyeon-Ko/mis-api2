@@ -102,25 +102,15 @@ public class DocController {
     @Operation(summary = "파일 다운로드", description = "유저 > 파일 다운로드")
     @GetMapping("/download/{filename}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable("filename") String filename) {
-        InputStream inputStream = null;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
         try {
-            inputStream = new BufferedInputStream((sftpClient.downloadFile(filename, docRemoteDirectory)));
+            byte[] fileBytes = sftpClient.downloadFile(filename, docRemoteDirectory);
 
-            if (inputStream == null) {
+            if (fileBytes == null || fileBytes.length == 0) {
                 throw new IOException("File not found on SFTP server.");
             }
 
-//            byte[] temp = new byte[4096];
-            byte[] temp = new byte[8192];
-
-            int bytesRead;
-            while ((bytesRead = inputStream.read(temp)) != -1) {
-                buffer.write(temp, 0, bytesRead);
-            }
-
-            byte[] fileBytes = buffer.toByteArray();
+            // 파일명을 URL 인코딩하여 헤더에 추가
             String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
 
             return ResponseEntity.ok()
@@ -140,15 +130,6 @@ public class DocController {
             System.err.println("Unexpected error occurred during file download: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } finally {
-            // 스트림 닫기
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                System.err.println("Error closing input stream: " + e.getMessage());
-            }
         }
     }
 }

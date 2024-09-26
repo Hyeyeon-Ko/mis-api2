@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -26,9 +27,10 @@ public class SftpClient {
     @Value("${sftp.password}")
     private String sftpPassword;
 
+    private Session session;
+    private ChannelSftp channelSftp;
+
     public void uploadFile(MultipartFile file, String fileName, String remoteDirectory) throws Exception {
-        Session session = null;
-        ChannelSftp channelSftp = null;
 
         try {
             JSch jsch = new JSch();
@@ -63,9 +65,8 @@ public class SftpClient {
         }
     }
 
-    public InputStream downloadFile(String fileName, String remoteDirectory) throws Exception {
-        Session session = null;
-        ChannelSftp channelSftp = null;
+    public byte[] downloadFile(String fileName, String remoteDirectory) throws Exception {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
         try {
             JSch jsch = new JSch();
@@ -84,16 +85,16 @@ public class SftpClient {
             channelSftp.connect();
 
             channelSftp.cd(remoteDirectory);
-//            InputStream inputStream = channelSftp.get(fileName);
-            InputStream inputStream = channelSftp.get(fileName, 1024 * 8);
 
-            if (inputStream == null) {
-                System.err.println("File not found on SFTP server: " + fileName);
-            } else {
-                System.out.println("File found on SFTP server: " + fileName);
+            try (InputStream inputStream = channelSftp.get(fileName, 1024 * 8)) {
+                byte[] temp = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(temp)) != -1) {
+                    buffer.write(temp, 0, bytesRead);
+                }
             }
-
-            return inputStream;
+            // 파일 내용을 byte array로 반환
+            return buffer.toByteArray();
 
         } catch (Exception e) {
             System.err.println("Error downloading file from SFTP: " + e.getMessage());
@@ -109,8 +110,6 @@ public class SftpClient {
     }
 
     public void deleteFile(String fileName, String remoteDirectory) throws Exception {
-        Session session = null;
-        ChannelSftp channelSftp = null;
 
         try {
             JSch jsch = new JSch();
