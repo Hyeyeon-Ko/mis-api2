@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: mis
   datasource:
     url: jdbc:mariadb://10.1.10.216:3306/mis  # 마리아DB 연결 URL
     username: user  # 데이터베이스 사용자 이름
@@ -8,68 +6,6 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver  # 마리아DB JDBC 드라이버 클래스
     hikari:
       maximum-pool-size: 20
-  jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect  # JPA 데이터베이스 플랫폼 설정
-    hibernate:
-      ddl-auto: update  # Hibernate 자동 DDL 설정 (옵션)
-    show-sql: true  # 쿼리 로그를 JPA 레벨에서도 출력
-    properties:
-      hibernate:
-        format_sql: true  # SQL 포맷팅
-        use_sql_comments: true  # SQL에 주석 추가
-        cache:
-          use_second_level_cache: false  # 2차 캐시 비활성화
-          use_query_cache: false         # 쿼리 캐시 비활성화
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-external:
-  login:
-    url: http://172.16.250.85/mis/login
-  userInfo:
-    url: http://172.16.250.85/mis/userDeptInfo
-  orgChart:
-    url: http://172.16.250.85/mis/userList
-
-file:
-  upload-dir: uploads/
-
-sftp:
-  host: 101.10.1.21
-  port: 22
-  username: kmiout009
-  password: kmiout009!
-  remote-directory:
-    doc: /doc
-    export: /seal
-    corpdoc: /corpdoc
-
-logging:
-  level:
-    org:
-      springframework:
-        transaction: info
-        orm:
-          jpa: info
-        jdbc:
-          core:
-            JdbcTemplate: debug
-            StatementCreatorUtils: trace
-      hibernate:
-        SQL: DEBUG
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
-    web: info
-    root: info
-  file:
-    name: /app/logs/application.log  # 로그 파일 경로 (파일로 로그 저장)
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 콘솔 출력 형식
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 파일 출력 형식
-
 
 server:
   port: 9090
