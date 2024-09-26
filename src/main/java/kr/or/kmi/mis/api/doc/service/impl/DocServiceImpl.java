@@ -70,9 +70,9 @@ public class DocServiceImpl implements DocService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         docMaster.updateApproverChain(stdDetail.getFirst().getEtcItem3());
-        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
-
         docMaster = docMasterRepository.save(docMaster);
+
+        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
 
         DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
         docDetailRepository.save(docDetail);
