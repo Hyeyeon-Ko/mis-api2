@@ -24,8 +24,9 @@ public class DocDetailResponseDTO {
     private String fileName;
     private String filePath;
 
+    // 파일 다운로드 URL
     public String getFileUrl() {
-        return filePath != null ? "/api/doc/download/" + fileName : null;
+        return fileName != null ? "/api/doc/download/" + fileName : null;
     }
 
     public static DocDetailResponseDTO of(DocMaster docMaster, DocDetail docDetail) {

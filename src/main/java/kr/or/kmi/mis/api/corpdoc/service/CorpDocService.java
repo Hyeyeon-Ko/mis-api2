@@ -15,12 +15,12 @@ import java.util.List;
 public interface CorpDocService {
 
     /** 법인서류 신청 */
-    void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws IOException;
+    void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws Exception;
     /** 법인서류 신청내역 조회 */
     CorpDocDetailResponseDTO getCorpDocApply(Long draftId);
     /** 법인서류 신청내역 수정 */
     void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
-                            MultipartFile file, boolean isFileDeleted) throws IOException;
+                            MultipartFile file, boolean isFileDeleted) throws Exception;
     /** 법인서류 신청내역 취소 */
     void cancelCorpDocApply(Long draftId);
     /** 법인서류 나의 승인대기내역 조회 */
