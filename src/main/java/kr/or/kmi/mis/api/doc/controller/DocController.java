@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.doc.controller;
 
+import com.jcraft.jsch.SftpException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
@@ -111,7 +112,9 @@ public class DocController {
                 throw new IOException("File not found on SFTP server.");
             }
 
-            byte[] temp = new byte[4096];
+//            byte[] temp = new byte[4096];
+            byte[] temp = new byte[2048];
+
             int bytesRead;
             while ((bytesRead = inputStream.read(temp)) != -1) {
                 buffer.write(temp, 0, bytesRead);
@@ -125,18 +128,26 @@ public class DocController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"")
                     .body(fileBytes);
 
+        } catch (SftpException e) {
+            System.err.println("SFTP error occurred during file download: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (IOException e) {
+            System.err.println("IO error occurred during file download: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } catch (Exception e) {
-            System.err.println("Error occurred during file download: " + e.getMessage());
+            System.err.println("Unexpected error occurred during file download: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } finally {
+            // 스트림 닫기
             try {
                 if (inputStream != null) {
                     inputStream.close();
                 }
-                buffer.close();
             } catch (IOException e) {
-                System.err.println("Error closing streams: " + e.getMessage());
+                System.err.println("Error closing input stream: " + e.getMessage());
             }
         }
     }
