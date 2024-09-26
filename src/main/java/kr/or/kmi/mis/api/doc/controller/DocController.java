@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.doc.controller;
 
-import com.jcraft.jsch.SftpException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
@@ -10,22 +9,11 @@ import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
-import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/doc")
@@ -34,10 +22,6 @@ import java.nio.charset.StandardCharsets;
 public class DocController {
 
     private final DocService docService;
-    private final SftpClient sftpClient;
-
-    @Value("${sftp.remote-directory.doc}")
-    private String docRemoteDirectory;
 
     @Operation(summary = "create receive doc apply", description = "유저 > 문서수신 신청")
     @PostMapping("/receive")
@@ -97,39 +81,5 @@ public class DocController {
     @GetMapping(value = "/{draftId}")
     public ApiResponse<DocDetailResponseDTO> getDocDetail(@PathVariable Long draftId) {
         return ResponseWrapper.success(docService.getDoc(draftId));
-    }
-
-    @Operation(summary = "파일 다운로드", description = "유저 > 파일 다운로드")
-    @GetMapping("/download/{filename}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable("filename") String filename) {
-
-        try {
-            byte[] fileBytes = sftpClient.downloadFile(filename, docRemoteDirectory);
-
-            if (fileBytes == null || fileBytes.length == 0) {
-                throw new IOException("File not found on SFTP server.");
-            }
-
-            // 파일명을 URL 인코딩하여 헤더에 추가
-            String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"")
-                    .body(fileBytes);
-
-        } catch (SftpException e) {
-            System.err.println("SFTP error occurred during file download: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (IOException e) {
-            System.err.println("IO error occurred during file download: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (Exception e) {
-            System.err.println("Unexpected error occurred during file download: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
     }
 }
