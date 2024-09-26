@@ -43,11 +43,13 @@ public class SftpClient {
             channelSftp = (ChannelSftp) session.openChannel("sftp");
             channelSftp.connect();
 
+            System.out.println("remoteDirectory = " + remoteDirectory);
+
             channelSftp.cd(remoteDirectory);
 
             try (InputStream inputStream = file.getInputStream()) {
-//                channelSftp.put(inputStream, fileName);
-                channelSftp.put(inputStream, fileName, ChannelSftp.OVERWRITE);
+                channelSftp.put(inputStream, fileName);
+//                channelSftp.put(inputStream, fileName, ChannelSftp.OVERWRITE);
             }
 
 

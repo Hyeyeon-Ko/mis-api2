@@ -70,9 +70,9 @@ public class DocServiceImpl implements DocService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         docMaster.updateApproverChain(stdDetail.getFirst().getEtcItem3());
-        docMaster = docMasterRepository.save(docMaster);
-
         String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
+
+        docMaster = docMasterRepository.save(docMaster);
 
         DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
         docDetailRepository.save(docDetail);
@@ -141,10 +141,10 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
-            String filePath = docRemoteDirectory + "/" + fileName;
 
             try {
-                sftpClient.uploadFile(file, fileName, filePath);
+                sftpClient.uploadFile(file, fileName, docRemoteDirectory);
+                String filePath = docRemoteDirectory + "/" + fileName;
                 fileInfo[0] = fileName;
                 fileInfo[1] = filePath;
             } catch (Exception e) {

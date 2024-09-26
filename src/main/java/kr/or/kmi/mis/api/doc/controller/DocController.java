@@ -106,14 +106,14 @@ public class DocController {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
         try {
-            inputStream = sftpClient.downloadFile(filename, docRemoteDirectory);
+            inputStream = new BufferedInputStream((sftpClient.downloadFile(filename, docRemoteDirectory)));
 
             if (inputStream == null) {
                 throw new IOException("File not found on SFTP server.");
             }
 
 //            byte[] temp = new byte[4096];
-            byte[] temp = new byte[2048];
+            byte[] temp = new byte[8192];
 
             int bytesRead;
             while ((bytesRead = inputStream.read(temp)) != -1) {
