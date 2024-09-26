@@ -46,8 +46,10 @@ public class SftpClient {
             channelSftp.cd(remoteDirectory);
 
             try (InputStream inputStream = file.getInputStream()) {
-                channelSftp.put(inputStream, fileName);
+//                channelSftp.put(inputStream, fileName);
+                channelSftp.put(inputStream, fileName, ChannelSftp.OVERWRITE);
             }
+
 
         } finally {
             if (channelSftp != null) {
@@ -80,7 +82,8 @@ public class SftpClient {
             channelSftp.connect();
 
             channelSftp.cd(remoteDirectory);
-            InputStream inputStream = channelSftp.get(fileName);
+//            InputStream inputStream = channelSftp.get(fileName);
+            InputStream inputStream = channelSftp.get(fileName, 1024 * 8);
 
             if (inputStream == null) {
                 System.err.println("File not found on SFTP server: " + fileName);
