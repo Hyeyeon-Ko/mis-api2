@@ -43,7 +43,11 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
+<<<<<<< Updated upstream
     public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd, String userId) {
+=======
+    public ApplyResponseDTO getAllApplyList(String documentType, String instCd, String userId) {
+>>>>>>> Stashed changes
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
         List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
@@ -52,11 +56,19 @@ public class ApplyServiceImpl implements ApplyService {
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         switch (documentType) {
+<<<<<<< Updated upstream
             case "A":
                 bcdApplyLists = bcdService.getBcdApply(timestamps[0], timestamps[1], searchType, keyword, instCd, userId);
                 break;
             case "B":
                 docApplyLists = docService.getDocApply(timestamps[0], timestamps[1], searchType, keyword, instCd, userId);
+=======
+            case "명함신청":
+                bcdApplyLists = bcdService.getBcdApplyByInstCd(instCd, userId);
+                break;
+            case "문서수발신":
+                docApplyLists = docService.getDocApplyByInstCd(instCd, userId);
+>>>>>>> Stashed changes
                 break;
             case "C":
                 corpDocApplyLists = corpDocService.getCorpDocApply(timestamps[0], timestamps[1], searchType, keyword);
@@ -112,6 +124,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
+<<<<<<< Updated upstream
     public PendingResponseDTO getPendingListByType(String documentType, LocalDate startDate, LocalDate endDate, String instCd, String userId) {
 
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
@@ -121,6 +134,15 @@ public class ApplyServiceImpl implements ApplyService {
             case "B" -> PendingResponseDTO.of(null, docService.getDocPendingList(timestamps[0], timestamps[1], instCd, userId), null, null);
             case "C" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(timestamps[0], timestamps[1]), null);
             case "D" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(timestamps[0], timestamps[1], instCd));
+=======
+    public PendingResponseDTO getPendingListByType(String documentType, String instCd, String userId) {
+
+        return switch (documentType) {
+            case "명함신청" -> PendingResponseDTO.of(bcdService.getPendingList(instCd, userId), null, null, null);
+            case "문서수발신" -> PendingResponseDTO.of(null, docService.getDocPendingList(instCd, userId), null, null);
+            case "법인서류" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(), null);
+            case "인장신청" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(instCd));
+>>>>>>> Stashed changes
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
         };
     }

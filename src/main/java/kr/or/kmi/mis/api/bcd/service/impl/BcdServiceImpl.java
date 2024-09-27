@@ -185,6 +185,7 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
+<<<<<<< Updated upstream
     public List<BcdMasterResponseDTO> getBcdApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -221,6 +222,31 @@ public class BcdServiceImpl implements BcdService {
             };
         }
         return true;
+=======
+    public List<BcdMasterResponseDTO> getBcdApplyByInstCd(String instCd, String userId) {
+
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotOrderByDraftDateDesc("F")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return bcdMasters.stream()
+                .filter(bcdMaster -> {
+                    if (bcdMaster.getStatus().equals("A")) {
+                        String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
+                        int currentIndex = bcdMaster.getCurrentApproverIndex();
+
+                        if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .map(bcdMaster -> {
+                    BcdMasterResponseDTO result = BcdMasterResponseDTO.of(bcdMaster, instCd);
+                    result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
+                    return result;
+                })
+                .toList();
+>>>>>>> Stashed changes
     }
 
     @Override
@@ -269,7 +295,11 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
+<<<<<<< Updated upstream
     public List<BcdPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId) {
+=======
+    public List<BcdPendingResponseDTO> getPendingList(String instCd, String userId) {
+>>>>>>> Stashed changes
 
         // 1. 승인대기 상태인 신청목록 모두 호출
         //    - 기안일자 기준 내림차순 정렬
@@ -279,7 +309,11 @@ public class BcdServiceImpl implements BcdService {
         return bcdMasters.stream()
                 .filter(bcdMaster -> {
                     String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
+<<<<<<< Updated upstream
                     int currentIndex = bcdMaster.getCurrentApproverIndex();
+=======
+                    int currentIndex = bcdMaster.getCurrentApproverIndex(); // 현재 승인자 인덱스
+>>>>>>> Stashed changes
 
                     return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
                 })

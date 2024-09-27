@@ -394,8 +394,13 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
+<<<<<<< Updated upstream
     public List<DocMasterResponseDTO> getDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
+=======
+    public List<DocMasterResponseDTO> getDocApplyByInstCd(String instCd, String userId) {
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdOrderByDraftDateDesc("F", instCd);
+>>>>>>> Stashed changes
 
         if (docMasters == null) {
             docMasters = new ArrayList<>();
@@ -435,7 +440,11 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
+<<<<<<< Updated upstream
     public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId) {
+=======
+    public List<DocPendingResponseDTO> getDocPendingList(String instCd, String userId) {
+>>>>>>> Stashed changes
         List<DocMaster> docMasters = docMasterRepository
                 .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
