@@ -24,7 +24,7 @@ public class FileHistoryServiceImpl implements FileHistorySevice {
     @Transactional
     public void createFileHistory(FileDetail fileDetail, String type) {
 
-        Long maxSeqId = fileHistoryRepository.findTopByDraftIdAndDocTypeOrderBySeqIdDesc(fileDetail.getDraftId(), fileDetail.getDocType())
+        Long maxSeqId = fileHistoryRepository.findTopByIdAndDocTypeOrderBySeqIdDesc(fileDetail.getId(), fileDetail.getDocType())
                 .map(FileHistory::getSeqId).orElse(0L);
 
         FileHistory fileHistory = FileHistory.builder()
