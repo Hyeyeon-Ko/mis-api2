@@ -127,10 +127,11 @@ public class SealExportServiceImpl implements SealExportService {
 
         // 3. FileDetail 업데이트
         FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "A")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                .orElse(null);
 
-        fileHistorySevice.createFileHistory(fileDetail, "A");
+        if (fileDetail != null) fileHistorySevice.createFileHistory(fileDetail, "A");
 
+        assert fileDetail != null;
         String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
 
         if (file != null && !file.isEmpty()) {

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,28 +95,61 @@ public class CorpDocServiceImpl implements CorpDocService {
     public void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
                                    MultipartFile file, boolean isFileDeleted) throws Exception {
 
-        // 1. CorpDocDetail 업데이트
+        // 1. CorpDocMaster 업데이트
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        corpDocMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        corpDocMaster.setUpdtrId(corpDocMaster.getDrafterId());
+        corpDocMasterRepository.save(corpDocMaster);
 
+        // 2. CorpDocDetail 업데이트
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         corpDocHistoryService.createCorpDocHistory(corpDocDetail);
 
         corpDocDetail.update(corpDocUpdateRequestDTO);
-        corpDocDetail.setUpdtrId(infoService.getUserInfo().getUserName());
+        corpDocDetail.setUpdtrId(corpDocMaster.getDrafter());
         corpDocDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
 
         corpDocDetailRepository.save(corpDocDetail);
 
-        // 2. FileDetail 업데이트
+        //3. FileDetail 업데이트
         FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                .orElse(null);
 
-        fileHistorySevice.createFileHistory(fileDetail, "A");
+        if (fileDetail != null) fileHistorySevice.createFileHistory(fileDetail, "A");
 
-        String[] savedFileInfo = handleFileUpload(file, fileDetail.getFilePath(), isFileDeleted);
+        assert fileDetail != null;
+        String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
+
+        if (file != null && !file.isEmpty()) {
+            if (savedFileInfo[1] != null) {
+                try {
+                    sftpClient.deleteFile(savedFileInfo[1], corpdocRemoteDirectory);
+                } catch (Exception e) {
+                    throw new IOException("SFTP 기존 파일 삭제 실패", e);
+                }
+            }
+
+            String newFileName = file.getOriginalFilename();
+            try {
+                sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
+                savedFileInfo[0] = newFileName;
+                savedFileInfo[1] = corpdocRemoteDirectory + "/" + newFileName;
+            } catch (Exception e) {
+                throw new IOException("SFTP 파일 업로드 실패", e);
+            }
+        }
+        else if (isFileDeleted && savedFileInfo[1] != null) {
+            try {
+                sftpClient.deleteFile(savedFileInfo[1], corpdocRemoteDirectory);
+                savedFileInfo[0] = null;
+                savedFileInfo[1] = null;
+            } catch (Exception e) {
+                throw new IOException("SFTP 파일 삭제 실패", e);
+            }
+        }
 
         fileDetail.updateFileInfo(savedFileInfo[0], savedFileInfo[1]);
         fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));

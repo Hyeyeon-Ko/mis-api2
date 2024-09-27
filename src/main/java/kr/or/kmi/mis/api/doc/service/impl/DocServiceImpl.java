@@ -283,23 +283,30 @@ public class DocServiceImpl implements DocService {
     @Transactional
     public void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
 
-        // 1. DocDetail 업데이트
+        // 1. DocMaster 업데이트
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        docMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docMaster.setUpdtrId(docMaster.getDrafterId());
+        docMasterRepository.save(docMaster);
 
+        // 2. DocDetail 업데이트
         DocDetail docDetailInfo = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         docHistoryService.createDocHistory(docDetailInfo);
 
+        docDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docDetailInfo.setUpdtrId(docMaster.getDrafterId());
         updateDocDetail(docUpdateRequestDTO, draftId);
 
         // 3. FileDetail 업데이트
         FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                .orElse(null);
 
-        fileHistorySevice.createFileHistory(fileDetail, "A");
+        if (fileDetail != null) fileHistorySevice.createFileHistory(fileDetail, "A");
 
+        assert fileDetail != null;
         String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
 
         if (file != null && !file.isEmpty()) {
