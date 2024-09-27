@@ -36,12 +36,6 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     @Column
     private Timestamp issueDate;   // 서류 입고/발급일자
 
-    @Column(length = 255)
-    private String fileName;
-
-    @Column(length = 255)
-    private String filePath;
-
     @Column
     private int certCorpseal;
 
@@ -67,14 +61,12 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     private String notes;
 
     @Builder
-    public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, String fileName, String filePath,
-                         int certCorpseal, int certCoregister, int certUsesignet, int warrant, String type, String notes, Timestamp issueDate) {
+    public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, int certCorpseal, int certCoregister,
+                         int certUsesignet, int warrant, String type, String notes, Timestamp issueDate) {
         this.draftId = draftId;
         this.submission = submission;
         this.purpose = purpose;
         this.useDate = useDate;
-        this.fileName = fileName;
-        this.filePath = filePath;
         this.certCorpseal = certCorpseal;
         this.certCoregister = certCoregister;
         this.certUsesignet = certUsesignet;
@@ -84,13 +76,10 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
         this.issueDate = issueDate;
     }
 
-    public void update(CorpDocUpdateRequestDTO corpDocUpdateRequestDTO, String newFileName, String newFilePath) {
+    public void update(CorpDocUpdateRequestDTO corpDocUpdateRequestDTO) {
         this.submission = corpDocUpdateRequestDTO.getSubmission();
         this.purpose = corpDocUpdateRequestDTO.getPurpose();
-        this.useDate = corpDocUpdateRequestDTO.getUseDate();
-        this.fileName = newFileName;
-        this.filePath = newFilePath;
-        this.certCorpseal = corpDocUpdateRequestDTO.getCertCorpseal();
+        this.useDate = corpDocUpdateRequestDTO.getUseDate();this.certCorpseal = corpDocUpdateRequestDTO.getCertCorpseal();
         this.certCoregister = corpDocUpdateRequestDTO.getCertCoregister();
         this.certUsesignet = corpDocUpdateRequestDTO.getCertUsesignet();
         this.warrant = corpDocUpdateRequestDTO.getWarrant();

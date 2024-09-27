@@ -38,19 +38,13 @@ public class DocDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String docId;
 
-    @Column(length = 255)
-    private String fileName;
-
-    @Column(length = 255)
-    private String filePath;
-
     public void updateDocId(String docId) {
         this.docId = docId;
     }
 
     @Builder
-    public DocDetail(Long draftId, String division, String receiver, String sender, String docTitle,
-                     String purpose, String docId, String fileName, String filePath) {
+    public DocDetail(Long draftId, String division, String receiver, String sender,
+                     String docTitle, String purpose, String docId) {
         this.draftId = draftId;
         this.division = division;
         this.receiver = receiver;
@@ -58,27 +52,21 @@ public class DocDetail extends BaseSystemFieldEntity {
         this.docTitle = docTitle;
         this.purpose = purpose;
         this.docId = docId;
-        this.fileName = fileName;
-        this.filePath = filePath;
     }
 
-    public void update(SendDocRequestDTO requestDTO, String fileName, String filePath) {
+    public void update(SendDocRequestDTO requestDTO) {
         this.division = requestDTO.getDivision();
         this.receiver = requestDTO.getReceiver();
         this.sender = requestDTO.getSender();
         this.docTitle = requestDTO.getDocTitle();
         this.purpose = requestDTO.getPurpose();
-        this.fileName = fileName;
-        this.filePath = filePath;
     }
 
-    public void updateFile(DocUpdateRequestDTO docUpdateRequestDTO, String fileName, String filePath) {
+    public void updateFile(DocUpdateRequestDTO docUpdateRequestDTO) {
         this.division = docUpdateRequestDTO.getDivision();
         this.receiver = docUpdateRequestDTO.getReceiver();
         this.sender = docUpdateRequestDTO.getSender();
         this.docTitle = docUpdateRequestDTO.getDocTitle();
         this.purpose = docUpdateRequestDTO.getPurpose();
-        this.fileName = fileName;
-        this.filePath = filePath;
     }
 }

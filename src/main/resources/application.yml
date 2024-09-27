@@ -63,39 +63,6 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 콘솔 출력 형식
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 파일 출력 형식
 
-file:
-  upload-dir: uploads/
-
-# Prometheus 설정
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,prometheus
-  endpoint:
-    prometheus:
-      enabled: true
-    health:
-      show-details: always
-  metrics:
-    distribution:
-      percentiles:
-        http:
-          server:
-            requests: 0.5,0.95,0.99
-      percentiles-histogram:
-        http:
-          server:
-            requests: true
-      minimum-expected-value:
-        http:
-          server:
-            requests: 1ms
-      maximum-expected-value:
-        http:
-          server:
-            requests: 10s
-prometheus:
-  metrics:
-    export:
-      enabled: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

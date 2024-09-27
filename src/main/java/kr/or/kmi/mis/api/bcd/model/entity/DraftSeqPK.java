@@ -9,5 +9,4 @@ public class DraftSeqPK implements Serializable {
 
     private Long draftId;
     private Long seqId;
-
 }

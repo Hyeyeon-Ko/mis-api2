@@ -8,6 +8,8 @@ import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocListService;
 import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +34,7 @@ public class DocListServiceImpl implements DocListService {
     private final StdBcdService stdBcdService;
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final FileDetailRepository fileDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -38,8 +42,12 @@ public class DocListServiceImpl implements DocListService {
 
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
-        return docDetailRepository.findAllByDocIdNotNullAndDivision("A")
-                .stream()
+        List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("A");
+        if (docDetails == null) {
+            return Collections.emptyList();
+        }
+
+        return docDetails.stream()
                 .filter(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
                     if (docMaster == null) {
@@ -62,34 +70,35 @@ public class DocListServiceImpl implements DocListService {
                     return matchesSearchType;
                 })
                 .map(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
-                    if (docMaster != null) {
-                        DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
-                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                        return docResponseDTO;
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .toList();
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd)
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C").orElse(null);
+                    assert fileDetail != null;
+                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileDetail);
+                    docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                    return docResponseDTO;
+                }).toList();
     }
 
     @Override
     public List<DocResponseDTO> getDeptReceiveApplyList(String deptCd) {
-        return docMasterRepository.findAllByDeptCd(deptCd)
-                .stream()
-                .map(docMaster -> {
-                    DocDetail docDetail = docDetailRepository.findByDraftIdAndDivision(docMaster.getDraftId(), "A").orElse(null);
 
-                    if (docDetail != null) {
-                        DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster);
-                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                        return docResponseDTO;
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .toList();
+        List<DocMaster> docMasters = docMasterRepository.findAllByDeptCd(deptCd);
+        if (docMasters == null) {
+            return Collections.emptyList();
+        }
+
+        return docMasters.stream()
+                .map(docMaster -> {
+                    DocDetail docDetail = docDetailRepository.findByDraftIdAndDivision(docMaster.getDraftId(), "A")
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docDetail.getDraftId(), "C")
+                            .orElse(null);
+                    assert fileDetail != null;
+                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileDetail);
+                    docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                    return docResponseDTO;
+                }).toList();
     }
 
     @Override
@@ -98,8 +107,12 @@ public class DocListServiceImpl implements DocListService {
 
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
-        return docDetailRepository.findAllByDocIdNotNullAndDivision("B")
-                .stream()
+        List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("B");
+        if (docDetails == null) {
+            return Collections.emptyList();
+        }
+
+        return docDetails.stream()
                 .filter(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
                     if (docMaster == null) {
@@ -121,16 +134,15 @@ public class DocListServiceImpl implements DocListService {
                     return matchesSearchType;
                 })
                 .map(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd).orElse(null);
-                    if (docMaster != null) {
-                        DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster);
-                        docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                        return docResponseDTO;
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .toList();
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd)
+                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
+                            .orElse(null);
+                    assert fileDetail != null;
+                    DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster, fileDetail);
+                    docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
+                    return docResponseDTO;
+                }).toList();
     }
 
     @Override

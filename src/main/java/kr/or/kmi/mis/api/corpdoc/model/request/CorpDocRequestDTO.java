@@ -32,7 +32,7 @@ public class CorpDocRequestDTO {
                 .build();
     }
 
-    public CorpDocDetail toDetailEntity(Long draftId, String fileName, String filePath) {
+    public CorpDocDetail toDetailEntity(Long draftId) {
         return CorpDocDetail.builder()
                 .draftId(draftId)
                 .submission(submission)
@@ -44,8 +44,6 @@ public class CorpDocRequestDTO {
                 .warrant(warrant)
                 .type(type)
                 .notes(notes)
-                .fileName(fileName)
-                .filePath(filePath)
                 .build();
     }
 }

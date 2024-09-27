@@ -18,7 +18,6 @@ public class CorpDocHistoryServiceImpl implements CorpDocHistoryService {
 
     private final CorpDocHistoryRepository corpDocHistoryRepository;
     private final InfoService infoService;
-    private final DocHistoryRepository docHistoryRepository;
 
     @Override
     @Transactional

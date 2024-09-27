@@ -16,6 +16,11 @@ import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
+import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
+import kr.or.kmi.mis.api.file.service.FileHistorySevice;
+import kr.or.kmi.mis.api.file.service.FileService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
@@ -51,17 +56,21 @@ public class DocServiceImpl implements DocService {
     private final AuthorityRepository authorityRepository;
     private final InfoService infoService;
     private final DocHistoryService docHistoryService;
+    private final FileService fileService;
+    private final FileHistorySevice fileHistorySevice;
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
 
     private final SftpClient sftpClient;
+    private final FileDetailRepository fileDetailRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
 
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
+        // 1. DocMaster 저장
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("A");
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
@@ -72,41 +81,65 @@ public class DocServiceImpl implements DocService {
         docMaster.updateApproverChain(stdDetail.getFirst().getEtcItem3());
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
-
-        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
+        // 2. DocDetail 저장
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId());
         docDetailRepository.save(docDetail);
+
+        // 3. File 업로드
+        String[] savedFileInfo = handleFileUpload(file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(docDetail.getDraftId())
+                .drafter(docMaster.getDrafter())
+                .docType("C")
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
     }
 
     @Override
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
+        // 1. DocMaster 저장
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("E");
         docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
-
-        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
-
+        // 2. DocDetail 저장
+        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId());
         DocDetail lastDocDetail = docDetailRepository
                 .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
         String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
 
         docDetail.updateDocId(docId);
         docDetailRepository.save(docDetail);
+
+        // 3. File 업로드
+        String[] savedFileInfo = handleFileUpload(file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(docDetail.getDraftId())
+                .drafter(docMaster.getDrafter())
+                .docType("C")
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
     }
 
     @Override
     @Transactional
     public void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
 
+        // 1. DocMaster 저장
         DocMaster docMaster = sendDocRequestDTO.toMasterEntity("A");
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
-
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
+        // 2. DocDetail 저장
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
         docDetailRepository.save(docDetail);
 
         String firstApproverId = sendDocRequestDTO.getApproverIds().getFirst();
@@ -114,28 +147,53 @@ public class DocServiceImpl implements DocService {
 
         grantAdminAuthorityIfAbsent(firstApproverId, infoDetailResponseDTO);
         updateSidebarPermissionsIfNeeded(firstApproverId);
+
+        // 3. File 업로드
+        String[] savedFileInfo = handleFileUpload(file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(docDetail.getDraftId())
+                .drafter(docMaster.getDrafter())
+                .docType("C")
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
     }
 
     @Override
     public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
 
+        // 1. DocMaster 저장
         DocMaster docMaster = sendDocRequestDTO.toMasterEntity("E");
         docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
         docMaster = docMasterRepository.save(docMaster);
 
-        String[] fileInfo = handleFileUpload(file, docMaster.getDraftId());
-
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId(), fileInfo[0], fileInfo[1]);
-
+        // 2. DocDetail 저장
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
         DocDetail lastDocDetail = docDetailRepository
                 .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
         String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
 
         docDetail.updateDocId(docId);
         docDetailRepository.save(docDetail);
+
+        // 3. File 업로드
+        String[] savedFileInfo = handleFileUpload(file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(docDetail.getDraftId())
+                .drafter(docMaster.getDrafter())
+                .docType("C")
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
     }
 
-    private String[] handleFileUpload(MultipartFile file, Long draftId) throws IOException {
+    private String[] handleFileUpload(MultipartFile file) throws IOException {
 
         String[] fileInfo = new String[2];
 
@@ -224,6 +282,8 @@ public class DocServiceImpl implements DocService {
     @Override
     @Transactional
     public void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
+
+        // 1. DocDetail 업데이트
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -232,7 +292,15 @@ public class DocServiceImpl implements DocService {
 
         docHistoryService.createDocHistory(docDetailInfo);
 
-        String[] savedFileInfo = {docDetailInfo.getFileName(), docDetailInfo.getFilePath()};
+        updateDocDetail(docUpdateRequestDTO, draftId);
+
+        // 3. FileDetail 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        fileHistorySevice.createFileHistory(fileDetail, "A");
+
+        String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
 
         if (file != null && !file.isEmpty()) {
             if (savedFileInfo[1] != null) {
@@ -262,19 +330,27 @@ public class DocServiceImpl implements DocService {
             }
         }
 
-        updateDocDetail(docUpdateRequestDTO, draftId, savedFileInfo);
-
-        docMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-        docMaster.setUpdtrId(docMaster.getDrafterId());
+        fileDetail.updateFileInfo(savedFileInfo[0], savedFileInfo[1]);
+        fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        fileDetail.setUpdtrId(docMaster.getDrafter());
+        fileDetailRepository.save(fileDetail);
     }
 
     @Override
     @Transactional
     public void cancelDocApply(Long draftId) {
+
+        // 1. DocMaster 삭제 (F)
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
         docMaster.updateStatus("F");
+        docMasterRepository.save(docMaster);
+
+        // 2. FileDetail History 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        fileHistorySevice.createFileHistory(fileDetail, "B");
+        fileDetailRepository.delete(fileDetail);
     }
 
     @Override
@@ -286,7 +362,10 @@ public class DocServiceImpl implements DocService {
         DocDetail docDetail = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        return DocDetailResponseDTO.of(docMaster, docDetail);
+        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return DocDetailResponseDTO.of(docMaster, docDetail, fileDetail);
     }
 
     @Override
@@ -390,14 +469,14 @@ public class DocServiceImpl implements DocService {
                 }).toList();
     }
 
-    private void updateDocDetail(Object docRequestOrUpdateDTO, Long draftId, String[] savedFileInfo) {
+    private void updateDocDetail(Object docRequestOrUpdateDTO, Long draftId) {
         DocDetail existingDocDetail = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         if (docRequestOrUpdateDTO instanceof SendDocRequestDTO sendDocRequestDTO) {
-            existingDocDetail.update(sendDocRequestDTO, savedFileInfo[0], savedFileInfo[1]);
+            existingDocDetail.update(sendDocRequestDTO);
         } else if (docRequestOrUpdateDTO instanceof DocUpdateRequestDTO docUpdateRequestDTO) {
-            existingDocDetail.updateFile(docUpdateRequestDTO, savedFileInfo[0], savedFileInfo[1]);
+            existingDocDetail.updateFile(docUpdateRequestDTO);
         }
 
         docDetailRepository.save(existingDocDetail);

@@ -31,12 +31,6 @@ public class CorpDocHistory extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String useDate;
 
-    @Column(length = 255)
-    private String fileName;
-
-    @Column(length = 255)
-    private String filePath;
-
     @Column
     private int certCorpseal;
 
@@ -62,8 +56,6 @@ public class CorpDocHistory extends BaseSystemFieldEntity {
         this.submission = corpDocDetail.getSubmission();
         this.purpose = corpDocDetail.getPurpose();
         this.useDate = corpDocDetail.getUseDate();
-        this.fileName = corpDocDetail.getFileName();
-        this.filePath = corpDocDetail.getFilePath();
         this.certCorpseal = corpDocDetail.getCertCorpseal();
         this.certCoregister = corpDocDetail.getCertCoregister();
         this.certUsesignet = corpDocDetail.getCertUsesignet();

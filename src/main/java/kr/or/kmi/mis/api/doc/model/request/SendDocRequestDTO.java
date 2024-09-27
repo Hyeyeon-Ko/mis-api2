@@ -41,7 +41,7 @@ public class SendDocRequestDTO {
     }
 
     // DocRequest Dto -> DocDetail Entity
-    public DocDetail toDetailEntity(Long draftId, String fileName, String filePath) {
+    public DocDetail toDetailEntity(Long draftId) {
         return DocDetail.builder()
                 .draftId(draftId)
                 .division(division)
@@ -49,8 +49,6 @@ public class SendDocRequestDTO {
                 .receiver(receiver)
                 .docTitle(docTitle)
                 .purpose(purpose)
-                .fileName(fileName)
-                .filePath(filePath)
                 .build();
     }
 }

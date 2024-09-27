@@ -77,8 +77,8 @@ public class SftpClient {
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
 
-            session.setTimeout(60000);  // 타임아웃 60초로 설정
-            session.setServerAliveInterval(5000);  // 5초마다 keep-alive 패킷 전송
+            session.setTimeout(60000);
+            session.setServerAliveInterval(5000); 
             session.connect();
 
             channelSftp = (ChannelSftp) session.openChannel("sftp");

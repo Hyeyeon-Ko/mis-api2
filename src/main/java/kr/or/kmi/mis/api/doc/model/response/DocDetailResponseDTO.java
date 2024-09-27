@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.doc.model.response;
 
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class DocDetailResponseDTO {
         return fileName != null ? "/api/doc/download/" + fileName : null;
     }
 
-    public static DocDetailResponseDTO of(DocMaster docMaster, DocDetail docDetail) {
+    public static DocDetailResponseDTO of(DocMaster docMaster, DocDetail docDetail, FileDetail fileDetail) {
         return DocDetailResponseDTO.builder()
                 .draftDate(docMaster.getDraftDate())
                 .lastUpdateDate(docDetail.getUpdtDt())
@@ -39,8 +40,8 @@ public class DocDetailResponseDTO {
                 .sender(docDetail.getSender())
                 .docTitle(docDetail.getDocTitle())
                 .purpose(docDetail.getPurpose())
-                .fileName(docDetail.getFileName())
-                .filePath(docDetail.getFilePath())
+                .fileName(fileDetail.getFileName())
+                .filePath(fileDetail.getFilePath())
                 .build();
     }
 }

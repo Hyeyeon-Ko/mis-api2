@@ -19,8 +19,9 @@ public class BcdController {
     private final BcdService bcdService;
 
     @Operation(summary = "create bcd apply", description = "유저 > 명함신청 시 사용")
-    @PostMapping(value = "/")
+    @PostMapping
     public ApiResponse<?> createBcdApply(@RequestBody BcdRequestDTO bcdRequestDTO) {
+        System.out.println("bcdRequestDTO = " + bcdRequestDTO);
         bcdService.applyBcd(bcdRequestDTO);
         return ResponseWrapper.success();
     }

@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.seal.model.response;
 
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class ExportListResponseDTO {
     private String fileName;
     private String filePath;
 
-    public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter) {
+    public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter, FileDetail fileDetail) {
         return ExportListResponseDTO.builder()
                 .draftId(sealExportDetail.getRgstrId())
                 .drafter(drafter)
@@ -35,8 +36,8 @@ public class ExportListResponseDTO {
                 .facsimileSeal(sealExportDetail.getFacsimileSeal())
                 .companySeal(sealExportDetail.getCompanySeal())
                 .purpose(sealExportDetail.getPurpose())
-                .fileName(sealExportDetail.getFileName())
-                .filePath(sealExportDetail.getFilePath())
+                .fileName(fileDetail.getFileName())
+                .filePath(fileDetail.getFilePath())
                 .build();
     }
 }
