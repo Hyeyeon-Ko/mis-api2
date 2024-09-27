@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.file.model.entity;
 
 import jakarta.persistence.*;
-import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
@@ -9,12 +8,12 @@ import lombok.*;
 @Getter
 @Entity
 @Table(name = "hrmtfiled_hist")
-@IdClass(DraftSeqPK.class)
+@IdClass(IdSeqPK.class)
 public class FileHistory extends BaseSystemFieldEntity {
 
     @Id
-    @Column(name = "draft_id")
-    private Long draftId;
+    @Column(name = "id")
+    private Long id;
 
     @Id
     @Column(name = "seq_id")
@@ -34,7 +33,7 @@ public class FileHistory extends BaseSystemFieldEntity {
 
     @Builder
     public FileHistory(FileDetail fileDetail, Long seqId, String type) {
-        this.draftId = fileDetail.getDraftId();
+        this.id = fileDetail.getId();
         this.seqId = seqId;
         this.docType = fileDetail.getDocType();
         this.fileName = fileDetail.getFileName();

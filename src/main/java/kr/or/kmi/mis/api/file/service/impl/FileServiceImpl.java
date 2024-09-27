@@ -20,8 +20,8 @@ public class FileServiceImpl implements FileService {
     @Override
     public void uploadFile(FileUploadRequestDTO fileUploadRequestDTO) {
         FileDetail fileDetail = new FileDetail(fileUploadRequestDTO);
-        fileDetail.setUpdtrId(fileUploadRequestDTO.getDrafter());
-        fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        fileDetail.setRgstrId(fileUploadRequestDTO.getDrafter());
+        fileDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
         fileDetailRepository.save(fileDetail);
     }
 }

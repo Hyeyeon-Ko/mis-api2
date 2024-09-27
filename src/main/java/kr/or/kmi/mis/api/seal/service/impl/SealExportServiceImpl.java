@@ -16,6 +16,7 @@ import kr.or.kmi.mis.api.seal.service.SealExportHistoryService;
 import kr.or.kmi.mis.api.seal.service.SealExportService;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,18 +107,25 @@ public class SealExportServiceImpl implements SealExportService {
     @Transactional
     public void updateExport(Long draftId, ExportUpdateRequestDTO exportUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
 
-        // 1. SealExportDetail 업데이트
+        // 1. SealExportMaster 업데이트
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        sealMaster.setUpdtrId(sealMaster.getDrafterId());
+        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealMasterRepository.save(sealMaster);
+
+        // 2. SealExportDetail 업데이트
         SealExportDetail sealExportDetailInfo = sealExportDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         sealExportHistoryService.createSealExportHistory(sealExportDetailInfo);
 
+        sealExportDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealExportDetailInfo.setUpdtrId(sealMaster.getDrafterId());
         updateSealExportDetail(exportUpdateRequestDTO, draftId);
 
-        // 2. FileDetail 업데이트
+        // 3. FileDetail 업데이트
         FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.file.model.entity;
 
 import jakarta.persistence.*;
-import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
