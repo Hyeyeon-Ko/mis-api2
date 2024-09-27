@@ -1,5 +1,7 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
@@ -30,6 +32,7 @@ public class SealListServiceImpl implements SealListService {
     private final SealExportDetailRepository sealExportDetailRepository;
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
     private final StdBcdService stdBcdService;
+    private final FileDetailRepository fileDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -101,8 +104,10 @@ public class SealListServiceImpl implements SealListService {
                 .map(sealMaster -> {
                     SealExportDetail sealExportDetail = sealExportDetailRepository.findById(sealMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("SealExportDetail not found for draftId: " + sealMaster.getDraftId()));
-
-                    return ExportListResponseDTO.of(sealExportDetail, sealMaster.getDrafter());
+                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(sealExportDetail.getDraftId(), "A")
+                            .orElse(null);
+                    assert fileDetail != null;
+                    return ExportListResponseDTO.of(sealExportDetail, sealMaster.getDrafter(), fileDetail);
                 })
                 .collect(Collectors.toList());
     }

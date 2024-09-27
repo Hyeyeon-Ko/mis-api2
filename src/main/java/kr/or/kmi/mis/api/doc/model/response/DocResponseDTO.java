@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.doc.model.response;
 
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import lombok.Builder;
 import lombok.Data;
 
@@ -27,7 +28,7 @@ public class DocResponseDTO {
 
     static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster) {
+    public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster, FileDetail fileDetail) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
@@ -36,12 +37,12 @@ public class DocResponseDTO {
                 .resSender(docDetail.getReceiver())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
-                .fileName(docDetail.getFileName())
-                .filePath(docDetail.getFilePath())
+                .fileName(fileDetail.getFileName())
+                .filePath(fileDetail.getFilePath())
                 .build();
     }
 
-    public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster) {
+    public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster, FileDetail fileDetail) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
@@ -50,8 +51,8 @@ public class DocResponseDTO {
                 .resSender(docDetail.getSender())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
-                .fileName(docDetail.getFileName())
-                .filePath(docDetail.getFilePath())
+                .fileName(fileDetail.getFileName())
+                .filePath(fileDetail.getFilePath())
                 .build();
     }
 }

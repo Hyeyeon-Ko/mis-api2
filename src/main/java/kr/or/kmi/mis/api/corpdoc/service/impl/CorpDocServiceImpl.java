@@ -12,6 +12,11 @@ import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
+import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
+import kr.or.kmi.mis.api.file.service.FileHistorySevice;
+import kr.or.kmi.mis.api.file.service.FileService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.config.SftpClient;
@@ -32,9 +37,12 @@ public class CorpDocServiceImpl implements CorpDocService {
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
     private final CorpDocHistoryService corpDocHistoryService;
+    private final FileService fileService;
+    private final FileHistorySevice fileHistorySevice;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
     private final SftpClient sftpClient;
+    private final FileDetailRepository fileDetailRepository;
 
     @Value("${sftp.remote-directory.corpdoc}")
     private String corpdocRemoteDirectory;
@@ -42,18 +50,33 @@ public class CorpDocServiceImpl implements CorpDocService {
     @Override
     @Transactional
     public void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws Exception {
+
+        // 1. CorpDocMaster 저장
         CorpDocMaster corpDocMaster = corpDocRequestDTO.toMasterEntity();
         corpDocMaster.setRgstrId(corpDocRequestDTO.getDrafterId());
         corpDocMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
         corpDocMaster = corpDocMasterRepository.save(corpDocMaster);
 
-        String[] savedFileInfo = handleFileUpload(file, null);
-
+        // 2. CorpdocDetail 저장
         CorpDocDetail corpDocDetail = corpDocRequestDTO.toDetailEntity(
-                corpDocMaster.getDraftId(), savedFileInfo[0], savedFileInfo[1]);
+                corpDocMaster.getDraftId());
         corpDocDetail.setRgstrId(corpDocRequestDTO.getDrafterId());
         corpDocDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+
         corpDocDetailRepository.save(corpDocDetail);
+
+        // 3. File 업로드
+        String[] savedFileInfo = handleFileUpload(file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(corpDocDetail.getDraftId())
+                .drafter(corpDocMaster.getDrafter())
+                .docType("B")
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
     }
 
     @Override
@@ -61,38 +84,64 @@ public class CorpDocServiceImpl implements CorpDocService {
     public CorpDocDetailResponseDTO getCorpDocApply(Long draftId) {
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        return CorpDocDetailResponseDTO.of(corpDocDetail);
+        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        return CorpDocDetailResponseDTO.of(corpDocDetail, fileDetail);
     }
 
     @Override
     @Transactional
     public void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
                                    MultipartFile file, boolean isFileDeleted) throws Exception {
+
+        // 1. CorpDocDetail 업데이트
+        CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         corpDocHistoryService.createCorpDocHistory(corpDocDetail);
 
-        String[] savedFileInfo = handleFileUpload(file, corpDocDetail.getFilePath(), isFileDeleted);
-
-        corpDocDetail.update(corpDocUpdateRequestDTO, savedFileInfo[0], savedFileInfo[1]);
+        corpDocDetail.update(corpDocUpdateRequestDTO);
         corpDocDetail.setUpdtrId(infoService.getUserInfo().getUserName());
         corpDocDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
 
         corpDocDetailRepository.save(corpDocDetail);
+
+        // 2. FileDetail 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        fileHistorySevice.createFileHistory(fileDetail, "A");
+
+        String[] savedFileInfo = handleFileUpload(file, fileDetail.getFilePath(), isFileDeleted);
+
+        fileDetail.updateFileInfo(savedFileInfo[0], savedFileInfo[1]);
+        fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        fileDetail.setUpdtrId(corpDocMaster.getDrafterId());
+        fileDetailRepository.save(fileDetail);
     }
 
     @Override
     @Transactional
     public void cancelCorpDocApply(Long draftId) {
+
+        // 1. CorpDocMaster 삭제 (F)
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         corpDocMaster.updateStatus("F");
         corpDocMasterRepository.save(corpDocMaster);
+
+        // 2. FileDetail History 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        fileHistorySevice.createFileHistory(fileDetail, "B");
+        fileDetailRepository.delete(fileDetail);
     }
 
-    private String[] handleFileUpload(MultipartFile file, String existingFilePath) throws Exception {
-        return handleFileUpload(file, existingFilePath, false);
+    private String[] handleFileUpload(MultipartFile file) throws Exception {
+        return handleFileUpload(file, null, false);
     }
 
     private String[] handleFileUpload(MultipartFile file, String existingFilePath, boolean isFileDeleted) throws Exception {

@@ -34,7 +34,7 @@ public class ExportRequestDTO {
                 .build();
     }
 
-    public SealExportDetail toDetailEntity(Long draftId, String fileName, String filePath) {
+    public SealExportDetail toDetailEntity(Long draftId) {
         return SealExportDetail.builder()
                 .draftId(draftId)
                 .submission(submission)
@@ -46,8 +46,6 @@ public class ExportRequestDTO {
                 .facsimileSeal(facsimileSeal)
                 .companySeal(companySeal)
                 .purpose(purpose)
-                .fileName(fileName)
-                .filePath(filePath)
                 .build();
     }
 }

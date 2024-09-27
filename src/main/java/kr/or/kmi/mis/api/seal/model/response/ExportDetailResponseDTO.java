@@ -22,22 +22,4 @@ public class ExportDetailResponseDTO {
     private String purpose;
     private String fileName;
     private String filePath;
-
-    public static ExportDetailResponseDTO of(SealMaster sealMaster, SealExportDetail sealExportDetail) {
-        return ExportDetailResponseDTO.builder()
-                .draftId(sealMaster.getDraftId())
-                .division(sealMaster.getDivision())
-                .submission(sealExportDetail.getSubmission())
-                .useDept(sealExportDetail.getUseDept())
-                .expNm(sealExportDetail.getExpNm())
-                .expDate(sealExportDetail.getExpDate())
-                .returnDate(sealExportDetail.getReturnDate())
-                .corporateSeal(sealExportDetail.getCorporateSeal())
-                .facsimileSeal(sealExportDetail.getFacsimileSeal())
-                .companySeal(sealExportDetail.getCompanySeal())
-                .purpose(sealExportDetail.getPurpose())
-                .fileName(sealExportDetail.getFileName())
-                .filePath(sealExportDetail.getFilePath())
-                .build();
-    }
 }

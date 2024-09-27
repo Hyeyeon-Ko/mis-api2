@@ -1,4 +1,4 @@
-package kr.or.kmi.mis.api.apply.controller;
+package kr.or.kmi.mis.api.file.controller;
 
 import com.jcraft.jsch.SftpException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +21,7 @@ import java.util.Map;
 @RequestMapping("/api/file")
 @RequiredArgsConstructor
 @Tag(name = "File Download", description = "파일 다운로드 API")
-public class FileController {
+public class FileDownloadController {
 
     private final SftpClient sftpClient;
 
