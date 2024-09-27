@@ -31,21 +31,12 @@ public class BcdRequestDTO {
     String division;    // 명함구분
     Integer quantity;
 
-<<<<<<< Updated upstream
     List<String> approverIds;
     Integer currentApproverIndex;
 
     // BcdRequest Dto -> BcdMaster Entity
     public BcdMaster toMasterEntity(String status) {
         String approverChain = String.join(", ", approverIds);
-=======
-    List<String> approverIds;  // 결재자 ID 리스트 추가
-    Integer currentApproverIndex;
-
-    // BcdRequest Dto -> BcdMaster Entity
-    public BcdMaster toMasterEntity() {
-        String approverChain = String.join(",", approverIds);
->>>>>>> Stashed changes
 
         return BcdMaster.builder()
                 .drafter(drafter)
@@ -53,10 +44,7 @@ public class BcdRequestDTO {
                 .teamNm(teamNm)
                 .korNm(korNm)
                 .approverChain(approverChain)
-<<<<<<< Updated upstream
                 .status(status)
-=======
->>>>>>> Stashed changes
                 .build();
     }
 

@@ -29,7 +29,6 @@ public class ApplyController {
     @Operation(summary = "신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList")
     public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam(required = false) String documentType,
-<<<<<<< Updated upstream
                                                          @RequestParam(required = false) LocalDate startDate,
                                                          @RequestParam(required = false) LocalDate endDate,
                                                          @RequestParam(required = false) String searchType,
@@ -37,27 +36,16 @@ public class ApplyController {
                                                          @RequestParam String instCd,
                                                          @RequestParam String userId) {
         return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, searchType, keyword, instCd, userId));
-=======
-                                                         @RequestParam String instCd,
-                                                         @RequestParam String userId) {
-        return ResponseWrapper.success(applyService.getAllApplyList(documentType, instCd, userId));
->>>>>>> Stashed changes
     }
 
     @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/pendingList")
     public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam(required = false) String documentType,
-<<<<<<< Updated upstream
                                                                @RequestParam(required = false) LocalDate startDate,
                                                                @RequestParam(required = false) LocalDate endDate,
                                                                @RequestParam String instCd,
                                                                @RequestParam String userId) {
         return ResponseWrapper.success(applyService.getPendingListByType(documentType, startDate, endDate, instCd, userId));
-=======
-                                                               @RequestParam String instCd,
-                                                               @RequestParam String userId) {
-        return ResponseWrapper.success(applyService.getPendingListByType(documentType, instCd, userId));
->>>>>>> Stashed changes
     }
 
     @Operation(summary = "승인대기내역 개수", description = "승인대기 내역의 개수를 알려줍니다.")
