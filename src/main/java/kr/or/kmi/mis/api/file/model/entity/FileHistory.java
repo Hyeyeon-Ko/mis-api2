@@ -19,6 +19,9 @@ public class FileHistory extends BaseSystemFieldEntity {
     @Column(name = "seq_id")
     private Long seqId;
 
+    @Column(name = "draft_id")
+    private Long draftId;
+
     @Column(name = "doc_type")
     private String docType;
 
@@ -35,6 +38,7 @@ public class FileHistory extends BaseSystemFieldEntity {
     public FileHistory(FileDetail fileDetail, Long seqId, String type) {
         this.id = fileDetail.getId();
         this.seqId = seqId;
+        this.draftId = fileDetail.getDraftId();
         this.docType = fileDetail.getDocType();
         this.fileName = fileDetail.getFileName();
         this.filePath = fileDetail.getFilePath();
