@@ -20,9 +20,6 @@ public class SealExportDetail extends BaseSystemFieldEntity {
     @Column(length = 50)
     private String submission;
 
-    @Column(length = 50)
-    private String useDept;
-
     @Column(length = 20)
     private String expNm;
 
@@ -44,12 +41,14 @@ public class SealExportDetail extends BaseSystemFieldEntity {
     @Column(length = 1000)
     private String purpose;
 
+    @Column(length = 1000)
+    private String notes;
+
     @Builder
-    public SealExportDetail(Long draftId, String submission, String useDept, String expNm, String expDate, String returnDate,
-                            String corporateSeal, String facsimileSeal, String companySeal, String purpose) {
+    public SealExportDetail(Long draftId, String submission, String expNm, String expDate, String returnDate,
+                            String corporateSeal, String facsimileSeal, String companySeal, String purpose, String notes) {
         this.draftId = draftId;
         this.submission = submission;
-        this.useDept = useDept;
         this.expNm = expNm;
         this.expDate = expDate;
         this.returnDate = returnDate;
@@ -57,11 +56,11 @@ public class SealExportDetail extends BaseSystemFieldEntity {
         this.facsimileSeal = facsimileSeal;
         this.companySeal = companySeal;
         this.purpose = purpose;
+        this.notes = notes;
     }
 
     public void update(ExportRequestDTO exportRequestDTO) {
         this.submission = exportRequestDTO.getSubmission();
-        this.useDept = exportRequestDTO.getUseDept();
         this.expNm = exportRequestDTO.getExpNm();
         this.expDate = exportRequestDTO.getExpDate();
         this.returnDate = exportRequestDTO.getReturnDate();
@@ -69,11 +68,11 @@ public class SealExportDetail extends BaseSystemFieldEntity {
         this.facsimileSeal = exportRequestDTO.getFacsimileSeal();
         this.companySeal = exportRequestDTO.getCompanySeal();
         this.purpose = exportRequestDTO.getPurpose();
+        this.notes = exportRequestDTO.getNotes();
     }
 
     public void updateFile(ExportUpdateRequestDTO exportUpdateRequestDTO) {
         this.submission = exportUpdateRequestDTO.getSubmission();
-        this.useDept = exportUpdateRequestDTO.getUseDept();
         this.expNm = exportUpdateRequestDTO.getExpNm();
         this.expDate = exportUpdateRequestDTO.getExpDate();
         this.returnDate = exportUpdateRequestDTO.getReturnDate();
@@ -81,5 +80,6 @@ public class SealExportDetail extends BaseSystemFieldEntity {
         this.facsimileSeal = exportUpdateRequestDTO.getFacsimileSeal();
         this.companySeal = exportUpdateRequestDTO.getCompanySeal();
         this.purpose = exportUpdateRequestDTO.getPurpose();
+        this.notes = exportUpdateRequestDTO.getNotes();
     }
 }

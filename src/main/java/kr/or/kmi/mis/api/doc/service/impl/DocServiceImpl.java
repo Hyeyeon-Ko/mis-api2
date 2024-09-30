@@ -70,6 +70,9 @@ public class DocServiceImpl implements DocService {
 
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
 
+        System.out.println("file = " + file);
+        System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
+
         // 1. DocMaster 저장
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("A");
 
@@ -96,6 +99,7 @@ public class DocServiceImpl implements DocService {
                 .filePath(savedFileInfo[1])
                 .build();
 
+        System.out.println("fileName = " + savedFileInfo[0]);
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
@@ -197,9 +201,17 @@ public class DocServiceImpl implements DocService {
 
         String[] fileInfo = new String[2];
 
+        System.out.println("DocServiceImpl.handleFileUpload");
+        System.out.println("file = " + file);
+        System.out.println("file.isEmpty() = " + file.isEmpty());
+        System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
+        System.out.println("file.getSize() = " + file.getSize());
+
+        System.out.println(file != null && !file.isEmpty());
+
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
-
+            System.out.println("fileName = " + fileName);
             try {
                 sftpClient.uploadFile(file, fileName, docRemoteDirectory);
                 String filePath = docRemoteDirectory + "/" + fileName;

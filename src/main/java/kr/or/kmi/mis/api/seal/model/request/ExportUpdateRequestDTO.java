@@ -6,7 +6,6 @@ import lombok.Getter;
 public class ExportUpdateRequestDTO {
 
     private String submission;
-    private String useDept;
     private String expNm;
     private String expDate;
     private String returnDate;
@@ -14,4 +13,5 @@ public class ExportUpdateRequestDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+    private String notes;
 }

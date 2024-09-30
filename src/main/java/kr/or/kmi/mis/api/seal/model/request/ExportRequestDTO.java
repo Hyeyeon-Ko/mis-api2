@@ -12,7 +12,6 @@ public class ExportRequestDTO {
     private String drafter;
     private String drafterId;
     private String submission;
-    private String useDept;
     private String expNm;
     private String expDate;
     private String returnDate;
@@ -20,6 +19,7 @@ public class ExportRequestDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+    private String notes;
     private String instCd;
 
     public SealMaster toMasterEntity() {
@@ -38,7 +38,6 @@ public class ExportRequestDTO {
         return SealExportDetail.builder()
                 .draftId(draftId)
                 .submission(submission)
-                .useDept(useDept)
                 .expNm(expNm)
                 .expDate(expDate)
                 .returnDate(returnDate)
@@ -46,6 +45,7 @@ public class ExportRequestDTO {
                 .facsimileSeal(facsimileSeal)
                 .companySeal(companySeal)
                 .purpose(purpose)
+                .notes(notes)
                 .build();
     }
 }

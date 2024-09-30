@@ -23,9 +23,6 @@ public class SealExportHistory {
     @Column(length = 50)
     private String submission;
 
-    @Column(length = 50)
-    private String useDept;
-
     @Column(length = 20)
     private String expNm;
 
@@ -47,12 +44,14 @@ public class SealExportHistory {
     @Column(length = 1000)
     private String purpose;
 
+    @Column(length = 1000)
+    private String notes;
+
     @Builder
     public SealExportHistory(SealExportDetail sealExportDetail, Long seqId) {
         this.draftId = sealExportDetail.getDraftId();
         this.seqId = seqId;
         this.submission = sealExportDetail.getSubmission();
-        this.useDept = sealExportDetail.getUseDept();
         this.expNm = sealExportDetail.getExpNm();
         this.expDate = sealExportDetail.getExpDate();
         this.returnDate = sealExportDetail.getReturnDate();
@@ -60,6 +59,7 @@ public class SealExportHistory {
         this.facsimileSeal = sealExportDetail.getFacsimileSeal();
         this.companySeal = sealExportDetail.getCompanySeal();
         this.purpose = sealExportDetail.getPurpose();
+        this.notes = sealExportDetail.getNotes();
     }
 
 }

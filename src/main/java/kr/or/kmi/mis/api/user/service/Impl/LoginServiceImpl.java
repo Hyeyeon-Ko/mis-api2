@@ -59,7 +59,7 @@ public class LoginServiceImpl implements LoginService {
                 .bodyToMono(Map.class)
                 .block();
 
-        if (responseMap != null && "0000".equals(responseMap.get("resultCd"))) {
+        if (responseMap != null && "0000".equals(responseMap.get("resultCd"))) {  // 2024.10.4 API 배포 후 code==200 으로 변경 요청 및 return 값 확인 필수 !!!
             LoginResponseDTO responseDTO = new LoginResponseDTO();
             responseDTO.setHngNm((String) responseMap.get("hngnm"));
 
