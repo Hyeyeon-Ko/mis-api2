@@ -115,7 +115,7 @@ public class SealListServiceImpl implements SealListService {
     @Override
     @Transactional(readOnly = true)
     public List<RegistrationListResponseDTO> getSealRegistrationList(String instCd) {
-        return sealRegisterDetailRepository.findAllByInstCd(instCd)
+        return sealRegisterDetailRepository.findAllByInstCdAndDeletedtNull(instCd)
                 .stream()
                 .map(sealRegisterDetail -> {
                     if (sealRegisterDetail != null) {
@@ -130,7 +130,7 @@ public class SealListServiceImpl implements SealListService {
     @Override
     @Transactional(readOnly = true)
     public List<TotalRegistrationListResponseDTO> getTotalSealRegistrationList() {
-        return sealRegisterDetailRepository.findAll()
+        return sealRegisterDetailRepository.findAllByDeletedtNull()
                 .stream()
                 .map(sealRegisterDetail -> {
                     if (sealRegisterDetail != null) {

@@ -71,7 +71,8 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
         sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
 
-        sealRegisterDetailRepository.deleteById(draftId);
+        sealRegisterDetail.deleteSeal(new Timestamp(System.currentTimeMillis()));
+        sealRegisterDetailRepository.save(sealRegisterDetail);
     }
 
     @Override
