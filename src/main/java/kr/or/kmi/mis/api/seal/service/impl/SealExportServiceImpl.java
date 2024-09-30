@@ -16,7 +16,6 @@ import kr.or.kmi.mis.api.seal.service.SealExportHistoryService;
 import kr.or.kmi.mis.api.seal.service.SealExportService;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
