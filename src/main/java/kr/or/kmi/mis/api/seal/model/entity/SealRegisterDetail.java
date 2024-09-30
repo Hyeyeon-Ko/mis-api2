@@ -46,6 +46,8 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String instCd;
 
+    private Timestamp deletedt;
+
     @Builder
     public SealRegisterDetail(Long draftId, String sealNm, String sealImage, String useDept, String purpose,
                               String manager, String subManager, String draftDate, String instCd, Timestamp lastUpdateDate) {
@@ -77,5 +79,9 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
         this.manager = sealUpdateRequestDTO.getManager();
         this.subManager = sealUpdateRequestDTO.getSubManager();
         this.sealImage = sealImage;
+    }
+
+    public void deleteSeal(Timestamp deletedt) {
+        this.deletedt = deletedt;
     }
 }

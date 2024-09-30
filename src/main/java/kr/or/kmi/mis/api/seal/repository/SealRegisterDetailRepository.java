@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface SealRegisterDetailRepository extends JpaRepository<SealRegisterDetail, Long> {
 
-    List<SealRegisterDetail> findAllByInstCd(String instCd);
+    List<SealRegisterDetail> findAllByInstCdAndDeletedtNull(String instCd);
+    List<SealRegisterDetail> findAllByDeletedtNull();
 }

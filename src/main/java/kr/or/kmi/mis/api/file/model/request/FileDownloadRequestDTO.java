@@ -6,10 +6,11 @@ import lombok.Data;
 @Data
 public class FileDownloadRequestDTO {
 
-    private Long draftId;
+    private String draftId;
     private String docType;
     private String fileType;
     private String reason;
+    private String fileName;
     private String downloaderNm;
     private String downloaderId;
 
