@@ -15,11 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/api/file")
@@ -59,10 +63,9 @@ public class FileDownloadController {
                 throw new IOException("File not found on SFTP server.");
             }
 
-            // 파일명을 URL 인코딩하여 헤더에 추가
             String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
 
-            // 다운로드 기록 저장
+            // 다운로드 사유 기록
             FileDownloadHistory fileDownloadHistory = fileDownloadRequestDTO.toEntity(filename, fileDownloadRequestDTO);
             fileDownloadHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
             fileDownloadHistory.setRgstrId(fileDownloadRequestDTO.getDownloaderId());
@@ -88,4 +91,63 @@ public class FileDownloadController {
         }
     }
 
+    @Operation(summary = "파일 다운로드", description = "유저 > 여러 파일 다운로드")
+    @PostMapping("/download/multiple")
+    public ResponseEntity<byte[]> downloadMultipleFiles(@RequestBody List<FileDownloadRequestDTO> fileDownloadRequestDTOs) {
+
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream)) {
+
+            for (FileDownloadRequestDTO requestDTO : fileDownloadRequestDTOs) {
+                String filename = requestDTO.getFileName();
+
+                Map<String, String> directoryMap = Map.of(
+                        "doc", docRemoteDirectory,
+                        "seal", exportRemoteDirectory,
+                        "corpdoc", corpdocRemoteDirectory
+                );
+
+                String remoteDirectory = directoryMap.get(requestDTO.getDocType());
+
+                byte[] fileBytes = sftpClient.downloadFile(filename, remoteDirectory);
+
+                if (fileBytes != null && fileBytes.length > 0) {
+                    ZipEntry zipEntry = new ZipEntry(filename);
+                    zipOut.putNextEntry(zipEntry);
+
+                    zipOut.write(fileBytes, 0, fileBytes.length);
+                    zipOut.closeEntry();
+                }
+
+                // 다운로드 사유 기록
+                FileDownloadHistory fileDownloadHistory = requestDTO.toEntity(filename, requestDTO);
+                fileDownloadHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
+                fileDownloadHistory.setRgstrId(requestDTO.getDownloaderId());
+                fileDownloadHistoryRepository.save(fileDownloadHistory);
+            }
+
+            zipOut.finish();
+            byte[] zipBytes = byteArrayOutputStream.toByteArray();
+
+            String encodedZipFileName = URLEncoder.encode("download.zip", StandardCharsets.UTF_8).replace("+", "%20");
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedZipFileName + "\"")
+                    .body(zipBytes);
+
+        } catch (SftpException e) {
+            System.err.println("SFTP error occurred during file download: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (IOException e) {
+            System.err.println("IO error occurred during file download: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            System.err.println("Unexpected error occurred during file download: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

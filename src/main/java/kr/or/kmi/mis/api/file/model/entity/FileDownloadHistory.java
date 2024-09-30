@@ -16,7 +16,7 @@ public class FileDownloadHistory extends BaseSystemFieldEntity {
     private Long id;
 
     @Column(name = "draft_id", nullable = false)
-    private Long draftId;
+    private String draftId;
 
     @Column(name = "doc_type", nullable = false)
     private String docType;
@@ -37,7 +37,7 @@ public class FileDownloadHistory extends BaseSystemFieldEntity {
     private String downloaderId;
 
     @Builder
-    public FileDownloadHistory(Long draftId, String docType, String fileName, String fileType,
+    public FileDownloadHistory(String draftId, String docType, String fileName, String fileType,
                                String reason, String downloaderNm, String downloaderId) {
         this.draftId = draftId;
         this.docType = docType;
