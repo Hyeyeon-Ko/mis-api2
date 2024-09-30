@@ -11,7 +11,6 @@ public class SealExportDetailResponseDTO {
 
     private Long draftId;
     private String submission;
-    private String useDept;
     private String expNm;
     private String expDate;
     private String returnDate;
@@ -19,6 +18,7 @@ public class SealExportDetailResponseDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+    private String notes;
     private String fileName;
     private String filePath;
 
@@ -26,7 +26,6 @@ public class SealExportDetailResponseDTO {
         return SealExportDetailResponseDTO.builder()
                 .draftId(sealExportDetail.getDraftId())
                 .submission(sealExportDetail.getSubmission())
-                .useDept(sealExportDetail.getUseDept())
                 .expNm(sealExportDetail.getExpNm())
                 .expDate(sealExportDetail.getExpDate())
                 .returnDate(sealExportDetail.getReturnDate())
@@ -34,6 +33,7 @@ public class SealExportDetailResponseDTO {
                 .facsimileSeal(sealExportDetail.getFacsimileSeal())
                 .companySeal(sealExportDetail.getCompanySeal())
                 .purpose(sealExportDetail.getPurpose())
+                .notes(sealExportDetail.getNotes())
                 .fileName(fileDetail.getFileName())
                 .filePath(fileDetail.getFilePath())
                 .build();

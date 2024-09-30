@@ -12,7 +12,6 @@ public class ExportDetailResponseDTO {
     private Long draftId;
     private String division;
     private String submission;
-    private String useDept;
     private String expNm;
     private String expDate;
     private String returnDate;
@@ -20,6 +19,7 @@ public class ExportDetailResponseDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+    private String notes;
     private String fileName;
     private String filePath;
 }

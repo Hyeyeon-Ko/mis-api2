@@ -12,7 +12,6 @@ public class ExportListResponseDTO {
     private String draftId;
     private String drafter;
     private String submission;
-    private String useDept;
     private String expNm;
     private String expDate;
     private String returnDate;
@@ -20,6 +19,7 @@ public class ExportListResponseDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+    private String notes;
     private String fileName;
     private String filePath;
 
@@ -28,7 +28,6 @@ public class ExportListResponseDTO {
                 .draftId(sealExportDetail.getRgstrId())
                 .drafter(drafter)
                 .submission(sealExportDetail.getSubmission())
-                .useDept(sealExportDetail.getUseDept())
                 .expNm(sealExportDetail.getFacsimileSeal())
                 .expDate(sealExportDetail.getExpDate())
                 .returnDate(sealExportDetail.getReturnDate())
@@ -36,6 +35,7 @@ public class ExportListResponseDTO {
                 .facsimileSeal(sealExportDetail.getFacsimileSeal())
                 .companySeal(sealExportDetail.getCompanySeal())
                 .purpose(sealExportDetail.getPurpose())
+                .notes(sealExportDetail.getNotes())
                 .fileName(fileDetail.getFileName())
                 .filePath(fileDetail.getFilePath())
                 .build();
