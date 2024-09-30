@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class DocDetailResponseDTO {
 
+    private Long draftId;
     private Timestamp draftDate;
     private Timestamp lastUpdateDate;
     private String drafter;
@@ -32,6 +33,7 @@ public class DocDetailResponseDTO {
 
     public static DocDetailResponseDTO of(DocMaster docMaster, DocDetail docDetail, FileDetail fileDetail) {
         return DocDetailResponseDTO.builder()
+                .draftId(docMaster.getDraftId())
                 .draftDate(docMaster.getDraftDate())
                 .lastUpdateDate(docDetail.getUpdtDt())
                 .drafter(docMaster.getDrafter())

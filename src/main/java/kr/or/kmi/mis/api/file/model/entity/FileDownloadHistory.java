@@ -24,24 +24,25 @@ public class FileDownloadHistory extends BaseSystemFieldEntity {
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
+    @Column(name = "file_type", nullable = false)
+    private String fileType;
 
     @Column(name = "reason", nullable = false)
     private String reason;
 
-    @Column(name = "downloader_name", nullable = false)
+    @Column(name = "downloader_nm", nullable = false)
     private String downloaderNm;
 
     @Column(name = "downloader_id", nullable = false)
     private String downloaderId;
 
     @Builder
-    public FileDownloadHistory(Long draftId, String docType, String fileName, String filePath, String reason, String downloaderNm, String downloaderId) {
+    public FileDownloadHistory(Long draftId, String docType, String fileName, String fileType,
+                               String reason, String downloaderNm, String downloaderId) {
         this.draftId = draftId;
         this.docType = docType;
         this.fileName = fileName;
-        this.filePath = filePath;
+        this.fileType = fileType;
         this.reason = reason;
         this.downloaderNm = downloaderNm;
         this.downloaderId = downloaderId;

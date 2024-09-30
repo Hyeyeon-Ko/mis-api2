@@ -3,6 +3,9 @@ package kr.or.kmi.mis.api.file.controller;
 import com.jcraft.jsch.SftpException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.file.model.entity.FileDownloadHistory;
+import kr.or.kmi.mis.api.file.model.request.FileDownloadRequestDTO;
+import kr.or.kmi.mis.api.file.repository.FileDownloadHistoryRepository;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.Map;
 
 @RestController
@@ -24,6 +28,7 @@ import java.util.Map;
 public class FileDownloadController {
 
     private final SftpClient sftpClient;
+    private final FileDownloadHistoryRepository fileDownloadHistoryRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
@@ -37,7 +42,7 @@ public class FileDownloadController {
 
     @Operation(summary = "파일 다운로드", description = "유저 > 파일 다운로드")
     @GetMapping("/download/{filename}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable("filename") String filename, @RequestParam String documentType) {
+    public ResponseEntity<byte[]> downloadFile(@PathVariable("filename") String filename, FileDownloadRequestDTO fileDownloadRequestDTO) {
 
         Map<String, String> directoryMap = Map.of(
                 "doc", docRemoteDirectory,
@@ -45,7 +50,7 @@ public class FileDownloadController {
                 "corpdoc", corpdocRemoteDirectory
         );
 
-        String remoteDirectory = directoryMap.get(documentType);
+        String remoteDirectory = directoryMap.get(fileDownloadRequestDTO.getDocType());
 
         try {
             byte[] fileBytes = sftpClient.downloadFile(filename, remoteDirectory);
@@ -56,6 +61,12 @@ public class FileDownloadController {
 
             // 파일명을 URL 인코딩하여 헤더에 추가
             String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+
+            // 다운로드 기록 저장
+            FileDownloadHistory fileDownloadHistory = fileDownloadRequestDTO.toEntity(filename, fileDownloadRequestDTO);
+            fileDownloadHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            fileDownloadHistory.setRgstrId(fileDownloadRequestDTO.getDownloaderId());
+            fileDownloadHistoryRepository.save(fileDownloadHistory);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)

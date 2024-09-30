@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 public class ExportListResponseDTO {
 
-    private String draftId;
+    private Long draftId;
     private String drafter;
     private String submission;
     private String expNm;
@@ -25,7 +25,7 @@ public class ExportListResponseDTO {
 
     public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter, FileDetail fileDetail) {
         return ExportListResponseDTO.builder()
-                .draftId(sealExportDetail.getRgstrId())
+                .draftId(sealExportDetail.getDraftId())
                 .drafter(drafter)
                 .submission(sealExportDetail.getSubmission())
                 .expNm(sealExportDetail.getFacsimileSeal())
