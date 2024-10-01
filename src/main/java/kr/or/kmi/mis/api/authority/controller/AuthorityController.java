@@ -3,12 +3,15 @@ package kr.or.kmi.mis.api.authority.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
-import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
+import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +24,16 @@ public class AuthorityController {
 
     private final AuthorityService authorityService;
 
-    @Operation(summary = "get authority list", description = "권한 관리 페이지에서 사용, 모든 권한 목록 호출")
-    @GetMapping
-    public ApiResponse<List<AuthorityListResponseDTO>> getAuthorityList() {
-        return ResponseWrapper.success(authorityService.getAuthorityList());
+//    @Operation(summary = "get authority list", description = "권한 관리 페이지에서 사용, 모든 권한 목록 호출")
+//    @GetMapping
+//    public ApiResponse<List<AuthorityListResponseDTO>> getAuthorityList() {
+//        return ResponseWrapper.success(authorityService.getAuthorityList());
+//    }
+
+    @Operation(summary = "get authority list using Paging", description = "권한 관리 페이지에서 사용, 모든 권한 목록 호출 및 페이징 처리")
+    @GetMapping("")
+    public ApiResponse<Page<AuthorityResponseDTO2>> getAuthorityList(PostPageRequest page) {
+        return ResponseWrapper.success(authorityService.getAuthorityList2(page.of()));
     }
 
     @Operation(summary = "get member authority", description = "유저 ID를 통해 유저 기준자료 권한 조회")

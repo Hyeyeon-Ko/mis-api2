@@ -26,11 +26,14 @@ public class Authority {
     @Column(nullable = false, length = 20)
     private String instCd;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     private String deptCd;
 
+    @Column(nullable = false, length = 10)
+    private String teamCd;
+
     @Column(nullable = false, length = 20)
-    private String deptNm;
+    private String teamNm;
 
     @Column(nullable = false, length = 50)
     private String email;
@@ -43,12 +46,14 @@ public class Authority {
     private Timestamp deletedt;
 
     @Builder
-    public Authority(String userId, String hngNm, String instCd, String deptCd, String deptNm, String email, String role, Timestamp createdt) {
+    public Authority(String userId, String hngNm, String instCd, String deptCd,
+                     String teamCd, String teamNm, String email, String role, Timestamp createdt) {
         this.userId = userId;
         this.hngNm = hngNm;
         this.instCd = instCd;
         this.deptCd = deptCd;
-        this.deptNm = deptNm;
+        this.teamCd = teamCd;
+        this.teamNm = teamNm;
         this.email = email;
         this.role = role;
         this.createdt = createdt;
