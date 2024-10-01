@@ -21,6 +21,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -81,10 +82,10 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .from(bcdMaster)
                 .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-                        titleContains(postSearchRequestDTO.getKeyword()),
-                        afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                        this.titleContains(postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-                        beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
@@ -97,12 +98,18 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {
-//        return startDate != null ? bcdMaster.rgstDt.after(startDate.atStartOfDay()).or(bcdMaster.rgstDt.eq(startDate.atStartOfDay())) : null;
-        return null;
+        if (startDate == null) {
+            return Expressions.asBoolean(true).isTrue();
+        }
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        return bcdMaster.rgstDt.goe(startDateTime);
     }
 
     private BooleanExpression beforeEndDate(LocalDate endDate) {
-//        return endDate != null ? bcdMaster.rgstDt.before(endDate.atTime(LocalTime.MAX)).or(bcdMaster.rgstDt.eq(endDate.atTime(LocalTime.MAX))) : null;
-        return null;
+        if (endDate == null) {
+            return Expressions.asBoolean(true).isTrue();
+        }
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return bcdMaster.rgstDt.loe(endDateTime);
     }
 }

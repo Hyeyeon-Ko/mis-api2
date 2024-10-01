@@ -20,9 +20,9 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 public class PostSearchRequestDTO {
-    @Schema(description = "검색범위-시작")
+    @Schema(description = "검색범위-시작", example = "YYYY-MM-DD")
     private String startDate;
-    @Schema(description = "검색범위-끝")
+    @Schema(description = "검색범위-끝", example = "YYYY-MM-DD")
     private String endDate;
     @Schema(description = "검색조건")
     private String searchType;

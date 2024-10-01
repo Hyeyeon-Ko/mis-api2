@@ -16,6 +16,7 @@ import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,8 +54,8 @@ public class ApplyController {
     @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/pendingList")
     public ApiResponse<PendingResponseDTO> getPendingApplyList(@RequestParam String documentType,
-                                                               @RequestParam(required = false) LocalDateTime startDate,
-                                                               @RequestParam(required = false) LocalDateTime endDate,
+                                                               @RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") LocalDateTime startDate,
+                                                               @RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") LocalDateTime endDate,
                                                                @RequestParam String instCd,
                                                                @RequestParam String userId) {
         return ResponseWrapper.success(applyService.getPendingListByType(documentType, startDate, endDate, instCd, userId));
