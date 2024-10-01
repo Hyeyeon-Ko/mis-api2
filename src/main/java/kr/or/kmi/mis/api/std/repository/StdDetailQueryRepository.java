@@ -17,4 +17,5 @@ import org.springframework.data.domain.Pageable;
  */
 public interface StdDetailQueryRepository {
     Page<StdDetailResponseDTO> getInfo2(String groupCd, Pageable page);
+    String findDetailCd(String teamCd, String instCd);
 }
