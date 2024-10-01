@@ -97,7 +97,7 @@ public class SealExportServiceImpl implements SealExportService {
         String[] savedFileInfo = handleFileUpload(file, null, exportRemoteDirectory);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(sealExportDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();

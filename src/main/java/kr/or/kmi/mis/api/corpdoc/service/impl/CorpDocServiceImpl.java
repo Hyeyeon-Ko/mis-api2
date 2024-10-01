@@ -73,7 +73,7 @@ public class CorpDocServiceImpl implements CorpDocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(corpDocDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();

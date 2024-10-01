@@ -2,9 +2,14 @@ package kr.or.kmi.mis.api.docstorage.service.impl;
 
 import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageExcelApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
+import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
+import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -20,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -29,7 +35,7 @@ import java.util.stream.Collectors;
 public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     private final DocStorageDetailRepository docStorageDetailRepository;
-    private final InfoService infoService;
+    private final DocStorageMasterRepository docStorageMasterRepository;
 
     @Override
     public void downloadExcel(HttpServletResponse response, List<Long> detailIds) throws IOException {
@@ -66,9 +72,10 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     }
 
     @Override
-    public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
-        String rgstrId = infoService.getUserInfo().getUserName();
-        LocalDateTime rgstDt = LocalDateTime.now();
+    public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details, DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO) {
+        String draftId = generateDraftId();
+
+        docStorageExcelApplyRequestDTO.toMasterEntity(docStorageExcelApplyRequestDTO, draftId);
 
         List<DocStorageDetail> entities = details.stream().map(dto -> {
             if (docStorageDetailRepository.existsByDocId(dto.getDocId())) {
@@ -76,6 +83,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
             }
 
             DocStorageDetail entity = DocStorageDetail.builder()
+                    .draftId(draftId)
                     .teamNm(dto.getTeamNm())
                     .docId(dto.getDocId())
                     .location(dto.getLocation())
@@ -91,13 +99,26 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
                     .deptCd(dto.getDeptCd())
                     .build();
 
-            entity.setRgstrId(rgstrId);
-            entity.setRgstDt(rgstDt);
+            entity.setRgstrId(docStorageExcelApplyRequestDTO.getDrafterId());
+            entity.setRgstDt(new Timestamp(System.currentTimeMillis()).toLocalDateTime());
 
             return entity;
         }).collect(Collectors.toList());
 
         docStorageDetailRepository.saveAll(entities);
+    }
+
+    private String generateDraftId() {
+        Optional<DocStorageMaster> lastDocStorageMasterOpt = docStorageMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastDocStorageMasterOpt.isPresent()) {
+            String lastDraftId = lastDocStorageMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "dc" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "dc0000000001";
+        }
     }
 
     @Override

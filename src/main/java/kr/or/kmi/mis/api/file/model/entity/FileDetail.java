@@ -12,7 +12,6 @@ import lombok.*;
 public class FileDetail extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attach_id", length = 12)
     private String attachId;
 

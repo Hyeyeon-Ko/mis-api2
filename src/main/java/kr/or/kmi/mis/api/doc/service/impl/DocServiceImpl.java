@@ -93,7 +93,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -123,7 +123,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -154,7 +154,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -184,7 +184,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -211,7 +211,6 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
-            System.out.println("fileName = " + fileName);
             try {
                 sftpClient.uploadFile(file, fileName, docRemoteDirectory);
                 String filePath = docRemoteDirectory + "/" + fileName;
