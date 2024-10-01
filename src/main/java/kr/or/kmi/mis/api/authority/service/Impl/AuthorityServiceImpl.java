@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
-//import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
@@ -15,12 +14,12 @@ import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailQueryRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,6 @@ import reactor.core.publisher.Mono;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -41,6 +39,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
     private final AuthorityQueryRepository authorityQueryRepository;
+    private final StdDetailQueryRepository stdDetailQueryRepository;
     private final HttpServletRequest httpServletRequest;
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
@@ -153,11 +152,15 @@ public class AuthorityServiceImpl implements AuthorityService {
         if (resultData == null) {
             throw new EntityNotFoundException("User information not found for userId: " + request.getUserId());
         }
+        
+        String deptCd = stdDetailQueryRepository.findDetailCd(resultData.getOrgdeptcd(), resultData.getBzbzplceCd());
+        System.out.println("deptCd = " + deptCd);
 
         Authority authorityInfo = Authority.builder()
                 .userId(resultData.getUserid())
                 .hngNm(resultData.getUsernm())
                 .instCd(resultData.getBzbzplceCd())
+                .deptCd(deptCd)
                 .teamCd(resultData.getOrgdeptcd()) //  그룹웨어에서 넘어오는 'teamCd' 정보
                 .teamNm(resultData.getOrgdeptnm()) //  그룹웨어에서 넘어오는 'teamNm' 정보
                 .email(resultData.getEmail())
