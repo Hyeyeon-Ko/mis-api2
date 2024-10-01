@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -25,12 +26,13 @@ public class SendDocRequestDTO {
 
 
     // DocRequest Dto -> DocMaster Entity
-    public DocMaster toMasterEntity(String status) {
+    public DocMaster toMasterEntity(String draftId, String status) {
         String approverChain = String.join(", ", approverIds);
 
         return DocMaster.builder()
+                .draftId(draftId)
                 .title(String.format("문서발신 신청서 (%s)", drafter))
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftDate(LocalDateTime.now())
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .status(status)
@@ -41,7 +43,7 @@ public class SendDocRequestDTO {
     }
 
     // DocRequest Dto -> DocDetail Entity
-    public DocDetail toDetailEntity(Long draftId) {
+    public DocDetail toDetailEntity(String draftId) {
         return DocDetail.builder()
                 .draftId(draftId)
                 .division(division)

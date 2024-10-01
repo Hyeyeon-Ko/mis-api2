@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.file.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
@@ -12,36 +13,34 @@ import lombok.*;
 public class FileHistory extends BaseSystemFieldEntity {
 
     @Id
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "attach_id")
+    private String attachId;
 
     @Id
     @Column(name = "seq_id")
     private Long seqId;
 
-    @Column(name = "draft_id")
-    private Long draftId;
-
-    @Column(name = "doc_type")
-    private String docType;
-
-    @Column(name = "file_name", nullable = false)
+    @Column(name = "file_nm", nullable = false)
     private String fileName;
 
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
-    @Column(name = "type", nullable = false)
-    private String type; // A: 수정, B: 삭제
-
     @Builder
-    public FileHistory(FileDetail fileDetail, Long seqId, String type) {
-        this.id = fileDetail.getId();
+    public FileHistory(Long seqId) {
         this.seqId = seqId;
-        this.draftId = fileDetail.getDraftId();
-        this.docType = fileDetail.getDocType();
-        this.fileName = fileDetail.getFileName();
-        this.filePath = fileDetail.getFilePath();
-        this.type = type;
+    }
+
+    public FileHistory(FileUploadRequestDTO fileUploadRequestDTO, String attachId, Long seqId) {
+        this.attachId = attachId;
+        this.seqId = seqId;
+        this.fileName = fileUploadRequestDTO.getFileName();
+        this.filePath = fileUploadRequestDTO.getFilePath();
+    }
+
+    public void update(FileUploadRequestDTO fileUploadRequestDTO, Long seqId) {
+        this.seqId = seqId;
+        this.fileName = fileUploadRequestDTO.getFileName();
+        this.filePath = fileUploadRequestDTO.getFilePath();
     }
 }

@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/api/corpDoc")
 @RequiredArgsConstructor
@@ -34,14 +32,14 @@ public class CorpDocController {
 
     @Operation(summary = "get corpDoc apply", description = "법인서류 신청 상세정보 조회")
     @GetMapping("/{draftId}")
-    public ApiResponse<CorpDocDetailResponseDTO> getCorpDocApply(@PathVariable("draftId") Long draftId) {
+    public ApiResponse<CorpDocDetailResponseDTO> getCorpDocApply(@PathVariable("draftId") String draftId) {
         return ResponseWrapper.success(corpDocService.getCorpDocApply(draftId));
     }
 
     @Operation(summary = "update corpDoc apply", description = "승인대기 중인 법인서류 신청 수정")
     @PostMapping("/update")
     public ApiResponse<?> updateCorpDocApply(
-            @RequestParam("draftId") Long draftId,
+            @RequestParam("draftId") String draftId,
             @RequestPart("corpDocUpdateRequest") CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
             @RequestPart(value = "file", required = false) MultipartFile file,
             boolean isFileDeleted) throws Exception {
@@ -52,7 +50,7 @@ public class CorpDocController {
 
     @Operation(summary = "cancel corpDoc apply", description = "법인서류 신청취소")
     @PutMapping("/{draftId}")
-    public ApiResponse<?> cancelCorpDocApply(@PathVariable("draftId") Long draftId) {
+    public ApiResponse<?> cancelCorpDocApply(@PathVariable("draftId") String draftId) {
         corpDocService.cancelCorpDocApply(draftId);
         return ResponseWrapper.success();
     }

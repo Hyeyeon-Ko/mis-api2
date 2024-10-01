@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -25,8 +26,8 @@ public class CorpDocListController {
 
     @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
     @GetMapping(value = "/issueList")
-    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(@RequestParam(required = false) LocalDate startDate,
-                                                                        @RequestParam(required = false) LocalDate endDate,
+    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(@RequestParam(required = false) LocalDateTime startDate,
+                                                                        @RequestParam(required = false) LocalDateTime endDate,
                                                                         @RequestParam(required = false) String searchType,
                                                                         @RequestParam(required = false) String keyword) {
         return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(startDate, endDate, searchType, keyword));
@@ -42,7 +43,7 @@ public class CorpDocListController {
 
     @Operation(summary = "issue corpDoc", description = "법인서류 발급")
     @PutMapping(value = "/issue")
-    public ApiResponse<?> issueCorpDoc(@RequestParam("draftId") Long draftId, @RequestBody CorpDocLeftRequestDTO requestDTO) {
+    public ApiResponse<?> issueCorpDoc(@RequestParam("draftId") String draftId, @RequestBody CorpDocLeftRequestDTO requestDTO) {
         corpDocListService.issueCorpDoc(draftId, requestDTO);
         return ResponseWrapper.success();
     }
@@ -56,7 +57,7 @@ public class CorpDocListController {
 
     @Operation(summary = "complete corpDoc apply", description = "법인서류 수령 확인")
     @PutMapping(value = "/completeApply")
-    public ApiResponse<?> completeCorpDoc(@RequestParam("draftId") Long draftId) {
+    public ApiResponse<?> completeCorpDoc(@RequestParam("draftId") String draftId) {
         corpDocListService.completeCorpDoc(draftId);
         return ResponseWrapper.success();
     }

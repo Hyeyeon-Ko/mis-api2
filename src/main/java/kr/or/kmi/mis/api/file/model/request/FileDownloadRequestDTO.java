@@ -7,20 +7,16 @@ import lombok.Data;
 public class FileDownloadRequestDTO {
 
     private String draftId;
-    private String docType;
-    private String fileType;
-    private String reason;
-    private String fileName;
+    private String downloadType;
+    private String downloadNotes;
     private String downloaderNm;
     private String downloaderId;
 
     public FileDownloadHistory toEntity(String fileName, FileDownloadRequestDTO fileDownloadRequestDTO) {
         return FileDownloadHistory.builder()
                 .draftId(fileDownloadRequestDTO.getDraftId())
-                .docType(fileDownloadRequestDTO.getDocType())
-                .fileName(fileName)
-                .fileType(fileDownloadRequestDTO.getFileType())
-                .reason(fileDownloadRequestDTO.getReason())
+                .downloadType(fileDownloadRequestDTO.getDownloadType())
+                .downloadNotes(fileDownloadRequestDTO.getDownloadNotes())
                 .downloaderNm(fileDownloadRequestDTO.getDownloaderNm())
                 .downloaderId(fileDownloadRequestDTO.getDownloaderId())
                 .build();

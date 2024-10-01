@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class ManagementListResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String drafter;
     private String submission;
     private String useDate;

@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 @AllArgsConstructor
 public class CorpDocRnpResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String drafter;
     private String draftDate;
     private String endDate;

@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.model.request.ImprintRequestDTO;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -26,22 +29,35 @@ public class SealImprintServiceImpl implements SealImprintService {
     @Override
     @Transactional
     public void applyImprint(ImprintRequestDTO imprintRequestDTO) {
+        String draftId = generateDraftId();
 
-        SealMaster sealMaster = imprintRequestDTO.toMasterEntity();
+        SealMaster sealMaster = imprintRequestDTO.toMasterEntity(draftId);
         sealMaster.setRgstrId(imprintRequestDTO.getDrafterId());
-        sealMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealMaster.setRgstDt(LocalDateTime.now());
         sealMaster = sealMasterRepository.save(sealMaster);
 
-        Long draftId = sealMaster.getDraftId();
-        SealImprintDetail sealImprintDetail = imprintRequestDTO.toDetailEntity(draftId);
+        SealImprintDetail sealImprintDetail = imprintRequestDTO.toDetailEntity(sealMaster.getDraftId());
         sealImprintDetail.setRgstrId(imprintRequestDTO.getDrafterId());
-        sealImprintDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealImprintDetail.setRgstDt(LocalDateTime.now());
         sealImprintDetailRepository.save(sealImprintDetail);
+    }
+
+    private String generateDraftId() {
+        Optional<SealMaster> lastSealMasterOpt = sealMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastSealMasterOpt.isPresent()) {
+            String lastDraftId = lastSealMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "se" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "se0000000001";
+        }
     }
 
     @Override
     @Transactional
-    public void updateImprint(Long draftId, ImprintUpdateRequestDTO imprintUpdateRequestDTO) {
+    public void updateImprint(String draftId, ImprintUpdateRequestDTO imprintUpdateRequestDTO) {
 
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -56,17 +72,17 @@ public class SealImprintServiceImpl implements SealImprintService {
         // 날인신청 수정사항 저장
         sealImprintDetailInfo.update(imprintUpdateRequestDTO);
         sealImprintDetailInfo.setUpdtrId(sealMaster.getDrafterId());
-        sealImprintDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealImprintDetailInfo.setUpdtDt(LocalDateTime.now());
         sealImprintDetailRepository.save(sealImprintDetailInfo);
 
         sealMaster.setUpdtrId(sealMaster.getDrafterId());
-        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealMaster.setUpdtDt(LocalDateTime.now());
         sealMasterRepository.save(sealMaster);
     }
 
     @Override
     @Transactional
-    public void cancelImprint(Long draftId) {
+    public void cancelImprint(String draftId) {
 
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -76,7 +92,7 @@ public class SealImprintServiceImpl implements SealImprintService {
     }
 
     @Override
-    public SealImprintDetailResponseDTO getSealImprintDetail(Long draftId) {
+    public SealImprintDetailResponseDTO getSealImprintDetail(String draftId) {
         SealImprintDetail sealImprintDetail = sealImprintDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

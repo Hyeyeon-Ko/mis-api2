@@ -6,16 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
 @AllArgsConstructor
 public class CorpDocMyResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
     private String drafter;
     private String approver;
     private String disapprover;

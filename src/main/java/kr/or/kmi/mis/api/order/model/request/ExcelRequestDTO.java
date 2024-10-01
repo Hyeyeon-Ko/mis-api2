@@ -8,5 +8,5 @@ import java.util.List;
 public class ExcelRequestDTO {
 
     private String instCd;
-    private List<Long> selectedApplications;
+    private List<String> selectedApplications;
 }

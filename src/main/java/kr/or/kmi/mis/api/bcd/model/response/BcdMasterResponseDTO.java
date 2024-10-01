@@ -4,22 +4,23 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
 @AllArgsConstructor
 public class BcdMasterResponseDTO {
-    private Long draftId;
+    private String draftId;
     private String instCd;
     private String instNm;
     private String title;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
-    private Timestamp orderDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
+    private LocalDateTime orderDate;
     private String drafter;
     private String applyStatus;
     private String lastUpdtId;
-    private Timestamp lastUpdtDate;
+    private LocalDateTime lastUpdtDate;
     private String docType;
 
     // BcdMaster Entity -> BcdMaster response Dto

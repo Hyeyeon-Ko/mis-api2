@@ -13,37 +13,22 @@ public class FileDetail extends BaseSystemFieldEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "attach_id", length = 12)
+    private String attachId;
 
     @Column(name = "draft_id")
-    private Long draftId;
+    private String draftId;
 
-    @Column(name = "doc_type", nullable = false)
-    private String docType; // A: 인장(반출), B: 법인서류, C: 문서수발신
+    @Column(name = "use_at", length = 1)
+    private String useAt;
 
-    @Column(name = "file_name", nullable = false)
-    private String fileName;
-
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
-
-    @Builder
-    public FileDetail(String docType, String fileName, String filePath) {
-        this.docType = docType;
-        this.fileName = fileName;
-        this.filePath = filePath;
-    }
-
-    public FileDetail(FileUploadRequestDTO fileUploadRequestDTO) {
+    public FileDetail(FileUploadRequestDTO fileUploadRequestDTO, String attachId) {
+        this.attachId = attachId;
         this.draftId = fileUploadRequestDTO.getDraftId();
-        this.docType = fileUploadRequestDTO.getDocType();
-        this.fileName = fileUploadRequestDTO.getFileName();
-        this.filePath = fileUploadRequestDTO.getFilePath();
+        this.useAt = "Y";
     }
 
-    public void updateFileInfo(String fileName, String filePath) {
-        this.fileName = fileName;
-        this.filePath = filePath;
+    public void updateUseAt(String useAt) {
+        this.useAt = useAt;
     }
 }

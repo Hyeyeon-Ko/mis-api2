@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface BcdHistoryRepository extends JpaRepository<BcdHistory, DraftSeqPK> {
 
-    Optional<BcdHistory> findTopByDraftIdOrderBySeqIdDesc(@Param("draftId") Long draftId);
+    Optional<BcdHistory> findTopByDraftIdOrderBySeqIdDesc(@Param("draftId") String draftId);
 
 }

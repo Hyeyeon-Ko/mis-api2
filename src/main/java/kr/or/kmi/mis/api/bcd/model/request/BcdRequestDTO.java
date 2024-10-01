@@ -35,10 +35,11 @@ public class BcdRequestDTO {
     Integer currentApproverIndex;
 
     // BcdRequest Dto -> BcdMaster Entity
-    public BcdMaster toMasterEntity(String status) {
+    public BcdMaster toMasterEntity(String draftId, String status) {
         String approverChain = String.join(", ", approverIds);
 
         return BcdMaster.builder()
+                .draftId(draftId)
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .teamNm(teamNm)
@@ -49,7 +50,7 @@ public class BcdRequestDTO {
     }
 
     // BcdRequest Dto -> BcdDetail Entity
-    public BcdDetail toDetailEntity(Long draftId) {
+    public BcdDetail toDetailEntity(String draftId) {
         return BcdDetail.builder()
                 .draftId(draftId)
                 .division(division)

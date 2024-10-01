@@ -17,9 +17,10 @@ import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
-import kr.or.kmi.mis.api.file.service.FileHistorySevice;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.file.service.FileService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -39,9 +40,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static kr.or.kmi.mis.api.confirm.service.Impl.DocConfirmServiceImpl.createDocId;
 
@@ -57,24 +60,22 @@ public class DocServiceImpl implements DocService {
     private final InfoService infoService;
     private final DocHistoryService docHistoryService;
     private final FileService fileService;
-    private final FileHistorySevice fileHistorySevice;
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
 
     private final SftpClient sftpClient;
     private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
 
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
-
-        System.out.println("file = " + file);
-        System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
+        String draftId = generateDraftId();
 
         // 1. DocMaster 저장
-        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("A");
+        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity(draftId, "A");
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -93,22 +94,20 @@ public class DocServiceImpl implements DocService {
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(docDetail.getDraftId())
-                .drafter(docMaster.getDrafter())
-                .docType("C")
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
 
-        System.out.println("fileName = " + savedFileInfo[0]);
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
     @Override
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
+        String draftId = generateDraftId();
 
         // 1. DocMaster 저장
-        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity("E");
-        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity(draftId, "E");
+        docMaster.updateRespondDate(LocalDateTime.now());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -125,8 +124,6 @@ public class DocServiceImpl implements DocService {
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(docDetail.getDraftId())
-                .drafter(docMaster.getDrafter())
-                .docType("C")
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -137,9 +134,10 @@ public class DocServiceImpl implements DocService {
     @Override
     @Transactional
     public void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+        String draftId = generateDraftId();
 
         // 1. DocMaster 저장
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("A");
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId, "A");
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -157,8 +155,6 @@ public class DocServiceImpl implements DocService {
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(docDetail.getDraftId())
-                .drafter(docMaster.getDrafter())
-                .docType("C")
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -168,10 +164,11 @@ public class DocServiceImpl implements DocService {
 
     @Override
     public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+        String draftId = generateDraftId();
 
         // 1. DocMaster 저장
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity("E");
-        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId,"E");
+        docMaster.updateRespondDate(LocalDateTime.now());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -188,8 +185,6 @@ public class DocServiceImpl implements DocService {
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(docDetail.getDraftId())
-                .drafter(docMaster.getDrafter())
-                .docType("C")
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -197,17 +192,22 @@ public class DocServiceImpl implements DocService {
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
+    private String generateDraftId() {
+        Optional<DocMaster> lastDocMasterOpt = docMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastDocMasterOpt.isPresent()) {
+            String lastDraftId = lastDocMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "rs" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "rs0000000001";
+        }
+    }
+
     private String[] handleFileUpload(MultipartFile file) throws IOException {
 
         String[] fileInfo = new String[2];
-
-        System.out.println("DocServiceImpl.handleFileUpload");
-        System.out.println("file = " + file);
-        System.out.println("file.isEmpty() = " + file.isEmpty());
-        System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
-        System.out.println("file.getSize() = " + file.getSize());
-
-        System.out.println(file != null && !file.isEmpty());
 
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
@@ -293,12 +293,12 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional
-    public void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
+    public void updateDocApply(String draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
 
         // 1. DocMaster 업데이트
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        docMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docMaster.setUpdtDt(LocalDateTime.now());
         docMaster.setUpdtrId(docMaster.getDrafterId());
         docMasterRepository.save(docMaster);
 
@@ -308,56 +308,59 @@ public class DocServiceImpl implements DocService {
 
         docHistoryService.createDocHistory(docDetailInfo);
 
-        docDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docDetailInfo.setUpdtDt(LocalDateTime.now());
         docDetailInfo.setUpdtrId(docMaster.getDrafterId());
         updateDocDetail(docUpdateRequestDTO, draftId);
 
-        // 3. FileDetail 업데이트
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
-                .orElse(null);
+        // 3. File 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId()).orElse(null);
+        FileHistory fileHistory = null;
 
-        if (fileDetail != null) fileHistorySevice.createFileHistory(fileDetail, "A");
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
 
-        assert fileDetail != null;
-        String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
 
         if (file != null && !file.isEmpty()) {
-            if (savedFileInfo[1] != null) {
+            if (fileHistory != null && fileHistory.getFilePath() != null) {
+                String newFileName = file.getOriginalFilename();
                 try {
-                    sftpClient.deleteFile(savedFileInfo[1], docRemoteDirectory);
+                    String newFilePath = docRemoteDirectory + "/" + newFileName;
+                    sftpClient.deleteFile(fileHistory.getFileName(), docRemoteDirectory);
+                    sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
+                    fileService.updateFile(new FileUploadRequestDTO(docMaster.getDraftId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
-            }
-
-            String newFileName = file.getOriginalFilename();
-            try {
-                sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
-                savedFileInfo[0] = newFileName;
-                savedFileInfo[1] = docRemoteDirectory + "/" + newFileName;
-            } catch (Exception e) {
-                throw new IOException("SFTP 파일 업로드 실패", e);
+            } else {
+                String newFileName = file.getOriginalFilename();
+                try {
+                    String newFilePath = docRemoteDirectory + "/" + newFileName;
+                    sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
+                    fileService.uploadFile(new FileUploadRequestDTO(docMaster.getDraftId(), newFileName, newFilePath));
+                } catch (Exception e) {
+                    throw new IOException("SFTP 파일 업로드 실패", e);
+                }
             }
         }
-        else if (isFileDeleted && savedFileInfo[1] != null) {
+        else if (isFileDeleted && fileHistory != null && fileHistory.getFilePath() != null) {
             try {
-                sftpClient.deleteFile(savedFileInfo[1], docRemoteDirectory);
-                savedFileInfo[0] = null;
-                savedFileInfo[1] = null;
+                sftpClient.deleteFile(fileHistory.getFilePath(), docRemoteDirectory);
+                fileDetail.updateUseAt("N");
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 삭제 실패", e);
             }
         }
-
-        fileDetail.updateFileInfo(savedFileInfo[0], savedFileInfo[1]);
-        fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-        fileDetail.setUpdtrId(docMaster.getDrafter());
-        fileDetailRepository.save(fileDetail);
     }
 
     @Override
     @Transactional
-    public void cancelDocApply(Long draftId) {
+    public void cancelDocApply(String draftId) {
 
         // 1. DocMaster 삭제 (F)
         DocMaster docMaster = docMasterRepository.findById(draftId)
@@ -366,34 +369,38 @@ public class DocServiceImpl implements DocService {
         docMasterRepository.save(docMaster);
 
         // 2. FileDetail History 업데이트
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "C")
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        fileHistorySevice.createFileHistory(fileDetail, "B");
-        fileDetailRepository.delete(fileDetail);
+        fileDetail.updateUseAt("N");
     }
 
     @Override
     @Transactional(readOnly = true)
-    public DocDetailResponseDTO getDoc(Long draftId) {
+    public DocDetailResponseDTO getDoc(String draftId) {
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         DocDetail docDetail = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
+                .orElse(null);
+        FileHistory fileHistory = null;
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
 
-        return DocDetailResponseDTO.of(docMaster, docDetail, fileDetail);
+        return DocDetailResponseDTO.of(docMaster, docDetail, fileHistory);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyResponseDTO> getMyDocApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<DocMyResponseDTO> getMyDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMyDocMasterList(startDate, endDate, userId));
     }
 
-    public List<DocMyResponseDTO> getMyDocMasterList(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<DocMyResponseDTO> getMyDocMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -413,7 +420,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
+    public List<DocMasterResponseDTO> getDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
 
         if (docMasters == null) {
@@ -454,7 +461,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId) {
+    public List<DocPendingResponseDTO> getDocPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository
                 .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
@@ -488,7 +495,7 @@ public class DocServiceImpl implements DocService {
                 }).toList();
     }
 
-    private void updateDocDetail(Object docRequestOrUpdateDTO, Long draftId) {
+    private void updateDocDetail(Object docRequestOrUpdateDTO, String draftId) {
         DocDetail existingDocDetail = docDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

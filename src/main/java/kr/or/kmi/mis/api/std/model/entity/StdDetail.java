@@ -5,7 +5,7 @@ import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -76,7 +76,7 @@ public class StdDetail extends BaseSystemFieldEntity {
         this.detailCd = detailCd;
         this.groupCd = groupCd;
         this.detailNm = detailNm;
-        this.fromDd = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        this.fromDd = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         this.toDd = "991231";
         this.useAt = "Y";
         this.etcItem1 = etcItem1;
@@ -95,7 +95,7 @@ public class StdDetail extends BaseSystemFieldEntity {
     public void update(StdDetailUpdateRequestDTO stdDetailRequestDTO) {
         this.detailCd = stdDetailRequestDTO.getDetailCd();
         this.detailNm = stdDetailRequestDTO.getDetailNm();
-        this.fromDd = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        this.fromDd = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         this.toDd = "991231";
         this.etcItem1 = stdDetailRequestDTO.getEtcItem1();
         this.etcItem2 = stdDetailRequestDTO.getEtcItem2();

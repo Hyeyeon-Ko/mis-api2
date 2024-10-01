@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DocService {
@@ -19,11 +20,11 @@ public interface DocService {
     void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException;
     void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException;
     void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException;
-    void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
-    void cancelDocApply(Long draftId);
-    DocDetailResponseDTO getDoc(Long draftId);
-    List<DocMyResponseDTO> getMyDocApply(Timestamp startDate, Timestamp endDate, String userId);
+    void updateDocApply(String draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
+    void cancelDocApply(String draftId);
+    DocDetailResponseDTO getDoc(String draftId);
+    List<DocMyResponseDTO> getMyDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
     List<DocPendingResponseDTO> getMyDocPendingList(String userId);
-    List<DocMasterResponseDTO> getDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId);
-    List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId);
+    List<DocMasterResponseDTO> getDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId);
+    List<DocPendingResponseDTO> getDocPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
 }

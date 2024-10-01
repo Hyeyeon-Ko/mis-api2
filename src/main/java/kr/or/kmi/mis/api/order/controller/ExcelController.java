@@ -21,7 +21,7 @@ public class ExcelController {
 
     @Operation(summary = "download excel", description = "발주 요청내역 엑셀 파일 다운로드")
     @PostMapping("/order/excel")
-    public void downloadExcel(HttpServletResponse response, @RequestBody List<Long> draftIds) throws IOException {
+    public void downloadExcel(HttpServletResponse response, @RequestBody List<String> draftIds) throws IOException {
         excelService.downloadExcel(response, draftIds);
     }
 

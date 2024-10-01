@@ -34,7 +34,7 @@ public class SealExportController {
 
     @Operation(summary = "modify export apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 반출신청 수정 시 사용")
     @PostMapping(value = "/update")
-    public ApiResponse<?> updateExportApply(@RequestParam Long draftId, @RequestPart ExportUpdateRequestDTO exportUpdateRequestDTO,
+    public ApiResponse<?> updateExportApply(@RequestParam String draftId, @RequestPart ExportUpdateRequestDTO exportUpdateRequestDTO,
                                             @RequestPart(value = "file", required = false) MultipartFile file, boolean isFileDeleted) throws IOException {
 
         sealExportService.updateExport(draftId, exportUpdateRequestDTO, file, isFileDeleted);
@@ -44,7 +44,7 @@ public class SealExportController {
 
     @Operation(summary = "cancel export apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 반출신청 취소 시 사용")
     @PutMapping(value = "/{draftId}")
-    public ApiResponse<?> cancelExportApply(@PathVariable Long draftId) {
+    public ApiResponse<?> cancelExportApply(@PathVariable String draftId) {
 
         sealExportService.cancelExport(draftId);
 
@@ -53,7 +53,7 @@ public class SealExportController {
 
     @Operation(summary = "get export detail", description = "반출신청 상세조회")
     @GetMapping(value = "/{draftId}")
-    public ApiResponse<SealExportDetailResponseDTO> getSealExportDetail(@PathVariable Long draftId) {
+    public ApiResponse<SealExportDetailResponseDTO> getSealExportDetail(@PathVariable String draftId) {
         return ResponseWrapper.success(sealExportService.getSealExportDetail(draftId));
     }
 }

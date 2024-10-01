@@ -9,7 +9,9 @@ import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocListService;
 import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -35,12 +38,13 @@ public class DocListServiceImpl implements DocListService {
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
     private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
+    public List<DocResponseDTO> getReceiveApplyList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("A");
         if (docDetails == null) {
@@ -49,7 +53,7 @@ public class DocListServiceImpl implements DocListService {
 
         return docDetails.stream()
                 .filter(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, startDate, endDate).orElse(null);
                     if (docMaster == null) {
                         return false;
                     }
@@ -72,9 +76,14 @@ public class DocListServiceImpl implements DocListService {
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd)
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C").orElse(null);
-                    assert fileDetail != null;
-                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileDetail);
+                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
+                            .orElse(null);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileHistory);
                     docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
                     return docResponseDTO;
                 }).toList();
@@ -92,10 +101,14 @@ public class DocListServiceImpl implements DocListService {
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findByDraftIdAndDivision(docMaster.getDraftId(), "A")
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docDetail.getDraftId(), "C")
+                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
                             .orElse(null);
-                    assert fileDetail != null;
-                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileDetail);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileHistory);
                     docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
                     return docResponseDTO;
                 }).toList();
@@ -103,9 +116,9 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
+    public List<DocResponseDTO> getSendApplyList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("B");
         if (docDetails == null) {
@@ -114,7 +127,7 @@ public class DocListServiceImpl implements DocListService {
 
         return docDetails.stream()
                 .filter(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, startDate, endDate).orElse(null);
                     if (docMaster == null) {
                         return false;
                     }
@@ -136,10 +149,14 @@ public class DocListServiceImpl implements DocListService {
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd)
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
+                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
                             .orElse(null);
-                    assert fileDetail != null;
-                    DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster, fileDetail);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster, fileHistory);
                     docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
                     return docResponseDTO;
                 }).toList();
@@ -160,7 +177,7 @@ public class DocListServiceImpl implements DocListService {
                 .toList();
     }
 
-    public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
-        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
-    }
+//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
+//        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
+//    }
 }

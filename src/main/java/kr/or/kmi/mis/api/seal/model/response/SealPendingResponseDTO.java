@@ -5,18 +5,19 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 public class SealPendingResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
     private String instCd;
     private String instNm;
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
     private String drafter;
-    private Timestamp lastUpdateDate;
+    private LocalDateTime lastUpdateDate;
     private String lastUpdater;
     private String applyStatus;
     private String docType;

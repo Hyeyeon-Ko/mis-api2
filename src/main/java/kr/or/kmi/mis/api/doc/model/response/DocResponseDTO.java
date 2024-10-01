@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.doc.model.response;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ import java.text.SimpleDateFormat;
 @Data
 public class DocResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String draftDate;
     private String drafter;
     private String docId;
@@ -28,7 +29,7 @@ public class DocResponseDTO {
 
     static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster, FileDetail fileDetail) {
+    public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster, FileHistory fileHistory) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
@@ -37,12 +38,12 @@ public class DocResponseDTO {
                 .resSender(docDetail.getReceiver())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
-                .fileName(fileDetail.getFileName())
-                .filePath(fileDetail.getFilePath())
+                .fileName(fileHistory != null ? fileHistory.getFileName() : "")
+                .filePath(fileHistory != null ? fileHistory.getFilePath() : "")
                 .build();
     }
 
-    public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster, FileDetail fileDetail) {
+    public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster, FileHistory fileHistory) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
                 .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
@@ -51,8 +52,8 @@ public class DocResponseDTO {
                 .resSender(docDetail.getSender())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
-                .fileName(fileDetail.getFileName())
-                .filePath(fileDetail.getFilePath())
+                .fileName(fileHistory != null ? fileHistory.getFileName() : "")
+                .filePath(fileHistory != null ? fileHistory.getFilePath() : "")
                 .build();
     }
 }

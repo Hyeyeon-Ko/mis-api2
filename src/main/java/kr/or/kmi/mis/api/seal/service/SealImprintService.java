@@ -10,11 +10,11 @@ public interface SealImprintService {
     void applyImprint(ImprintRequestDTO imprintRequestDTO);
 
     /* 날인수정 */
-    void updateImprint(Long draftId, ImprintUpdateRequestDTO imprintUpdateRequestDTO);
+    void updateImprint(String draftId, ImprintUpdateRequestDTO imprintUpdateRequestDTO);
 
     /* 날인취소 */
-    void cancelImprint(Long draftId);
+    void cancelImprint(String draftId);
 
     /* 날인신청 상세조회 */
-    SealImprintDetailResponseDTO getSealImprintDetail(Long draftId);
+    SealImprintDetailResponseDTO getSealImprintDetail(String draftId);
 }

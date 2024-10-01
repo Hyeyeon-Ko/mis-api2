@@ -19,8 +19,8 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long detailId;
 
-    @Column
-    private Long draftId;
+    @Column(length = 12, nullable = false)
+    private String draftId;
 
     @Column(length = 50)
     private String docId;
@@ -66,7 +66,7 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
 
 
     @Builder
-    public DocStorageDetail(Long detailId, Long draftId, String docId, String docNm, String location, String teamNm, String manager, String subManager,
+    public DocStorageDetail(Long detailId, String draftId, String docId, String docNm, String location, String teamNm, String manager, String subManager,
                             String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdNum, String deptCd,
                             String status) {
         this.detailId = detailId;
@@ -115,7 +115,7 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
         this.dpdNum=dto.getDpdNum();
     }
 
-    public void updateDraftId(Long draftId) {
+    public void updateDraftId(String draftId) {
         this.draftId = draftId;
     }
 

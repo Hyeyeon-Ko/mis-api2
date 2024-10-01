@@ -5,6 +5,7 @@ import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -14,15 +15,15 @@ import java.sql.Timestamp;
 public class DocMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(nullable = false)
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
 
-    private Timestamp respondDate;
+    private LocalDateTime respondDate;
 
-    private Timestamp endDate;
+    private LocalDateTime endDate;
 
     @Column(nullable = false, length = 20)
     private String drafter;
@@ -56,18 +57,20 @@ public class DocMaster extends BaseSystemFieldEntity {
 
     public void confirm(String status, String approver, String approverId) {
         this.status = status;
-        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.respondDate = LocalDateTime.now();
         this.approver = approver;
         this.approverId = approverId;
     }
 
     public void delete(String status) {
         this.status = status;
-        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.respondDate = LocalDateTime.now();
     }
 
     @Builder
-    public DocMaster(String title, Timestamp draftDate, String drafter, String drafterId, String approverChain, String status, String instCd, String deptCd) {
+    public DocMaster(String draftId, String title, LocalDateTime draftDate, String drafter, String drafterId,
+                     String approverChain, String status, String instCd, String deptCd) {
+        this.draftId = draftId;
         this.title = title;
         this.draftDate = draftDate;
         this.drafter = drafter;
@@ -96,7 +99,7 @@ public class DocMaster extends BaseSystemFieldEntity {
         this.status = status;
     }
 
-    public void updateRespondDate(Timestamp respondDate) {
+    public void updateRespondDate(LocalDateTime respondDate) {
         this.respondDate = respondDate;
     }
 }

@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 public class ExportRequestDTO {
@@ -22,19 +23,20 @@ public class ExportRequestDTO {
     private String notes;
     private String instCd;
 
-    public SealMaster toMasterEntity() {
+    public SealMaster toMasterEntity(String draftId) {
 
         return SealMaster.builder()
                 .drafter(drafter)
+                .drafter(drafter)
                 .drafterId(drafterId)
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftDate(LocalDateTime.now())
                 .status("A")
                 .division("B")
                 .instCd(instCd)
                 .build();
     }
 
-    public SealExportDetail toDetailEntity(Long draftId) {
+    public SealExportDetail toDetailEntity(String draftId) {
         return SealExportDetail.builder()
                 .draftId(draftId)
                 .submission(submission)

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -16,17 +17,17 @@ import java.sql.Timestamp;
 public class CorpDocMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(nullable = false)
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
 
     @Column
-    private Timestamp respondDate;
+    private LocalDateTime respondDate;
 
     @Column
-    private Timestamp endDate;
+    private LocalDateTime endDate;
 
     @Column(nullable = false, length = 20)
     private String drafter;
@@ -59,7 +60,8 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
     private String instCd;
 
     @Builder
-    public CorpDocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd) {
+    public CorpDocMaster(String draftId, LocalDateTime draftDate, String drafter, String drafterId, String status, String instCd) {
+        this.draftId = draftId;
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
@@ -76,7 +78,7 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
         this.status = "B";
         this.approver = approver;
         this.approverId = approverId;
-        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.respondDate = LocalDateTime.now();
     }
 
     public void disapprove(String disapprover, String disapproverId, String rejectReason) {
@@ -84,11 +86,11 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
         this.disapprover = disapprover;
         this.disapproverId = disapproverId;
         this.rejectReason = rejectReason;
-        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.respondDate = LocalDateTime.now();
     }
 
-    public void end(Long draftId) {
+    public void end(String draftId) {
         this.status = "E";
-        this.endDate = new Timestamp(System.currentTimeMillis());
+        this.endDate = LocalDateTime.now();
     }
 }

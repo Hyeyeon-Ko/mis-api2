@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -21,12 +22,12 @@ public class ApplyResponseDTO {
      * 해당 DTO 에 한번에 담아서 반환
  * */
 
-    private List<BcdMasterResponseDTO> bcdMasterResponses;
+    private Page<BcdMasterResponseDTO> bcdMasterResponses;
     private List<DocMasterResponseDTO> docMasterResponses;
     private List<CorpDocMasterResponseDTO> corpDocMasterResponses;
     private List<SealMasterResponseDTO> sealMasterResponses;
 
-    public static ApplyResponseDTO of(List<BcdMasterResponseDTO> bcdMasterResponses,
+    public static ApplyResponseDTO of(Page<BcdMasterResponseDTO> bcdMasterResponses,
                                       List<DocMasterResponseDTO> docMasterResponses,
                                       List<CorpDocMasterResponseDTO> corpDocMasterResponses,
                                       List<SealMasterResponseDTO> sealMasterResponses) {

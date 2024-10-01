@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,7 +35,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public CorpDocIssueListResponseDTO getCorpDocIssueList(LocalDate startDate, LocalDate endDate, String searchType, String keyword) {
+    public CorpDocIssueListResponseDTO getCorpDocIssueList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword) {
 
         // 1. 발급완료+입고된 법인서류, 발급대기 중인 법인서류 모두 호출
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("G");
@@ -50,10 +51,13 @@ public class CorpDocListServiceImpl implements CorpDocListService {
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
                     if (startDate != null && endDate != null && corpDocDetail.getIssueDate() != null) {
-                        LocalDate issueDate = corpDocDetail.getIssueDate().toLocalDateTime().toLocalDate();
-                        if (issueDate.isBefore(startDate) || issueDate.isAfter(endDate)) {
+                        if(startDate.isBefore(corpDocDetail.getIssueDate()) || endDate.isAfter(corpDocDetail.getIssueDate())){
                             return false;
                         }
+//                        LocalDate issueDate = corpDocDetail.getIssueDate().toLocalDate();
+//                        if (issueDate.isBefore(startDate) || issueDate.isAfter(endDate)) {
+//                            return false;
+//                        }
                     }
 
                     if (searchType != null && keyword != null && !keyword.isEmpty()) {
@@ -150,7 +154,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional
-    public void issueCorpDoc(Long draftId, CorpDocLeftRequestDTO corpDocLeftRequestDTO) {
+    public void issueCorpDoc(String draftId, CorpDocLeftRequestDTO corpDocLeftRequestDTO) {
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found corp doc master: " + draftId));
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
@@ -186,7 +190,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
         CorpDocMaster corpDocMaster = CorpDocMaster.builder()
                 .drafterId(corpDocStoreRequestDTO.getUserId())
                 .drafter(corpDocStoreRequestDTO.getUserNm())
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftDate(LocalDateTime.now())
                 .status("X")
                 .instCd(corpDocStoreRequestDTO.getInstCd())
                 .build();
@@ -201,13 +205,13 @@ public class CorpDocListServiceImpl implements CorpDocListService {
         corpDocDetail.updateDateAndTotal(totalCorpseal, totalCoregister);
 
         corpDocDetail.setRgstrId(corpDocStoreRequestDTO.getUserId());
-        corpDocDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        corpDocDetail.setRgstDt(LocalDateTime.now());
         corpDocDetailRepository.save(corpDocDetail);
     }
 
     @Override
     @Transactional
-    public void completeCorpDoc(Long draftId) {
+    public void completeCorpDoc(String draftId) {
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found corp doc master: " + draftId));
 

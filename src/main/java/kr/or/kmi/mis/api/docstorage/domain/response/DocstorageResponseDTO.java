@@ -7,7 +7,7 @@ import lombok.Data;
 public class DocstorageResponseDTO {
 
     private Long detailId;
-    private Long draftId;
+    private String draftId;
     private String teamNm;
     private String docId;
     private String location;
@@ -24,7 +24,7 @@ public class DocstorageResponseDTO {
     private String status;
 
     @Builder
-    public DocstorageResponseDTO(Long detailId, Long draftId, String teamNm, String docId, String location, String docNm, String manager, String subManager,
+    public DocstorageResponseDTO(Long detailId, String draftId, String teamNm, String docId, String location, String docNm, String manager, String subManager,
                                  String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdraftNum,
                                  String type, String status) {
         this.detailId = detailId;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -12,11 +13,11 @@ import java.sql.Timestamp;
 public class DocStorageMaster {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
 
     @Column(length = 20)
     private String drafter;
@@ -37,8 +38,9 @@ public class DocStorageMaster {
     private String status;
 
     @Builder
-    public DocStorageMaster(Timestamp draftDate, String drafter, String drafterId,
+    public DocStorageMaster(String draftId, LocalDateTime draftDate, String drafter, String drafterId,
                             String instCd, String deptCd, String type, String status) {
+        this.draftId = draftId;
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;

@@ -10,16 +10,19 @@ import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.StdResponseDTO;
 import kr.or.kmi.mis.api.std.repository.StdDetailHistRepository;
+import kr.or.kmi.mis.api.std.repository.StdDetailQueryRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +37,8 @@ public class StdDetailServiceImpl implements StdDetailService {
     private final StdDetailRepository stdDetailRepository;
     private final StdDetailHistRepository stdDetailHistRepository;
     private final InfoService infoService;
+    private final StdDetailQueryRepository stdDetailQueryRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -48,6 +53,14 @@ public class StdDetailServiceImpl implements StdDetailService {
         return stdDetails.stream()
                 .map(StdDetailResponseDTO::of)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<StdDetailResponseDTO> getInfo2(String groupCd, Pageable page) {
+        stdGroupRepository.findById(groupCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + groupCd));
+
+        return stdDetailQueryRepository.getInfo2(groupCd, page);
     }
 
     @Override
@@ -84,7 +97,7 @@ public class StdDetailServiceImpl implements StdDetailService {
                 StdDetail newStdDetail = stdDetailRequestDTO.toEntity(stdGroup);
                 String userId = infoService.getUserInfo().getUserId();
                 newStdDetail.setRgstrId(userId);
-                newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+                newStdDetail.setRgstDt(LocalDateTime.now());
 
                 stdDetailRepository.save(newStdDetail);
             } else {
@@ -93,7 +106,7 @@ public class StdDetailServiceImpl implements StdDetailService {
         } else {
             StdDetail stdDetail = stdDetailRequestDTO.toEntity(stdGroup);
             stdDetail.setRgstrId(infoService.getUserInfo().getUserId());
-            stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            stdDetail.setRgstDt(LocalDateTime.now());
 
             stdDetailRepository.save(stdDetail);
         }
@@ -120,7 +133,7 @@ public class StdDetailServiceImpl implements StdDetailService {
         if(Objects.equals(stdDetailRequestDTO.getDetailCd(), oriDetailCd)) {
             oriStdDetail.update(stdDetailRequestDTO);
             oriStdDetail.setUpdtrId(lstUpdtr);
-            oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+            oriStdDetail.setUpdtDt(LocalDateTime.now());
         }
         //  2) detailCd 포함해 상세 정보를 수정할 경우
         //     - 변경 할 detailCd가 DB에 존재할 때 : 해당 데이터 update 후, 사용여부 "Y"로 변경, 기존 데이터 사용여부 "N"으로 변경
@@ -131,7 +144,7 @@ public class StdDetailServiceImpl implements StdDetailService {
                 stdDetail.update(stdDetailRequestDTO);
                 stdDetail.updateUseAt("Y");
                 stdDetail.setUpdtrId(lstUpdtr);
-                stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+                stdDetail.setUpdtDt(LocalDateTime.now());
                 stdDetailRepository.save(stdDetail);
             }
             else {
@@ -154,12 +167,12 @@ public class StdDetailServiceImpl implements StdDetailService {
                 newStdDetail.setRgstrId(oriStdDetail.getRgstrId());
                 newStdDetail.setRgstDt(oriStdDetail.getRgstDt());
                 newStdDetail.setUpdtrId(lstUpdtr);
-                newStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+                newStdDetail.setUpdtDt(LocalDateTime.now());
                 stdDetailRepository.save(newStdDetail);
             }
             oriStdDetail.updateUseAt("N");
             oriStdDetail.setUpdtrId(lstUpdtr);
-            oriStdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+            oriStdDetail.setUpdtDt(LocalDateTime.now());
         }
         stdDetailRepository.save(oriStdDetail);
     }
@@ -185,12 +198,12 @@ public class StdDetailServiceImpl implements StdDetailService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상세 정보 없음: detailCd = " + detailCd));
 
-        stdDetail.updateToDd(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+        stdDetail.updateToDd(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
         this.saveDetailIntoHist(stdDetail);
 
         String deleter = infoService.getUserInfo().getUserId();
         stdDetail.setUpdtrId(deleter);
-        stdDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        stdDetail.setUpdtDt(LocalDateTime.now());
         stdDetail.updateUseAt("N");
         stdDetailRepository.save(stdDetail);
     }

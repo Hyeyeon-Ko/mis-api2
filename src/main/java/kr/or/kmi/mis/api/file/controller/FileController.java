@@ -8,6 +8,7 @@ import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +25,14 @@ public class FileController {
     public ApiResponse<?> uploadFile(FileUploadRequestDTO fileUploadRequestDTO) {
 
         fileService.uploadFile(fileUploadRequestDTO);
+        return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "update file", description = "파일 수정")
+    @PutMapping
+    public ApiResponse<?> updateFile(FileUploadRequestDTO fileUploadRequestDTO) {
+
+        fileService.updateFile(fileUploadRequestDTO);
         return ResponseWrapper.success();
     }
 }

@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.corpdoc.service.impl;
 
+import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
@@ -13,9 +14,10 @@ import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
-import kr.or.kmi.mis.api.file.service.FileHistorySevice;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.file.service.FileService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
@@ -27,9 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +42,10 @@ public class CorpDocServiceImpl implements CorpDocService {
     private final CorpDocDetailRepository corpDocDetailRepository;
     private final CorpDocHistoryService corpDocHistoryService;
     private final FileService fileService;
-    private final FileHistorySevice fileHistorySevice;
     private final StdBcdService stdBcdService;
-    private final InfoService infoService;
     private final SftpClient sftpClient;
     private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Value("${sftp.remote-directory.corpdoc}")
     private String corpdocRemoteDirectory;
@@ -51,18 +53,19 @@ public class CorpDocServiceImpl implements CorpDocService {
     @Override
     @Transactional
     public void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws Exception {
+        String draftId = generateDraftId();
 
         // 1. CorpDocMaster 저장
-        CorpDocMaster corpDocMaster = corpDocRequestDTO.toMasterEntity();
+        CorpDocMaster corpDocMaster = corpDocRequestDTO.toMasterEntity(draftId);
         corpDocMaster.setRgstrId(corpDocRequestDTO.getDrafterId());
-        corpDocMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        corpDocMaster.setRgstDt(LocalDateTime.now());
         corpDocMaster = corpDocMasterRepository.save(corpDocMaster);
 
         // 2. CorpdocDetail 저장
         CorpDocDetail corpDocDetail = corpDocRequestDTO.toDetailEntity(
                 corpDocMaster.getDraftId());
         corpDocDetail.setRgstrId(corpDocRequestDTO.getDrafterId());
-        corpDocDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        corpDocDetail.setRgstDt(LocalDateTime.now());
 
         corpDocDetailRepository.save(corpDocDetail);
 
@@ -71,8 +74,6 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(corpDocDetail.getDraftId())
-                .drafter(corpDocMaster.getDrafter())
-                .docType("B")
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -80,25 +81,43 @@ public class CorpDocServiceImpl implements CorpDocService {
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
+    private String generateDraftId() {
+        Optional<CorpDocMaster> lastCorpdocMasterOpt = corpDocMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastCorpdocMasterOpt.isPresent()) {
+            String lastDraftId = lastCorpdocMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "cd" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "cd0000000001";
+        }
+    }
+
     @Override
     @Transactional(readOnly = true)
-    public CorpDocDetailResponseDTO getCorpDocApply(Long draftId) {
+    public CorpDocDetailResponseDTO getCorpDocApply(String draftId) {
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        return CorpDocDetailResponseDTO.of(corpDocDetail, fileDetail);
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(corpDocDetail.getDraftId())
+                .orElse(null);
+        FileHistory fileHistory = null;
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
+        return CorpDocDetailResponseDTO.of(corpDocDetail, fileHistory);
     }
 
     @Override
     @Transactional
-    public void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
+    public void updateCorpDocApply(String draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
                                    MultipartFile file, boolean isFileDeleted) throws Exception {
 
         // 1. CorpDocMaster 업데이트
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        corpDocMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        corpDocMaster.setUpdtDt(LocalDateTime.now());
         corpDocMaster.setUpdtrId(corpDocMaster.getDrafterId());
         corpDocMasterRepository.save(corpDocMaster);
 
@@ -110,56 +129,54 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         corpDocDetail.update(corpDocUpdateRequestDTO);
         corpDocDetail.setUpdtrId(corpDocMaster.getDrafter());
-        corpDocDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        corpDocDetail.setUpdtDt(LocalDateTime.now());
 
         corpDocDetailRepository.save(corpDocDetail);
 
-        //3. FileDetail 업데이트
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
-                .orElse(null);
+        // 3. File 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(draftId).orElse(null);
+        FileHistory fileHistory = null;
 
-        if (fileDetail != null) fileHistorySevice.createFileHistory(fileDetail, "A");
-
-        assert fileDetail != null;
-        String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
 
         if (file != null && !file.isEmpty()) {
-            if (savedFileInfo[1] != null) {
+            if (fileHistory != null && fileHistory.getFilePath() != null) {
+                String newFileName = file.getOriginalFilename();
                 try {
-                    sftpClient.deleteFile(savedFileInfo[1], corpdocRemoteDirectory);
+                    String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
+                    sftpClient.deleteFile(fileHistory.getFileName(), corpdocRemoteDirectory);
+                    sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
+                    fileService.updateFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
-            }
-
-            String newFileName = file.getOriginalFilename();
-            try {
-                sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
-                savedFileInfo[0] = newFileName;
-                savedFileInfo[1] = corpdocRemoteDirectory + "/" + newFileName;
-            } catch (Exception e) {
-                throw new IOException("SFTP 파일 업로드 실패", e);
+            } else {
+                String newFileName = file.getOriginalFilename();
+                try {
+                    String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
+                    sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
+                    fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), newFileName, newFilePath));
+                } catch (Exception e) {
+                    throw new IOException("SFTP 파일 업로드 실패", e);
+                }
             }
         }
-        else if (isFileDeleted && savedFileInfo[1] != null) {
+        else if (isFileDeleted && fileHistory != null && fileHistory.getFilePath() != null) {
             try {
-                sftpClient.deleteFile(savedFileInfo[1], corpdocRemoteDirectory);
-                savedFileInfo[0] = null;
-                savedFileInfo[1] = null;
+                sftpClient.deleteFile(fileHistory.getFilePath(), corpdocRemoteDirectory);
+                fileDetail.updateUseAt("N");
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 삭제 실패", e);
             }
         }
-
-        fileDetail.updateFileInfo(savedFileInfo[0], savedFileInfo[1]);
-        fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-        fileDetail.setUpdtrId(corpDocMaster.getDrafterId());
-        fileDetailRepository.save(fileDetail);
     }
 
     @Override
     @Transactional
-    public void cancelCorpDocApply(Long draftId) {
+    public void cancelCorpDocApply(String draftId) {
 
         // 1. CorpDocMaster 삭제 (F)
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
@@ -168,10 +185,9 @@ public class CorpDocServiceImpl implements CorpDocService {
         corpDocMasterRepository.save(corpDocMaster);
 
         // 2. FileDetail History 업데이트
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "B")
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        fileHistorySevice.createFileHistory(fileDetail, "B");
-        fileDetailRepository.delete(fileDetail);
+        fileDetail.updateUseAt("N");
     }
 
     private String[] handleFileUpload(MultipartFile file) throws Exception {
@@ -205,7 +221,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate) {
+    public List<CorpDocPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
                 .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
 
@@ -221,13 +237,13 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMyResponseDTO> getMyCorpDocApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<CorpDocMyResponseDTO> getMyCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMyCorpDocList(startDate, endDate, userId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMasterResponseDTO> getCorpDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword) {
+    public List<CorpDocMasterResponseDTO> getCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
                 .findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
 
@@ -254,7 +270,7 @@ public class CorpDocServiceImpl implements CorpDocService {
                 }).toList();
     }
 
-    private List<CorpDocMyResponseDTO> getMyCorpDocList(Timestamp startDate, Timestamp endDate, String userId) {
+    private List<CorpDocMyResponseDTO> getMyCorpDocList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<CorpDocMaster> corpDocMasterList = corpDocMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not found"));
 

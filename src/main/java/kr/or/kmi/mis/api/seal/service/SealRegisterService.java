@@ -13,11 +13,11 @@ public interface SealRegisterService {
     void registerSeal(SealRegisterRequestDTO sealRegisterRequestDTO, MultipartFile sealImage) throws IOException;
 
     /* 인장 수정 */
-    void updateSeal(Long draftId, SealUpdateRequestDTO sealUpdateRequestDTO, MultipartFile sealImage, boolean isFileDeleted) throws IOException;
+    void updateSeal(String draftId, SealUpdateRequestDTO sealUpdateRequestDTO, MultipartFile sealImage, boolean isFileDeleted) throws IOException;
 
     /* 인장 삭제*/
-    void deleteSeal(Long draftId);
+    void deleteSeal(String draftId);
 
     /* 인장 상세조회 */
-    SealDetailResponseDTO getSealDetail(Long draftId);
+    SealDetailResponseDTO getSealDetail(String draftId);
 }

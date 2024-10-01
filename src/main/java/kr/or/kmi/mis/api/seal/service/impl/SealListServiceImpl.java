@@ -1,7 +1,9 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
@@ -17,10 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +34,7 @@ public class SealListServiceImpl implements SealListService {
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
     private final StdBcdService stdBcdService;
     private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -76,40 +78,85 @@ public class SealListServiceImpl implements SealListService {
     @Transactional(readOnly = true)
     public List<ExportListResponseDTO> getSealExportList(String searchType, String keyword, String instCd) {
 
-        List<SealMaster> sealMasters = sealMasterRepository.findAllByStatusAndDivisionAndInstCd("E", "B", instCd).orElse(Collections.emptyList());
+        // 1. SealMaster 조회
+        List<SealMaster> sealMasters = sealMasterRepository.findAllByStatusAndDivisionAndInstCd("E", "B", instCd)
+                .orElse(Collections.emptyList());
 
-        sealMasters = sealMasters.stream()
-                .filter(sealMaster -> {
-                    SealExportDetail sealExportDetail = sealExportDetailRepository.findById(sealMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("SealExportDetail not found for draftId: " + sealMaster.getDraftId()));
+        if (sealMasters.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-                    boolean matchesSearchType = true;
+        List<String> draftIds = sealMasters.stream()
+                .map(SealMaster::getDraftId)
+                .collect(Collectors.toList());
 
-                    if (searchType != null && keyword != null && !keyword.isEmpty()) {
-                        matchesSearchType = switch (searchType) {
-                            case "전체" -> sealExportDetail.getExpDate().contains(keyword) ||
-                                    sealExportDetail.getReturnDate().contains(keyword) ||
-                                    sealExportDetail.getPurpose().contains(keyword);
-                            case "반출일자" -> sealExportDetail.getExpDate().contains(keyword);
-                            case "반납일자" -> sealExportDetail.getReturnDate().contains(keyword);
-                            case "사용목적" -> sealExportDetail.getPurpose().contains(keyword);
-                            default -> true;
-                        };
+        // 2. SealExportDetail 일괄 조회
+        List<SealExportDetail> sealExportDetails = sealExportDetailRepository.findAllById(draftIds);
+
+        if (sealExportDetails.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 3. 검색 필터 적용
+        List<SealExportDetail> filteredSealExportDetails = sealExportDetails.stream()
+                .filter(sealExportDetail -> {
+                    if (searchType == null || keyword == null || keyword.isEmpty()) {
+                        return true;
                     }
-                    return matchesSearchType;
+                    return switch (searchType) {
+                        case "전체" -> containsIgnoreCase(sealExportDetail.getExpDate(), keyword) ||
+                                containsIgnoreCase(sealExportDetail.getReturnDate(), keyword) ||
+                                containsIgnoreCase(sealExportDetail.getPurpose(), keyword);
+                        case "반출일자" -> containsIgnoreCase(sealExportDetail.getExpDate(), keyword);
+                        case "반납일자" -> containsIgnoreCase(sealExportDetail.getReturnDate(), keyword);
+                        case "사용목적" -> containsIgnoreCase(sealExportDetail.getPurpose(), keyword);
+                        default -> true;
+                    };
                 })
                 .toList();
 
-        return sealMasters.stream()
-                .map(sealMaster -> {
-                    SealExportDetail sealExportDetail = sealExportDetailRepository.findById(sealMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("SealExportDetail not found for draftId: " + sealMaster.getDraftId()));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(sealExportDetail.getDraftId(), "A")
-                            .orElse(null);
-                    assert fileDetail != null;
-                    return ExportListResponseDTO.of(sealExportDetail, sealMaster.getDrafter(), fileDetail);
-                })
+        if (filteredSealExportDetails.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 4. 검색조건에 해당하는 내역의 draftIds
+        List<String> filteredDraftIds = filteredSealExportDetails.stream()
+                .map(SealExportDetail::getDraftId)
                 .collect(Collectors.toList());
+
+        // 5. FileDetail 일괄 조회
+        List<FileDetail> fileDetails = fileDetailRepository.findAllByDraftIdIn(filteredDraftIds);
+
+        Map<String, FileDetail> fileDetailMap = fileDetails.stream()
+                .collect(Collectors.toMap(FileDetail::getDraftId, Function.identity()));
+
+        // 6. ExportListResponseDTO 리스트 생성
+        return filteredSealExportDetails.stream()
+                .map(sealExportDetail -> {
+                    String draftId = sealExportDetail.getDraftId();
+                    SealMaster sealMaster = sealMasters.stream()
+                            .filter(sm -> sm.getDraftId().equals(draftId))
+                            .findFirst()
+                            .orElse(null);
+                    if (sealMaster == null) {
+                        return null;
+                    }
+                    String drafter = sealMaster.getDrafter();
+                    FileDetail fileDetail = fileDetailMap.get(draftId);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    return ExportListResponseDTO.of(sealExportDetail, drafter, fileHistory);
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private boolean containsIgnoreCase(String source, String target) {
+        if (source == null || target == null) return false;
+        return source.toLowerCase().contains(target.toLowerCase());
     }
 
     @Override
@@ -144,7 +191,7 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMasterResponseDTO> getSealApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
+    public List<SealMasterResponseDTO> getSealApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
         List<SealMaster> sealMasters = sealMasterRepository
                 .findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
 
@@ -176,7 +223,7 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<SealPendingResponseDTO> getSealPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd) {
         List<SealMaster> sealMasters = sealMasterRepository
                 .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
@@ -186,11 +233,11 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMyResponseDTO> getMySealApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<SealMyResponseDTO> getMySealApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
     }
 
-    public List<SealMyResponseDTO> getMySealMasterList(String userId, Timestamp startDate, Timestamp endDate) {
+    public List<SealMyResponseDTO> getMySealMasterList(String userId, LocalDateTime startDate, LocalDateTime endDate) {
         List<SealMaster> sealMasterList = sealMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

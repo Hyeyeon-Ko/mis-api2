@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DocDetailRepository extends JpaRepository<DocDetail, Long> {
+public interface DocDetailRepository extends JpaRepository<DocDetail, String> {
 
     Optional<DocDetail> findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(String division);
-    Optional<DocDetail> findByDraftIdAndDivision(Long draftId, String division);
+    Optional<DocDetail> findByDraftIdAndDivision(String draftId, String division);
     List<DocDetail> findAllByDocIdNotNullAndDivision(String division);
 }

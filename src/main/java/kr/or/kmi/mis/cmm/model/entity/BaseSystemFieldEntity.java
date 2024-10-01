@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
@@ -17,12 +18,12 @@ public class BaseSystemFieldEntity {
     private String rgstrId;
 
     @Column(name = "rgst_dt")
-    private Timestamp rgstDt;
+    private LocalDateTime rgstDt;
 
     @Column(name = "updtr_id")
     private String updtrId;
 
     @Column(name = "updt_dt")
-    private Timestamp updtDt;
+    private LocalDateTime updtDt;
 
 }

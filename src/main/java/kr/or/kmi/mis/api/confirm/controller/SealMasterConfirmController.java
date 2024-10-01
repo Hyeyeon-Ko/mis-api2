@@ -18,14 +18,14 @@ public class SealMasterConfirmController {
 
     @Operation(summary = "approve application", description = "인장신청 승인")
     @PostMapping("/{draftId}")
-    public ApiResponse<?> approve(@PathVariable Long draftId) {
+    public ApiResponse<?> approve(@PathVariable String draftId) {
         sealMasterConfirmService.approve(draftId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "disapprove application", description = "인장신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason) {
+    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody String rejectReason) {
         sealMasterConfirmService.disapprove(draftId, rejectReason);
         return ResponseWrapper.success();
     }

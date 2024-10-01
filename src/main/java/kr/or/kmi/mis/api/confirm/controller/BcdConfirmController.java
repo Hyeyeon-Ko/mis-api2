@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,29 +24,29 @@ public class BcdConfirmController {
 
     @Operation(summary = "get apply list", description = "명함신청 목록 상세정보 조회")
     @GetMapping("/{draftId}")
-    public ApiResponse<BcdDetailResponseDTO> getApplyList(@PathVariable Long draftId) {
+    public ApiResponse<BcdDetailResponseDTO> getApplyList(@PathVariable String draftId) {
         return ResponseWrapper.success(bcdConfirmService.getBcdDetailInfo(draftId));
     }
 
     @Operation(summary = "approve application", description = "명함신청 승인")
     @PostMapping("/{draftId}")
-    public ApiResponse<?> approve(@PathVariable Long draftId, @RequestBody String userId) {
+    public ApiResponse<?> approve(@PathVariable String draftId, @RequestBody String userId) {
         bcdConfirmService.approve(draftId, userId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason, @RequestBody String userId) {
+    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody String rejectReason, @RequestBody String userId) {
         bcdConfirmService.disapprove(draftId, rejectReason, userId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "get bcd application history by drafter", description = "기안자의 명함신청 이력 조회")
     @GetMapping("/history/{draftId}")
-    public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@RequestParam(required = false) LocalDate startDate,
-                                                                          @RequestParam(required = false) LocalDate endDate,
-                                                                          @PathVariable Long draftId) {
+    public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@RequestParam(required = false) LocalDateTime startDate,
+                                                                          @RequestParam(required = false) LocalDateTime endDate,
+                                                                          @PathVariable String draftId) {
         return ResponseWrapper.success(bcdConfirmService.getBcdApplicationHistory(startDate, endDate, draftId));
     }
 }

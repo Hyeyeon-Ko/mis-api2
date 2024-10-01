@@ -9,7 +9,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderRequestDTO {
 
-    private List<Long> draftIds;
+    private List<String> draftIds;
     private String emailSubject;
     private String emailBody;
     private String fileName;

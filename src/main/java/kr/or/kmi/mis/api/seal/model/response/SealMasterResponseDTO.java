@@ -5,17 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 public class SealMasterResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String instCd;
     private String instNm;
     private String title;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
     private String drafter;
     private String applyStatus;
     private String lastUpdtId;

@@ -8,16 +8,17 @@ import lombok.Data;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
 @AllArgsConstructor
 public class CorpDocIssueResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String draftDate;
     private String useDate;
-    private Timestamp issueDate;
+    private LocalDateTime issueDate;
     private String drafter;
     private String instNm;
     private String status;

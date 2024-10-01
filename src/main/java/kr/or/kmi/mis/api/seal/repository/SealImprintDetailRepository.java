@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SealImprintDetailRepository extends JpaRepository<SealImprintDetail, Long> {
+public interface SealImprintDetailRepository extends JpaRepository<SealImprintDetail, String> {
 }

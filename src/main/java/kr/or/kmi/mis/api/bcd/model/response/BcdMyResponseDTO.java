@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,10 +18,10 @@ import java.util.List;
 @AllArgsConstructor
 public class BcdMyResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
     private String drafter;
     private String approver;
     private String disapprover;

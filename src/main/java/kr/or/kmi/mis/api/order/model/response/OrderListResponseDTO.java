@@ -4,22 +4,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @RequiredArgsConstructor
 public class OrderListResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String instNm;
     private String title;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
     private String drafter;
     private Integer quantity;
 
     @Builder
-    public OrderListResponseDTO(Long draftId, String instNm, String title, Timestamp draftDate, Timestamp respondDate, String drafter, Integer quantity) {
+    public OrderListResponseDTO(String draftId, String instNm, String title, LocalDateTime draftDate, LocalDateTime respondDate, String drafter, Integer quantity) {
         this.draftId = draftId;
         this.instNm = instNm;
         this.title = title;

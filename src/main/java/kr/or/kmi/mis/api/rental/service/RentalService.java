@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface RentalService {
     void addRentalInfo(RentalRequestDTO rentalRequestDTO);
-    RentalResponseDTO getRentalInfo(Long draftId);
-    void updateRentalInfo(Long draftId, RentalRequestDTO rentalRequestDTO);
+    RentalResponseDTO getRentalInfo(Long detailId);
+    void updateRentalInfo(Long detailId, RentalRequestDTO rentalRequestDTO);
     void bulkUpdateRentalInfo(RentalBulkUpdateRequestDTO rentalBulkUpdateRequestDTO);
-    void deleteRentalInfo(Long draftId);
-    void finishRentalInfo(List<Long> draftIds);
+    void deleteRentalInfo(Long detailId);
+    void finishRentalInfo(List<Long> detailIds);
 }

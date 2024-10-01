@@ -6,6 +6,7 @@ import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -17,7 +18,7 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "draft_id")
-    private Long draftId;
+    private String draftId;
 
     @Id
     @Column(name = "seq_id")
@@ -45,7 +46,7 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
     private String draftDate;
 
     @Column
-    private Timestamp changedDate;
+    private LocalDateTime changedDate;
 
     @Column(length = 20)
     private String instCd;
@@ -64,7 +65,7 @@ public class SealRegisterHistory extends BaseSystemFieldEntity {
         this.instCd = sealRegisterDetail.getInstCd();
     }
 
-    public void update(Timestamp changedDate) {
+    public void update(LocalDateTime changedDate) {
         this.changedDate = changedDate;
     }
 }

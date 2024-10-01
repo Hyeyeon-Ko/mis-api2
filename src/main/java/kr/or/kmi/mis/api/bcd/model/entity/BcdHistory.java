@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -17,7 +18,7 @@ public class BcdHistory {
 
     @Id
     @Column(name = "draft_id")
-    private Long draftId;
+    private String draftId;
 
     @Id
     @Column(name = "seq_id")
@@ -28,7 +29,7 @@ public class BcdHistory {
 
     @CreationTimestamp
     @Column(length = 20)
-    private Timestamp updtDate;     // 명함 수정일자
+    private LocalDateTime updtDate;     // 명함 수정일자
 
     @Column(length = 1)
     private String division;  // 명함구분 - A:회사정보, B:영문명함

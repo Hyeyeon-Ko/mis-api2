@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class BcdDetailResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String drafter;
     private String userId;
     private String division;

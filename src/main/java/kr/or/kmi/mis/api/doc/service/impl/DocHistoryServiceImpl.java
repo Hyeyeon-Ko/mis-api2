@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class DocHistoryServiceImpl implements DocHistoryService {
                 .seqId(maxSeqId+1)
                 .build();
 
-        docHistory.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docHistory.setUpdtDt(LocalDateTime.now());
 
         // DocHistory 객체를 저장
         docHistoryRepository.save(docHistory);

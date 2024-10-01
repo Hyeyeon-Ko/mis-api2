@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface DocStorageDetailRepository extends JpaRepository<DocStorageDetail, Long> {
 
-    Optional<List<DocStorageDetail>> findAllByDraftId(Long draftId);
+    Optional<List<DocStorageDetail>> findAllByDraftId(String draftId);
     Optional<List<DocStorageDetail>> findAllByDeptCd(String deptCd);
     Optional<List<DocStorageDetail>> findByDeptCdAndStatus(String detailCd, String status);
     List<DocStorageDetail> findAllByDetailIdIn(List<Long> detailIds);

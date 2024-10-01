@@ -62,7 +62,7 @@ public class DocController {
     @Operation(summary = "modify doc apply", description = "유저 > 문서수발신 수정")
     @PostMapping(value = "/update")
     public ApiResponse<?> updateDocApply(
-            @RequestParam("draftId") Long draftId,
+            @RequestParam("draftId") String draftId,
             @RequestPart("docUpdateRequest") DocUpdateRequestDTO docUpdateRequestDTO,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "isFileDeleted", defaultValue = "false") boolean isFileDeleted) throws IOException {
@@ -72,14 +72,14 @@ public class DocController {
 
     @Operation(summary = "cancel doc apply", description = "유저 > 문서수발신 취소")
     @PutMapping(value = "/{draftId}")
-    public ApiResponse<?> cancelDoc(@PathVariable Long draftId) {
+    public ApiResponse<?> cancelDoc(@PathVariable String draftId) {
         docService.cancelDocApply(draftId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "get doc detail", description = "유저 > 문서수발신 상세 정보 조회")
     @GetMapping(value = "/{draftId}")
-    public ApiResponse<DocDetailResponseDTO> getDocDetail(@PathVariable Long draftId) {
+    public ApiResponse<DocDetailResponseDTO> getDocDetail(@PathVariable String draftId) {
         return ResponseWrapper.success(docService.getDoc(draftId));
     }
 }

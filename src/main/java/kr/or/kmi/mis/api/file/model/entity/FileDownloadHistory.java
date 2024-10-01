@@ -7,43 +7,40 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "hrmtfdlh")
+@Table(name = "hrmtfldl_hist")
 public class FileDownloadHistory extends BaseSystemFieldEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "sn")
+    private Long sn;
 
-    @Column(name = "draft_id", nullable = false)
+    @Column(name = "attach_id", nullable = false)
+    private String attachId;
+
+    @Column(name = "draft_id", length = 12, nullable = false)
     private String draftId;
 
-    @Column(name = "doc_type", nullable = false)
-    private String docType;
+    @Column(name = "download_type", length = 1, nullable = false)
+    private String downloadType;
 
-    @Column(name = "file_name", nullable = false)
-    private String fileName;
+    @Column(name = "download_notes", length = 50, nullable = false)
+    private String downloadNotes;
 
-    @Column(name = "file_type", nullable = false)
-    private String fileType;
-
-    @Column(name = "reason", nullable = false)
-    private String reason;
-
-    @Column(name = "downloader_nm", nullable = false)
+    @Column(name = "downloader_nm", length = 20, nullable = false)
     private String downloaderNm;
 
-    @Column(name = "downloader_id", nullable = false)
+    @Column(name = "downloader_id", length = 20, nullable = false)
     private String downloaderId;
 
     @Builder
-    public FileDownloadHistory(String draftId, String docType, String fileName, String fileType,
-                               String reason, String downloaderNm, String downloaderId) {
+    public FileDownloadHistory(String attachId, String draftId,
+                               String downloadType, String downloadNotes,
+                               String downloaderNm, String downloaderId) {
+        this.attachId = attachId;
         this.draftId = draftId;
-        this.docType = docType;
-        this.fileName = fileName;
-        this.fileType = fileType;
-        this.reason = reason;
+        this.downloadType = downloadType;
+        this.downloadNotes = downloadNotes;
         this.downloaderNm = downloaderNm;
         this.downloaderId = downloaderId;
     }

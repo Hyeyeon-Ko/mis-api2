@@ -21,7 +21,6 @@ public class BcdController {
     @Operation(summary = "create bcd apply", description = "유저 > 명함신청 시 사용")
     @PostMapping
     public ApiResponse<?> createBcdApply(@RequestBody BcdRequestDTO bcdRequestDTO) {
-        System.out.println("bcdRequestDTO = " + bcdRequestDTO);
         bcdService.applyBcd(bcdRequestDTO);
         return ResponseWrapper.success();
     }
@@ -36,21 +35,21 @@ public class BcdController {
 
     @Operation(summary = "modify bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 수정 시 사용")
     @PostMapping(value = "/update")
-    public ApiResponse<?> updateBcdApply(@RequestParam("draftId") Long draftId, @RequestBody BcdUpdateRequestDTO bcdUpdateRequestDTO) {
+    public ApiResponse<?> updateBcdApply(@RequestParam("draftId") String draftId, @RequestBody BcdUpdateRequestDTO bcdUpdateRequestDTO) {
         bcdService.updateBcd(draftId, bcdUpdateRequestDTO);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "cancel bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 취소 시 사용")
     @PutMapping(value = "/{draftId}")
-    public ApiResponse<?> cancelBscApply(@PathVariable("draftId") Long draftId) {
+    public ApiResponse<?> cancelBscApply(@PathVariable("draftId") String draftId) {
         bcdService.cancelBcdApply(draftId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "put status ORDERED into COMPLETED", description = "유저 > 나의 신청 내역 > 명함을 수령한 후, 수령 확인 버튼 클릭 시 사용")
     @PutMapping(value = "/completeApply")
-    public ApiResponse<?> completeBcdApply(@RequestParam("draftId") Long draftId) {
+    public ApiResponse<?> completeBcdApply(@RequestParam("draftId") String draftId) {
         bcdService.completeBcdApply(draftId);
         return ResponseWrapper.success();
     }

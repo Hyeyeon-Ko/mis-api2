@@ -5,6 +5,7 @@ import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -14,13 +15,13 @@ import java.sql.Timestamp;
 public class SealMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(nullable = false)
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
 
-    private Timestamp respondDate;
+    private LocalDateTime respondDate;
 
     @Column(nullable = false, length = 20)
     private String drafter;
@@ -53,10 +54,11 @@ public class SealMaster extends BaseSystemFieldEntity {
     private String instCd;
 
     @Builder
-    public SealMaster(String drafter, String drafterId, Timestamp draftDate, String status, String division, String instCd) {
+    public SealMaster(String draftId, String drafter, String drafterId, LocalDateTime draftDate, String status, String division, String instCd) {
 
         String divisionType = "A".equals(division) ? "날인" : "반출";
 
+        this.draftId = draftId;
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.draftDate = draftDate;
@@ -72,14 +74,14 @@ public class SealMaster extends BaseSystemFieldEntity {
 
     public void confirm(String status, String approver, String approverId) {
         this.status = status;
-        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.respondDate = LocalDateTime.now();
         this.approver = approver;
         this.approverId = approverId;
     }
 
     public void reject(String status, String disapprover, String disapproverId, String rejectReason) {
         this.status = status;
-        this.respondDate = new Timestamp(System.currentTimeMillis());
+        this.respondDate = LocalDateTime.now();
         this.disapprover = disapprover;
         this.disapproverId = disapproverId;
         this.rejectReason = rejectReason;

@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.seal.model.response.*;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SealListService {
@@ -21,13 +22,13 @@ public interface SealListService {
     List<TotalRegistrationListResponseDTO> getTotalSealRegistrationList();
 
     /* 인장 전체신청내역 */
-    List<SealMasterResponseDTO> getSealApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd);
+    List<SealMasterResponseDTO> getSealApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd);
 
     /* 인장 승인대기내역 */
-    List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate, String instCd);
+    List<SealPendingResponseDTO> getSealPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd);
 
     /* 인장 나의 전체신청내역 */
-    List<SealMyResponseDTO> getMySealApply(Timestamp startDate, Timestamp endDate, String userId);
+    List<SealMyResponseDTO> getMySealApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
 
     /* 인장 나의 승인대기내역 */
     List<SealPendingResponseDTO> getMySealPendingList(String userId);

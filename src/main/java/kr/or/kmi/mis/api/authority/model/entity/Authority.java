@@ -2,9 +2,8 @@ package kr.or.kmi.mis.api.authority.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -26,11 +25,14 @@ public class Authority {
     @Column(nullable = false, length = 20)
     private String instCd;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     private String deptCd;
 
+    @Column(nullable = false, length = 10)
+    private String teamCd;
+
     @Column(nullable = false, length = 20)
-    private String deptNm;
+    private String teamNm;
 
     @Column(nullable = false, length = 50)
     private String email;
@@ -38,17 +40,19 @@ public class Authority {
     @Column(nullable = false, length = 10)
     private String role; // A: Master, B: Admin
 
-    @CreationTimestamp
-    private Timestamp createdt;
-    private Timestamp deletedt;
+    private LocalDateTime createdt;
+
+    private LocalDateTime deletedt;
 
     @Builder
-    public Authority(String userId, String hngNm, String instCd, String deptCd, String deptNm, String email, String role, Timestamp createdt) {
+    public Authority(String userId, String hngNm, String instCd, String deptCd,
+                     String teamCd, String teamNm, String email, String role, LocalDateTime createdt) {
         this.userId = userId;
         this.hngNm = hngNm;
         this.instCd = instCd;
         this.deptCd = deptCd;
-        this.deptNm = deptNm;
+        this.teamCd = teamCd;
+        this.teamNm = teamNm;
         this.email = email;
         this.role = role;
         this.createdt = createdt;
@@ -60,7 +64,7 @@ public class Authority {
     }
 
     // 권한 취소 -> 종료일시 기록
-    public void deleteAdmin(Timestamp deletedt) {
+    public void deleteAdmin(LocalDateTime deletedt) {
         this.deletedt = deletedt;
     }
 }

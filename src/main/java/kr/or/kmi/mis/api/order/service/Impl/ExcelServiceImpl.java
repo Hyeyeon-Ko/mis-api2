@@ -40,7 +40,7 @@ public class ExcelServiceImpl implements ExcelService {
     private final StdDetailRepository stdDetailRepository;
 
     @Override
-    public void downloadExcel(HttpServletResponse response, List<Long> draftIds) throws IOException {
+    public void downloadExcel(HttpServletResponse response, List<String> draftIds) throws IOException {
         byte[] excelData = generateExcel(draftIds);
 
         try {
@@ -57,7 +57,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
-    public void downloadOrderExcel(HttpServletResponse response, List<Long> draftIds, String instCd) throws IOException {
+    public void downloadOrderExcel(HttpServletResponse response, List<String> draftIds, String instCd) throws IOException {
         byte[] excelData = generateOrderExcel(draftIds, instCd);
 
         try {
@@ -92,13 +92,13 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
-    public byte[] generateExcel(List<Long> draftIds) throws IOException {
+    public byte[] generateExcel(List<String> draftIds) throws IOException {
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
         return createExcelData(bcdDetails);
     }
 
     @Override
-    public byte[] generateOrderExcel(List<Long> draftIds, String instCd) throws IOException {
+    public byte[] generateOrderExcel(List<String> draftIds, String instCd) throws IOException {
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
         return createOrderExcelData(bcdDetails, instCd);
     }

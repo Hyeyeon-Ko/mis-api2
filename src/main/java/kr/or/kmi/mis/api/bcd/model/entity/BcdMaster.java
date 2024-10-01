@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.BcdApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,21 +17,21 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "hrmtbcdm")
-public class BcdMaster {
+public class BcdMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(name = "draft_id", length = 12)
+    private String draftId;
 
     @CreationTimestamp
     @Column(nullable = false)
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
 
-    private Timestamp respondDate;
+    private LocalDateTime respondDate;
 
-    private Timestamp orderDate;
+    private LocalDateTime orderDate;
 
-    private Timestamp endDate;
+    private LocalDateTime endDate;
 
     @Column(length = 20)
     private String drafterId;
@@ -64,7 +66,8 @@ public class BcdMaster {
     private String status;
 
     @Builder
-    public BcdMaster(String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
+    public BcdMaster(String draftId, String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
+        this.draftId = draftId;
         this.title = String.format("[%s]명함신청서(%s)", teamNm, korNm);
         this.drafterId = drafterId;
         this.drafter = drafter;
@@ -77,7 +80,7 @@ public class BcdMaster {
         return this.approverChain.split(", ")[this.currentApproverIndex];
     }
 
-    public void updateEndDate(Timestamp endDate) {
+    public void updateEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
 
@@ -107,7 +110,7 @@ public class BcdMaster {
     }
 
     // 발주 -> 발주일시 업데이트
-    public void updateOrder(Timestamp deletedt) {
+    public void updateOrder(LocalDateTime deletedt) {
         this.orderDate = deletedt;
         this.status = "D";
     }
@@ -116,7 +119,7 @@ public class BcdMaster {
         this.title = String.format("[%s]명함신청서(%s)", updateBcdRequestDTO.getTeamNm(), updateBcdRequestDTO.getKorNm());
     }
 
-    public void updateRespondDate(Timestamp ResponseDate) {
+    public void updateRespondDate(LocalDateTime ResponseDate) {
         this.respondDate = ResponseDate;
     }
 }

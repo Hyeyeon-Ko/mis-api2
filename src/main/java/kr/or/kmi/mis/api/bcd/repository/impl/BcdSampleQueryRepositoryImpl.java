@@ -31,7 +31,7 @@ public class BcdSampleQueryRepositoryImpl implements BcdSampleQueryRepository {
     public BcdSampleResponseDTO getBcdSampleNm(String groupCd, String detailCd) {
 
         StringTemplate instNm = Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", groupCd, detailCd);
-        long draftId = 1;
+        String draftId = "1";
 
         return queryFactory.select(
                         Projections.constructor(

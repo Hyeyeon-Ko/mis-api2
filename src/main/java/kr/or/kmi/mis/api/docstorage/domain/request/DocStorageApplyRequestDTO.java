@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -17,9 +18,10 @@ public class DocStorageApplyRequestDTO {
     private String type;
     private List<Long> detailIds;
 
-    public DocStorageMaster toMasterEntity(String drafter, String drafterId) {
+    public DocStorageMaster toMasterEntity(String draftId, String drafter, String drafterId) {
         return DocStorageMaster.builder()
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftId(draftId)
+                .draftDate(LocalDateTime.now())
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .instCd(instCd)

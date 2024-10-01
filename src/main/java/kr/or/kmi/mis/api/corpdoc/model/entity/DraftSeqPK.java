@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Data
 public class DraftSeqPK implements Serializable {
 
-    private Long draftId;
+    private String draftId;
     private Long seqId;
 
 }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -23,7 +24,7 @@ public class DocStorageDetailResponseDTO {
     private String disposalDate;
     private String registr;
     private String lastupdtr;
-    private Timestamp lastupdtDt;
+    private LocalDateTime lastupdtDt;
     private String type;
     private String status;
 

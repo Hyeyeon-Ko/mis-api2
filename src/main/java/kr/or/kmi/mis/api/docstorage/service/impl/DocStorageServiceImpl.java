@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.docstorage.service.impl;
 
+import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
@@ -15,8 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.sql.Timestamp;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ public class DocStorageServiceImpl implements DocStorageService {
 
         DocStorageDetail docStorageDetail = docStorageRequestDTO.toDetailEntity();
         docStorageDetail.setRgstrId(infoService.getUserInfo().getUserName());
-        docStorageDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        docStorageDetail.setRgstDt(LocalDateTime.now());
         docStorageDetailRepository.save(docStorageDetail);
     }
 
@@ -48,7 +51,7 @@ public class DocStorageServiceImpl implements DocStorageService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID로 문서 보관 정보를 찾을 수 없습니다: " + detailId));
 
         docStorageDetail.update(docStorageUpdateDTO);
-        docStorageDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docStorageDetail.setUpdtDt(LocalDateTime.now());
         docStorageDetail.setUpdtrId(infoService.getUserInfo().getUserName());
         docStorageDetailRepository.save(docStorageDetail);
     }
@@ -81,7 +84,7 @@ public class DocStorageServiceImpl implements DocStorageService {
                     .status(existingDetail.getStatus())
                     .build();
 
-            updatedDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+            updatedDetail.setUpdtDt(LocalDateTime.now());
             updatedDetail.setUpdtrId(infoService.getUserInfo().getUserName());
 
             docStorageDetailRepository.save(updatedDetail);
@@ -115,10 +118,11 @@ public class DocStorageServiceImpl implements DocStorageService {
     @Override
     @Transactional
     public void applyStorage(DocStorageApplyRequestDTO docStorageApplyRequestDTO) {
+        String draftId = generateDraftId();
         String drafter = infoService.getUserInfo().getUserName();
         String drafterId = infoService.getUserInfo().getUserId();
 
-        DocStorageMaster docStorageMaster = docStorageMasterRepository.save(docStorageApplyRequestDTO.toMasterEntity(drafter, drafterId));
+        DocStorageMaster docStorageMaster = docStorageMasterRepository.save(docStorageApplyRequestDTO.toMasterEntity(draftId, drafter, drafterId));
 
         docStorageApplyRequestDTO.getDetailIds().forEach(detailId -> {
             docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
@@ -129,9 +133,22 @@ public class DocStorageServiceImpl implements DocStorageService {
         });
     }
 
+    private String generateDraftId() {
+        Optional<DocStorageMaster> lastDocStorageMasterOpt = docStorageMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastDocStorageMasterOpt.isPresent()) {
+            String lastDraftId = lastDocStorageMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "dc" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "dc0000000001";
+        }
+    }
+
     @Override
     @Transactional
-    public void approveStorage(List<Long> draftIds) {
+    public void approveStorage(List<String> draftIds) {
         draftIds.forEach(draftId -> {
             docStorageMasterRepository.findById(draftId).ifPresent(docStorageMaster -> {
 

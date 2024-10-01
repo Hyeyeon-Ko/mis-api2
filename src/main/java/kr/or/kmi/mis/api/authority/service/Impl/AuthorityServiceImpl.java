@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
-import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
+//import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
+import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
+import kr.or.kmi.mis.api.authority.repository.AuthorityQueryRepository;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
@@ -17,12 +19,16 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,6 +40,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final AuthorityRepository authorityRepository;
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final AuthorityQueryRepository authorityQueryRepository;
     private final HttpServletRequest httpServletRequest;
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
@@ -42,64 +49,68 @@ public class AuthorityServiceImpl implements AuthorityService {
     private String externalUserInfoUrl;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<AuthorityListResponseDTO> getAuthorityList() {
-        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
-        return authorityList.stream()
-                .map(authority -> {
-                    // 기준자료 참조
-                    // 1. 팀 이름 -> 부서 코드
-                    StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("A003")
-                            .orElseThrow(() -> new EntityNotFoundException("A003"));
-
-                    // 여러 개의 StdDetail을 리스트로 받아옴
-                    List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup1, authority.getDeptNm())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-                    if (stdDetails.isEmpty()) {
-                        throw new EntityNotFoundException("No StdDetail found for DeptNm: " + authority.getDeptNm());
-                    }
-
-                    // A002 그룹 코드의 StdDetail 찾기
-                    Optional<StdDetail> matchingDetailOpt = stdDetails.stream()
-                            .map(stdDetail -> {
-                                StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("A002")
-                                        .orElseThrow(() -> new EntityNotFoundException("A002"));
-
-                                return stdDetailRepository.findByGroupCdAndDetailCdAndEtcItem1(stdGroup2, stdDetail.getEtcItem1(), authority.getInstCd())
-                                        .orElse(null);
-                            })
-                            .filter(Objects::nonNull)
-                            .findFirst();
-
-                    if (matchingDetailOpt.isEmpty()) {
-                        throw new EntityNotFoundException("No matching StdDetail found for DeptCd and InstCd");
-                    }
-
-                    StdDetail matchingDetail = matchingDetailOpt.get();
-                    String deptNm = matchingDetail.getDetailNm();
-                    String instCd = matchingDetail.getEtcItem1();
-
-                    // 3. 센터 코드 -> 센터 이름
-                    StdGroup stdGroup3 = stdGroupRepository.findByGroupCd("A001")
-                            .orElseThrow(() -> new EntityNotFoundException("A001"));
-                    StdDetail stdDetail3 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup3, instCd)
-                            .orElseThrow(() -> new EntityNotFoundException(instCd));
-                    String instNm = stdDetail3.getDetailNm();
-
-                    return AuthorityListResponseDTO.builder()
-                            .authId(authority.getAuthId())
-                            .userId(authority.getUserId())
-                            .hngNm(authority.getHngNm())
-                            .userRole(authority.getRole())
-                            .email(authority.getEmail())
-                            .instNm(instNm)
-                            .deptNm(deptNm)
-                            .detailCd(authority.getUserId())
-                            .build();
-                })
-                .collect(Collectors.toList());
+    public Page<AuthorityResponseDTO2> getAuthorityList2(Pageable page) {
+        return authorityQueryRepository.getAuthorityList(page);
     }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<AuthorityListResponseDTO> getAuthorityList() {
+//        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
+//        return authorityList.stream()
+//                .map(authority -> {
+//                    // 기준자료 참조
+//                    // 1. 팀 이름 -> 부서 코드
+//                    StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("A003")
+//                            .orElseThrow(() -> new EntityNotFoundException("A003"));
+//
+//                    // 여러 개의 StdDetail을 리스트로 받아옴
+//                    List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup1, authority.getDeptNm())
+//                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+//
+//                    if (stdDetails.isEmpty()) {
+//                        throw new EntityNotFoundException("No StdDetail found for DeptNm: " + authority.getDeptNm());
+//                    }
+//
+//                    // A002 그룹 코드의 StdDetail 찾기
+//                    Optional<StdDetail> matchingDetailOpt = stdDetails.stream()
+//                            .map(stdDetail -> {
+//                                StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("A002")
+//                                        .orElseThrow(() -> new EntityNotFoundException("A002"));
+//
+//                                return stdDetailRepository.findByGroupCdAndDetailCdAndEtcItem1(stdGroup2, stdDetail.getEtcItem1(), authority.getInstCd())
+//                                        .orElse(null);
+//                            })
+//                            .filter(Objects::nonNull)
+//                            .findFirst();
+//
+//                    if (matchingDetailOpt.isEmpty()) {
+//                        throw new EntityNotFoundException("No matching StdDetail found for DeptCd and InstCd");
+//                    }
+//
+//                    StdDetail matchingDetail = matchingDetailOpt.get();
+//                    String deptNm = matchingDetail.getDetailNm();
+//                    String instCd = matchingDetail.getEtcItem1();
+//
+//                    // 3. 센터 코드 -> 센터 이름
+//                    StdGroup stdGroup3 = stdGroupRepository.findByGroupCd("A001")
+//                            .orElseThrow(() -> new EntityNotFoundException("A001"));
+//                    StdDetail stdDetail3 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup3, instCd)
+//                            .orElseThrow(() -> new EntityNotFoundException(instCd));
+//                    String instNm = stdDetail3.getDetailNm();
+//
+//                    return AuthorityListResponseDTO.builder()
+//                            .authId(authority.getAuthId())
+//                            .userId(authority.getUserId())
+//                            .hngNm(authority.getHngNm())
+//                            .userRole(authority.getRole())
+//                            .email(authority.getEmail())
+//                            .instNm(instNm)
+//                            .deptNm(deptNm)
+//                            .detailCd(authority.getUserId())
+//                            .build();
+//                })
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -147,11 +158,11 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .userId(resultData.getUserid())
                 .hngNm(resultData.getUsernm())
                 .instCd(resultData.getBzbzplceCd())
-                .deptCd(resultData.getOrgdeptcd())
-                .deptNm(resultData.getOrgdeptnm())
+                .teamCd(resultData.getOrgdeptcd()) //  그룹웨어에서 넘어오는 'teamCd' 정보
+                .teamNm(resultData.getOrgdeptnm()) //  그룹웨어에서 넘어오는 'teamNm' 정보
                 .email(resultData.getEmail())
                 .role(request.getUserRole())
-                .createdt(new Timestamp(System.currentTimeMillis()))
+                .createdt(LocalDateTime.now())
                 .build();
 
         if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
@@ -163,7 +174,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .etcItem2(request.getUserRole())
                     .build();
             newStdDetail.setRgstrId((String) httpServletRequest.getSession().getAttribute("userId"));
-            newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            newStdDetail.setRgstDt(LocalDateTime.now());
             stdDetailRepository.save(newStdDetail);
         }
 
@@ -190,7 +201,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                             .etcItem2(authority.getRole())
                             .build()
                     );
-            stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            stdDetail.setRgstDt(LocalDateTime.now());
             stdDetail.setRgstrId(sessionUserId);
             stdDetailRepository.save(stdDetail);
         } else {
@@ -207,7 +218,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .orElseThrow(() -> new EntityNotFoundException("Authority with id " + authId + " not found"));
 
         // 권한 테이블 -> 취소할 관리자의 종료일시 저장
-        authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
+        authority.deleteAdmin(LocalDateTime.now());
         authorityRepository.save(authority);
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
