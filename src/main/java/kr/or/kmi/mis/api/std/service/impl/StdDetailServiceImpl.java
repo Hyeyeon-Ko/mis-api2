@@ -10,11 +10,14 @@ import kr.or.kmi.mis.api.std.model.request.StdDetailUpdateRequestDTO;
 import kr.or.kmi.mis.api.std.model.response.StdDetailResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.StdResponseDTO;
 import kr.or.kmi.mis.api.std.repository.StdDetailHistRepository;
+import kr.or.kmi.mis.api.std.repository.StdDetailQueryRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,8 @@ public class StdDetailServiceImpl implements StdDetailService {
     private final StdDetailRepository stdDetailRepository;
     private final StdDetailHistRepository stdDetailHistRepository;
     private final InfoService infoService;
+    private final StdDetailQueryRepository stdDetailQueryRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -48,6 +53,14 @@ public class StdDetailServiceImpl implements StdDetailService {
         return stdDetails.stream()
                 .map(StdDetailResponseDTO::of)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<StdDetailResponseDTO> getInfo2(String groupCd, Pageable page) {
+        stdGroupRepository.findById(groupCd)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + groupCd));
+
+        return stdDetailQueryRepository.getInfo2(groupCd, page);
     }
 
     @Override

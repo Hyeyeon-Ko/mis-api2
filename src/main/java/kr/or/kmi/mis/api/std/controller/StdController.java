@@ -10,9 +10,11 @@ import kr.or.kmi.mis.api.std.model.response.StdGroupResponseDTO;
 import kr.or.kmi.mis.api.std.model.response.StdResponseDTO;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
+import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,6 +59,12 @@ public class StdController {
         List<StdDetailResponseDTO> stdDetailResponses = stdDetailService.getInfo(groupCd);
 
         return ResponseWrapper.success(stdDetailResponses);
+    }
+
+    @Operation(summary = "get Detail Info", description = "기준자료 > 상세 정보 호출 시 사용 및 페이징 처리")
+    @GetMapping("/detailInfo2")
+    public ApiResponse<Page<StdDetailResponseDTO>> getDetailInfo(@RequestParam("groupCd") String groupCd, PostPageRequest page) {
+        return ResponseWrapper.success(stdDetailService.getInfo2(groupCd, page.of()));
     }
 
     @Operation(summary = "add Detail Info", description = "기준자료 > 상세 정보 추가 시 사용")
