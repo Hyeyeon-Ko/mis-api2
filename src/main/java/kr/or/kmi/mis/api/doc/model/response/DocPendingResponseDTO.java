@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -16,9 +17,9 @@ public class DocPendingResponseDTO {
     private String title;
     private String instCd;
     private String instNm;
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
     private String drafter;
-    private Timestamp lastUpdateDate;   // 최종 수정일시
+    private LocalDateTime lastUpdateDate;   // 최종 수정일시
     private String lastUpdater;        // 최종 수정자
     private String applyStatus;
     private String docType;

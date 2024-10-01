@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 public class ReceiveDocRequestDTO {
@@ -24,7 +25,7 @@ public class ReceiveDocRequestDTO {
         return DocMaster.builder()
                 .draftId(draftId)
                 .title(String.format("문서수신 신청서 (%s)", drafter))
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftDate(LocalDateTime.now())
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .status(status)

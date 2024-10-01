@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -16,7 +17,7 @@ public class DocStorageMaster {
     private String draftId;
 
     @Column
-    private Timestamp draftDate;
+    private LocalDateTime draftDate;
 
     @Column(length = 20)
     private String drafter;
@@ -37,7 +38,7 @@ public class DocStorageMaster {
     private String status;
 
     @Builder
-    public DocStorageMaster(String draftId, Timestamp draftDate, String drafter, String drafterId,
+    public DocStorageMaster(String draftId, LocalDateTime draftDate, String drafter, String drafterId,
                             String instCd, String deptCd, String type, String status) {
         this.draftId = draftId;
         this.draftDate = draftDate;

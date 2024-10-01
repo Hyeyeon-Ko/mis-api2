@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,14 +58,14 @@ public class CorpDocServiceImpl implements CorpDocService {
         // 1. CorpDocMaster 저장
         CorpDocMaster corpDocMaster = corpDocRequestDTO.toMasterEntity(draftId);
         corpDocMaster.setRgstrId(corpDocRequestDTO.getDrafterId());
-        corpDocMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        corpDocMaster.setRgstDt(LocalDateTime.now());
         corpDocMaster = corpDocMasterRepository.save(corpDocMaster);
 
         // 2. CorpdocDetail 저장
         CorpDocDetail corpDocDetail = corpDocRequestDTO.toDetailEntity(
                 corpDocMaster.getDraftId());
         corpDocDetail.setRgstrId(corpDocRequestDTO.getDrafterId());
-        corpDocDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        corpDocDetail.setRgstDt(LocalDateTime.now());
 
         corpDocDetailRepository.save(corpDocDetail);
 
@@ -117,7 +117,7 @@ public class CorpDocServiceImpl implements CorpDocService {
         // 1. CorpDocMaster 업데이트
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        corpDocMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        corpDocMaster.setUpdtDt(LocalDateTime.now());
         corpDocMaster.setUpdtrId(corpDocMaster.getDrafterId());
         corpDocMasterRepository.save(corpDocMaster);
 
@@ -129,7 +129,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         corpDocDetail.update(corpDocUpdateRequestDTO);
         corpDocDetail.setUpdtrId(corpDocMaster.getDrafter());
-        corpDocDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        corpDocDetail.setUpdtDt(LocalDateTime.now());
 
         corpDocDetailRepository.save(corpDocDetail);
 
@@ -221,7 +221,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate) {
+    public List<CorpDocPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
                 .findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
 
@@ -237,13 +237,13 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMyResponseDTO> getMyCorpDocApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<CorpDocMyResponseDTO> getMyCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMyCorpDocList(startDate, endDate, userId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocMasterResponseDTO> getCorpDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword) {
+    public List<CorpDocMasterResponseDTO> getCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository
                 .findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate);
 
@@ -270,7 +270,7 @@ public class CorpDocServiceImpl implements CorpDocService {
                 }).toList();
     }
 
-    private List<CorpDocMyResponseDTO> getMyCorpDocList(Timestamp startDate, Timestamp endDate, String userId) {
+    private List<CorpDocMyResponseDTO> getMyCorpDocList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<CorpDocMaster> corpDocMasterList = corpDocMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not found"));
 

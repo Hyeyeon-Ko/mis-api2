@@ -6,11 +6,12 @@ import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueListResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CorpDocListService {
     /** 법인서류 발급대장 내역 조회 */
-    CorpDocIssueListResponseDTO getCorpDocIssueList(LocalDate startDate, LocalDate endDate, String searchType, String keyword);
+    CorpDocIssueListResponseDTO getCorpDocIssueList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword);
 
     int getCorpDocIssuePendingList();
 

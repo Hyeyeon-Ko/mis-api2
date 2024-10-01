@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -120,7 +121,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
                     .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
 
             // ADMIN 권한 취소
-            authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
+            authority.deleteAdmin(LocalDateTime.now());
             authorityRepository.save(authority);
 
             // 사이드바 권한 취소

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
         SealRegisterDetail sealRegisterDetail = sealRegisterRequestDTO.toDetailEntity();
         sealRegisterDetail.setRgstrId(sealRegisterRequestDTO.getDrafterId());
-        sealRegisterDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealRegisterDetail.setRgstDt(LocalDateTime.now());
         sealRegisterDetailRepository.save(sealRegisterDetail);
 
         sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
@@ -71,7 +72,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
         sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
 
-        sealRegisterDetail.deleteSeal(new Timestamp(System.currentTimeMillis()));
+        sealRegisterDetail.deleteSeal(LocalDateTime.now());
         sealRegisterDetailRepository.save(sealRegisterDetail);
     }
 

@@ -10,7 +10,7 @@ import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,8 +23,8 @@ public class DocListController {
 
     @Operation(summary = "get doc receive applyList", description = "문서수신대장 조회")
     @GetMapping("/receiveList")
-    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam(required = false) LocalDate startDate,
-                                                            @RequestParam(required = false) LocalDate endDate,
+    public ApiResponse<List<DocResponseDTO>> getReceiveList(@RequestParam(required = false) LocalDateTime startDate,
+                                                            @RequestParam(required = false) LocalDateTime endDate,
                                                             @RequestParam(required = false) String searchType,
                                                             @RequestParam(required = false) String keyword,
                                                             @RequestParam String instCd) {
@@ -39,8 +39,8 @@ public class DocListController {
 
     @Operation(summary = "get doc send applyList", description = "문서발신대장 조회")
     @GetMapping("/sendList")
-    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam(required = false) LocalDate startDate,
-                                                         @RequestParam(required = false) LocalDate endDate,
+    public ApiResponse<List<DocResponseDTO>> getSendList(@RequestParam(required = false) LocalDateTime startDate,
+                                                         @RequestParam(required = false) LocalDateTime endDate,
                                                          @RequestParam(required = false) String searchType,
                                                          @RequestParam(required = false) String keyword,
                                                          @RequestParam String instCd) {

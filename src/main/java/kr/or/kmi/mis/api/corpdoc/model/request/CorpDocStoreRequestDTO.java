@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
@@ -22,7 +23,7 @@ public class CorpDocStoreRequestDTO {
         return CorpDocDetail.builder()
                 .draftId(draftId)
                 .purpose(purpose)
-                .issueDate(new Timestamp(System.currentTimeMillis()))
+                .issueDate(LocalDateTime.now())
                 .certCorpseal(certCorpseal)
                 .certCoregister(certCoregister)
                 .build();

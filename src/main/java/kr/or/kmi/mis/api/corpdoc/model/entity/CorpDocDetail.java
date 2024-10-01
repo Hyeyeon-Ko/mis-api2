@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -33,7 +35,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     private String useDate;     // 서류 사용일자
 
     @Column
-    private Timestamp issueDate;   // 서류 입고/발급일자
+    private LocalDateTime issueDate;   // 서류 입고/발급일자
 
     @Column
     private int certCorpseal;
@@ -61,7 +63,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
 
     @Builder
     public CorpDocDetail(String draftId, String submission, String purpose, String useDate, int certCorpseal, int certCoregister,
-                         int certUsesignet, int warrant, String type, String notes, Timestamp issueDate) {
+                         int certUsesignet, int warrant, String type, String notes, LocalDateTime issueDate) {
         this.draftId = draftId;
         this.submission = submission;
         this.purpose = purpose;
@@ -87,7 +89,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     }
 
     public void updateDateAndTotal(int totalCorpseal, int totalCoregister) {
-        this.issueDate = new Timestamp(System.currentTimeMillis());
+        this.issueDate = LocalDateTime.now();
         this.totalCorpseal = totalCorpseal;
         this.totalCoregister = totalCoregister;
     }

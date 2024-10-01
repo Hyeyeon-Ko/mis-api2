@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -13,8 +13,8 @@ import java.sql.Timestamp;
 public class CorpDocMasterResponseDTO {
 
     private String draftId;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
     private String drafter;
     private String title;
     private String applyStatus;

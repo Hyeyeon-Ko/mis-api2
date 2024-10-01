@@ -28,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -161,7 +162,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .teamNm(resultData.getOrgdeptnm()) //  그룹웨어에서 넘어오는 'teamNm' 정보
                 .email(resultData.getEmail())
                 .role(request.getUserRole())
-                .createdt(new Timestamp(System.currentTimeMillis()))
+                .createdt(LocalDateTime.now())
                 .build();
 
         if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
@@ -173,7 +174,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .etcItem2(request.getUserRole())
                     .build();
             newStdDetail.setRgstrId((String) httpServletRequest.getSession().getAttribute("userId"));
-            newStdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            newStdDetail.setRgstDt(LocalDateTime.now());
             stdDetailRepository.save(newStdDetail);
         }
 
@@ -200,7 +201,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                             .etcItem2(authority.getRole())
                             .build()
                     );
-            stdDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            stdDetail.setRgstDt(LocalDateTime.now());
             stdDetail.setRgstrId(sessionUserId);
             stdDetailRepository.save(stdDetail);
         } else {
@@ -217,7 +218,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .orElseThrow(() -> new EntityNotFoundException("Authority with id " + authId + " not found"));
 
         // 권한 테이블 -> 취소할 관리자의 종료일시 저장
-        authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
+        authority.deleteAdmin(LocalDateTime.now());
         authorityRepository.save(authority);
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")

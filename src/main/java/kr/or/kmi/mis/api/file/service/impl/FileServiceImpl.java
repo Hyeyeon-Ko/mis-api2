@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -28,12 +29,12 @@ public class FileServiceImpl implements FileService {
 
         // 1. FileDetail 업로드
         FileDetail fileDetail = new FileDetail(fileUploadRequestDTO, attachId);
-        fileDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        fileDetail.setRgstDt(LocalDateTime.now());
         fileDetailRepository.save(fileDetail);
 
         // 2. FileHistory 업로드
         FileHistory fileHistory = new FileHistory(fileUploadRequestDTO, attachId, seqId);
-        fileHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        fileHistory.setRgstDt(LocalDateTime.now());
         fileHistoryRepository.save(fileHistory);
     }
 
@@ -45,7 +46,7 @@ public class FileServiceImpl implements FileService {
 
         Long seqId = Long.valueOf(generateSeqId(fileDetail.getAttachId()));
         FileHistory fileHistory = new FileHistory(fileUploadRequestDTO, fileDetail.getAttachId(), seqId);
-        fileHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        fileHistory.setRgstDt(LocalDateTime.now());
         fileHistoryRepository.save(fileHistory);
     }
 

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +38,7 @@ public class RentalServiceImpl implements RentalService {
         // 3. 등록자 정보 update
         RentalDetail rentalDetail = rentalRequestDTO.toEntity(instCd);
         rentalDetail.setRgstrId(userId);
-        rentalDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        rentalDetail.setRgstDt(LocalDateTime.now());
 
         // 4. 저장
         rentalDetailRepository.save(rentalDetail);
@@ -66,7 +67,7 @@ public class RentalServiceImpl implements RentalService {
         // 3. rentalDetail 업데이트
         rentalDetail.update(rentalUpdateRequestDTO);
         rentalDetail.setUpdtrId(infoService.getUserInfo().getUserId());
-        rentalDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        rentalDetail.setUpdtDt(LocalDateTime.now());
 
         if(Objects.equals(rentalDetail.getStatus(), "E")){
             rentalDetail.updateStatus("A");
@@ -99,7 +100,7 @@ public class RentalServiceImpl implements RentalService {
                     .specialNote(!rentalBulkUpdateRequestDTO.getSpecialNote().isEmpty() ? rentalBulkUpdateRequestDTO.getSpecialNote() : existingDetail.getSpecialNote())
                     .build();
 
-            newRentalDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+            newRentalDetail.setUpdtDt(LocalDateTime.now());
             newRentalDetail.setUpdtrId(infoService.getUserInfo().getUserId());
 
             rentalDetailRepository.save(newRentalDetail);

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class SealImprintHistoryServiceImpl implements SealImprintHistoryService 
                 .seqId(maxSeqId+1)
                 .build();
 
-        sealImprintHistory.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealImprintHistory.setUpdtDt(LocalDateTime.now());
 
         sealImprintHistoryRepository.save(sealImprintHistory);
     }

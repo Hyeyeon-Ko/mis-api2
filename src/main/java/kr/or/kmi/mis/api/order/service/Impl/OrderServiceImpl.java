@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -109,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
         orderRequest.getDraftIds().forEach(draftId -> {
             BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                     .orElseThrow(() -> new EntityNotFoundException("Draft not found with id " + draftId));
-            bcdMaster.updateOrder(new Timestamp(System.currentTimeMillis()));
+            bcdMaster.updateOrder(LocalDateTime.now());
             bcdMasterRepository.save(bcdMaster);
 
             // 알림 전송

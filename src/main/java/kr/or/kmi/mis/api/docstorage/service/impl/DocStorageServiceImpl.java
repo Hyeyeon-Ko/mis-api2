@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -39,7 +40,7 @@ public class DocStorageServiceImpl implements DocStorageService {
 
         DocStorageDetail docStorageDetail = docStorageRequestDTO.toDetailEntity();
         docStorageDetail.setRgstrId(infoService.getUserInfo().getUserName());
-        docStorageDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        docStorageDetail.setRgstDt(LocalDateTime.now());
         docStorageDetailRepository.save(docStorageDetail);
     }
 
@@ -50,7 +51,7 @@ public class DocStorageServiceImpl implements DocStorageService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID로 문서 보관 정보를 찾을 수 없습니다: " + detailId));
 
         docStorageDetail.update(docStorageUpdateDTO);
-        docStorageDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docStorageDetail.setUpdtDt(LocalDateTime.now());
         docStorageDetail.setUpdtrId(infoService.getUserInfo().getUserName());
         docStorageDetailRepository.save(docStorageDetail);
     }
@@ -83,7 +84,7 @@ public class DocStorageServiceImpl implements DocStorageService {
                     .status(existingDetail.getStatus())
                     .build();
 
-            updatedDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+            updatedDetail.setUpdtDt(LocalDateTime.now());
             updatedDetail.setUpdtrId(infoService.getUserInfo().getUserName());
 
             docStorageDetailRepository.save(updatedDetail);

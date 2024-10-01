@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -16,8 +17,8 @@ import java.sql.Timestamp;
 public class DocDetailResponseDTO {
 
     private String draftId;
-    private Timestamp draftDate;
-    private Timestamp lastUpdateDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime lastUpdateDate;
     private String drafter;
     private String division;
     private String receiver;

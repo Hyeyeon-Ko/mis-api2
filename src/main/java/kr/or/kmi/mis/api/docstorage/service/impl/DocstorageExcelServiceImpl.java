@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -67,7 +68,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     @Override
     public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details) {
         String rgstrId = infoService.getUserInfo().getUserName();
-        Timestamp rgstDt = new Timestamp(System.currentTimeMillis());
+        LocalDateTime rgstDt = LocalDateTime.now();
 
         List<DocStorageDetail> entities = details.stream().map(dto -> {
             if (docStorageDetailRepository.existsByDocId(dto.getDocId())) {

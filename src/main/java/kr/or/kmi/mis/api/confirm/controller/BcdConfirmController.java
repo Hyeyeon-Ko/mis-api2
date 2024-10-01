@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -36,15 +37,15 @@ public class BcdConfirmController {
 
     @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody String rejectReason, @RequestBody String userId) {
+    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason, @RequestBody String userId) {
         bcdConfirmService.disapprove(draftId, rejectReason, userId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "get bcd application history by drafter", description = "기안자의 명함신청 이력 조회")
     @GetMapping("/history/{draftId}")
-    public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@RequestParam(required = false) LocalDate startDate,
-                                                                          @RequestParam(required = false) LocalDate endDate,
+    public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@RequestParam(required = false) LocalDateTime startDate,
+                                                                          @RequestParam(required = false) LocalDateTime endDate,
                                                                           @PathVariable String draftId) {
         return ResponseWrapper.success(bcdConfirmService.getBcdApplicationHistory(startDate, endDate, draftId));
     }

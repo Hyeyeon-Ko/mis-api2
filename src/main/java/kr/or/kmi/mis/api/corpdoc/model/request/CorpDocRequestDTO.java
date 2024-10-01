@@ -4,7 +4,8 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import lombok.Getter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 
 @Getter
 public class CorpDocRequestDTO {
@@ -25,7 +26,7 @@ public class CorpDocRequestDTO {
     public CorpDocMaster toMasterEntity(String draftId) {
         return CorpDocMaster.builder()
                 .draftId(draftId)
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftDate(LocalDateTime.now())
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .status("A")

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -41,9 +42,9 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getReceiveApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
+    public List<DocResponseDTO> getReceiveApplyList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("A");
         if (docDetails == null) {
@@ -52,7 +53,7 @@ public class DocListServiceImpl implements DocListService {
 
         return docDetails.stream()
                 .filter(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, startDate, endDate).orElse(null);
                     if (docMaster == null) {
                         return false;
                     }
@@ -115,9 +116,9 @@ public class DocListServiceImpl implements DocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocResponseDTO> getSendApplyList(LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd) {
+    public List<DocResponseDTO> getSendApplyList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("B");
         if (docDetails == null) {
@@ -126,7 +127,7 @@ public class DocListServiceImpl implements DocListService {
 
         return docDetails.stream()
                 .filter(docDetail -> {
-                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, timestamps[0], timestamps[1]).orElse(null);
+                    DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(docDetail.getDraftId(), instCd, startDate, endDate).orElse(null);
                     if (docMaster == null) {
                         return false;
                     }
@@ -176,7 +177,7 @@ public class DocListServiceImpl implements DocListService {
                 .toList();
     }
 
-    public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
-        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
-    }
+//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
+//        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
+//    }
 }

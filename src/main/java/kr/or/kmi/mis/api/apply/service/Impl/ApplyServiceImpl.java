@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.apply.service.Impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
@@ -19,12 +20,15 @@ import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealListService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,28 +47,54 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllApplyList(String documentType, LocalDate startDate, LocalDate endDate, String searchType, String keyword, String instCd, String userId) {
+    public ApplyResponseDTO getAllApplyList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
         List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
         List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         switch (documentType) {
             case "A":
-                bcdApplyLists = bcdService.getBcdApply(timestamps[0], timestamps[1], searchType, keyword, instCd, userId);
+                bcdApplyLists = bcdService.getBcdApply(startDate, endDate, searchType, keyword, instCd, userId);
                 break;
             case "B":
-                docApplyLists = docService.getDocApply(timestamps[0], timestamps[1], searchType, keyword, instCd, userId);
+                docApplyLists = docService.getDocApply(startDate, endDate, searchType, keyword, instCd, userId);
                 break;
             case "C":
-                corpDocApplyLists = corpDocService.getCorpDocApply(timestamps[0], timestamps[1], searchType, keyword);
+                corpDocApplyLists = corpDocService.getCorpDocApply(startDate, endDate, searchType, keyword);
                 break;
             case "D":
-                sealApplyLists = sealListService.getSealApply(timestamps[0], timestamps[1], searchType, keyword, instCd);
+                sealApplyLists = sealListService.getSealApply(startDate, endDate, searchType, keyword, instCd);
                 break;
             default:
+                break;
+        }
+        return null;
+//        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
+    }
+
+
+    @Override
+    public ApplyResponseDTO getAllApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        Page<BcdMasterResponseDTO> bcdApplyLists = null;
+        List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
+        List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
+        List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
+
+        switch (applyRequestDTO.getDocumentType()) {
+            case "B":
+//                docApplyLists = docService.getDocApply2(startDate, endDate, searchType, keyword, instCd, userId);
+                break;
+            case "C":
+//                corpDocApplyLists = corpDocService.getCorpDocApply2(startDate, endDate, searchType, keyword);
+                break;
+            case "D":
+//                sealApplyLists = sealListService.getSealApply2(startDate, endDate, searchType, keyword, instCd);
+                break;
+            default:
+                bcdApplyLists = bcdService.getBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
         }
 
@@ -73,38 +103,38 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDate startDate, LocalDate endDate, String userId) {
+    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String userId) {
 
         List<BcdMyResponseDTO> myBcdApplyList = new ArrayList<>();
         List<DocMyResponseDTO> myDocApplyList = new ArrayList<>();
         List<CorpDocMyResponseDTO> myCorpDocApplyList = new ArrayList<>();
         List<SealMyResponseDTO> mySealApplyList = new ArrayList<>();
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         if (documentType != null) {
             switch (documentType) {
                 case "A":
-                    myBcdApplyList = bcdService.getMyBcdApply(timestamps[0], timestamps[1], userId);
+                    myBcdApplyList = bcdService.getMyBcdApply(startDate, endDate, userId);
                     break;
                 case "B":
-                    myDocApplyList = docService.getMyDocApply(timestamps[0], timestamps[1], userId);
+                    myDocApplyList = docService.getMyDocApply(startDate, endDate, userId);
                     break;
                 case "C":
-                    myCorpDocApplyList = corpDocService.getMyCorpDocApply(timestamps[0], timestamps[1], userId);
+                    myCorpDocApplyList = corpDocService.getMyCorpDocApply(startDate, endDate, userId);
                     break;
                 case "D":
-                    mySealApplyList = sealListService.getMySealApply(timestamps[0], timestamps[1], userId);
+                    mySealApplyList = sealListService.getMySealApply(startDate, endDate, userId);
                     break;
                 default:
                     break;
             }
         } else {
             // 전체 신청 목록을 조회합니다.
-            myBcdApplyList = bcdService.getMyBcdApply(timestamps[0], timestamps[1], userId);
-            myDocApplyList = docService.getMyDocApply(timestamps[0], timestamps[1], userId);
-            myCorpDocApplyList = corpDocService.getMyCorpDocApply(timestamps[0], timestamps[1], userId);
-            mySealApplyList = sealListService.getMySealApply(timestamps[0], timestamps[1], userId);
+            myBcdApplyList = bcdService.getMyBcdApply(startDate, endDate, userId);
+            myDocApplyList = docService.getMyDocApply(startDate, endDate, userId);
+            myCorpDocApplyList = corpDocService.getMyCorpDocApply(startDate, endDate, userId);
+            mySealApplyList = sealListService.getMySealApply(startDate, endDate, userId);
         }
 
         return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
@@ -112,15 +142,15 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getPendingListByType(String documentType, LocalDate startDate, LocalDate endDate, String instCd, String userId) {
+    public PendingResponseDTO getPendingListByType(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         return switch (documentType) {
-            case "A" -> PendingResponseDTO.of(bcdService.getPendingList(timestamps[0], timestamps[1], instCd, userId), null, null, null);
-            case "B" -> PendingResponseDTO.of(null, docService.getDocPendingList(timestamps[0], timestamps[1], instCd, userId), null, null);
-            case "C" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(timestamps[0], timestamps[1]), null);
-            case "D" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(timestamps[0], timestamps[1], instCd));
+            case "A" -> PendingResponseDTO.of(bcdService.getPendingList(startDate, endDate, instCd, userId), null, null, null);
+            case "B" -> PendingResponseDTO.of(null, docService.getDocPendingList(startDate, endDate, instCd, userId), null, null);
+            case "C" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(startDate, endDate), null);
+            case "D" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(startDate, endDate, instCd));
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
         };
     }
@@ -128,14 +158,14 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingCountResponseDTO getPendingCountList(String documentType, LocalDate startDate, LocalDate endDate, String instCd, String userId) {
+    public PendingCountResponseDTO getPendingCountList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
-        int bcdPendingCount = bcdService.getPendingList(timestamps[0], timestamps[1], instCd, userId).size();
-        int docPendingCount = docService.getDocPendingList(timestamps[0], timestamps[1], instCd, userId).size();
-        int corpDocPendingCount = corpDocService.getPendingList(timestamps[0], timestamps[1]).size();
-        int sealPendingCount = sealListService.getSealPendingList(timestamps[0], timestamps[1], instCd).size();
+        int bcdPendingCount = bcdService.getPendingList(startDate, endDate, instCd, userId).size();
+        int docPendingCount = docService.getDocPendingList(startDate, endDate, instCd, userId).size();
+        int corpDocPendingCount = corpDocService.getPendingList(startDate, endDate).size();
+        int sealPendingCount = sealListService.getSealPendingList(startDate, endDate, instCd).size();
         int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingList();
         int orderPendingCount = orderService.getOrderList(instCd).size();
 
@@ -153,18 +183,18 @@ public class ApplyServiceImpl implements ApplyService {
                 sealListService.getMySealPendingList(userId));
     }
 
-    public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
-
-        if (startDate == null) {
-            startDate = LocalDate.now().minusMonths(1);
-        }
-        if (endDate == null) {
-            endDate = LocalDate.now();
-        }
-
-        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
-        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
-
-        return new Timestamp[]{startTimestamp, endTimestamp};
-    }
+//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
+//
+//        if (startDate == null) {
+//            startDate = LocalDateTime.now().minusMonths(1);
+//        }
+//        if (endDate == null) {
+//            endDate = LocalDateTime.now();
+//        }
+//
+//        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+//        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
+//
+//        return new Timestamp[]{startTimestamp, endTimestamp};
+//    }
 }

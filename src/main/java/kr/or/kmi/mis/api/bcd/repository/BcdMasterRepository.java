@@ -15,11 +15,11 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, String> {
 
     Optional<List<BcdMaster>> findByDrafterIdAndStatusAndCurrentApproverIndex(String drafterId, @Param("status") String status, Integer approverIndex);
 
-    Optional<List<BcdMaster>> findByDrafterIdAndDraftDateBetween(String drafterId, Timestamp from, Timestamp to);
+    Optional<List<BcdMaster>> findByDrafterIdAndDraftDateBetween(String drafterId, LocalDateTime from, LocalDateTime to);
 
-    Optional<List<BcdMaster>> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc(@Param("status") String status, Timestamp from, Timestamp to);
+    Optional<List<BcdMaster>> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc(@Param("status") String status, LocalDateTime from, LocalDateTime to);
 
-    List<BcdMaster> findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc(String status, Timestamp from, Timestamp to);
+    List<BcdMaster> findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc(String status, LocalDateTime from, LocalDateTime to);
 
     Optional<BcdMaster> findByDraftIdAndStatusAndDrafterIdNot(String draftId, String status, String drafterId);
 
@@ -31,7 +31,7 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, String> {
 
     Optional<List<BcdMaster>> findAllByStatusAndOrderDateIsNull(String status);
 
-    Optional<List<BcdMaster>> findByDraftIdAndDraftDateBetweenAndDrafterIdNot(String draftId, Timestamp from, Timestamp to, String drafterId);
+    Optional<List<BcdMaster>> findByDraftIdAndDraftDateBetweenAndDrafterIdNot(String draftId, LocalDateTime from, LocalDateTime to, String drafterId);
 
     Optional<List<BcdMaster>> findAllByDrafterId(String drafterId);
 

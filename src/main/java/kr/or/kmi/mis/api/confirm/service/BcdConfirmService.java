@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BcdConfirmService {
@@ -18,5 +19,5 @@ public interface BcdConfirmService {
     void disapprove(String draftId, String rejectReason, String userId);
 
     /* 명함 신청이력 조회 */
-    List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, String draftId);
+    List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDateTime startDate, LocalDateTime endDate, String draftId);
 }

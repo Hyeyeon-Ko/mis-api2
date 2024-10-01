@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -16,8 +17,8 @@ public class DocMasterResponseDTO {
     private String title;
     private String instCd;
     private String instNm;
-    private Timestamp draftDate;
-    private Timestamp respondDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime respondDate;
     private String drafter;
     private String approver;
     private String applyStatus;

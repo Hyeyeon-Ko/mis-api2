@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -190,7 +191,7 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMasterResponseDTO> getSealApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd) {
+    public List<SealMasterResponseDTO> getSealApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
         List<SealMaster> sealMasters = sealMasterRepository
                 .findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
 
@@ -222,7 +223,7 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealPendingResponseDTO> getSealPendingList(Timestamp startDate, Timestamp endDate, String instCd) {
+    public List<SealPendingResponseDTO> getSealPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd) {
         List<SealMaster> sealMasters = sealMasterRepository
                 .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
@@ -232,11 +233,11 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealMyResponseDTO> getMySealApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<SealMyResponseDTO> getMySealApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
     }
 
-    public List<SealMyResponseDTO> getMySealMasterList(String userId, Timestamp startDate, Timestamp endDate) {
+    public List<SealMyResponseDTO> getMySealMasterList(String userId, LocalDateTime startDate, LocalDateTime endDate) {
         List<SealMaster> sealMasterList = sealMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

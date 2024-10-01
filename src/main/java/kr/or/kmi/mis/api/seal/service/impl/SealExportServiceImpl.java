@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -83,13 +84,13 @@ public class SealExportServiceImpl implements SealExportService {
         // 1. SealMaster 저장
         SealMaster sealMaster = exportRequestDTO.toMasterEntity(draftId);
         sealMaster.setRgstrId(exportRequestDTO.getDrafterId());
-        sealMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealMaster.setRgstDt(LocalDateTime.now());
         sealMaster = sealMasterRepository.save(sealMaster);
 
         // 2. SealDetail 저장
         SealExportDetail sealExportDetail = exportRequestDTO.toDetailEntity(sealMaster.getDraftId());
         sealExportDetail.setRgstrId(exportRequestDTO.getDrafterId());
-        sealExportDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealExportDetail.setRgstDt(LocalDateTime.now());
         sealExportDetailRepository.save(sealExportDetail);
 
         // 3. File 업로드
@@ -126,7 +127,7 @@ public class SealExportServiceImpl implements SealExportService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         sealMaster.setUpdtrId(sealMaster.getDrafterId());
-        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealMaster.setUpdtDt(LocalDateTime.now());
         sealMasterRepository.save(sealMaster);
 
         // 2. SealExportDetail 업데이트
@@ -135,7 +136,7 @@ public class SealExportServiceImpl implements SealExportService {
 
         sealExportHistoryService.createSealExportHistory(sealExportDetailInfo);
 
-        sealExportDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealExportDetailInfo.setUpdtDt(LocalDateTime.now());
         sealExportDetailInfo.setUpdtrId(sealMaster.getDrafterId());
         updateSealExportDetail(exportUpdateRequestDTO, draftId);
 

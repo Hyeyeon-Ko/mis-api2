@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +33,12 @@ public class SealImprintServiceImpl implements SealImprintService {
 
         SealMaster sealMaster = imprintRequestDTO.toMasterEntity(draftId);
         sealMaster.setRgstrId(imprintRequestDTO.getDrafterId());
-        sealMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealMaster.setRgstDt(LocalDateTime.now());
         sealMaster = sealMasterRepository.save(sealMaster);
 
         SealImprintDetail sealImprintDetail = imprintRequestDTO.toDetailEntity(sealMaster.getDraftId());
         sealImprintDetail.setRgstrId(imprintRequestDTO.getDrafterId());
-        sealImprintDetail.setRgstDt(new Timestamp(System.currentTimeMillis()));
+        sealImprintDetail.setRgstDt(LocalDateTime.now());
         sealImprintDetailRepository.save(sealImprintDetail);
     }
 
@@ -71,11 +72,11 @@ public class SealImprintServiceImpl implements SealImprintService {
         // 날인신청 수정사항 저장
         sealImprintDetailInfo.update(imprintUpdateRequestDTO);
         sealImprintDetailInfo.setUpdtrId(sealMaster.getDrafterId());
-        sealImprintDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealImprintDetailInfo.setUpdtDt(LocalDateTime.now());
         sealImprintDetailRepository.save(sealImprintDetailInfo);
 
         sealMaster.setUpdtrId(sealMaster.getDrafterId());
-        sealMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        sealMaster.setUpdtDt(LocalDateTime.now());
         sealMasterRepository.save(sealMaster);
     }
 

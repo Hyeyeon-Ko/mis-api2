@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.bcd.service.impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
@@ -8,6 +9,7 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.*;
+import kr.or.kmi.mis.api.bcd.repository.BcdApplyQueryRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
@@ -21,12 +23,16 @@ import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +51,8 @@ public class BcdServiceImpl implements BcdService {
     private final StdDetailService stdDetailService;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
+
+    private final BcdApplyQueryRepository bcdApplyQueryRepository;
 
     @Override
     @Transactional
@@ -162,7 +170,7 @@ public class BcdServiceImpl implements BcdService {
         String draftId = generateDraftId();
 
         BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity(draftId, "B");
-        bcdMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        bcdMaster.updateRespondDate(LocalDateTime.now());
         bcdMasterRepository.save(bcdMaster);
 
         saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
@@ -202,7 +210,7 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getBcdApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
+    public List<BcdMasterResponseDTO> getBcdApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -210,6 +218,11 @@ public class BcdServiceImpl implements BcdService {
                 .filter(bcdMaster -> isValidForSearch(bcdMaster, instCd, searchType, keyword, userId))
                 .map(bcdMaster -> BcdMasterResponseDTO.of(bcdMaster, instCd, stdBcdService.getInstNm(instCd)))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return bcdApplyQueryRepository.getBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     private boolean isValidForSearch(BcdMaster bcdMaster, String instCd, String searchType, String keyword, String userId) {
@@ -242,7 +255,7 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMyResponseDTO> getMyBcdApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<BcdMyResponseDTO> results = new ArrayList<>();
 
         results.addAll(this.getMyMasterList(startDate, endDate, userId));
@@ -255,7 +268,7 @@ public class BcdServiceImpl implements BcdService {
      * @param userId
      * @return List<BcdMyResponseDTO>
      */
-    public List<BcdMyResponseDTO> getMyMasterList(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<BcdMyResponseDTO> getMyMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -269,7 +282,7 @@ public class BcdServiceImpl implements BcdService {
      * @param userId
      * @return List<BcdMyResponseDTO>
      */
-    public List<BcdMyResponseDTO> getAnotherMasterList(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<BcdMyResponseDTO> getAnotherMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         // 2-2. 타인이 신청해준 나의 명함신청 내역
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
@@ -286,7 +299,7 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
-    public List<BcdPendingResponseDTO> getPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId) {
+    public List<BcdPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
 
         // 1. 승인대기 상태인 신청목록 모두 호출
         //    - 기안일자 기준 내림차순 정렬
@@ -378,7 +391,7 @@ public class BcdServiceImpl implements BcdService {
 
         // 2. 명함신청 상태 "완료, End"로 변경
         bcdMaster.updateStatus("E");
-        bcdMaster.updateEndDate(new Timestamp(System.currentTimeMillis()));
+        bcdMaster.updateEndDate(LocalDateTime.now());
     }
 
 }

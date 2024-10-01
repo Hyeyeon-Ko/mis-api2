@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         BcdApproveRequestDTO approveRequest = BcdApproveRequestDTO.builder()
                 .approverId(userId)
                 .approver(infoService.getUserInfo().getUserName())
-                .respondDate(new Timestamp(System.currentTimeMillis()))
+                .respondDate(LocalDateTime.now())
                 .status(isLastApprover ? "B" : "A")  // 마지막 결재자라면 B(완료), 아니면 A(승인 대기)
                 .build();
 
@@ -135,7 +136,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
             // ADMIN 권한 취소
-            authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
+            authority.deleteAdmin(LocalDateTime.now());
             authorityRepository.save(authority);
 
             // 사이드바 권한 취소
@@ -162,7 +163,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 .disapproverId(infoService.getUserInfo().getUserId())
                 .disapprover(infoService.getUserInfo().getUserName())
                 .rejectReason(rejectReason)
-                .respondDate(new Timestamp(System.currentTimeMillis()))
+                .respondDate(LocalDateTime.now())
                 .status("C")
                 .build();
 
@@ -220,7 +221,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                     .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
 
             // ADMIN 권한 취소
-            authority.deleteAdmin(new Timestamp(System.currentTimeMillis()));
+            authority.deleteAdmin(LocalDateTime.now());
             authorityRepository.save(authority);
 
             // 사이드바 권한 취소
@@ -236,16 +237,16 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     /*신청이력조회*/
     @Override
     @Transactional(readOnly = true)
-    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, String draftId) {
+    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDateTime startDate, LocalDateTime endDate, String draftId) {
 
-        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
+//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
 
         String drafterId = bcdMaster.getDrafterId();
 
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(drafterId, timestamps[0], timestamps[1])
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(drafterId, startDate, endDate)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + drafterId));
 
         Map<String, BcdDetail> bcdDetailMap = new HashMap<>();
@@ -268,8 +269,18 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         }).collect(Collectors.toList());
     }
 
-    public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
-
-        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
-    }
+//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
+//
+//        if (startDate == null) {
+//            startDate = LocalDate.now().minusMonths(1);
+//        }
+//        if (endDate == null) {
+//            endDate = LocalDate.now();
+//        }
+//
+//        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+//        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
+//
+//        return new Timestamp[]{startTimestamp, endTimestamp};
+//    }
 }

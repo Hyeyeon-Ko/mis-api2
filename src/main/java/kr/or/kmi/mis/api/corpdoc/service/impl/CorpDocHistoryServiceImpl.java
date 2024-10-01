@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class CorpDocHistoryServiceImpl implements CorpDocHistoryService {
         corpDocHistory.setRgstrId(corpDocDetail.getRgstrId());
         corpDocHistory.setRgstDt(corpDocDetail.getRgstDt());
         corpDocHistory.setUpdtrId(infoService.getUserInfo().getUserId());
-        corpDocHistory.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        corpDocHistory.setUpdtDt(LocalDateTime.now());
 
         corpDocHistoryRepository.save(corpDocHistory);
     }

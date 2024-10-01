@@ -40,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -106,7 +107,7 @@ public class DocServiceImpl implements DocService {
 
         // 1. DocMaster 저장
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity(draftId, "E");
-        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        docMaster.updateRespondDate(LocalDateTime.now());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -167,7 +168,7 @@ public class DocServiceImpl implements DocService {
 
         // 1. DocMaster 저장
         DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId,"E");
-        docMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
+        docMaster.updateRespondDate(LocalDateTime.now());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -297,7 +298,7 @@ public class DocServiceImpl implements DocService {
         // 1. DocMaster 업데이트
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        docMaster.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docMaster.setUpdtDt(LocalDateTime.now());
         docMaster.setUpdtrId(docMaster.getDrafterId());
         docMasterRepository.save(docMaster);
 
@@ -307,7 +308,7 @@ public class DocServiceImpl implements DocService {
 
         docHistoryService.createDocHistory(docDetailInfo);
 
-        docDetailInfo.setUpdtDt(new Timestamp(System.currentTimeMillis()));
+        docDetailInfo.setUpdtDt(LocalDateTime.now());
         docDetailInfo.setUpdtrId(docMaster.getDrafterId());
         updateDocDetail(docUpdateRequestDTO, draftId);
 
@@ -395,11 +396,11 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMyResponseDTO> getMyDocApply(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<DocMyResponseDTO> getMyDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMyDocMasterList(startDate, endDate, userId));
     }
 
-    public List<DocMyResponseDTO> getMyDocMasterList(Timestamp startDate, Timestamp endDate, String userId) {
+    public List<DocMyResponseDTO> getMyDocMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -419,7 +420,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId) {
+    public List<DocMasterResponseDTO> getDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
 
         if (docMasters == null) {
@@ -460,7 +461,7 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getDocPendingList(Timestamp startDate, Timestamp endDate, String instCd, String userId) {
+    public List<DocPendingResponseDTO> getDocPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
         List<DocMaster> docMasters = docMasterRepository
                 .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 

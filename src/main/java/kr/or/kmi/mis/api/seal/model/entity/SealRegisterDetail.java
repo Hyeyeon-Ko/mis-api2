@@ -7,6 +7,7 @@ import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -41,16 +42,16 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     private String draftDate;
 
     @Column
-    private Timestamp lastUpdateDate;
+    private LocalDateTime lastUpdateDate;
 
     @Column(length = 20)
     private String instCd;
 
-    private Timestamp deletedt;
+    private LocalDateTime deletedt;
 
     @Builder
     public SealRegisterDetail(String draftId, String sealNm, String sealImage, String useDept, String purpose,
-                              String manager, String subManager, String draftDate, String instCd, Timestamp lastUpdateDate) {
+                              String manager, String subManager, String draftDate, String instCd, LocalDateTime lastUpdateDate) {
         this.draftId = draftId;
         this.sealNm = sealNm;
         this.sealImage = sealImage;
@@ -81,7 +82,7 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
         this.sealImage = sealImage;
     }
 
-    public void deleteSeal(Timestamp deletedt) {
+    public void deleteSeal(LocalDateTime deletedt) {
         this.deletedt = deletedt;
     }
 }

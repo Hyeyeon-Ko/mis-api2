@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -81,7 +82,7 @@ public class FileDownloadController {
 
             // 다운로드 사유 기록
             FileDownloadHistory fileDownloadHistory = fileDownloadRequestDTO.toEntity(filename, fileDownloadRequestDTO);
-            fileDownloadHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
+            fileDownloadHistory.setRgstDt(LocalDateTime.now());
             fileDownloadHistory.setRgstrId(fileDownloadRequestDTO.getDownloaderId());
             fileDownloadHistoryRepository.save(fileDownloadHistory);
 
@@ -148,7 +149,7 @@ public class FileDownloadController {
 
                 // 다운로드 사유 기록
                 FileDownloadHistory fileDownloadHistory = requestDTO.toEntity(filename, requestDTO);
-                fileDownloadHistory.setRgstDt(new Timestamp(System.currentTimeMillis()));
+                fileDownloadHistory.setRgstDt(LocalDateTime.now());
                 fileDownloadHistory.setRgstrId(requestDTO.getDownloaderId());
                 fileDownloadHistoryRepository.save(fileDownloadHistory);
             }

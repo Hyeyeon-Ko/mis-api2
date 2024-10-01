@@ -1,14 +1,14 @@
 package kr.or.kmi.mis.api.noti.service;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public interface NotificationSendService {
 
-    void sendBcdRejection(Timestamp draftDate, String drafterId);
-    void sendBcdOrder(Timestamp draftDate, String drafterId);
-    void sendCorpDocRejection(Timestamp draftDate, String drafterId);
-    void sendCorpDocApproval(Timestamp draftDate, String drafterId);
-    void sendDocApproval(Timestamp draftDate, String drafterId, String division);
-    void sendSealApproval(Timestamp draftDate, String drafterId);
-    void sendSealDisapproval(Timestamp draftDate, String drafterId);
+    void sendBcdRejection(LocalDateTime draftDate, String drafterId);
+    void sendBcdOrder(LocalDateTime draftDate, String drafterId);
+    void sendCorpDocRejection(LocalDateTime draftDate, String drafterId);
+    void sendCorpDocApproval(LocalDateTime draftDate, String drafterId);
+    void sendDocApproval(LocalDateTime draftDate, String drafterId, String division);
+    void sendSealApproval(LocalDateTime draftDate, String drafterId);
+    void sendSealDisapproval(LocalDateTime draftDate, String drafterId);
 }

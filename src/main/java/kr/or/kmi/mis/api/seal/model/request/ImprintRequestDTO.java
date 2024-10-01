@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 public class ImprintRequestDTO {
@@ -25,7 +26,7 @@ public class ImprintRequestDTO {
                 .draftId(draftId)
                 .drafter(drafter)
                 .drafterId(drafterId)
-                .draftDate(new Timestamp(System.currentTimeMillis()))
+                .draftDate(LocalDateTime.now())
                 .status("A")
                 .division("A")
                 .instCd(instCd)
