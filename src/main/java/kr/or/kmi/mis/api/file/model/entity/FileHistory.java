@@ -13,7 +13,7 @@ import lombok.*;
 public class FileHistory extends BaseSystemFieldEntity {
 
     @Id
-    @Column(name = "attach_id")
+    @Column(name = "attach_id", length = 12)
     private String attachId;
 
     @Id
