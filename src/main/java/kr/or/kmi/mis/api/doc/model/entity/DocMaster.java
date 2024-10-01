@@ -14,8 +14,8 @@ import java.sql.Timestamp;
 public class DocMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(nullable = false)
     private Timestamp draftDate;
@@ -67,7 +67,9 @@ public class DocMaster extends BaseSystemFieldEntity {
     }
 
     @Builder
-    public DocMaster(String title, Timestamp draftDate, String drafter, String drafterId, String approverChain, String status, String instCd, String deptCd) {
+    public DocMaster(String draftId, String title, Timestamp draftDate, String drafter, String drafterId,
+                     String approverChain, String status, String instCd, String deptCd) {
+        this.draftId = draftId;
         this.title = title;
         this.draftDate = draftDate;
         this.drafter = drafter;

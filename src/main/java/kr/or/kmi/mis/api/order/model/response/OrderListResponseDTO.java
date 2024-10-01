@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @RequiredArgsConstructor
 public class OrderListResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String instNm;
     private String title;
     private Timestamp draftDate;
@@ -19,7 +19,7 @@ public class OrderListResponseDTO {
     private Integer quantity;
 
     @Builder
-    public OrderListResponseDTO(Long draftId, String instNm, String title, Timestamp draftDate, Timestamp respondDate, String drafter, Integer quantity) {
+    public OrderListResponseDTO(String draftId, String instNm, String title, Timestamp draftDate, Timestamp respondDate, String drafter, Integer quantity) {
         this.draftId = draftId;
         this.instNm = instNm;
         this.title = title;

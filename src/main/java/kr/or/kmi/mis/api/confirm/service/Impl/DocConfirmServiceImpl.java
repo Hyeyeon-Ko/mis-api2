@@ -40,7 +40,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
 
     @Override
     @Transactional
-    public void confirm(Long draftId, String userId) {
+    public void confirm(String draftId, String userId) {
 
         // 1. 문서수발신신청 승인
         DocMaster docMaster = docMasterRepository.findById(draftId)
@@ -136,7 +136,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
 
     @Override
     @Transactional
-    public void delete(Long draftId) {
+    public void delete(String draftId) {
 
         DocMaster docMaster = docMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("docMaster not found: " + draftId));

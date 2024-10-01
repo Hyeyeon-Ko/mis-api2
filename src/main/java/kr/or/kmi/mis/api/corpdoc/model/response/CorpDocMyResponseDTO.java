@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class CorpDocMyResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
     private Timestamp draftDate;
     private Timestamp respondDate;

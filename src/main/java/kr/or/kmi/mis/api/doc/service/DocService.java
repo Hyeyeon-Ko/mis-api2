@@ -19,9 +19,9 @@ public interface DocService {
     void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException;
     void applySendDoc(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException;
     void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException;
-    void updateDocApply(Long draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
-    void cancelDocApply(Long draftId);
-    DocDetailResponseDTO getDoc(Long draftId);
+    void updateDocApply(String draftId, DocUpdateRequestDTO docUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
+    void cancelDocApply(String draftId);
+    DocDetailResponseDTO getDoc(String draftId);
     List<DocMyResponseDTO> getMyDocApply(Timestamp startDate, Timestamp endDate, String userId);
     List<DocPendingResponseDTO> getMyDocPendingList(String userId);
     List<DocMasterResponseDTO> getDocApply(Timestamp startDate, Timestamp endDate, String searchType, String keyword, String instCd, String userId);

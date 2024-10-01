@@ -23,20 +23,20 @@ public class BcdConfirmController {
 
     @Operation(summary = "get apply list", description = "명함신청 목록 상세정보 조회")
     @GetMapping("/{draftId}")
-    public ApiResponse<BcdDetailResponseDTO> getApplyList(@PathVariable Long draftId) {
+    public ApiResponse<BcdDetailResponseDTO> getApplyList(@PathVariable String draftId) {
         return ResponseWrapper.success(bcdConfirmService.getBcdDetailInfo(draftId));
     }
 
     @Operation(summary = "approve application", description = "명함신청 승인")
     @PostMapping("/{draftId}")
-    public ApiResponse<?> approve(@PathVariable Long draftId, @RequestBody String userId) {
+    public ApiResponse<?> approve(@PathVariable String draftId, @RequestBody String userId) {
         bcdConfirmService.approve(draftId, userId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason, @RequestBody String userId) {
+    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody String rejectReason, @RequestBody String userId) {
         bcdConfirmService.disapprove(draftId, rejectReason, userId);
         return ResponseWrapper.success();
     }
@@ -45,7 +45,7 @@ public class BcdConfirmController {
     @GetMapping("/history/{draftId}")
     public ApiResponse<List<BcdHistoryResponseDTO>> getApplicationHistory(@RequestParam(required = false) LocalDate startDate,
                                                                           @RequestParam(required = false) LocalDate endDate,
-                                                                          @PathVariable Long draftId) {
+                                                                          @PathVariable String draftId) {
         return ResponseWrapper.success(bcdConfirmService.getBcdApplicationHistory(startDate, endDate, draftId));
     }
 }

@@ -30,7 +30,7 @@ public class SealImprintController {
 
     @Operation(summary = "modify imprint apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 날인신청 수정 시 사용")
     @PostMapping(value = "/update")
-    public ApiResponse<?> updateImprintApply(@RequestParam Long draftId, @RequestBody ImprintUpdateRequestDTO imprintUpdateRequestDTO) {
+    public ApiResponse<?> updateImprintApply(@RequestParam String draftId, @RequestBody ImprintUpdateRequestDTO imprintUpdateRequestDTO) {
 
         sealImprintService.updateImprint(draftId, imprintUpdateRequestDTO);
 
@@ -39,7 +39,7 @@ public class SealImprintController {
 
     @Operation(summary = "cancel imprint apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 날인신청 취소 시 사용")
     @PutMapping(value = "/{draftId}")
-    public ApiResponse<?> cancelImprintApply(@PathVariable Long draftId) {
+    public ApiResponse<?> cancelImprintApply(@PathVariable String draftId) {
 
         sealImprintService.cancelImprint(draftId);
 
@@ -48,7 +48,7 @@ public class SealImprintController {
 
     @Operation(summary = "get imprint detail", description = "날인신청 상세조회")
     @GetMapping(value = "/{draftId}")
-    public ApiResponse<SealImprintDetailResponseDTO> getSealImprintDetail(@PathVariable Long draftId) {
+    public ApiResponse<SealImprintDetailResponseDTO> getSealImprintDetail(@PathVariable String draftId) {
 
         return ResponseWrapper.success(sealImprintService.getSealImprintDetail(draftId));
     }

@@ -150,7 +150,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional
-    public void issueCorpDoc(Long draftId, CorpDocLeftRequestDTO corpDocLeftRequestDTO) {
+    public void issueCorpDoc(String draftId, CorpDocLeftRequestDTO corpDocLeftRequestDTO) {
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found corp doc master: " + draftId));
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
@@ -207,7 +207,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional
-    public void completeCorpDoc(Long draftId) {
+    public void completeCorpDoc(String draftId) {
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not found corp doc master: " + draftId));
 

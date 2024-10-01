@@ -18,8 +18,8 @@ import java.util.List;
 public class BcdMaster {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(name = "draft_id", length = 12)
+    private String draftId;
 
     @CreationTimestamp
     @Column(nullable = false)
@@ -64,7 +64,8 @@ public class BcdMaster {
     private String status;
 
     @Builder
-    public BcdMaster(String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
+    public BcdMaster(String draftId, String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
+        this.draftId = draftId;
         this.title = String.format("[%s]명함신청서(%s)", teamNm, korNm);
         this.drafterId = drafterId;
         this.drafter = drafter;

@@ -16,8 +16,8 @@ import java.sql.Timestamp;
 public class SealRegisterDetail extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(length = 20)
     private String sealNm;
@@ -49,7 +49,7 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     private Timestamp deletedt;
 
     @Builder
-    public SealRegisterDetail(Long draftId, String sealNm, String sealImage, String useDept, String purpose,
+    public SealRegisterDetail(String draftId, String sealNm, String sealImage, String useDept, String purpose,
                               String manager, String subManager, String draftDate, String instCd, Timestamp lastUpdateDate) {
         this.draftId = draftId;
         this.sealNm = sealNm;

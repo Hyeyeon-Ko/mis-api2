@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 public class ExportDetailResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String division;
     private String submission;
     private String expNm;

@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class TotalRegistrationListResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String sealNm;
     private String sealImage;
     private String useDept;

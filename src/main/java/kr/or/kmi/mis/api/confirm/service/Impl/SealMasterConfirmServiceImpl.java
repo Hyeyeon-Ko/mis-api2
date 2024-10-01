@@ -24,7 +24,7 @@ public class SealMasterConfirmServiceImpl implements SealMasterConfirmService {
 
     @Override
     @Transactional
-    public void approve(Long draftId) {
+    public void approve(String draftId) {
 
         // 1. 인장신청 승인
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
@@ -42,7 +42,7 @@ public class SealMasterConfirmServiceImpl implements SealMasterConfirmService {
 
     @Override
     @Transactional
-    public void disapprove(Long draftId, String rejectReason) {
+    public void disapprove(String draftId, String rejectReason) {
 
         // 1. 인장신청 반려
         SealMaster sealMaster = sealMasterRepository.findById(draftId)

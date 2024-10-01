@@ -1,9 +1,11 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
-import kr.or.kmi.mis.api.file.service.FileHistorySevice;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.file.service.FileService;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
@@ -23,19 +25,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class SealExportServiceImpl implements SealExportService {
 
     private final FileService fileService;
-    private final FileHistorySevice fileHistorySevice;
     private final SealMasterRepository sealMasterRepository;
     private final SealExportDetailRepository sealExportDetailRepository;
     private final SealExportHistoryService sealExportHistoryService;
 
     private final SftpClient sftpClient;
     private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Value("${sftp.remote-directory.export}")
     private String exportRemoteDirectory;
@@ -75,9 +78,10 @@ public class SealExportServiceImpl implements SealExportService {
     @Override
     @Transactional
     public void applyExport(ExportRequestDTO exportRequestDTO, MultipartFile file) throws IOException {
+        String draftId = generateDraftId();
 
         // 1. SealMaster 저장
-        SealMaster sealMaster = exportRequestDTO.toMasterEntity();
+        SealMaster sealMaster = exportRequestDTO.toMasterEntity(draftId);
         sealMaster.setRgstrId(exportRequestDTO.getDrafterId());
         sealMaster.setRgstDt(new Timestamp(System.currentTimeMillis()));
         sealMaster = sealMasterRepository.save(sealMaster);
@@ -93,8 +97,6 @@ public class SealExportServiceImpl implements SealExportService {
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(sealExportDetail.getDraftId())
-                .drafter(sealMaster.getDrafter())
-                .docType("A")
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -102,9 +104,22 @@ public class SealExportServiceImpl implements SealExportService {
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
+    private String generateDraftId() {
+        Optional<SealMaster> lastSealMasterOpt = sealMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastSealMasterOpt.isPresent()) {
+            String lastDraftId = lastSealMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "se" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "se0000000001";
+        }
+    }
+
     @Override
     @Transactional
-    public void updateExport(Long draftId, ExportUpdateRequestDTO exportUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
+    public void updateExport(String draftId, ExportUpdateRequestDTO exportUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException {
 
         // 1. SealExportMaster 업데이트
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
@@ -124,50 +139,48 @@ public class SealExportServiceImpl implements SealExportService {
         sealExportDetailInfo.setUpdtrId(sealMaster.getDrafterId());
         updateSealExportDetail(exportUpdateRequestDTO, draftId);
 
-        // 3. FileDetail 업데이트
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "A")
-                .orElse(null);
+        // 3. File 업데이트
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(draftId).orElse(null);
+        FileHistory fileHistory = null;
 
-        if (fileDetail != null) fileHistorySevice.createFileHistory(fileDetail, "A");
-
-        assert fileDetail != null;
-        String[] savedFileInfo = {fileDetail.getFileName(), fileDetail.getFilePath()};
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
 
         if (file != null && !file.isEmpty()) {
-            if (savedFileInfo[1] != null) {
+            if (fileHistory != null && fileHistory.getFilePath() != null) {
+                String newFileName = file.getOriginalFilename();
                 try {
-                    sftpClient.deleteFile(savedFileInfo[1], exportRemoteDirectory);
+                    String newFilePath = exportRemoteDirectory + "/" + newFileName;
+                    sftpClient.deleteFile(fileHistory.getFileName(), exportRemoteDirectory);
+                    sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
+                    fileService.updateFile(new FileUploadRequestDTO(sealMaster.getDraftId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
-            }
-
-            String newFileName = file.getOriginalFilename();
-            try {
-                sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
-                savedFileInfo[0] = newFileName;
-                savedFileInfo[1] = exportRemoteDirectory + "/" + newFileName;
-            } catch (Exception e) {
-                throw new IOException("SFTP 파일 업로드 실패", e);
+            } else {
+                String newFileName = file.getOriginalFilename();
+                try {
+                    String newFilePath = exportRemoteDirectory + "/" + newFileName;
+                    sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
+                    fileService.uploadFile(new FileUploadRequestDTO(sealMaster.getDraftId(), newFileName, newFilePath));
+                } catch (Exception e) {
+                    throw new IOException("SFTP 파일 업로드 실패", e);
+                }
             }
         }
-        else if (isFileDeleted && savedFileInfo[1] != null) {
+        else if (isFileDeleted && fileHistory != null && fileHistory.getFilePath() != null) {
             try {
-                sftpClient.deleteFile(savedFileInfo[1], exportRemoteDirectory);
-                savedFileInfo[0] = null;
-                savedFileInfo[1] = null;
+                sftpClient.deleteFile(fileHistory.getFilePath(), exportRemoteDirectory);
+                fileDetail.updateUseAt("N");
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 삭제 실패", e);
             }
         }
-
-        fileDetail.updateFileInfo(savedFileInfo[0], savedFileInfo[1]);
-        fileDetail.setUpdtDt(new Timestamp(System.currentTimeMillis()));
-        fileDetail.setUpdtrId(sealMaster.getDrafter());
-        fileDetailRepository.save(fileDetail);
     }
 
-    private void updateSealExportDetail(Object exportRequestOrUpdateDTO, Long draftId) {
+    private void updateSealExportDetail(Object exportRequestOrUpdateDTO, String draftId) {
         SealExportDetail existingSealImprintDetail = sealExportDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -182,7 +195,7 @@ public class SealExportServiceImpl implements SealExportService {
 
     @Override
     @Transactional
-    public void cancelExport(Long draftId) {
+    public void cancelExport(String draftId) {
 
         // 1. SealMaster 삭제 (F)
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
@@ -191,21 +204,25 @@ public class SealExportServiceImpl implements SealExportService {
         sealMasterRepository.save(sealMaster);
 
         // 2. FileDetail History 업데이트
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(draftId, "A")
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        fileHistorySevice.createFileHistory(fileDetail, "B");
-        fileDetailRepository.delete(fileDetail);
+        fileDetail.updateUseAt("N");
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SealExportDetailResponseDTO getSealExportDetail(Long draftId) {
+    public SealExportDetailResponseDTO getSealExportDetail(String draftId) {
         SealExportDetail sealExportDetail = sealExportDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(sealExportDetail.getDraftId(), "A")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        FileDetail fileDetail = fileDetailRepository.findByDraftId(sealExportDetail.getDraftId())
+                .orElse(null);
+        FileHistory fileHistory = null;
+        if (fileDetail != null) {
+            fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        }
 
-        return SealExportDetailResponseDTO.of(sealExportDetail, fileDetail);
+        return SealExportDetailResponseDTO.of(sealExportDetail, fileHistory);
     }
 }

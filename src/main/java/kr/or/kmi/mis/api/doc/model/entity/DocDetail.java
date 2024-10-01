@@ -17,8 +17,8 @@ import lombok.*;
 public class DocDetail extends BaseSystemFieldEntity {
 
     @Id
-    @Column(nullable = false)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(length = 1)
     private String division;
@@ -43,7 +43,7 @@ public class DocDetail extends BaseSystemFieldEntity {
     }
 
     @Builder
-    public DocDetail(Long draftId, String division, String receiver, String sender,
+    public DocDetail(String draftId, String division, String receiver, String sender,
                      String docTitle, String purpose, String docId) {
         this.draftId = draftId;
         this.division = division;

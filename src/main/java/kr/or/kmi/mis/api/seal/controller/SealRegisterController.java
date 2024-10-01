@@ -32,7 +32,7 @@ public class SealRegisterController {
 
     @Operation(summary = "modify seal register", description = "등록한 인장 수정 시 사용")
     @PostMapping(value = "/update")
-    public ApiResponse<?> updateSealRegister(@RequestParam Long draftId,
+    public ApiResponse<?> updateSealRegister(@RequestParam String draftId,
                                              @RequestPart SealUpdateRequestDTO sealUpdateRequestDTO,
                                              @RequestPart(value = "sealImage", required = false) MultipartFile sealImage,
                                              @RequestParam(value = "isFileDeleted", defaultValue = "false") boolean isFileDeleted) throws IOException {
@@ -42,14 +42,14 @@ public class SealRegisterController {
 
     @Operation(summary = "delete seal register", description = "등록한 인장 삭제 시 사용")
     @DeleteMapping(value = "/{draftId}")
-    public ApiResponse<?> deleteSealRegister(@PathVariable Long draftId) {
+    public ApiResponse<?> deleteSealRegister(@PathVariable String draftId) {
         sealRegisterService.deleteSeal(draftId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "get seal detail", description = "등록한 인장 상세조회")
     @GetMapping(value = "/{draftId}")
-    public ApiResponse<SealDetailResponseDTO> getSealDetail(@PathVariable Long draftId) {
+    public ApiResponse<SealDetailResponseDTO> getSealDetail(@PathVariable String draftId) {
         return ResponseWrapper.success(sealRegisterService.getSealDetail(draftId));
     }
 }

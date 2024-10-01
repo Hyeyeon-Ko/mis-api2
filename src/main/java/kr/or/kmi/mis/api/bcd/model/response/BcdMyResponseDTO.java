@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class BcdMyResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
     private Timestamp draftDate;
     private Timestamp respondDate;

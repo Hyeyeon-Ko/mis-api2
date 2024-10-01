@@ -43,7 +43,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
     @Override
     @Transactional
-    public void updateSeal(Long draftId, SealUpdateRequestDTO sealUpdateRequestDTO, MultipartFile sealImage, boolean isFileDeleted) throws IOException {
+    public void updateSeal(String draftId, SealUpdateRequestDTO sealUpdateRequestDTO, MultipartFile sealImage, boolean isFileDeleted) throws IOException {
         SealRegisterDetail sealRegisterDetail = sealRegisterDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -65,7 +65,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
     @Override
     @Transactional
-    public void deleteSeal(Long draftId) {
+    public void deleteSeal(String draftId) {
         SealRegisterDetail sealRegisterDetail = sealRegisterDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
@@ -76,7 +76,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
     }
 
     @Override
-    public SealDetailResponseDTO getSealDetail(Long draftId) {
+    public SealDetailResponseDTO getSealDetail(String draftId) {
         SealRegisterDetail sealRegisterDetail = sealRegisterDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

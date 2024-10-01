@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CorpDocMasterRepository extends JpaRepository<CorpDocMaster, Long> {
+public interface CorpDocMasterRepository extends JpaRepository<CorpDocMaster, String> {
 
     Optional<List<CorpDocMaster>> findByDrafterIdAndStatus(String userId, String status);
 
     Optional<List<CorpDocMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp from, Timestamp to);
+
+    Optional<CorpDocMaster> findTopByOrderByDraftIdDesc();
 
     List<CorpDocMaster> findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc(String status, Timestamp from, Timestamp to);
 

@@ -17,12 +17,12 @@ public interface CorpDocService {
     /** 법인서류 신청 */
     void createCorpDocApply(CorpDocRequestDTO corpDocRequestDTO, MultipartFile file) throws Exception;
     /** 법인서류 신청내역 조회 */
-    CorpDocDetailResponseDTO getCorpDocApply(Long draftId);
+    CorpDocDetailResponseDTO getCorpDocApply(String draftId);
     /** 법인서류 신청내역 수정 */
-    void updateCorpDocApply(Long draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
+    void updateCorpDocApply(String draftId, CorpDocUpdateRequestDTO corpDocUpdateRequestDTO,
                             MultipartFile file, boolean isFileDeleted) throws Exception;
     /** 법인서류 신청내역 취소 */
-    void cancelCorpDocApply(Long draftId);
+    void cancelCorpDocApply(String draftId);
     /** 법인서류 나의 승인대기내역 조회 */
     List<CorpDocPendingResponseDTO> getMyPendingList(String userId);
     /** 법인서류 전체 승인대기내역, 센터별 조회 */

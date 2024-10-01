@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface DocStorageMasterRepository extends JpaRepository<DocStorageMaster, Long> {
+public interface DocStorageMasterRepository extends JpaRepository<DocStorageMaster, String> {
 
     Optional<List<DocStorageMaster>> findAllByInstCdAndStatus(String instCd, String status);
     Optional<List<DocStorageMaster>> findAllByInstCdAndType(String instCd, String type);
     Optional<List<DocStorageMaster>> findAllByInstCdAndStatusAndType(String instCd, String status, String type);
-    Optional<DocStorageMaster> findByDraftId(Long draftId);
-
+    Optional<DocStorageMaster> findByDraftId(String draftId);
+    Optional<DocStorageMaster> findTopByOrderByDraftIdDesc();
 }

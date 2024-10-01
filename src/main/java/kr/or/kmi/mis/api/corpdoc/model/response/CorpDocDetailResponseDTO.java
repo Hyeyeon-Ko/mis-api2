@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.corpdoc.model.response;
 
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,13 +28,13 @@ public class CorpDocDetailResponseDTO {
         return filePath != null ? "/api/corpDoc/download/" + fileName : null;
     }
 
-    public static CorpDocDetailResponseDTO of(CorpDocDetail corpDocDetail, FileDetail fileDetail){
+    public static CorpDocDetailResponseDTO of(CorpDocDetail corpDocDetail, FileHistory fileHistory){
         return CorpDocDetailResponseDTO.builder()
                 .submission(corpDocDetail.getSubmission())
                 .purpose(corpDocDetail.getPurpose())
                 .useDate(corpDocDetail.getUseDate())
-                .fileName(fileDetail.getFileName())
-                .filePath(fileDetail.getFilePath())
+                .fileName(fileHistory != null ? fileHistory.getFileName() : "")
+                .filePath(fileHistory != null ? fileHistory.getFilePath() : "")
                 .certCorpseal(corpDocDetail.getCertCorpseal())
                 .certCoregister(corpDocDetail.getCertCoregister())
                 .certUsesignet(corpDocDetail.getCertUsesignet())

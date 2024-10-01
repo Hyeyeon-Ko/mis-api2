@@ -42,7 +42,7 @@ public class CorpDocListController {
 
     @Operation(summary = "issue corpDoc", description = "법인서류 발급")
     @PutMapping(value = "/issue")
-    public ApiResponse<?> issueCorpDoc(@RequestParam("draftId") Long draftId, @RequestBody CorpDocLeftRequestDTO requestDTO) {
+    public ApiResponse<?> issueCorpDoc(@RequestParam("draftId") String draftId, @RequestBody CorpDocLeftRequestDTO requestDTO) {
         corpDocListService.issueCorpDoc(draftId, requestDTO);
         return ResponseWrapper.success();
     }
@@ -56,7 +56,7 @@ public class CorpDocListController {
 
     @Operation(summary = "complete corpDoc apply", description = "법인서류 수령 확인")
     @PutMapping(value = "/completeApply")
-    public ApiResponse<?> completeCorpDoc(@RequestParam("draftId") Long draftId) {
+    public ApiResponse<?> completeCorpDoc(@RequestParam("draftId") String draftId) {
         corpDocListService.completeCorpDoc(draftId);
         return ResponseWrapper.success();
     }

@@ -20,7 +20,7 @@ public class CorpDocConfirmServiceImpl implements CorpDocConfirmService {
 
     @Override
     @Transactional
-    public void approve(Long draftId) {
+    public void approve(String draftId) {
 
         // 1. 법인서류신청 승인
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
@@ -39,7 +39,7 @@ public class CorpDocConfirmServiceImpl implements CorpDocConfirmService {
 
     @Override
     @Transactional
-    public void reject(Long draftId, String rejectReason) {
+    public void reject(String draftId, String rejectReason) {
 
         // 1. 법인서류신청 반려
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)

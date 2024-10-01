@@ -312,7 +312,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     }
 
     /* Draft ID로 문서보관 상세 리스트 조회 */
-    private List<DocStorageDetail> fetchDocStorageDetailsByDraftId(Long draftId) {
+    private List<DocStorageDetail> fetchDocStorageDetailsByDraftId(String draftId) {
         return docStorageDetailRepository.findAllByDraftId(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("DocStorageDetails not found for draftId: " + draftId));
     }

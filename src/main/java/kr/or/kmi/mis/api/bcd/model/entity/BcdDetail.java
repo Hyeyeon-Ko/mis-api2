@@ -14,8 +14,8 @@ import java.sql.Timestamp;
 public class BcdDetail {
 
     @Id
-    @Column(name = "draft_id")
-    private Long draftId;
+    @Column(name = "draft_id", length = 12)
+    private String draftId;
 
     @Column(length = 20)
     private String lastUpdtr;         // 명함 최종 수정자
@@ -79,7 +79,7 @@ public class BcdDetail {
     private Integer quantity;
 
     @Builder
-    public BcdDetail(Long draftId, String division, String userId, String korNm, String engNm,
+    public BcdDetail(String draftId, String division, String userId, String korNm, String engNm,
                      String instCd, String deptCd, String teamCd, String teamNm, String engteamNm,
                      String gradeCd, String gradeNm, String enGradeNm, String extTel, String faxTel, String phoneTel,
                      String email, String address, String engAddress, Integer quantity) {

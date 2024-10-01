@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -21,8 +20,8 @@ import java.text.SimpleDateFormat;
 public class CorpDocDetail extends BaseSystemFieldEntity {
 
     @Id
-    @Column(nullable = false)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(length = 50)
     private String submission;
@@ -61,7 +60,7 @@ public class CorpDocDetail extends BaseSystemFieldEntity {
     private String notes;
 
     @Builder
-    public CorpDocDetail(Long draftId, String submission, String purpose, String useDate, int certCorpseal, int certCoregister,
+    public CorpDocDetail(String draftId, String submission, String purpose, String useDate, int certCorpseal, int certCoregister,
                          int certUsesignet, int warrant, String type, String notes, Timestamp issueDate) {
         this.draftId = draftId;
         this.submission = submission;

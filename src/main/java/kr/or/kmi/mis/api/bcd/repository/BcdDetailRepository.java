@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BcdDetailRepository extends JpaRepository<BcdDetail, Long> {
+public interface BcdDetailRepository extends JpaRepository<BcdDetail, String> {
 
-    List<BcdDetail> findAllByDraftIdIn(List<Long> draftIds);
+    List<BcdDetail> findAllByDraftIdIn(List<String> draftIds);
 
     List<BcdDetail> findAllByUserId(String userId);
 

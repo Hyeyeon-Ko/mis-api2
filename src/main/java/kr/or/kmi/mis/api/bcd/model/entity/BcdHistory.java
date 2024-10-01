@@ -17,7 +17,7 @@ public class BcdHistory {
 
     @Id
     @Column(name = "draft_id")
-    private Long draftId;
+    private String draftId;
 
     @Id
     @Column(name = "seq_id")

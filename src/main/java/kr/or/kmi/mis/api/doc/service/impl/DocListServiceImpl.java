@@ -9,7 +9,9 @@ import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocListService;
 import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
@@ -35,6 +37,7 @@ public class DocListServiceImpl implements DocListService {
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
     private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -72,9 +75,14 @@ public class DocListServiceImpl implements DocListService {
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd)
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C").orElse(null);
-                    assert fileDetail != null;
-                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileDetail);
+                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
+                            .orElse(null);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileHistory);
                     docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
                     return docResponseDTO;
                 }).toList();
@@ -92,10 +100,14 @@ public class DocListServiceImpl implements DocListService {
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findByDraftIdAndDivision(docMaster.getDraftId(), "A")
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docDetail.getDraftId(), "C")
+                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
                             .orElse(null);
-                    assert fileDetail != null;
-                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileDetail);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileHistory);
                     docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
                     return docResponseDTO;
                 }).toList();
@@ -136,10 +148,14 @@ public class DocListServiceImpl implements DocListService {
                 .map(docDetail -> {
                     DocMaster docMaster = docMasterRepository.findByDraftIdAndInstCd(docDetail.getDraftId(), instCd)
                             .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftIdAndDocType(docMaster.getDraftId(), "C")
+                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
                             .orElse(null);
-                    assert fileDetail != null;
-                    DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster, fileDetail);
+                    FileHistory fileHistory = null;
+                    if (fileDetail != null) {
+                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    }
+                    DocResponseDTO docResponseDTO = DocResponseDTO.sOf(docDetail, docMaster, fileHistory);
                     docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
                     return docResponseDTO;
                 }).toList();

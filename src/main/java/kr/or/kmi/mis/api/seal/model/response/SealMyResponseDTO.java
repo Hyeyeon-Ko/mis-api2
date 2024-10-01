@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Builder
 public class SealMyResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
     private Timestamp draftDate;
     private Timestamp respondDate;

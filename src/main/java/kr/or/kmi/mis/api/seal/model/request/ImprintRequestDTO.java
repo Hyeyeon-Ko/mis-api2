@@ -20,8 +20,9 @@ public class ImprintRequestDTO {
     private String notes;
     private String instCd;
 
-    public SealMaster toMasterEntity() {
+    public SealMaster toMasterEntity(String draftId) {
         return SealMaster.builder()
+                .draftId(draftId)
                 .drafter(drafter)
                 .drafterId(drafterId)
                 .draftDate(new Timestamp(System.currentTimeMillis()))
@@ -31,7 +32,7 @@ public class ImprintRequestDTO {
                 .build();
     }
 
-    public SealImprintDetail toDetailEntity(Long draftId) {
+    public SealImprintDetail toDetailEntity(String draftId) {
         return SealImprintDetail.builder()
                 .draftId(draftId)
                 .submission(submission)

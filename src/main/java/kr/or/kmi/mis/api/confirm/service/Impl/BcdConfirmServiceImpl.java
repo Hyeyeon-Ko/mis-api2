@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
+import kr.or.kmi.mis.api.apply.service.Impl.ApplyServiceImpl;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
@@ -52,11 +53,11 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     @Override
     @Transactional(readOnly = true)
-    public BcdDetailResponseDTO getBcdDetailInfo(Long id) {
-        BcdMaster bcdMaster = bcdMasterRepository.findById(id)
+    public BcdDetailResponseDTO getBcdDetailInfo(String draftId) {
+        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found"));
-        BcdDetail bcdDetail = bcdDetailRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
+        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + draftId));
 
         String drafter = bcdMaster.getDrafter();
         // 기준자료에서 각 기준자료 코드에 해당하는 명칭 불러오기
@@ -67,11 +68,11 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     @Override
     @Transactional
-    public void approve(Long id, String userId) {
+    public void approve(String draftId, String userId) {
 
         // 1. 승인
-        BcdMaster bcdMaster = bcdMasterRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
+        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
 
         if (!bcdMaster.getCurrentApproverId().equals(userId)) {
             throw new IllegalArgumentException("현재 결재자가 아닙니다.");
@@ -150,11 +151,11 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     /* 반려 */
     @Override
     @Transactional
-    public void disapprove(Long id, String rejectReason, String userId) {
-        BcdMaster bcdMaster = bcdMasterRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + id));
-        BcdDetail bcdDetail = bcdDetailRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + id));
+    public void disapprove(String draftId, String rejectReason, String userId) {
+        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
+        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + draftId));
 
         // 1. 명함신청 반려 처리
         BcdDisapproveRequestDTO disapproveRequest = BcdDisapproveRequestDTO.builder()
@@ -235,7 +236,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     /*신청이력조회*/
     @Override
     @Transactional(readOnly = true)
-    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, Long draftId) {
+    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, String draftId) {
 
         Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
@@ -247,7 +248,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(drafterId, timestamps[0], timestamps[1])
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + drafterId));
 
-        Map<Long, BcdDetail> bcdDetailMap = new HashMap<>();
+        Map<String, BcdDetail> bcdDetailMap = new HashMap<>();
 
         for (BcdMaster master : bcdMasters) {
             BcdDetail bcdDetail = bcdDetailRepository.findById(master.getDraftId())
@@ -269,16 +270,6 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     public static Timestamp[] getDateIntoTimestamp(LocalDate startDate, LocalDate endDate) {
 
-        if (startDate == null) {
-            startDate = LocalDate.now().minusMonths(1);
-        }
-        if (endDate == null) {
-            endDate = LocalDate.now();
-        }
-
-        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
-        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
-
-        return new Timestamp[]{startTimestamp, endTimestamp};
+        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
     }
 }

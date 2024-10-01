@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DocMasterRepository extends JpaRepository<DocMaster, Long> {
+public interface DocMasterRepository extends JpaRepository<DocMaster, String> {
 
-    Optional<DocMaster> findByDraftIdAndInstCd(Long draftId, String instCd);
+    Optional<DocMaster> findByDraftIdAndInstCd(String draftId, String instCd);
 
-    Optional<DocMaster> findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(Long draftId, String instCd, Timestamp from, Timestamp to);
+    Optional<DocMaster> findByDraftIdAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String draftId, String instCd, Timestamp from, Timestamp to);
+
+    Optional<DocMaster> findTopByOrderByDraftIdDesc();
 
     Optional<List<DocMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp from, Timestamp to);
 

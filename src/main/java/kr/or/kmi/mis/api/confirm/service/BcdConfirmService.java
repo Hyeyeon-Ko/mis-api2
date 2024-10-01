@@ -9,14 +9,14 @@ import java.util.List;
 public interface BcdConfirmService {
 
     /* 명함신청 상세 정보 불러오기 */
-    BcdDetailResponseDTO getBcdDetailInfo(Long id);
+    BcdDetailResponseDTO getBcdDetailInfo(String draftId);
 
     /* 승인 */
-    void approve(Long id, String userId);
+    void approve(String draftId, String userId);
 
     /* 반려 */
-    void disapprove(Long id, String rejectReason, String userId);
+    void disapprove(String draftId, String rejectReason, String userId);
 
     /* 명함 신청이력 조회 */
-    List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, Long draftId);
+    List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDate startDate, LocalDate endDate, String draftId);
 }

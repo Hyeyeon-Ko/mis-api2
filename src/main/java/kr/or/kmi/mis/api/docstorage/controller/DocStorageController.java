@@ -70,7 +70,7 @@ public class DocStorageController {
 
     @Operation(summary = "approve docStorage apply", description = "문서보관 신청 승인")
     @PutMapping("/approve")
-    public ApiResponse<?> approveDocStorage(@RequestBody List<Long> draftIds) {
+    public ApiResponse<?> approveDocStorage(@RequestBody List<String> draftIds) {
         docStorageService.approveStorage(draftIds);
 
         return ResponseWrapper.success();

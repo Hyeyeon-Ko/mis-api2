@@ -14,8 +14,8 @@ import java.sql.Timestamp;
 public class SealMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(nullable = false)
     private Timestamp draftDate;
@@ -53,10 +53,11 @@ public class SealMaster extends BaseSystemFieldEntity {
     private String instCd;
 
     @Builder
-    public SealMaster(String drafter, String drafterId, Timestamp draftDate, String status, String division, String instCd) {
+    public SealMaster(String draftId, String drafter, String drafterId, Timestamp draftDate, String status, String division, String instCd) {
 
         String divisionType = "A".equals(division) ? "날인" : "반출";
 
+        this.draftId = draftId;
         this.drafter = drafter;
         this.drafterId = drafterId;
         this.draftDate = draftDate;

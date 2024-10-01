@@ -3,9 +3,13 @@ package kr.or.kmi.mis.api.file.controller;
 import com.jcraft.jsch.SftpException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileDownloadHistory;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.model.request.FileDownloadRequestDTO;
+import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.file.repository.FileDownloadHistoryRepository;
+import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +37,8 @@ public class FileDownloadController {
 
     private final SftpClient sftpClient;
     private final FileDownloadHistoryRepository fileDownloadHistoryRepository;
+    private final FileDetailRepository fileDetailRepository;
+    private final FileHistoryRepository fileHistoryRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
@@ -54,7 +60,15 @@ public class FileDownloadController {
                 "corpdoc", corpdocRemoteDirectory
         );
 
-        String remoteDirectory = directoryMap.get(fileDownloadRequestDTO.getDocType());
+        String remoteDirectory;
+        // TODO: draftId 관련 코드 기준자료에 입력 후 수정!!!!!!! 임시 if문
+        if (fileDownloadRequestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("cd")) {
+            remoteDirectory = directoryMap.get("corpdoc");
+        } else if (fileDownloadRequestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("sl")) {
+            remoteDirectory = directoryMap.get("seal");
+        } else {
+            remoteDirectory = directoryMap.get("doc");
+        }
 
         try {
             byte[] fileBytes = sftpClient.downloadFile(filename, remoteDirectory);
@@ -99,7 +113,12 @@ public class FileDownloadController {
              ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream)) {
 
             for (FileDownloadRequestDTO requestDTO : fileDownloadRequestDTOs) {
-                String filename = requestDTO.getFileName();
+
+                FileDetail fileDetail = fileDetailRepository.findByDraftId(requestDTO.getDraftId())
+                        .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                FileHistory fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
+                        .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                String filename = fileHistory.getFileName();
 
                 Map<String, String> directoryMap = Map.of(
                         "doc", docRemoteDirectory,
@@ -107,7 +126,15 @@ public class FileDownloadController {
                         "corpdoc", corpdocRemoteDirectory
                 );
 
-                String remoteDirectory = directoryMap.get(requestDTO.getDocType());
+                String remoteDirectory;
+                // TODO: draftId 관련 코드 기준자료에 입력 후 수정!!!!!!! 임시 if문
+                if (requestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("cd")) {
+                    remoteDirectory = directoryMap.get("corpdoc");
+                } else if (requestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("sl")) {
+                    remoteDirectory = directoryMap.get("seal");
+                } else {
+                    remoteDirectory = directoryMap.get("doc");
+                }
 
                 byte[] fileBytes = sftpClient.downloadFile(filename, remoteDirectory);
 

@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SealExportDetailRepository extends JpaRepository<SealExportDetail, Long> {
+public interface SealExportDetailRepository extends JpaRepository<SealExportDetail, String> {
 }

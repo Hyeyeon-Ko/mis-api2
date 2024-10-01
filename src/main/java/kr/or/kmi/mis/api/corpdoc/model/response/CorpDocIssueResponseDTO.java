@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 @AllArgsConstructor
 public class CorpDocIssueResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String draftDate;
     private String useDate;
     private Timestamp issueDate;

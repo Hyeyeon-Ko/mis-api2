@@ -17,8 +17,9 @@ public class DocStorageApplyRequestDTO {
     private String type;
     private List<Long> detailIds;
 
-    public DocStorageMaster toMasterEntity(String drafter, String drafterId) {
+    public DocStorageMaster toMasterEntity(String draftId, String drafter, String drafterId) {
         return DocStorageMaster.builder()
+                .draftId(draftId)
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .drafter(drafter)
                 .drafterId(drafterId)

@@ -16,8 +16,8 @@ import java.sql.Timestamp;
 public class CorpDocMaster extends BaseSystemFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(nullable = false)
     private Timestamp draftDate;
@@ -59,7 +59,8 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
     private String instCd;
 
     @Builder
-    public CorpDocMaster(Timestamp draftDate, String drafter, String drafterId, String status, String instCd) {
+    public CorpDocMaster(String draftId, Timestamp draftDate, String drafter, String drafterId, String status, String instCd) {
+        this.draftId = draftId;
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;
@@ -87,7 +88,7 @@ public class CorpDocMaster extends BaseSystemFieldEntity {
         this.respondDate = new Timestamp(System.currentTimeMillis());
     }
 
-    public void end(Long draftId) {
+    public void end(String draftId) {
         this.status = "E";
         this.endDate = new Timestamp(System.currentTimeMillis());
     }

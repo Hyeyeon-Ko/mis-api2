@@ -13,8 +13,8 @@ import lombok.*;
 public class SealImprintDetail extends BaseSystemFieldEntity {
 
     @Id
-    @Column(name = "draft_id")
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column(length = 50)
     private String submission;
@@ -38,7 +38,7 @@ public class SealImprintDetail extends BaseSystemFieldEntity {
     private String notes;
 
     @Builder
-    public SealImprintDetail(Long draftId, String submission, String useDate, String corporateSeal, String facsimileSeal,
+    public SealImprintDetail(String draftId, String submission, String useDate, String corporateSeal, String facsimileSeal,
                              String companySeal, String purpose, String notes) {
         this.draftId = draftId;
         this.submission = submission;

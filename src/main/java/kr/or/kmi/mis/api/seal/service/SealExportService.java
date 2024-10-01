@@ -13,11 +13,11 @@ public interface SealExportService {
     void applyExport(ExportRequestDTO exportRequestDTO, MultipartFile file) throws IOException;
 
     /* 반출수정 */
-    void updateExport(Long draftId, ExportUpdateRequestDTO exportUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
+    void updateExport(String draftId, ExportUpdateRequestDTO exportUpdateRequestDTO, MultipartFile file, boolean isFileDeleted) throws IOException;
 
     /* 반출취소 */
-    void cancelExport(Long draftId);
+    void cancelExport(String draftId);
 
     /* 반출신청 상세조회 */
-    SealExportDetailResponseDTO getSealExportDetail(Long draftId);
+    SealExportDetailResponseDTO getSealExportDetail(String draftId);
 }

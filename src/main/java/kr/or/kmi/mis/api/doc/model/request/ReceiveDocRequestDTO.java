@@ -20,8 +20,9 @@ public class ReceiveDocRequestDTO {
     String deptCd;
 
     // DocRequest Dto -> DocMaster Entity
-    public DocMaster toMasterEntity(String status) {
+    public DocMaster toMasterEntity(String draftId, String status) {
         return DocMaster.builder()
+                .draftId(draftId)
                 .title(String.format("문서수신 신청서 (%s)", drafter))
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .drafter(drafter)
@@ -33,7 +34,7 @@ public class ReceiveDocRequestDTO {
     }
 
     // DocRequest Dto -> DocDetail Entity
-    public DocDetail toDetailEntity(Long draftId) {
+    public DocDetail toDetailEntity(String draftId) {
         return DocDetail.builder()
                 .draftId(draftId)
                 .division(division)

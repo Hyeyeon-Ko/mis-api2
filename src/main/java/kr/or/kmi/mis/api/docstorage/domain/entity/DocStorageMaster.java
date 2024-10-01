@@ -12,8 +12,8 @@ import java.sql.Timestamp;
 public class DocStorageMaster {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long draftId;
+    @Column(nullable = false, length = 12)
+    private String draftId;
 
     @Column
     private Timestamp draftDate;
@@ -37,8 +37,9 @@ public class DocStorageMaster {
     private String status;
 
     @Builder
-    public DocStorageMaster(Timestamp draftDate, String drafter, String drafterId,
+    public DocStorageMaster(String draftId, Timestamp draftDate, String drafter, String drafterId,
                             String instCd, String deptCd, String type, String status) {
+        this.draftId = draftId;
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.drafterId = drafterId;

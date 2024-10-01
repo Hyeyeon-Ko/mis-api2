@@ -22,8 +22,9 @@ public class CorpDocRequestDTO {
     private String type;
     private String notes;
 
-    public CorpDocMaster toMasterEntity() {
+    public CorpDocMaster toMasterEntity(String draftId) {
         return CorpDocMaster.builder()
+                .draftId(draftId)
                 .draftDate(new Timestamp(System.currentTimeMillis()))
                 .drafter(drafter)
                 .drafterId(drafterId)
@@ -32,7 +33,7 @@ public class CorpDocRequestDTO {
                 .build();
     }
 
-    public CorpDocDetail toDetailEntity(Long draftId) {
+    public CorpDocDetail toDetailEntity(String draftId) {
         return CorpDocDetail.builder()
                 .draftId(draftId)
                 .submission(submission)

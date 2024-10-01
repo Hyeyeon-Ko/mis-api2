@@ -17,7 +17,7 @@ public class ImageController {
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
 
     @GetMapping("/{draftId}")
-    public ResponseEntity<String> getImageAsBase64(@PathVariable Long draftId) {
+    public ResponseEntity<String> getImageAsBase64(@PathVariable String draftId) {
         SealRegisterDetail detail = sealRegisterDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 

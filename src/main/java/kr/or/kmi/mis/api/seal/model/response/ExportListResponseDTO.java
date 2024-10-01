@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.seal.model.response;
 
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
+import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.Data;
 @Builder
 public class ExportListResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String drafter;
     private String submission;
     private String expNm;
@@ -23,12 +24,12 @@ public class ExportListResponseDTO {
     private String fileName;
     private String filePath;
 
-    public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter, FileDetail fileDetail) {
+    public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter, FileHistory fileHistory) {
         return ExportListResponseDTO.builder()
                 .draftId(sealExportDetail.getDraftId())
                 .drafter(drafter)
                 .submission(sealExportDetail.getSubmission())
-                .expNm(sealExportDetail.getFacsimileSeal())
+                .expNm(sealExportDetail.getExpNm())
                 .expDate(sealExportDetail.getExpDate())
                 .returnDate(sealExportDetail.getReturnDate())
                 .corporateSeal(sealExportDetail.getCorporateSeal())
@@ -36,8 +37,8 @@ public class ExportListResponseDTO {
                 .companySeal(sealExportDetail.getCompanySeal())
                 .purpose(sealExportDetail.getPurpose())
                 .notes(sealExportDetail.getNotes())
-                .fileName(fileDetail.getFileName())
-                .filePath(fileDetail.getFilePath())
+                .fileName(fileHistory != null ? fileHistory.getFileName() : "")
+                .filePath(fileHistory != null ? fileHistory.getFilePath() : "")
                 .build();
     }
 }

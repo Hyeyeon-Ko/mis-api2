@@ -18,14 +18,14 @@ public class DocConfirmController {
 
     @Operation(summary = "confirm doc apply", description = "문서수발신 신청 승인")
     @PutMapping("/confirm")
-    public ApiResponse<?> confirm(@RequestParam("draftId") Long draftId, @RequestParam String userId) {
+    public ApiResponse<?> confirm(@RequestParam("draftId") String draftId, @RequestParam String userId) {
         docConfirmService.confirm(draftId, userId);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "delete doc apply", description = "승인 후, 사용자가 신청 취소 요청 시 삭제")
     @PutMapping("/delete")
-    public ApiResponse<?> delete(@RequestParam("draftId") Long draftId) {
+    public ApiResponse<?> delete(@RequestParam("draftId") String draftId) {
         docConfirmService.delete(draftId);
         return ResponseWrapper.success();
     }

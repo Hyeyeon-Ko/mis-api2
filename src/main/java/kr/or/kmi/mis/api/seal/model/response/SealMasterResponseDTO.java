@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Builder
 public class SealMasterResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String instCd;
     private String instNm;
     private String title;

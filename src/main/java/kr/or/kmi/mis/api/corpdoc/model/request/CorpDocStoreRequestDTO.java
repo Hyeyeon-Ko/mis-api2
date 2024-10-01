@@ -18,7 +18,7 @@ public class CorpDocStoreRequestDTO {
     private int totalCorpseal;
     private int totalCoregister;
 
-    public CorpDocDetail toEntity(Long draftId) {
+    public CorpDocDetail toEntity(String draftId) {
         return CorpDocDetail.builder()
                 .draftId(draftId)
                 .purpose(purpose)

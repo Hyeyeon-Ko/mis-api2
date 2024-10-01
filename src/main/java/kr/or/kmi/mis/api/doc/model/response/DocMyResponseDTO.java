@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DocMyResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String title;
     private Timestamp draftDate;
     private Timestamp respondDate;

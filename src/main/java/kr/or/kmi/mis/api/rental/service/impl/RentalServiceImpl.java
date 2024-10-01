@@ -30,7 +30,7 @@ public class RentalServiceImpl implements RentalService {
         // 1. 계약번호 중복 불가 예외처리
         checkDuplicateCNm(rentalRequestDTO.getContractNum(), "");
 
-      // 2. 렌탈정보 입력 사용자 정보 조회
+        // 2. 렌탈정보 입력 사용자 정보 조회
         String userId = infoService.getUserInfo().getUserId();
         String instCd = infoService.getUserInfoDetail(userId).getInstCd();
 

@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 public class BcdMasterResponseDTO {
-    private Long draftId;
+    private String draftId;
     private String instCd;
     private String instNm;
     private String title;

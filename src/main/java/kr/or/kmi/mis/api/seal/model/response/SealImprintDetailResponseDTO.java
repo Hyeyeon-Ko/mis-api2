@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class SealImprintDetailResponseDTO {
 
-    private Long draftId;
+    private String draftId;
     private String submission;
     private String useDate;
     private String corporateSeal;

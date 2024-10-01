@@ -5,4 +5,6 @@ import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 public interface FileService {
 
     void uploadFile(FileUploadRequestDTO fileUploadRequestDTO);
+
+    void updateFile(FileUploadRequestDTO fileUploadRequestDTO);
 }

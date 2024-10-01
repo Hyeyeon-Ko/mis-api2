@@ -9,13 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SealMasterRepository extends JpaRepository<SealMaster, Long> {
+public interface SealMasterRepository extends JpaRepository<SealMaster, String> {
 
     Optional<List<SealMaster>> findAllByStatusAndDivisionAndInstCd(String status, String division, String instCd);
 
     Optional<List<SealMaster>> findByDrafterIdAndDraftDateBetween(String userId, Timestamp from, Timestamp to);
 
     Optional<List<SealMaster>> findByDrafterIdAndStatus(String userId, String status);
+
+    Optional<SealMaster> findTopByOrderByDraftIdDesc();
 
     List<SealMaster> findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, Timestamp from, Timestamp to);
 

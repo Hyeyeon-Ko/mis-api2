@@ -116,12 +116,27 @@ public class BcdServiceImpl implements BcdService {
         }
     }
 
+    private String generateDraftId() {
+        Optional<BcdMaster> lastBcdMasterOpt = bcdMasterRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastBcdMasterOpt.isPresent()) {
+            String lastDraftId = lastBcdMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "bc" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "bc0000000001";
+        }
+    }
+
     private BcdMaster saveBcdMaster(BcdRequestDTO bcdRequestDTO) {
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("A");
+        String draftId = generateDraftId();
+
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity(draftId, "A");
         return bcdMasterRepository.save(bcdMaster);
     }
 
-    private void saveBcdDetail(BcdRequestDTO bcdRequestDTO, Long draftId) {
+    private void saveBcdDetail(BcdRequestDTO bcdRequestDTO, String draftId) {
         BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId);
         bcdDetailRepository.save(bcdDetail);
     }
@@ -144,7 +159,9 @@ public class BcdServiceImpl implements BcdService {
     @Override
     @Transactional
     public void applyBcdByLeader(BcdRequestDTO bcdRequestDTO) {
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity("B");
+        String draftId = generateDraftId();
+
+        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity(draftId, "B");
         bcdMaster.updateRespondDate(new Timestamp(System.currentTimeMillis()));
         bcdMasterRepository.save(bcdMaster);
 
@@ -153,7 +170,7 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional
-    public void updateBcd(Long draftId, BcdUpdateRequestDTO updateBcdRequestDTO) {
+    public void updateBcd(String draftId, BcdUpdateRequestDTO updateBcdRequestDTO) {
         BcdDetail existingDetail = getBcdDetail(draftId);
         BcdMaster existingMaster = getBcdMaster(draftId);
 
@@ -166,19 +183,19 @@ public class BcdServiceImpl implements BcdService {
         bcdDetailRepository.save(existingDetail);
     }
 
-    private BcdDetail getBcdDetail(Long draftId) {
+    private BcdDetail getBcdDetail(String draftId) {
         return bcdDetailRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("BcdDetail not found: " + draftId));
     }
 
-    private BcdMaster getBcdMaster(Long draftId) {
+    private BcdMaster getBcdMaster(String draftId) {
         return bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("BcdMaster not found: " + draftId));
     }
 
     @Override
     @Transactional
-    public void cancelBcdApply(Long draftId) {
+    public void cancelBcdApply(String draftId) {
         BcdMaster bcdMaster = getBcdMaster(draftId);
         bcdMaster.updateStatus("F");
     }
@@ -353,7 +370,7 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional
-    public void completeBcdApply(Long draftId){
+    public void completeBcdApply(String draftId){
 
         // 1. 명함신청 Entity 호출
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
