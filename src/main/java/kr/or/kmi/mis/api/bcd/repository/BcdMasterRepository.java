@@ -35,5 +35,5 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, String> {
 
     Optional<List<BcdMaster>> findAllByDrafterId(String drafterId);
 
-    Optional<List<BcdMaster>> findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(String drafterId, Timestamp from, Timestamp to);
+    Optional<List<BcdMaster>> findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(String drafterId, LocalDateTime from, LocalDateTime to);
 }

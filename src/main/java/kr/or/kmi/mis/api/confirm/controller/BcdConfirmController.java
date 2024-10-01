@@ -37,7 +37,7 @@ public class BcdConfirmController {
 
     @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable Long draftId, @RequestBody String rejectReason, @RequestBody String userId) {
+    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody String rejectReason, @RequestBody String userId) {
         bcdConfirmService.disapprove(draftId, rejectReason, userId);
         return ResponseWrapper.success();
     }
