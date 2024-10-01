@@ -3,10 +3,12 @@ package kr.or.kmi.mis.api.authority.repository.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.authority.model.entity.QAuthority;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.repository.AuthorityQueryRepository;
+import kr.or.kmi.mis.api.bcd.model.response.BcdSampleResponseDTO;
 import kr.or.kmi.mis.api.std.model.entity.QStdDetail;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +32,6 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
 
     @Override
     public Page<AuthorityResponseDTO2> getAuthorityList(Pageable page) {
-
-//        String instNm = stdBcdService.getInstNm();
-        String insttNm = queryFactory.select(
-                Projections.constructor(
-                        String.class,
-                        stdDetail.detailNm
-                )
-        )
-                .from(stdDetail)
-                .where(
-//                        stdDetail.groupCd.eq(Expressions.constant("A001")),
-//                        stdDetail.detailCd.eq(authority.instCd)
-                )
-                .fetchOne();
-
         List<AuthorityResponseDTO2> resultSet = queryFactory.select(
                 Projections.constructor(
                         AuthorityResponseDTO2.class,
@@ -52,8 +39,8 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
                         authority.userId,
                         authority.hngNm,
                         authority.role,
-                        authority.instCd,     //Expressions.constant(instNm),
-                        authority.deptCd,
+                        Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A001", authority.instCd),
+                        Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A002", authority.deptCd),
                         authority.email
                 )
         )
