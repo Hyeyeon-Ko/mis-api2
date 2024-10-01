@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class SealMaster extends BaseSystemFieldEntity {
 
     @Id
-    @Column(nullable = false, length = 12)
+    @Column(name = "draft_id", length = 12)
     private String draftId;
 
     @Column(nullable = false)

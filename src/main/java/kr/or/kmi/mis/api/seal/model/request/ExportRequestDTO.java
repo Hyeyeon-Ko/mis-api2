@@ -26,6 +26,7 @@ public class ExportRequestDTO {
     public SealMaster toMasterEntity(String draftId) {
 
         return SealMaster.builder()
+                .draftId(draftId)
                 .drafter(drafter)
                 .drafter(drafter)
                 .drafterId(drafterId)
