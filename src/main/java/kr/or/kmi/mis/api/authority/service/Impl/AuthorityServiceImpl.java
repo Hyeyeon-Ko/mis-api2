@@ -15,6 +15,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailQueryRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
+import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final AuthorityRepository authorityRepository;
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final StdDetailService stdDetailService;
     private final InfoService infoService;
     private final AuthorityQueryRepository authorityQueryRepository;
     private final StdDetailQueryRepository stdDetailQueryRepository;
@@ -218,9 +220,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         // 기준자료 관리자였다면 -> 기준자료 테이블 데이터 삭제
         if (authority.getUserId() != null) {
-            stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId())
-                    .ifPresent(stdDetailToDelete -> stdDetailRepository.deleteByGroupCdAndDetailCd(
-                            stdDetailToDelete.getGroupCd(), stdDetailToDelete.getDetailCd()));
+            stdDetailService.deleteInfo(stdGroup.getGroupCd(), authority.getUserId());
         }
     }
 
