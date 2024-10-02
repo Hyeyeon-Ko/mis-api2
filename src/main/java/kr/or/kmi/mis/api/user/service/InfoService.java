@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.user.service;
 
+import kr.or.kmi.mis.api.authority.model.response.ResponseData;
 import kr.or.kmi.mis.api.user.model.response.*;
 import reactor.core.publisher.Mono;
 
@@ -20,4 +21,7 @@ public interface InfoService {
     List<ConfirmResponseDTO> getConfirmInfo(String instCd);
 
     Mono<List<OrgChartResponseData.OrgChartData>> fetchOrgChartInfo();
+
+    /* 외부 사용자 정보 API 에서 사용자 정보 가져오기 */
+    Mono<ResponseData.ResultData> fetchUserInfo(String userId);
 }
