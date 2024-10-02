@@ -154,15 +154,14 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
         
         String deptCd = stdDetailQueryRepository.findDetailCd(resultData.getOrgdeptcd(), resultData.getBzbzplceCd());
-        System.out.println("deptCd = " + deptCd);
 
         Authority authorityInfo = Authority.builder()
                 .userId(resultData.getUserid())
                 .hngNm(resultData.getUsernm())
                 .instCd(resultData.getBzbzplceCd())
                 .deptCd(deptCd)
-                .teamCd(resultData.getOrgdeptcd()) //  그룹웨어에서 넘어오는 'teamCd' 정보
-                .teamNm(resultData.getOrgdeptnm()) //  그룹웨어에서 넘어오는 'teamNm' 정보
+                .teamCd(resultData.getOrgdeptcd())
+                .teamNm(resultData.getOrgdeptnm())
                 .email(resultData.getEmail())
                 .role(request.getUserRole())
                 .createdt(LocalDateTime.now())

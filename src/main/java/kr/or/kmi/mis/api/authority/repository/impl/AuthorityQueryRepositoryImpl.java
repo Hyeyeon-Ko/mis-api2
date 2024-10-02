@@ -2,15 +2,10 @@ package kr.or.kmi.mis.api.authority.repository.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.authority.model.entity.QAuthority;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.repository.AuthorityQueryRepository;
-import kr.or.kmi.mis.api.bcd.model.response.BcdSampleResponseDTO;
-import kr.or.kmi.mis.api.std.model.entity.QStdDetail;
-import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,10 +20,8 @@ import java.util.List;
 @Slf4j
 public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
 
-    private final StdBcdService stdBcdService;
     private final JPAQueryFactory queryFactory;
     private final QAuthority authority = QAuthority.authority;
-    private final QStdDetail stdDetail = QStdDetail.stdDetail;
 
     @Override
     public Page<AuthorityResponseDTO2> getAuthorityList(Pageable page) {
