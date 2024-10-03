@@ -15,9 +15,10 @@ import lombok.RequiredArgsConstructor;
  * 2024-10-01        KMI_DI       the first create
  */
 @Data
-@RequiredArgsConstructor
-public class ApplyRequestDTO {
-    private String userId;
-    private String instCd;
-    private String documentType;
+    @RequiredArgsConstructor
+    public class ApplyRequestDTO {
+        private String userId;
+        private String instCd;
+        private String documentType;
+        //권한
 }

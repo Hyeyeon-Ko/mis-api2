@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.corpdoc.service.impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
@@ -11,6 +12,7 @@ import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocQueryRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
@@ -21,9 +23,12 @@ import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.file.service.FileService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,8 +52,16 @@ public class CorpDocServiceImpl implements CorpDocService {
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
 
+    private final CorpDocQueryRepository corpDocQueryRepository;
+
     @Value("${sftp.remote-directory.corpdoc}")
     private String corpdocRemoteDirectory;
+
+
+    @Override
+    public Page<CorpDocMasterResponseDTO> getCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return corpDocQueryRepository.getCorpDocApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
 
     @Override
     @Transactional

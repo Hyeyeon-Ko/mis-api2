@@ -79,19 +79,19 @@ public class ApplyServiceImpl implements ApplyService {
     @Override
     public ApplyResponseDTO getAllApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
         Page<BcdMasterResponseDTO> bcdApplyLists = null;
-        List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
-        List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
-        List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
+        Page<DocMasterResponseDTO> docApplyLists = null;
+        Page<CorpDocMasterResponseDTO> corpDocApplyLists = null;
+        Page<SealMasterResponseDTO> sealApplyLists = null;
 
         switch (applyRequestDTO.getDocumentType()) {
             case "B":
-//                docApplyLists = docService.getDocApply2(startDate, endDate, searchType, keyword, instCd, userId);
+                docApplyLists = docService.getDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
             case "C":
-//                corpDocApplyLists = corpDocService.getCorpDocApply2(startDate, endDate, searchType, keyword);
+                corpDocApplyLists = corpDocService.getCorpDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
             case "D":
-//                sealApplyLists = sealListService.getSealApply2(startDate, endDate, searchType, keyword, instCd);
+                sealApplyLists = sealListService.getSealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
             default:
                 bcdApplyLists = bcdService.getBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);

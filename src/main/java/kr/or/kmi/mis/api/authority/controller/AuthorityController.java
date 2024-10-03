@@ -31,7 +31,7 @@ public class AuthorityController {
 //    }
 
     @Operation(summary = "get authority list using Paging", description = "권한 관리 페이지에서 사용, 모든 권한 목록 호출 및 페이징 처리")
-    @GetMapping("")
+    @GetMapping("/")
     public ApiResponse<Page<AuthorityResponseDTO2>> getAuthorityList(PostPageRequest page) {
         return ResponseWrapper.success(authorityService.getAuthorityList2(page.of()));
     }

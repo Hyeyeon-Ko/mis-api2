@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * packageName    : kr.or.kmi.mis.api.bcd.repository.impl
@@ -51,7 +52,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
         String docType = "명함신청";
 
-        List<BcdMasterResponseDTO> resultSet = queryFactory.select(
+        List<BcdMasterResponseDTO> resultList = queryFactory.select(
                     Projections.constructor(
                             BcdMasterResponseDTO.class,
                             bcdMaster.draftId,
@@ -65,36 +66,66 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                             bcdMaster.status,
                             bcdDetail.lastUpdtr,
                             bcdDetail.lastupdtDate,
-                            Expressions.constant(docType)
-                    )
+                            Expressions.constant(docType),
+                            bcdMaster.approverChain,
+                            bcdMaster.currentApproverIndex
+                            )
                 )
                 .from(bcdMaster)
                 .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-
+                        bcdMaster.status.ne("F"),
+                        bcdDetail.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
 
-        Long count = queryFactory.select(bcdMaster.count())
-                .from(bcdMaster)
-                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
-                .where(
-                        this.titleContains(postSearchRequestDTO.getKeyword()),
-                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
-                )
-                .fetchOne();
+        List<BcdMasterResponseDTO> resultSet = resultList.stream()
+                .filter(dto -> {
+                    if (dto.getApplyStatus().equals("A")) {
+                        String[] approverChainArray = dto.getApproverChain().split(", ");
+                        int currentIndex = dto.getCurrentApproverIndex();
+                        return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
+                    }
+                    // 조건에 해당하지 않는 경우 포함하지 않음
+                    return false;
+                })
+                .collect(Collectors.toList());
 
-        return new PageImpl<>(resultSet, page, count);
+//        Long count = queryFactory.select(bcdMaster.count())
+//                .from(bcdMaster)
+//                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+//                .where(
+//                        bcdMaster.status.ne("F"),
+//                        bcdDetail.instCd.eq(applyRequestDTO.getInstCd()),
+//                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+//                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+//                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+//                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+//                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+//                )
+//                .fetchOne();
+
+
+        return new PageImpl<>(resultSet, page, resultSet.size());
     }
 
-    private BooleanExpression titleContains(String title) {
-        return StringUtils.hasLength(title) ? bcdMaster.title.like("%" + title + "%") : null;
+    private BooleanExpression titleContains(String searchType, String title) {
+        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
+            switch (searchType) {
+                case "제목": return bcdMaster.title.like("%" + title + "%");
+                case "신청자": return bcdMaster.drafter.like("%" + title + "%");
+                default: return null;
+            }
+        }
+        return null;
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {
@@ -102,7 +133,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
             return Expressions.asBoolean(true).isTrue();
         }
         LocalDateTime startDateTime = startDate.atStartOfDay();
-        return bcdMaster.rgstDt.goe(startDateTime);
+        return bcdMaster.draftDate.goe(startDateTime);
     }
 
     private BooleanExpression beforeEndDate(LocalDate endDate) {
@@ -110,6 +141,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
             return Expressions.asBoolean(true).isTrue();
         }
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return bcdMaster.rgstDt.loe(endDateTime);
+        return bcdMaster.draftDate.loe(endDateTime);
     }
+
 }

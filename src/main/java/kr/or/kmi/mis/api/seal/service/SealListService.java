@@ -1,6 +1,10 @@
 package kr.or.kmi.mis.api.seal.service;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.seal.model.response.*;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -23,6 +27,7 @@ public interface SealListService {
 
     /* 인장 전체신청내역 */
     List<SealMasterResponseDTO> getSealApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd);
+    Page<SealMasterResponseDTO> getSealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
 
     /* 인장 승인대기내역 */
     List<SealPendingResponseDTO> getSealPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd);

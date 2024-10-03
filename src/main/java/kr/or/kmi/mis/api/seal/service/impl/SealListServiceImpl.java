@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
@@ -8,13 +9,13 @@ import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.model.response.*;
-import kr.or.kmi.mis.api.seal.repository.SealExportDetailRepository;
-import kr.or.kmi.mis.api.seal.repository.SealImprintDetailRepository;
-import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
-import kr.or.kmi.mis.api.seal.repository.SealRegisterDetailRepository;
+import kr.or.kmi.mis.api.seal.repository.*;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,14 @@ public class SealListServiceImpl implements SealListService {
     private final StdBcdService stdBcdService;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
+
+    private final SealApplyQueryRepository sealApplyQueryRepository;
+
+
+    @Override
+    public Page<SealMasterResponseDTO> getSealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return sealApplyQueryRepository.getSealApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
 
     @Override
     @Transactional(readOnly = true)

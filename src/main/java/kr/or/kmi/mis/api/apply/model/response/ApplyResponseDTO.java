@@ -23,20 +23,21 @@ public class ApplyResponseDTO {
  * */
 
     private Page<BcdMasterResponseDTO> bcdMasterResponses;
-    private List<DocMasterResponseDTO> docMasterResponses;
-    private List<CorpDocMasterResponseDTO> corpDocMasterResponses;
-    private List<SealMasterResponseDTO> sealMasterResponses;
+    private Page<DocMasterResponseDTO> docMasterResponses;
+    private Page<CorpDocMasterResponseDTO> corpDocMasterResponses;
+    private Page<SealMasterResponseDTO> sealMasterResponses;
 
     public static ApplyResponseDTO of(Page<BcdMasterResponseDTO> bcdMasterResponses,
-                                      List<DocMasterResponseDTO> docMasterResponses,
-                                      List<CorpDocMasterResponseDTO> corpDocMasterResponses,
-                                      List<SealMasterResponseDTO> sealMasterResponses) {
+                                      Page<DocMasterResponseDTO> docMasterResponses,
+                                      Page<CorpDocMasterResponseDTO> corpDocMasterResponses,
+                                      Page<SealMasterResponseDTO> sealMasterResponses) {
         return ApplyResponseDTO.builder()
-                .bcdMasterResponses(bcdMasterResponses)
-                .docMasterResponses(docMasterResponses)
-                .corpDocMasterResponses(corpDocMasterResponses)
-                .sealMasterResponses(sealMasterResponses)
+                .bcdMasterResponses(bcdMasterResponses != null ? bcdMasterResponses : Page.empty())
+                .docMasterResponses(docMasterResponses != null ? docMasterResponses : Page.empty())
+                .corpDocMasterResponses(corpDocMasterResponses != null ? corpDocMasterResponses : Page.empty())
+                .sealMasterResponses(sealMasterResponses != null ? sealMasterResponses : Page.empty())
                 .build();
     }
+
 
 }

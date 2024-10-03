@@ -1,11 +1,15 @@
 package kr.or.kmi.mis.api.corpdoc.service;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocUpdateRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocDetailResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -32,4 +36,5 @@ public interface CorpDocService {
     List<CorpDocMyResponseDTO> getMyCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
     /** 법인서류 전체 신청내역, 신청일자로 조회 */
     List<CorpDocMasterResponseDTO> getCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword);
+    Page<CorpDocMasterResponseDTO> getCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
 }
