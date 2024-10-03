@@ -76,4 +76,26 @@ public class StdDetailQueryRepositoryImpl implements StdDetailQueryRepository {
         return new PageImpl<>(resultSet, page, count);
     }
 
+    @Override
+    public String findDetailCd(String teamCd, String instCd) {
+
+        // (1) group_cd가 'A003'이고, etc_item3가 g_team_cd인 칼럼들 중에서 etc_item1을 가져오는 서브쿼리
+        List<String> etcItem1List = queryFactory
+                .select(stdDetail.etcItem1)
+                .from(stdDetail)
+                .where(stdDetail.groupCd.groupCd.eq("A003")
+                        .and(stdDetail.etcItem3.eq(teamCd)))
+                .fetch();
+
+        // (2) group_cd가 'A002'이고, etc_item1이 user_inst_cd인 칼럼들 중에서 detail_cd를 가져오는 쿼리
+        return queryFactory
+                .select(stdDetail.detailCd)
+                .from(stdDetail)
+                .where(stdDetail.groupCd.groupCd.eq("A002")
+                        .and(stdDetail.etcItem1.eq(instCd))
+                        .and(stdDetail.detailCd.in(etcItem1List)))  // (1)의 etc_item1과 (2)의 detail_cd가 같은지 비교
+                .fetchOne();
+    }
+
+
 }

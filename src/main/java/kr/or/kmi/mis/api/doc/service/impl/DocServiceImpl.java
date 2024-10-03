@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.doc.service.impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
@@ -12,6 +13,7 @@ import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
+import kr.or.kmi.mis.api.doc.repository.DocApplyQueryRepository;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
@@ -31,9 +33,12 @@ import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,6 +73,8 @@ public class DocServiceImpl implements DocService {
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
 
+    private final DocApplyQueryRepository docApplyQueryRepository;
+
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
 
@@ -93,7 +100,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -123,7 +130,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -154,7 +161,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -184,7 +191,7 @@ public class DocServiceImpl implements DocService {
         String[] savedFileInfo = handleFileUpload(file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(docDetail.getDraftId())
+                .draftId(draftId)
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -211,7 +218,6 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
-            System.out.println("fileName = " + fileName);
             try {
                 sftpClient.uploadFile(file, fileName, docRemoteDirectory);
                 String filePath = docRemoteDirectory + "/" + fileName;
@@ -416,6 +422,11 @@ public class DocServiceImpl implements DocService {
     @Transactional(readOnly = true)
     public List<DocPendingResponseDTO> getMyDocPendingList(String userId) {
         return new ArrayList<>(this.getMyDocPendingMasterList(userId));
+    }
+
+    @Override
+    public Page<DocMasterResponseDTO> getDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return docApplyQueryRepository.getDocApply2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override

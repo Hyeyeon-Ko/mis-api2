@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.docstorage.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageExcelApplyRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class DocstorageExcelController {
 
     @Operation(summary = "download excel data", description = "문서보관 내역 엑셀 데이터 다운로드")
     @PostMapping("/data")
-    public void receiveData(@RequestBody List<DocstorageExcelResponseDTO> details) {
-        docstorageExcelService.saveDocstorageDetails(details);
+    public void receiveData(@RequestBody List<DocstorageExcelResponseDTO> details, DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO) {
+        docstorageExcelService.saveDocstorageDetails(details, docStorageExcelApplyRequestDTO);
     }
 
     @Operation(summary = "modify docStorage info with file", description = "문서보관 관련 정보 파일을 통한 수정")

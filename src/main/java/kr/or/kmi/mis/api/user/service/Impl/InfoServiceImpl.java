@@ -1,8 +1,9 @@
 package kr.or.kmi.mis.api.user.service.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import kr.or.kmi.mis.api.authority.service.AuthorityService;
+import kr.or.kmi.mis.api.authority.model.response.ResponseData;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -26,7 +29,6 @@ import java.util.stream.Collectors;
 public class InfoServiceImpl implements InfoService {
 
     private final HttpServletRequest request;
-    private final AuthorityService authorityService;
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
     private final StdGroupRepository stdGroupRepository;
@@ -34,6 +36,9 @@ public class InfoServiceImpl implements InfoService {
 
     @Value("${external.orgChart.url}")
     private String externalOrgChartUrl;
+
+    @Value("${external.userInfo.url}")
+    private String externalUserInfoUrl;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,7 +57,7 @@ public class InfoServiceImpl implements InfoService {
             userId = (String) request.getSession().getAttribute("userId");
         }
 
-        var resultData = authorityService.fetchUserInfo(userId).block();
+        var resultData = this.fetchUserInfo(userId).block();
 
         String userNm = Objects.requireNonNull(resultData).getUsernm();               // 성명
         String telNum = Objects.requireNonNull(resultData).getMpphonno();             // 전화번호
@@ -144,6 +149,38 @@ public class InfoServiceImpl implements InfoService {
                     } catch (Exception e) {
                         return Mono.error(new RuntimeException("Error processing response from org chart API", e));
                     }
+                });
+    }
+
+    @Override
+    @Transactional
+    public Mono<ResponseData.ResultData> fetchUserInfo(String userId) {
+        Map<String, String> requestData = new HashMap<>();
+        requestData.put("userId", userId);
+        return webClient.post()
+                .uri(externalUserInfoUrl)
+                .bodyValue(requestData)
+                .retrieve()
+                .bodyToMono(String.class)
+                .flatMap(responseJson -> {
+                    if (responseJson == null) {
+                        return Mono.error(new EntityNotFoundException("User response data not found for userId: " + userId));
+                    }
+                    try {
+                        ResponseData responseData = objectMapper.readValue(responseJson, ResponseData.class);
+                        ResponseData.ResultData resultData = responseData.getResultData();
+                        if (resultData == null) {
+                            return Mono.error(new EntityNotFoundException("User information not found for userId: " + userId));
+                        }
+                        return Mono.just(resultData);
+                    } catch (JsonProcessingException e) {
+                        System.err.println("Error parsing JSON response: " + e.getMessage());
+                        return Mono.error(new RuntimeException("Failed to parse JSON from groupware API", e));
+                    } catch (Exception e) {
+                        System.err.println("General error: " + e.getMessage());
+                        return Mono.error(new RuntimeException("General error while processing groupware API", e));
+                    }
+
                 });
     }
 }

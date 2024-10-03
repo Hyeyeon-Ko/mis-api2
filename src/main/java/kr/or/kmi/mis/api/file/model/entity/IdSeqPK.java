@@ -7,6 +7,6 @@ import java.io.Serializable;
 @Data
 public class IdSeqPK implements Serializable {
 
-    private Long attachId;
+    private String attachId;
     private Long seqId;
 }

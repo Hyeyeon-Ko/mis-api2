@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.authority.model.entity.QAuthority;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.repository.AuthorityQueryRepository;
-import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,19 +20,11 @@ import java.util.List;
 @Slf4j
 public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
 
-    private final StdBcdService stdBcdService;
     private final JPAQueryFactory queryFactory;
     private final QAuthority authority = QAuthority.authority;
 
     @Override
     public Page<AuthorityResponseDTO2> getAuthorityList(Pageable page) {
-        String instNm = stdBcdService.getInstNm(authority.instCd.toString());
-
-        // 1. groupCd가 A003인 List<StdDetail> 각각의 etcItem1 뽑아
-        // 2. groupCd가 A002인 List<StdDetail>에서 detailCd가 1의 etcItem1이면서,
-        //    authority.instCd가 2의 etcItem1인 StdDetail 찾음
-        // 3. stdDetail detailNm을 반환해, deptNm 으로 넘겨줌
-
         List<AuthorityResponseDTO2> resultSet = queryFactory.select(
                 Projections.constructor(
                         AuthorityResponseDTO2.class,
@@ -41,8 +32,8 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
                         authority.userId,
                         authority.hngNm,
                         authority.role,
-                        Expressions.constant(instNm),
-                        authority.deptCd,
+                        Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A001", authority.instCd),
+                        Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A002", authority.deptCd),
                         authority.email
                 )
         )

@@ -1,11 +1,8 @@
 package kr.or.kmi.mis.api.authority.service.Impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
-//import kr.or.kmi.mis.api.authority.model.response.AuthorityListResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO;
 import kr.or.kmi.mis.api.authority.model.response.AuthorityResponseDTO2;
 import kr.or.kmi.mis.api.authority.model.response.ResponseData;
@@ -15,22 +12,18 @@ import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailQueryRepository;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
+import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -40,13 +33,11 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final AuthorityRepository authorityRepository;
     private final StdDetailRepository stdDetailRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final StdDetailService stdDetailService;
+    private final InfoService infoService;
     private final AuthorityQueryRepository authorityQueryRepository;
+    private final StdDetailQueryRepository stdDetailQueryRepository;
     private final HttpServletRequest httpServletRequest;
-    private final ObjectMapper objectMapper;
-    private final WebClient webClient;
-
-    @Value("${external.userInfo.url}")
-    private String externalUserInfoUrl;
 
     @Override
     public Page<AuthorityResponseDTO2> getAuthorityList2(Pageable page) {
@@ -134,7 +125,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             throw new IllegalArgumentException("로그인한 사용자의 userId와 동일합니다");
         }
 
-        ResponseData.ResultData resultData = fetchUserInfo(userId).block();
+        ResponseData.ResultData resultData = infoService.fetchUserInfo(userId).block();
         if (resultData == null || resultData.getUsernm() == null) {
             throw new EntityNotFoundException("User information not found for userId: " + userId);
         }
@@ -149,17 +140,20 @@ public class AuthorityServiceImpl implements AuthorityService {
             throw new IllegalStateException("Authority with userId " + request.getUserId() + " already exists");
         }
 
-        ResponseData.ResultData resultData = fetchUserInfo(request.getUserId()).block();
+        ResponseData.ResultData resultData = infoService.fetchUserInfo(request.getUserId()).block();
         if (resultData == null) {
             throw new EntityNotFoundException("User information not found for userId: " + request.getUserId());
         }
+        
+        String deptCd = stdDetailQueryRepository.findDetailCd(resultData.getOrgdeptcd(), resultData.getBzbzplceCd());
 
         Authority authorityInfo = Authority.builder()
                 .userId(resultData.getUserid())
                 .hngNm(resultData.getUsernm())
                 .instCd(resultData.getBzbzplceCd())
-                .teamCd(resultData.getOrgdeptcd()) //  그룹웨어에서 넘어오는 'teamCd' 정보
-                .teamNm(resultData.getOrgdeptnm()) //  그룹웨어에서 넘어오는 'teamNm' 정보
+                .deptCd(deptCd)
+                .teamCd(resultData.getOrgdeptcd())
+                .teamNm(resultData.getOrgdeptnm())
                 .email(resultData.getEmail())
                 .role(request.getUserRole())
                 .createdt(LocalDateTime.now())
@@ -226,42 +220,8 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         // 기준자료 관리자였다면 -> 기준자료 테이블 데이터 삭제
         if (authority.getUserId() != null) {
-            stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, authority.getUserId())
-                    .ifPresent(stdDetailToDelete -> stdDetailRepository.deleteByGroupCdAndDetailCd(
-                            stdDetailToDelete.getGroupCd(), stdDetailToDelete.getDetailCd()));
+            stdDetailService.deleteInfo(stdGroup.getGroupCd(), authority.getUserId());
         }
-    }
-
-    @Override
-    @Transactional
-    public Mono<ResponseData.ResultData> fetchUserInfo(String userId) {
-        Map<String, String> requestData = new HashMap<>();
-        requestData.put("userId", userId);
-        return webClient.post()
-                .uri(externalUserInfoUrl)
-                .bodyValue(requestData)
-                .retrieve()
-                .bodyToMono(String.class)
-                .flatMap(responseJson -> {
-                    if (responseJson == null) {
-                        return Mono.error(new EntityNotFoundException("User response data not found for userId: " + userId));
-                    }
-                    try {
-                        ResponseData responseData = objectMapper.readValue(responseJson, ResponseData.class);
-                        ResponseData.ResultData resultData = responseData.getResultData();
-                        if (resultData == null) {
-                            return Mono.error(new EntityNotFoundException("User information not found for userId: " + userId));
-                        }
-                        return Mono.just(resultData);
-                    } catch (JsonProcessingException e) {
-                        System.err.println("Error parsing JSON response: " + e.getMessage());
-                        return Mono.error(new RuntimeException("Failed to parse JSON from groupware API", e));
-                    } catch (Exception e) {
-                        System.err.println("General error: " + e.getMessage());
-                        return Mono.error(new RuntimeException("General error while processing groupware API", e));
-                    }
-
-                });
     }
 
     @Override

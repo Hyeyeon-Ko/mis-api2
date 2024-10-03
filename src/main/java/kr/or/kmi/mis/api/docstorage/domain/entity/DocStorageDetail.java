@@ -19,7 +19,7 @@ public class DocStorageDetail extends BaseSystemFieldEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long detailId;
 
-    @Column(length = 12, nullable = false)
+    @Column(length = 12)
     private String draftId;
 
     @Column(length = 50)

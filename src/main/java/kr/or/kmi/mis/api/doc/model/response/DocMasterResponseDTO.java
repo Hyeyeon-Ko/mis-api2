@@ -23,6 +23,8 @@ public class DocMasterResponseDTO {
     private String approver;
     private String applyStatus;
     private String docType;
+    private String approverChain;
+    private int currentApproverIndex;
 
     public static DocMasterResponseDTO of(DocMaster docMaster, String division) {
 
