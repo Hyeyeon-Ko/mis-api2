@@ -16,6 +16,7 @@ import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocApplyQueryRepository;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
+import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
@@ -74,10 +75,13 @@ public class DocServiceImpl implements DocService {
     private final FileHistoryRepository fileHistoryRepository;
 
     private final DocApplyQueryRepository docApplyQueryRepository;
+    private final DocPendingQueryRepository docPendingQueryRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
 
+    @Override
+    @Transactional
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
         String draftId = generateDraftId();
 
@@ -109,6 +113,7 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
+    @Transactional
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
         String draftId = generateDraftId();
 
@@ -170,6 +175,7 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
+    @Transactional
     public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
         String draftId = generateDraftId();
 
@@ -199,16 +205,19 @@ public class DocServiceImpl implements DocService {
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
+    // TODO 수정하다 멈춤
     private String generateDraftId() {
         Optional<DocMaster> lastDocMasterOpt = docMasterRepository.findTopByOrderByDraftIdDesc();
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         if (lastDocMasterOpt.isPresent()) {
             String lastDraftId = lastDocMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
             return "rs" + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "rs0000000001";
+            return "0000000001";
         }
     }
 
@@ -492,6 +501,11 @@ public class DocServiceImpl implements DocService {
 
                     return docPendingResponseDTO;
                 }).toList();
+    }
+
+    @Override
+    public Page<DocPendingResponseDTO> getDocPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return docPendingQueryRepository.getDocPending2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     public List<DocPendingResponseDTO> getMyDocPendingMasterList(String userId) {

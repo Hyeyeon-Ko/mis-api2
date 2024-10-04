@@ -12,6 +12,7 @@ import kr.or.kmi.mis.api.bcd.model.response.*;
 import kr.or.kmi.mis.api.bcd.repository.BcdApplyQueryRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
+import kr.or.kmi.mis.api.bcd.repository.BcdPendingQueryRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
@@ -53,6 +54,7 @@ public class BcdServiceImpl implements BcdService {
     private final StdDetailRepository stdDetailRepository;
 
     private final BcdApplyQueryRepository bcdApplyQueryRepository;
+    private final BcdPendingQueryRepository bcdPendingQueryRepository;
 
     @Override
     @Transactional
@@ -342,6 +344,11 @@ public class BcdServiceImpl implements BcdService {
                 })
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    public Page<BcdPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return bcdPendingQueryRepository.getBcdPending2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override

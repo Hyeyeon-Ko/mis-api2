@@ -24,7 +24,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void uploadFile(FileUploadRequestDTO fileUploadRequestDTO) {
         String attachId = generateAttachId();
-        Long seqId = Long.valueOf(generateSeqId(attachId));
+        Long seqId = generateSeqId(attachId);
 
         // 1. FileDetail 업로드
         FileDetail fileDetail = new FileDetail(fileUploadRequestDTO, attachId);
@@ -43,7 +43,7 @@ public class FileServiceImpl implements FileService {
         FileDetail fileDetail = fileDetailRepository.findByDraftId(fileUploadRequestDTO.getDraftId())
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        Long seqId = Long.valueOf(generateSeqId(fileDetail.getAttachId()));
+        Long seqId = generateSeqId(fileDetail.getAttachId());
         FileHistory fileHistory = new FileHistory(fileUploadRequestDTO, fileDetail.getAttachId(), seqId);
         fileHistory.setRgstDt(LocalDateTime.now());
         fileHistoryRepository.save(fileHistory);
@@ -62,12 +62,11 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    private String generateSeqId(String attachId) {
-        Optional<FileHistory> fileHistoryOpt = Optional.ofNullable(fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(attachId))
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+    private Long generateSeqId(String attachId) {
+        Optional<FileHistory> fileHistoryOpt = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(attachId);
 
         Long maxSeqId = fileHistoryOpt.map(FileHistory::getSeqId).orElse(0L);
 
-        return String.format("%d", maxSeqId + 1);
+        return maxSeqId + 1;
     }
 }

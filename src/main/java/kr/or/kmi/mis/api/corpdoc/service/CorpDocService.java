@@ -32,6 +32,7 @@ public interface CorpDocService {
     List<CorpDocPendingResponseDTO> getMyPendingList(String userId);
     /** 법인서류 전체 승인대기내역, 센터별 조회 */
     List<CorpDocPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate);
+    Page<CorpDocPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     /** 법인서류 나의 신청내역, 신청일자로 조회 */
     List<CorpDocMyResponseDTO> getMyCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
     /** 법인서류 전체 신청내역, 신청일자로 조회 */

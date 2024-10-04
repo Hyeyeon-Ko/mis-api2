@@ -6,19 +6,23 @@ import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
+import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -185,15 +189,46 @@ public class ApplyServiceImpl implements ApplyService {
     @Transactional(readOnly = true)
     public PendingResponseDTO getPendingListByType(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
 
+        List<BcdPendingResponseDTO> bcdApplyLists = new ArrayList<>();
+        List<DocPendingResponseDTO> docApplyLists = new ArrayList<>();
+        List<CorpDocPendingResponseDTO> corpDocApplyLists = new ArrayList<>();
+        List<SealPendingResponseDTO> sealApplyLists = new ArrayList<>();
+
 //        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
-        return switch (documentType) {
-            case "A" -> PendingResponseDTO.of(bcdService.getPendingList(startDate, endDate, instCd, userId), null, null, null);
-            case "B" -> PendingResponseDTO.of(null, docService.getDocPendingList(startDate, endDate, instCd, userId), null, null);
-            case "C" -> PendingResponseDTO.of(null, null, corpDocService.getPendingList(startDate, endDate), null);
-            case "D" -> PendingResponseDTO.of(null, null, null, sealListService.getSealPendingList(startDate, endDate, instCd));
+        switch (documentType) {
+            case "A" -> bcdApplyLists = bcdService.getPendingList(startDate, endDate, instCd, userId);
+            case "B" -> docApplyLists = docService.getDocPendingList(startDate, endDate, instCd, userId);
+            case "C" -> corpDocApplyLists = corpDocService.getPendingList(startDate, endDate);
+            case "D" -> sealApplyLists = sealListService.getSealPendingList(startDate, endDate, instCd);
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
         };
+        return null;
+    }
+
+    @Override
+    public PendingResponseDTO getPendingListByType2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        Page<BcdPendingResponseDTO> bcdApplyLists = null;
+        Page<DocPendingResponseDTO> docApplyLists = null;
+        Page<CorpDocPendingResponseDTO> corpDocApplyLists = null;
+        Page<SealPendingResponseDTO> sealApplyLists = null;
+
+        switch (applyRequestDTO.getDocumentType()) {
+            case "B":
+                docApplyLists = docService.getDocPendingList2(applyRequestDTO, postSearchRequestDTO, page);
+                break;
+            case "C":
+                corpDocApplyLists = corpDocService.getPendingList2(applyRequestDTO, postSearchRequestDTO, page);
+                break;
+            case "D":
+                sealApplyLists = sealListService.getSealPendingList2(applyRequestDTO, postSearchRequestDTO, page);
+                break;
+            default:
+                bcdApplyLists = bcdService.getPendingList2(applyRequestDTO, postSearchRequestDTO, page);
+                break;
+        }
+
+        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
     }
 
 
@@ -217,11 +252,14 @@ public class ApplyServiceImpl implements ApplyService {
     @Transactional(readOnly = true)
     public PendingResponseDTO getMyPendingList(String userId) {
 
-        return PendingResponseDTO.of(
-                bcdService.getMyPendingList(userId),
-                docService.getMyDocPendingList(userId),
-                corpDocService.getMyPendingList(userId),
-                sealListService.getMySealPendingList(userId));
+        // TODO: 수정 필요!!!!
+
+//        return PendingResponseDTO.of(
+//                bcdService.getMyPendingList(userId),
+//                docService.getMyDocPendingList(userId),
+//                corpDocService.getMyPendingList(userId),
+//                sealListService.getMySealPendingList(userId));
+        return null;
     }
 
 //    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {

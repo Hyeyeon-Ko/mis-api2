@@ -38,6 +38,7 @@ public class SealListServiceImpl implements SealListService {
     private final FileHistoryRepository fileHistoryRepository;
 
     private final SealApplyQueryRepository sealApplyQueryRepository;
+    private final SealPendingQueryRepository sealPendingQueryRepository;
 
 
     @Override
@@ -238,6 +239,11 @@ public class SealListServiceImpl implements SealListService {
 
         return sealMasters.stream()
                 .map(SealPendingResponseDTO::of).toList();
+    }
+
+    @Override
+    public Page<SealPendingResponseDTO> getSealPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return sealPendingQueryRepository.getSealPending2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override

@@ -7,8 +7,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocMaster;
-import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
-import kr.or.kmi.mis.api.corpdoc.repository.CorpDocQueryRepository;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocPendingQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -23,51 +23,41 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-/**
- * packageName    : kr.or.kmi.mis.api.corpdoc.repository.impl
- * fileName       : CorpDocQueryRepositoryImpl
- * author         : KMI_DI
- * date           : 2024-10-04
- * description    :
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2024-10-04        KMI_DI       the first create
- */
 @Repository
 @RequiredArgsConstructor
-public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
+public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QCorpDocMaster corpDocMaster = QCorpDocMaster.corpDocMaster;
+    private final QCorpDocDetail corpDocDetail = QCorpDocDetail.corpDocDetail;
     private final StdBcdService stdBcdService;
 
     @Override
-    public Page<CorpDocMasterResponseDTO> getCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+    public Page<CorpDocPendingResponseDTO> getCorpDocPending2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 
         String docType = "법인서류";
 
-        List<CorpDocMasterResponseDTO> resultSet = queryFactory.select(
+        List<CorpDocPendingResponseDTO> resultSet = queryFactory.select(
                         Projections.constructor(
-                                CorpDocMasterResponseDTO.class,
-                                corpDocMaster.draftId,
-                                corpDocMaster.draftDate,
-                                corpDocMaster.respondDate,
-                                corpDocMaster.drafter,
+                                CorpDocPendingResponseDTO.class,
+                                corpDocMaster.drafterId,
                                 corpDocMaster.title,
-                                corpDocMaster.status,
                                 corpDocMaster.instCd,
                                 Expressions.constant(instNm),
+                                corpDocMaster.draftDate,
+                                corpDocMaster.drafter,
+                                corpDocDetail.updtDt,
+                                corpDocDetail.updtrId,
+                                corpDocMaster.status,
                                 Expressions.constant(docType)
                         )
                 )
                 .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
-                        corpDocMaster.status.ne("F"),
-                        // corpDocMaster.instCd.eq(applyRequestDTO.getInstCd()), // 법인서류는 센터별 X !!
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        corpDocMaster.status.eq("A"),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -81,9 +71,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
         Long count = queryFactory.select(corpDocMaster.count())
                 .from(corpDocMaster)
                 .where(
-                        corpDocMaster.status.ne("F"),
-                        //corpDocMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        corpDocMaster.status.eq("A"),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -92,17 +80,6 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
-    }
-
-    private BooleanExpression titleContains(String searchType, String title) {
-        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
-            switch (searchType) {
-                case "제목": return corpDocMaster.title.like("%" + title + "%");
-                case "신청자": return corpDocMaster.drafter.like("%" + title + "%");
-                default: return null;
-            }
-        }
-        return null;
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {
@@ -120,5 +97,5 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return corpDocMaster.draftDate.loe(endDateTime);
     }
-    
+
 }

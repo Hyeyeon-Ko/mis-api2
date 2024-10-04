@@ -6,8 +6,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.seal.model.entity.QSealMaster;
-import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
-import kr.or.kmi.mis.api.seal.repository.SealApplyQueryRepository;
+import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
+import kr.or.kmi.mis.api.seal.repository.SealExportDetailRepository;
+import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -22,49 +23,39 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-/**
- * packageName    : kr.or.kmi.mis.api.seal.repository.impl
- * fileName       : SealApplyQueryRepositoryImpl
- * author         : KMI_DI
- * date           : 2024-10-04
- * description    :
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2024-10-04        KMI_DI       the first create
- */
 @Repository
 @RequiredArgsConstructor
-public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
+public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepository {
 
     private final JPAQueryFactory queryFactory;
-    private final StdBcdService stdBcdService;
     private final QSealMaster sealMaster = QSealMaster.sealMaster;
+    private final StdBcdService stdBcdService;
+    private final SealExportDetailRepository sealExportDetailRepository;
 
     @Override
-    public Page<SealMasterResponseDTO> getSealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+    public Page<SealPendingResponseDTO> getSealPending2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 
-        List<SealMasterResponseDTO> resultSet = queryFactory.select(
+        List<SealPendingResponseDTO> resultSet = queryFactory.select(
                         Projections.constructor(
-                                SealMasterResponseDTO.class,
+                                SealPendingResponseDTO.class,
                                 sealMaster.draftId,
-                                sealMaster.draftDate,
-                                sealMaster.respondDate,
-                                sealMaster.drafter,
                                 sealMaster.title,
-                                sealMaster.status,
                                 sealMaster.instCd,
-                                sealMaster.division,
                                 Expressions.constant(instNm),
+                                sealMaster.draftDate,
+                                sealMaster.drafter,
+                                sealMaster.updtDt,
+                                sealMaster.drafter,
+                                sealMaster.status,
                                 Expressions.stringTemplate("case when {0} = 'A' then '인장신청(날인)' else '인장신청(반출)' end", sealMaster.division)
                         )
                 )
                 .from(sealMaster)
                 .where(
-                        sealMaster.status.ne("F"),
+                        sealMaster.status.eq("A"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -78,9 +69,8 @@ public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
         Long count = queryFactory.select(sealMaster.count())
                 .from(sealMaster)
                 .where(
-                        sealMaster.status.ne("F"),
+                        sealMaster.status.eq("A"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -89,17 +79,6 @@ public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
-    }
-
-    private BooleanExpression titleContains(String searchType, String title) {
-        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
-            switch (searchType) {
-                case "제목": return sealMaster.title.like("%" + title + "%");
-                case "신청자": return sealMaster.drafter.like("%" + title + "%");
-                default: return null;
-            }
-        }
-        return null;
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {
@@ -117,4 +96,5 @@ public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         return sealMaster.draftDate.loe(endDateTime);
     }
+
 }

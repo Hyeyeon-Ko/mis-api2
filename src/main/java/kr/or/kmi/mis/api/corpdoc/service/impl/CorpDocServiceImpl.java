@@ -12,6 +12,7 @@ import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocPendingQueryRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocQueryRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
@@ -53,6 +54,7 @@ public class CorpDocServiceImpl implements CorpDocService {
     private final FileHistoryRepository fileHistoryRepository;
 
     private final CorpDocQueryRepository corpDocQueryRepository;
+    private final CorpDocPendingQueryRepository corpDocPendingQueryRepository;
 
     @Value("${sftp.remote-directory.corpdoc}")
     private String corpdocRemoteDirectory;
@@ -246,6 +248,11 @@ public class CorpDocServiceImpl implements CorpDocService {
                     corpDocPendingResponseDTO.setInstNm(stdBcdService.getInstNm(corpDocMaster.getInstCd()));
                     return corpDocPendingResponseDTO;
                 }).toList();
+    }
+
+    @Override
+    public Page<CorpDocPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return corpDocPendingQueryRepository.getCorpDocPending2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override

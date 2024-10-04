@@ -7,8 +7,7 @@ import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Builder
 @Data
@@ -20,13 +19,13 @@ public class PendingResponseDTO {
      * 해당 DTO 에 한번에 담아서 반환
      * */
 
-    private List<BcdPendingResponseDTO> bcdPendingResponses;
-    private List<DocPendingResponseDTO> docPendingResponses;
-    private List<CorpDocPendingResponseDTO> corpDocPendingResponses;
-    private List<SealPendingResponseDTO> sealPendingResponses;
+    private Page<BcdPendingResponseDTO> bcdPendingResponses;
+    private Page<DocPendingResponseDTO> docPendingResponses;
+    private Page<CorpDocPendingResponseDTO> corpDocPendingResponses;
+    private Page<SealPendingResponseDTO> sealPendingResponses;
 
-    public static PendingResponseDTO of(List<BcdPendingResponseDTO> bcdPendingResponses, List<DocPendingResponseDTO> docPendingResponses,
-                                        List<CorpDocPendingResponseDTO> corpDocPendingResponses, List<SealPendingResponseDTO> sealPendingResponses) {
+    public static PendingResponseDTO of(Page<BcdPendingResponseDTO> bcdPendingResponses, Page<DocPendingResponseDTO> docPendingResponses,
+                                        Page<CorpDocPendingResponseDTO> corpDocPendingResponses, Page<SealPendingResponseDTO> sealPendingResponses) {
         return PendingResponseDTO.builder()
                 .bcdPendingResponses(bcdPendingResponses)
                 .docPendingResponses(docPendingResponses)

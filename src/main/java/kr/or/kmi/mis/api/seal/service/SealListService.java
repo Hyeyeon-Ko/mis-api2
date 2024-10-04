@@ -31,6 +31,7 @@ public interface SealListService {
 
     /* 인장 승인대기내역 */
     List<SealPendingResponseDTO> getSealPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd);
+    Page<SealPendingResponseDTO> getSealPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 
     /* 인장 나의 전체신청내역 */
     List<SealMyResponseDTO> getMySealApply(LocalDateTime startDate, LocalDateTime endDate, String userId);

@@ -24,7 +24,7 @@ public class FileDownloadHistory extends BaseSystemFieldEntity {
     @Column(name = "download_type", length = 1, nullable = false)
     private String downloadType;
 
-    @Column(name = "download_notes", length = 50, nullable = false)
+    @Column(name = "download_notes", length = 50)
     private String downloadNotes;
 
     @Column(name = "downloader_nm", length = 20, nullable = false)
