@@ -52,7 +52,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
         String docType = "명함신청";
 
-        List<BcdMasterResponseDTO> resultList = queryFactory.select(
+        List<BcdMasterResponseDTO> resultSet = queryFactory.select(
                     Projections.constructor(
                             BcdMasterResponseDTO.class,
                             bcdMaster.draftId,
@@ -87,17 +87,17 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .limit(page.getPageSize())
                 .fetch();
 
-        List<BcdMasterResponseDTO> resultSet = resultList.stream()
-                .filter(dto -> {
-                    if (dto.getApplyStatus().equals("A")) {
-                        String[] approverChainArray = dto.getApproverChain().split(", ");
-                        int currentIndex = dto.getCurrentApproverIndex();
-                        return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
-                    }
-                    // 조건에 해당하지 않는 경우 포함하지 않음
-                    return false;
-                })
-                .collect(Collectors.toList());
+//        List<BcdMasterResponseDTO> resultSet = resultList.stream()
+//                .filter(dto -> {
+//                    if (dto.getApplyStatus().equals("A")) {
+//                        String[] approverChainArray = dto.getApproverChain().split(", ");
+//                        int currentIndex = dto.getCurrentApproverIndex();
+//                        return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
+//                    }
+//                    // 조건에 해당하지 않는 경우 포함하지 않음
+//                    return false;
+//                })
+//                .collect(Collectors.toList());
 
 //        Long count = queryFactory.select(bcdMaster.count())
 //                .from(bcdMaster)

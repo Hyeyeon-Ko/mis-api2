@@ -47,7 +47,7 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
     @Override
     public Page<DocMasterResponseDTO> getDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
 
-        List<DocMasterResponseDTO> resultList = queryFactory.select(
+        List<DocMasterResponseDTO> resultSet = queryFactory.select(
                         Projections.constructor(
                                 DocMasterResponseDTO.class,
                                 docMaster.draftId,
@@ -82,17 +82,17 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                     .limit(page.getPageSize())
                     .fetch();
 
-        List<DocMasterResponseDTO> resultSet = resultList.stream()
-                .filter(dto -> {
-                    if (dto.getApplyStatus().equals("A")) {
-                        String[] approverChainArray = dto.getApproverChain().split(", ");
-                        int currentIndex = dto.getCurrentApproverIndex();
-                        return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
-                    }
-                    // 조건에 해당하지 않는 경우 포함하지 않음
-                    return false;
-                })
-                .collect(Collectors.toList());
+//        List<DocMasterResponseDTO> resultSet = resultList.stream()
+//                .filter(dto -> {
+//                    if (dto.getApplyStatus().equals("A")) {
+//                        String[] approverChainArray = dto.getApproverChain().split(", ");
+//                        int currentIndex = dto.getCurrentApproverIndex();
+//                        return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
+//                    }
+//                    // 조건에 해당하지 않는 경우 포함하지 않음
+//                    return false;
+//                })
+//                .collect(Collectors.toList());
 
 //        Long count = queryFactory.select(docMaster.count())
 //                .from(docMaster)
@@ -127,7 +127,7 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
             return Expressions.asBoolean(true).isTrue();
         }
         LocalDateTime startDateTime = startDate.atStartOfDay();
-        return docMaster.rgstDt.goe(startDateTime);
+        return docMaster.draftDate.goe(startDateTime);
     }
 
     private BooleanExpression beforeEndDate(LocalDate endDate) {
@@ -135,7 +135,7 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
             return Expressions.asBoolean(true).isTrue();
         }
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return docMaster.rgstDt.loe(endDateTime);
+        return docMaster.draftDate.loe(endDateTime);
     }
 
     private BooleanExpression checkApproval(String status, String approverChain, int currentApproverIndex, String userId) {
