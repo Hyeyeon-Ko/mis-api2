@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.seal.model.response;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -19,9 +20,21 @@ public class SealMasterResponseDTO {
     private LocalDateTime respondDate;
     private String drafter;
     private String applyStatus;
-    private String lastUpdtId;
-    private String lastUpdtDate;
+//    private String lastUpdtId;
+//    private String lastUpdtDate;
     private String docType;
+
+    public SealMasterResponseDTO(String draftId, String instCd, String instNm, String title, LocalDateTime draftDate, LocalDateTime respondDate, String drafter, String applyStatus, String docType) {
+        this.draftId = draftId;
+        this.instCd = instCd;
+        this.instNm = instNm;
+        this.title = title;
+        this.draftDate = draftDate;
+        this.respondDate = respondDate;
+        this.drafter = drafter;
+        this.applyStatus = applyStatus;
+        this.docType = docType;
+    }
 
     public static SealMasterResponseDTO of(SealMaster sealMaster) {
 

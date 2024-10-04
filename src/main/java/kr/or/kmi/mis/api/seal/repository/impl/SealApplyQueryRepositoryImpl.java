@@ -49,15 +49,14 @@ public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
                         Projections.constructor(
                                 SealMasterResponseDTO.class,
                                 sealMaster.draftId,
+                                sealMaster.instCd,
+                                Expressions.constant(instNm),
+                                sealMaster.title,
                                 sealMaster.draftDate,
                                 sealMaster.respondDate,
                                 sealMaster.drafter,
-                                sealMaster.title,
                                 sealMaster.status,
-                                sealMaster.instCd,
-                                sealMaster.division,
-                                Expressions.constant(instNm),
-                                Expressions.stringTemplate("case when {0} = 'A' then '인장신청(날인)' else '인장신청(반출)' end", sealMaster.division)
+                                Expressions.stringTemplate("case when {0} = 'A' then '인장신청(날인)' else '인장신청(반출)' end", sealMaster.division).as("docType")
                         )
                 )
                 .from(sealMaster)
