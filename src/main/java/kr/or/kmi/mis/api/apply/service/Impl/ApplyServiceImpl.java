@@ -204,7 +204,7 @@ public class ApplyServiceImpl implements ApplyService {
             case "C" -> corpDocApplyLists = corpDocService.getPendingList(startDate, endDate);
             case "D" -> sealApplyLists = sealListService.getSealPendingList(startDate, endDate, instCd);
             default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
-        }
+        };
         return null;
     }
 

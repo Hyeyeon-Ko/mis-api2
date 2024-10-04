@@ -49,7 +49,7 @@ public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepositor
                                 sealMaster.updtDt,
                                 sealMaster.drafter,
                                 sealMaster.status,
-                                Expressions.stringTemplate("case when {0} = 'A' then '인장신청(날인)' else '인장신청(반출)' end", sealMaster.division)
+                                Expressions.stringTemplate("case when {0} = 'A' then '인장신청(날인)' else '인장신청(반출)' end", sealMaster.division).as("docType")
                         )
                 )
                 .from(sealMaster)
