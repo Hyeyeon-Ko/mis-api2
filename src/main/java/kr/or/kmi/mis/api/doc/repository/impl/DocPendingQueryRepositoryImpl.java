@@ -78,7 +78,19 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
                 })
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(resultSet, page, resultSet.size());
+        Long count = queryFactory.select(docMaster.count())
+                .from(docMaster)
+                .where(
+                        docMaster.status.eq("A"),
+                        docMaster.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {
