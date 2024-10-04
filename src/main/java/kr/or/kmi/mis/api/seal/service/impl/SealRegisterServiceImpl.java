@@ -1,5 +1,7 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
+import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
+import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.util.ImageUtil;
 import kr.or.kmi.mis.api.seal.model.entity.SealRegisterDetail;
 import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
     private final SealRegisterHistoryService sealRegisterHistoryService;
+    private final SealMasterRepository sealMasterRepository;
 
     @Transactional
     public void registerSeal(SealRegisterRequestDTO sealRegisterRequestDTO, MultipartFile sealImage) throws IOException {
@@ -34,12 +38,25 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
         sealRegisterRequestDTO.setSealImageBase64(base64EncodedImage);
 
-        SealRegisterDetail sealRegisterDetail = sealRegisterRequestDTO.toDetailEntity();
+        String draftId = generateDraftId();
+
+        SealRegisterDetail sealRegisterDetail = sealRegisterRequestDTO.toDetailEntity(draftId);
         sealRegisterDetail.setRgstrId(sealRegisterRequestDTO.getDrafterId());
         sealRegisterDetail.setRgstDt(LocalDateTime.now());
         sealRegisterDetailRepository.save(sealRegisterDetail);
+    }
 
-        sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
+    private String generateDraftId() {
+        Optional<SealRegisterDetail> lastSealRegisterDetailOpt = sealRegisterDetailRepository.findTopByOrderByDraftIdDesc();
+
+        if (lastSealRegisterDetailOpt.isPresent()) {
+            String lastDraftId = lastSealRegisterDetailOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return "sr" + String.format("%010d", lastIdNum + 1);
+        } else {
+            // TODO: draftId 관련 기준자료 추가 후 수정!!!
+            return "sr0000000001";
+        }
     }
 
     @Override
