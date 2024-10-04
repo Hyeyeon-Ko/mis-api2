@@ -82,6 +82,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
 
         Long count = queryFactory.select(bcdMaster.count())
                 .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
                         bcdMaster.status.eq("A"),
                         bcdDetail.instCd.eq(applyRequestDTO.getInstCd()),
