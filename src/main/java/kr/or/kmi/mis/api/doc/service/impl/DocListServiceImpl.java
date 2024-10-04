@@ -121,6 +121,7 @@ public class DocListServiceImpl implements DocListService {
 //        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("B");
+
         if (docDetails == null) {
             return Collections.emptyList();
         }

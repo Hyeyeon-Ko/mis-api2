@@ -69,7 +69,6 @@ public class ApplyController {
         return ResponseWrapper.success(applyService.getPendingListByType2(applyRequestDTO, postSearchRequestDTO, page.of()));
     }
 
-
     @Operation(summary = "승인대기내역 개수", description = "승인대기 내역의 개수를 알려줍니다.")
     @GetMapping(value = "/pendingCount")
     public ApiResponse<PendingCountResponseDTO> getPendingCountList(@RequestParam String documentType,
