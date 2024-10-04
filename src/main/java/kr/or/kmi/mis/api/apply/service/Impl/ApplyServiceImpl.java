@@ -141,6 +141,47 @@ public class ApplyServiceImpl implements ApplyService {
     }
 
     @Override
+    public MyApplyResponseDTO getAllMyApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        Page<BcdMasterResponseDTO> myBcdApplyList = null;
+        Page<DocMasterResponseDTO> myDocApplyList = null;
+        Page<CorpDocMasterResponseDTO> myCorpDocApplyList = null;
+        Page<SealMasterResponseDTO> mySealApplyList = null;
+
+        List<BcdMasterResponseDTO> myBcdApplyList2 = null;
+        List<DocMasterResponseDTO> myDocApplyList2 = null;
+        List<CorpDocMasterResponseDTO> myCorpDocApplyList2 = null;
+        List<SealMasterResponseDTO> mySealApplyList2 = null;
+
+
+
+        if (applyRequestDTO.getDocumentType() != null) {
+            switch (applyRequestDTO.getDocumentType()) {
+                case "B":
+                    myDocApplyList = docService.getMyDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+                case "C":
+                    myCorpDocApplyList = corpDocService.getMyCorpDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+                case "D":
+                    mySealApplyList = sealListService.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+                default:
+                    myBcdApplyList = bcdService.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+            }
+            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
+        } else {
+            // 전체 신청 목록을 조회합니다.
+            myBcdApplyList2 = bcdService.getMyBcdApply(startDate, endDate, userId);
+            mySealApplyList2 = docService.getMyDocApply(startDate, endDate, userId);
+            myCorpDocApplyList2 = corpDocService.getMyCorpDocApply(startDate, endDate, userId);
+            myDocApplyList2 = sealListService.getMySealApply(startDate, endDate, userId);
+
+            return MyApplyResponseDTO.in(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public PendingResponseDTO getPendingListByType(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
 

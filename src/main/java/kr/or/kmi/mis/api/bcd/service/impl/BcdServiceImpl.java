@@ -220,11 +220,6 @@ public class BcdServiceImpl implements BcdService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
-        return bcdApplyQueryRepository.getBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
-    }
-
     private boolean isValidForSearch(BcdMaster bcdMaster, String instCd, String searchType, String keyword, String userId) {
         if (bcdMaster.getStatus().equals("A")) {
             String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
@@ -254,6 +249,11 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
+    public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return bcdApplyQueryRepository.getBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<BcdMyResponseDTO> results = new ArrayList<>();
@@ -263,8 +263,22 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
+    @Override
+    public Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return null;
+    }
+
+    @Override
+    public List<BcdMyResponseDTO> getMyBcdApply3(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        List<BcdMyResponseDTO> results = new ArrayList<>();
+
+//        results.addAll(bcdApplyQueryRepository.getMyMasterList(applyRequestDTO, postSearchRequestDTO));
+//        results.addAll(bcdApplyQueryRepository.getAnotherMasterList(applyRequestDTO, postSearchRequestDTO));
+        return results;
+    }
+
     /**
-     * 2-1. 내가 신청한 나의 명함신청 내역
+     * 2-1. 내가 신청한 명함신청 내역
      * @param userId
      * @return List<BcdMyResponseDTO>
      */
@@ -287,15 +301,15 @@ public class BcdServiceImpl implements BcdService {
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
         return bcdDetails.stream()
-                .flatMap(bcdDetail -> {
-                    // startDate, endDate 사이에 있는 BcdMaster 조회
-                    List<BcdMaster> newBcdMasters = bcdMasterRepository
-                            .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
-                            .orElse(new ArrayList<>());
+            .flatMap(bcdDetail -> {
+                // startDate, endDate 사이에 있는 BcdMaster 조회
+                List<BcdMaster> newBcdMasters = bcdMasterRepository
+                        .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
+                        .orElse(new ArrayList<>());
 
-                    return newBcdMasters.stream()
-                            .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
-                }).toList();
+                return newBcdMasters.stream()
+                        .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
+            }).toList();
     }
 
     @Override
