@@ -205,19 +205,20 @@ public class DocServiceImpl implements DocService {
         fileService.uploadFile(fileUploadRequestDTO);
     }
 
-    // TODO 수정하다 멈춤
     private String generateDraftId() {
         Optional<DocMaster> lastDocMasterOpt = docMasterRepository.findTopByOrderByDraftIdDesc();
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "E")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         if (lastDocMasterOpt.isPresent()) {
             String lastDraftId = lastDocMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "rs" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            return "0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 

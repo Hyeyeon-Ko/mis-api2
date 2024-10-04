@@ -6,6 +6,10 @@ import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.file.service.FileService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +24,8 @@ public class FileServiceImpl implements FileService {
 
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     public void uploadFile(FileUploadRequestDTO fileUploadRequestDTO) {
@@ -52,13 +58,17 @@ public class FileServiceImpl implements FileService {
     private String generateAttachId() {
         Optional<FileDetail> lastFileDetailOpt = fileDetailRepository.findTopByOrderByAttachIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "F")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastFileDetailOpt.isPresent()) {
             String lastAttachId = lastFileDetailOpt.get().getAttachId();
             int lastIdNum = Integer.parseInt(lastAttachId.substring(2));
-            return "at" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "at0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 

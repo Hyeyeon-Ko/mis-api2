@@ -10,6 +10,10 @@ import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
@@ -19,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +33,8 @@ public class CorpDocListServiceImpl implements CorpDocListService {
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
     private final StdBcdService stdBcdService;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -187,7 +190,10 @@ public class CorpDocListServiceImpl implements CorpDocListService {
     @Transactional
     public void storeCorpDoc(CorpDocStoreRequestDTO corpDocStoreRequestDTO) {
 
+        String draftId = generateDraftId();
+
         CorpDocMaster corpDocMaster = CorpDocMaster.builder()
+                .draftId(draftId)
                 .drafterId(corpDocStoreRequestDTO.getUserId())
                 .drafter(corpDocStoreRequestDTO.getUserNm())
                 .draftDate(LocalDateTime.now())
@@ -196,7 +202,7 @@ public class CorpDocListServiceImpl implements CorpDocListService {
                 .build();
         corpDocMasterRepository.save(corpDocMaster);
 
-        CorpDocDetail corpDocDetail = corpDocStoreRequestDTO.toEntity(corpDocMaster.getDraftId());
+        CorpDocDetail corpDocDetail = corpDocStoreRequestDTO.toEntity(draftId);
 
         int totalCorpseal = corpDocStoreRequestDTO.getTotalCorpseal();
         totalCorpseal += corpDocDetail.getCertCorpseal();
@@ -207,6 +213,23 @@ public class CorpDocListServiceImpl implements CorpDocListService {
         corpDocDetail.setRgstrId(corpDocStoreRequestDTO.getUserId());
         corpDocDetail.setRgstDt(LocalDateTime.now());
         corpDocDetailRepository.save(corpDocDetail);
+    }
+
+    private String generateDraftId() {
+        Optional<CorpDocMaster> lastCorpdocMasterOpt = corpDocMasterRepository.findTopByOrderByDraftIdDesc();
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        if (lastCorpdocMasterOpt.isPresent()) {
+            String lastDraftId = lastCorpdocMasterOpt.get().getDraftId();
+            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
+        } else {
+            return stdDetail.getEtcItem1() + "0000000001";
+        }
     }
 
     @Override

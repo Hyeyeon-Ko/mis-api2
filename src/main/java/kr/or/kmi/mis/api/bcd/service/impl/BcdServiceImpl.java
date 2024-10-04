@@ -129,13 +129,17 @@ public class BcdServiceImpl implements BcdService {
     private String generateDraftId() {
         Optional<BcdMaster> lastBcdMasterOpt = bcdMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "A")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastBcdMasterOpt.isPresent()) {
             String lastDraftId = lastBcdMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "bc" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "bc0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 

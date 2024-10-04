@@ -22,6 +22,10 @@ import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
 import kr.or.kmi.mis.api.file.service.FileService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -55,6 +59,8 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     private final CorpDocQueryRepository corpDocQueryRepository;
     private final CorpDocPendingQueryRepository corpDocPendingQueryRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Value("${sftp.remote-directory.corpdoc}")
     private String corpdocRemoteDirectory;
@@ -99,13 +105,17 @@ public class CorpDocServiceImpl implements CorpDocService {
     private String generateDraftId() {
         Optional<CorpDocMaster> lastCorpdocMasterOpt = corpDocMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastCorpdocMasterOpt.isPresent()) {
             String lastDraftId = lastCorpdocMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "cd" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "cd0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 

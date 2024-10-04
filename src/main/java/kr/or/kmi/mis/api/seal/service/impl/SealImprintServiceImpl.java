@@ -10,6 +10,10 @@ import kr.or.kmi.mis.api.seal.repository.SealImprintDetailRepository;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.service.SealImprintHistoryService;
 import kr.or.kmi.mis.api.seal.service.SealImprintService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,8 @@ public class SealImprintServiceImpl implements SealImprintService {
     private final SealMasterRepository sealMasterRepository;
     private final SealImprintDetailRepository sealImprintDetailRepository;
     private final SealImprintHistoryService sealImprintHistoryService;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional
@@ -45,13 +51,17 @@ public class SealImprintServiceImpl implements SealImprintService {
     private String generateDraftId() {
         Optional<SealMaster> lastSealMasterOpt = sealMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "D")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastSealMasterOpt.isPresent()) {
             String lastDraftId = lastSealMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "se" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "se0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 
