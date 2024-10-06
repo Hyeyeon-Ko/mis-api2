@@ -17,6 +17,17 @@ public class RegistrationListResponseDTO {
     private String subManager;
     private String draftDate;
 
+    public RegistrationListResponseDTO(String draftId, String sealNm, String sealImage, String useDept, String purpose, String manager, String subManager, String draftDate) {
+        this.draftId = draftId;
+        this.sealNm = sealNm;
+        this.sealImage = sealImage;
+        this.useDept = useDept;
+        this.purpose = purpose;
+        this.manager = manager;
+        this.subManager = subManager;
+        this.draftDate = draftDate;
+    }
+
     public static RegistrationListResponseDTO of(SealRegisterDetail sealRegisterDetail) {
         return RegistrationListResponseDTO.builder()
                 .draftId(sealRegisterDetail.getDraftId())

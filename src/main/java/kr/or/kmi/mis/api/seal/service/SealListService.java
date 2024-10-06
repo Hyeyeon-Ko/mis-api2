@@ -15,19 +15,23 @@ public interface SealListService {
 
     /* 인장관리대장 */
     List<ManagementListResponseDTO> getSealManagementList(String searchType, String keyword, String instCd);
+    Page<ManagementListResponseDTO> getSealManagementList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 
     /* 인장반출대장 */
     List<ExportListResponseDTO> getSealExportList(String searchType, String keyword, String instCd);
+    Page<ExportListResponseDTO> getSealExportList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 
     /* 인장등록대장(센터별) */
     List<RegistrationListResponseDTO> getSealRegistrationList(String instCd);
+    Page<RegistrationListResponseDTO> getSealRegistrationList2(ApplyRequestDTO applyRequestDTO, Pageable page);
 
     /* 인장등록대장(전국) */
     List<TotalRegistrationListResponseDTO> getTotalSealRegistrationList();
+    Page<TotalRegistrationListResponseDTO> getTotalSealRegistrationList2(Pageable page);
 
     /* 인장 전체신청내역 */
     List<SealMasterResponseDTO> getSealApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd);
-    Page<SealMasterResponseDTO> getSealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
+    Page<SealMasterResponseDTO> getSealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 
     /* 인장 승인대기내역 */
     List<SealPendingResponseDTO> getSealPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd);

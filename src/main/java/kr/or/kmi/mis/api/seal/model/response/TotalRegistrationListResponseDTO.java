@@ -16,6 +16,19 @@ public class TotalRegistrationListResponseDTO {
     private String manager;
     private String subManager;
     private String draftDate;
+
+    public TotalRegistrationListResponseDTO(String draftId, String sealNm, String sealImage, String useDept, String purpose, String manager, String subManager, String draftDate, String instCd) {
+        this.draftId = draftId;
+        this.sealNm = sealNm;
+        this.sealImage = sealImage;
+        this.useDept = useDept;
+        this.purpose = purpose;
+        this.manager = manager;
+        this.subManager = subManager;
+        this.draftDate = draftDate;
+        this.instCd = instCd;
+    }
+
     private String instCd;
 
     public static TotalRegistrationListResponseDTO of(SealRegisterDetail sealRegisterDetail) {

@@ -262,7 +262,6 @@ public class ApplyServiceImpl implements ApplyService {
         return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public PendingCountResponseDTO getPendingCountList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {

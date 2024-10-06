@@ -16,6 +16,19 @@ public class ManagementListResponseDTO {
     private String facsimileSeal;
     private String companySeal;
     private String purpose;
+
+    public ManagementListResponseDTO(String draftId, String drafter, String submission, String useDate, String corporateSeal, String facsimileSeal, String companySeal, String purpose, String notes) {
+        this.draftId = draftId;
+        this.drafter = drafter;
+        this.submission = submission;
+        this.useDate = useDate;
+        this.corporateSeal = corporateSeal;
+        this.facsimileSeal = facsimileSeal;
+        this.companySeal = companySeal;
+        this.purpose = purpose;
+        this.notes = notes;
+    }
+
     private String notes;
 
     public static ManagementListResponseDTO of(SealImprintDetail sealImprintDetail, String drafter) {
