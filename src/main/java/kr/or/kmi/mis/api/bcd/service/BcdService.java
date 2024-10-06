@@ -21,8 +21,21 @@ public interface BcdService {
     List<BcdMasterResponseDTO> getBcdApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId);
     Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
+    /**
+     * 전체 조회
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @param page
+     * @return
+     */
     Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
-    List<BcdMyResponseDTO> getMyBcdApply3(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
+    /**
+     * 전체 조회
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @return
+     */
+    List<BcdMyResponseDTO> getMyBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     List<BcdPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
     Page<BcdPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<BcdPendingResponseDTO> getMyPendingList(String userId);

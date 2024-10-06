@@ -35,6 +35,8 @@ public interface SealListService {
 
     /* 인장 나의 전체신청내역 */
     List<SealMyResponseDTO> getMySealApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
+    List<SealMyResponseDTO> getMySealApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
+    Page<SealMyResponseDTO> getMySealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
 
     /* 인장 나의 승인대기내역 */
     List<SealPendingResponseDTO> getMySealPendingList(String userId);

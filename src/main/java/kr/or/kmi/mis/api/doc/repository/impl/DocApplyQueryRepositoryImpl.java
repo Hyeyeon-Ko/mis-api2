@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.doc.repository.impl;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -7,10 +8,15 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
+import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
+import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.entity.QDocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.QDocMaster;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
+import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocApplyQueryRepository;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +28,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +50,8 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
     private final JPAQueryFactory queryFactory;
     private final QDocMaster docMaster = QDocMaster.docMaster;
     private final QDocDetail docDetail = QDocDetail.docDetail;
+    private final InfoService infoService;
+
 
     @Override
     public Page<DocMasterResponseDTO> getDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
@@ -94,21 +103,121 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
 //                })
 //                .collect(Collectors.toList());
 
-//        Long count = queryFactory.select(docMaster.count())
+        Long count = queryFactory.select(docMaster.count())
+                .from(docMaster)
+                .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
+                .where(
+                        docMaster.status.ne("F"),
+                        docMaster.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Page<DocMyResponseDTO> getMyDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+
+        List<Tuple> results = queryFactory.select(docMaster, docDetail.division)
+                .from(docMaster)
+                .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
+                .where(
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(docMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        // Map the result into DocMyResponseDTO
+        List<DocMyResponseDTO> resultSet = results.stream()
+                .map(tuple -> {
+                    DocMaster master = tuple.get(docMaster);
+                    String division = tuple.get(docDetail.division);
+
+                    return DocMyResponseDTO.of(master, division, infoService);
+                })
+                .collect(Collectors.toList());
+
+        // Count the total number of results
+        Long count = queryFactory.select(docMaster.count())
+                .from(docMaster)
+                .where(
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+
+//        List<DocMaster> docMasters = queryFactory.select(docMaster)
 //                .from(docMaster)
-//                .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
 //                .where(
-//                        docMaster.status.ne("F"),
-//                        docMaster.instCd.eq(applyRequestDTO.getInstCd()),
-//                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+//
 //                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
 //                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
 //                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
 //                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
 //                )
+//                .orderBy(docMaster.rgstDt.desc())
+//                .offset(page.getOffset())
+//                .limit(page.getPageSize())
+//                .fetch();
+//
+//        List<DocMyResponseDTO> resultSet = docMasters.stream()
+//                .map(docMaster -> DocMyResponseDTO.of(docMaster, "", infoService))
+//                .collect(Collectors.toList());
+//
+//        Long count = queryFactory.select(docMaster.count())
+//                .from(docMaster)
+//                .where(
+//                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+//                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+//                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+//                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+//                )
+//                .orderBy(docMaster.rgstDt.desc())
 //                .fetchOne();
 
-        return new PageImpl<>(resultSet, page, resultSet.size());
+//        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public List<DocMyResponseDTO> getMyDocMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+
+        List<Tuple> results = queryFactory.select(docMaster, docDetail.division)
+                .from(docMaster)
+                .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
+                .where(
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(docMaster.rgstDt.desc())
+                .fetch();
+
+        // Map the result into DocMyResponseDTO
+        List<DocMyResponseDTO> resultSet = results.stream()
+                .map(tuple -> {
+                    DocMaster master = tuple.get(docMaster);
+                    String division = tuple.get(docDetail.division);
+
+                    return DocMyResponseDTO.of(master, division, infoService);
+                })
+                .collect(Collectors.toList());
+
+        return resultSet;
     }
 
     private BooleanExpression titleContains(String searchType, String title) {

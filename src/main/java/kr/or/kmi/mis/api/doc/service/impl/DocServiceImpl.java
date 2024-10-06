@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
@@ -414,6 +415,16 @@ public class DocServiceImpl implements DocService {
     @Transactional(readOnly = true)
     public List<DocMyResponseDTO> getMyDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMyDocMasterList(startDate, endDate, userId));
+    }
+
+    @Override
+    public Page<DocMyResponseDTO> getMyDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return docApplyQueryRepository.getMyDocApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
+    public List<DocMyResponseDTO> getMyDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return docApplyQueryRepository.getMyDocMasterList2(applyRequestDTO, postSearchRequestDTO);
     }
 
     public List<DocMyResponseDTO> getMyDocMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {

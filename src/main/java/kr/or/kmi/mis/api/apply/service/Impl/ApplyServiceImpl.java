@@ -27,6 +27,7 @@ import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
@@ -80,6 +84,13 @@ public class ApplyServiceImpl implements ApplyService {
     }
 
 
+    /**
+     * 관리자 전체 신청 내역 조회
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @param pageable
+     * @return
+     */
     @Override
     public ApplyResponseDTO getAllApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
         Page<BcdMasterResponseDTO> bcdApplyLists = null;
@@ -145,46 +156,64 @@ public class ApplyServiceImpl implements ApplyService {
 //        return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
     }
 
+    /**
+     * 내 전체 신청내역
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @param pageable
+     * @return
+     */
     @Override
     public MyApplyResponseDTO getAllMyApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
-//        Page<BcdMasterResponseDTO> myBcdApplyList = null;
-//        Page<DocMasterResponseDTO> myDocApplyList = null;
-//        Page<CorpDocMasterResponseDTO> myCorpDocApplyList = null;
-//        Page<SealMasterResponseDTO> mySealApplyList = null;
-//
-//        List<BcdMasterResponseDTO> myBcdApplyList2 = null;
-//        List<DocMasterResponseDTO> myDocApplyList2 = null;
-//        List<CorpDocMasterResponseDTO> myCorpDocApplyList2 = null;
-//        List<SealMasterResponseDTO> mySealApplyList2 = null;
-//
-//
-//
-//        if (applyRequestDTO.getDocumentType() != null) {
-//            switch (applyRequestDTO.getDocumentType()) {
-//                case "B":
-//                    myDocApplyList = docService.getMyDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
-//                    break;
-//                case "C":
-//                    myCorpDocApplyList = corpDocService.getMyCorpDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
-//                    break;
-//                case "D":
-//                    mySealApplyList = sealListService.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
-//                    break;
-//                default:
-//                    myBcdApplyList = bcdService.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
-//                    break;
-//            }
-//            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
-//        } else {
-//            // 전체 신청 목록을 조회합니다.
-//            myBcdApplyList2 = bcdService.getMyBcdApply(startDate, endDate, userId);
-//            mySealApplyList2 = docService.getMyDocApply(startDate, endDate, userId);
-//            myCorpDocApplyList2 = corpDocService.getMyCorpDocApply(startDate, endDate, userId);
-//            myDocApplyList2 = sealListService.getMySealApply(startDate, endDate, userId);
-//
-//            return MyApplyResponseDTO.in(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
-//        }
-        return null;
+        Page<BcdMyResponseDTO> myBcdApplyList = null;
+        Page<DocMyResponseDTO> myDocApplyList = null;
+        Page<CorpDocMyResponseDTO> myCorpDocApplyList = null;
+        Page<SealMyResponseDTO> mySealApplyList = null;
+
+        List<BcdMyResponseDTO> myBcdApplyList2 = new ArrayList<>();
+        List<DocMyResponseDTO> myDocApplyList2 = new ArrayList<>();
+        List<CorpDocMyResponseDTO> myCorpDocApplyList2 = new ArrayList<>();
+        List<SealMyResponseDTO> mySealApplyList2 = new ArrayList<>();
+
+        if (applyRequestDTO.getDocumentType() != null) {
+            // 각 신청 별 목록 페이징 조회
+            switch (applyRequestDTO.getDocumentType()) {
+                case "B":
+                    myDocApplyList = docService.getMyDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+                case "C":
+                    myCorpDocApplyList = corpDocService.getMyCorpDocApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+                case "D":
+                    mySealApplyList = sealListService.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+                default:
+                    myBcdApplyList = bcdService.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
+            }
+            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
+        } else {
+            // 전체 신청 목록 리스트 조회
+            myBcdApplyList2 = bcdService.getMyBcdApply(applyRequestDTO, postSearchRequestDTO);
+            myDocApplyList2 = docService.getMyDocApply(applyRequestDTO, postSearchRequestDTO);
+            myCorpDocApplyList2 = corpDocService.getMyCorpDocApply(applyRequestDTO, postSearchRequestDTO);
+            mySealApplyList2 = sealListService.getMySealApply(applyRequestDTO, postSearchRequestDTO);
+
+            List<Object> combinedList = Stream.concat(
+                    Stream.concat(myBcdApplyList2.stream(), myDocApplyList2.stream()),
+                    Stream.concat(myCorpDocApplyList2.stream(), mySealApplyList2.stream())
+            ).collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), combinedList.size());
+            List<Object> pagedList = combinedList.subList(start, end);
+
+            long totalCount = combinedList.size();
+
+            Page<Object> pagedResult = new PageImpl<>(pagedList, pageable, totalCount);
+
+            return MyApplyResponseDTO.of(pagedResult);
+        }
     }
 
     @Override

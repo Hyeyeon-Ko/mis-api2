@@ -272,6 +272,16 @@ public class CorpDocServiceImpl implements CorpDocService {
     }
 
     @Override
+    public Page<CorpDocMyResponseDTO> getMyCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return corpDocQueryRepository.getMyCorpDocApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
+    public List<CorpDocMyResponseDTO> getMyCorpDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return corpDocQueryRepository.getMyCorpDocApply(applyRequestDTO, postSearchRequestDTO);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<CorpDocMasterResponseDTO> getCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository

@@ -35,6 +35,8 @@ public interface CorpDocService {
     Page<CorpDocPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     /** 법인서류 나의 신청내역, 신청일자로 조회 */
     List<CorpDocMyResponseDTO> getMyCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
+    Page<CorpDocMyResponseDTO> getMyCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    List<CorpDocMyResponseDTO> getMyCorpDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     /** 법인서류 전체 신청내역, 신청일자로 조회 */
     List<CorpDocMasterResponseDTO> getCorpDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword);
     Page<CorpDocMasterResponseDTO> getCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);

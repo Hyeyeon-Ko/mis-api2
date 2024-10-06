@@ -5,9 +5,13 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocDetail;
+import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocHistory;
 import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -22,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * packageName    : kr.or.kmi.mis.api.corpdoc.repository.impl
@@ -40,6 +45,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QCorpDocMaster corpDocMaster = QCorpDocMaster.corpDocMaster;
+    private final QCorpDocDetail corpDocDetail = QCorpDocDetail.corpDocDetail;
     private final StdBcdService stdBcdService;
 
     @Override
@@ -92,6 +98,84 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Page<CorpDocMyResponseDTO> getMyCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+
+        String docType = "법인서류";
+
+        List<CorpDocMyResponseDTO> resultSet = queryFactory.select(
+                Projections.constructor(
+                        CorpDocMyResponseDTO.class,
+                        corpDocMaster.draftId,
+                        corpDocMaster.title,
+                        corpDocMaster.draftDate,
+                        corpDocMaster.respondDate,
+                        corpDocMaster.drafter,
+                        corpDocMaster.approver,
+                        corpDocMaster.disapprover,
+                        corpDocMaster.status,
+                        corpDocMaster.rejectReason,
+                        Expressions.constant(docType)
+                    )
+                )
+                .from(corpDocMaster)
+                .where(
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(corpDocMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .where(
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public List<CorpDocMyResponseDTO> getMyCorpDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        String docType = "법인서류";
+
+        return queryFactory.select(
+                        Projections.constructor(
+                                CorpDocMyResponseDTO.class,
+                                corpDocMaster.draftId,
+                                corpDocMaster.title,
+                                corpDocMaster.draftDate,
+                                corpDocMaster.respondDate,
+                                corpDocMaster.drafter,
+                                corpDocMaster.approver,
+                                corpDocMaster.disapprover,
+                                corpDocMaster.status,
+                                corpDocMaster.rejectReason,
+                                Expressions.constant(docType)
+                        )
+                )
+                .from(corpDocMaster)
+                .where(
+                        corpDocMaster.draftId.eq(applyRequestDTO.getUserId()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(corpDocMaster.rgstDt.desc())
+                .fetch();
     }
 
     private BooleanExpression titleContains(String searchType, String title) {

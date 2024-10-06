@@ -21,10 +21,12 @@ public class MyApplyResponseDTO {
     private Page<CorpDocMyResponseDTO> myCorpDocResponses;
     private Page<SealMyResponseDTO> mySealResponses;
 
-    private List<BcdMyResponseDTO> myBcdResponses2;
-    private List<DocMyResponseDTO> myDocResponses2;
-    private List<CorpDocMyResponseDTO> myCorpDocResponses2;
-    private List<SealMyResponseDTO> mySealResponses2;
+//    private List<BcdMyResponseDTO> myBcdResponses2;
+//    private List<DocMyResponseDTO> myDocResponses2;
+//    private List<CorpDocMyResponseDTO> myCorpDocResponses2;
+//    private List<SealMyResponseDTO> mySealResponses2;
+
+    private Page<Object> pagedResult;
 
     public static MyApplyResponseDTO of(Page<BcdMyResponseDTO> bcdMyResponses, Page<DocMyResponseDTO> myDocResponses,
                                         Page<CorpDocMyResponseDTO> myCorpDocResponses, Page<SealMyResponseDTO> mySealResponses) {
@@ -35,13 +37,10 @@ public class MyApplyResponseDTO {
                 .mySealResponses(mySealResponses)
                 .build();
     }
-    public static MyApplyResponseDTO in(List<BcdMyResponseDTO> bcdMyResponses2, List<DocMyResponseDTO> myDocResponses2,
-                                        List<CorpDocMyResponseDTO> myCorpDocResponses2, List<SealMyResponseDTO> mySealResponses2) {
+
+    public static MyApplyResponseDTO of(Page<Object> pagedResult) {
         return MyApplyResponseDTO.builder()
-                .myBcdResponses2(bcdMyResponses2)
-                .myDocResponses2(myDocResponses2)
-                .myCorpDocResponses2(myCorpDocResponses2)
-                .mySealResponses2(mySealResponses2)
+                .pagedResult(pagedResult)
                 .build();
     }
 }

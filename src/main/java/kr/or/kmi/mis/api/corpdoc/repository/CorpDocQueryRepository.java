@@ -2,9 +2,12 @@ package kr.or.kmi.mis.api.corpdoc.repository;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * packageName    : kr.or.kmi.mis.api.corpdoc.repository
@@ -19,4 +22,6 @@ import org.springframework.data.domain.Pageable;
  */
 public interface CorpDocQueryRepository {
     Page<CorpDocMasterResponseDTO> getCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    Page<CorpDocMyResponseDTO> getMyCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    List<CorpDocMyResponseDTO> getMyCorpDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
 }

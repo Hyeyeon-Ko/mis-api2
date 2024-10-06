@@ -271,15 +271,14 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     public Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
-        return null;
+        return bcdApplyQueryRepository.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override
-    public List<BcdMyResponseDTO> getMyBcdApply3(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+    public List<BcdMyResponseDTO> getMyBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         List<BcdMyResponseDTO> results = new ArrayList<>();
-
-//        results.addAll(bcdApplyQueryRepository.getMyMasterList(applyRequestDTO, postSearchRequestDTO));
-//        results.addAll(bcdApplyQueryRepository.getAnotherMasterList(applyRequestDTO, postSearchRequestDTO));
+        results.addAll(this.getMyMasterList2(applyRequestDTO, postSearchRequestDTO));
+        results.addAll(this.getAnotherMasterList2(applyRequestDTO, postSearchRequestDTO));
         return results;
     }
 
@@ -295,6 +294,16 @@ public class BcdServiceImpl implements BcdService {
         return bcdMasters.stream()
                 .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
                 .toList();
+    }
+
+    public List<BcdMyResponseDTO> getMyMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return bcdApplyQueryRepository.getMyBcdList(applyRequestDTO, postSearchRequestDTO);
+//        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(applyRequestDTO.getUserId(), postSearchRequestDTO.getStartDate(), postSearchRequestDTO.getEndDate())
+//                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+//
+//        return bcdMasters.stream()
+//                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
+//                .toList();
     }
 
     /**
@@ -316,6 +325,10 @@ public class BcdServiceImpl implements BcdService {
                 return newBcdMasters.stream()
                         .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
             }).toList();
+    }
+
+    public List<BcdMyResponseDTO> getAnotherMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return bcdApplyQueryRepository.getAnotherMasterList(applyRequestDTO, postSearchRequestDTO);
     }
 
     @Override

@@ -252,6 +252,16 @@ public class SealListServiceImpl implements SealListService {
         return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
     }
 
+    @Override
+    public List<SealMyResponseDTO> getMySealApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return sealApplyQueryRepository.getMySealApply(applyRequestDTO, postSearchRequestDTO);
+    }
+
+    @Override
+    public Page<SealMyResponseDTO> getMySealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        return sealApplyQueryRepository.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+    }
+
     public List<SealMyResponseDTO> getMySealMasterList(String userId, LocalDateTime startDate, LocalDateTime endDate) {
         List<SealMaster> sealMasterList = sealMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
