@@ -5,13 +5,12 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
-import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocDetail;
-import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocHistory;
 import kr.or.kmi.mis.api.corpdoc.model.entity.QCorpDocMaster;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -26,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * packageName    : kr.or.kmi.mis.api.corpdoc.repository.impl
@@ -47,6 +45,161 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
     private final QCorpDocMaster corpDocMaster = QCorpDocMaster.corpDocMaster;
     private final QCorpDocDetail corpDocDetail = QCorpDocDetail.corpDocDetail;
     private final StdBcdService stdBcdService;
+
+    public Page<CorpDocIssueResponseDTO> getCorpDocIssueList2(PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        List<CorpDocIssueResponseDTO> resultSet = queryFactory.select(
+                Projections.constructor(
+                        CorpDocIssueResponseDTO.class,
+                        corpDocMaster.draftId,
+                        corpDocMaster.draftDate,
+                        corpDocDetail.useDate,
+                        corpDocDetail.issueDate,
+                        corpDocMaster.drafter,
+                        corpDocMaster.instCd,
+                        Expressions.constant(""),
+                        corpDocMaster.status,
+                        corpDocDetail.submission,
+                        corpDocDetail.purpose,
+                        corpDocDetail.certCorpseal,
+                        corpDocDetail.totalCorpseal,
+                        corpDocDetail.certCoregister,
+                        corpDocDetail.totalCoregister,
+                        corpDocDetail.certUsesignet,
+                        corpDocDetail.warrant,
+                        corpDocDetail.type
+                )
+        )
+                .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.status.eq("G") // 발급완료
+                                .or(corpDocMaster.status.eq("X") // 입고
+                                        .or(corpDocMaster.status.eq("E"))), // 처리완료
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(corpDocMaster.draftDate.asc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.status.eq("G")
+                                .or(corpDocMaster.status.eq("X")
+                                        .or(corpDocMaster.status.eq("E"))), // 처리완료
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+
+        resultSet.forEach(dto -> {
+            if (!"X".equals(dto.getStatus())) {
+                String instNm = stdBcdService.getInstNm(dto.getInstCd());
+                dto.setInstNm(instNm);
+            }
+        });
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(Pageable page) {
+        List<CorpDocIssueResponseDTO> resultSet = queryFactory.select(
+                        Projections.constructor(
+                                CorpDocIssueResponseDTO.class,
+                                corpDocMaster.draftId,
+                                corpDocMaster.draftDate,
+                                corpDocDetail.useDate,
+                                corpDocDetail.issueDate,
+                                corpDocMaster.drafter,
+                                corpDocMaster.instCd,
+                                Expressions.constant(""),
+                                corpDocMaster.status,
+                                corpDocDetail.submission,
+                                corpDocDetail.purpose,
+                                corpDocDetail.certCorpseal,
+                                corpDocDetail.totalCorpseal,
+                                corpDocDetail.certCoregister,
+                                corpDocDetail.totalCoregister,
+                                corpDocDetail.certUsesignet,
+                                corpDocDetail.warrant,
+                                corpDocDetail.type
+                        )
+                )
+                .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.status.eq("B") // 발급대기
+                )
+                .orderBy(corpDocMaster.draftDate.asc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.status.eq("B")
+                )
+                .fetchOne();
+
+        resultSet.forEach(dto -> {
+                String instNm = stdBcdService.getInstNm(dto.getInstCd());
+                dto.setInstNm(instNm);
+        });
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Page<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        List<CorpDocRnpResponseDTO> resultSet = queryFactory.select(
+                        Projections.constructor(
+                                CorpDocRnpResponseDTO.class,
+                                corpDocMaster.draftId,
+                                corpDocMaster.drafter,
+                                corpDocMaster.draftDate,
+                                corpDocMaster.endDate,
+                                corpDocDetail.submission,
+                                corpDocDetail.purpose,
+                                corpDocDetail.certCorpseal,
+                                corpDocDetail.certCoregister,
+                                corpDocDetail.certUsesignet,
+                                corpDocDetail.warrant
+                        )
+                )
+                .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.status.eq("E"), // 발급대기
+                        corpDocMaster.instCd.eq(instCd)
+                )
+                .orderBy(corpDocMaster.draftDate.asc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.status.eq("E"),
+                        corpDocMaster.instCd.eq(instCd)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
 
     @Override
     public Page<CorpDocMasterResponseDTO> getCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {

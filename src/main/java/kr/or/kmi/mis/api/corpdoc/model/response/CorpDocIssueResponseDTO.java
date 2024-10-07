@@ -2,12 +2,8 @@ package kr.or.kmi.mis.api.corpdoc.model.response;
 
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 @Builder
@@ -16,10 +12,11 @@ import java.time.LocalDateTime;
 public class CorpDocIssueResponseDTO {
 
     private String draftId;
-    private String draftDate;
+    private LocalDateTime draftDate;
     private String useDate;
     private LocalDateTime issueDate;
     private String drafter;
+    private String instCd;
     private String instNm;
     private String status;
     private String submission;
@@ -33,14 +30,14 @@ public class CorpDocIssueResponseDTO {
     private String note;
 
     public static CorpDocIssueResponseDTO of(CorpDocMaster corpDocMaster, CorpDocDetail corpDocDetail) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         return CorpDocIssueResponseDTO.builder()
                 .draftId(corpDocMaster.getDraftId())
-                .draftDate(sdf.format(corpDocMaster.getDraftDate()))
+                .draftDate(corpDocMaster.getDraftDate())
                 .useDate(corpDocDetail.getUseDate())
                 .issueDate(corpDocDetail.getIssueDate())
                 .drafter(corpDocMaster.getDrafter())
+                .instCd(corpDocMaster.getInstCd())
                 .status(corpDocMaster.getStatus())
                 .submission(corpDocDetail.getSubmission())
                 .purpose(corpDocDetail.getPurpose())

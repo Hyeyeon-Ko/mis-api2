@@ -9,22 +9,21 @@ import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocQueryRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
-import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,77 +31,18 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     private final CorpDocMasterRepository corpDocMasterRepository;
     private final CorpDocDetailRepository corpDocDetailRepository;
-    private final StdBcdService stdBcdService;
+    private final CorpDocQueryRepository corpDocQueryRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public CorpDocIssueListResponseDTO getCorpDocIssueList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword) {
+    public CorpDocIssueListResponseDTO getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
 
-        // 1. 발급완료+입고된 법인서류, 발급대기 중인 법인서류 모두 호출
-        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("G");
-        corpDocMasters.addAll(corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("X"));
-        List<CorpDocMaster> corpDocPendingMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("B");
+        Page<CorpDocIssueResponseDTO> res1 = corpDocQueryRepository.getCorpDocIssueList2(postSearchRequestDTO, page);
+        Page<CorpDocIssueResponseDTO> res2 = corpDocQueryRepository.getCorpDocIssuePendingList(page);
+        return CorpDocIssueListResponseDTO.of(res1, res2);
 
-        // 2. searchType과 keyword, 그리고 startDate와 endDate를 통한 필터링
-        corpDocMasters = corpDocMasters.stream()
-                .filter(corpDocMaster -> {
-                    boolean matchesSearchType = true;
-
-                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-                    if (startDate != null && endDate != null && corpDocDetail.getIssueDate() != null) {
-                        if(startDate.isBefore(corpDocDetail.getIssueDate()) || endDate.isAfter(corpDocDetail.getIssueDate())){
-                            return false;
-                        }
-//                        LocalDate issueDate = corpDocDetail.getIssueDate().toLocalDate();
-//                        if (issueDate.isBefore(startDate) || issueDate.isAfter(endDate)) {
-//                            return false;
-//                        }
-                    }
-
-                    if (searchType != null && keyword != null && !keyword.isEmpty()) {
-                        matchesSearchType = switch (searchType) {
-                            case "전체" -> corpDocDetail.getIssueDate() != null && corpDocDetail.getIssueDate().toString().contains(keyword) ||
-                                    corpDocMaster.getDrafter() != null && corpDocMaster.getDrafter().contains(keyword) ||
-                                    corpDocDetail.getSubmission() != null && corpDocDetail.getSubmission().contains(keyword) ||
-                                    corpDocDetail.getPurpose() != null && corpDocDetail.getPurpose().contains(keyword);
-                            case "발급/입고일자" -> corpDocDetail.getIssueDate() != null && corpDocDetail.getIssueDate().toString().contains(keyword);
-                            case "이름" -> corpDocMaster.getDrafter() != null && corpDocMaster.getDrafter().contains(keyword);
-                            case "제출처" -> corpDocDetail.getSubmission() != null && corpDocDetail.getSubmission().contains(keyword);
-                            case "사용목적" -> corpDocDetail.getPurpose() != null && corpDocDetail.getPurpose().contains(keyword);
-                            default -> true;
-                        };
-                    }
-
-                    return matchesSearchType;
-                })
-                .collect(Collectors.toList());
-
-        // 3. 각각 responseDTO 형태로 반환
-        List<CorpDocIssueResponseDTO> sortedIssueList = this.intoDTO(corpDocMasters).stream()
-                .sorted(Comparator.comparing(CorpDocIssueResponseDTO::getIssueDate))
-                .toList();
-
-        return CorpDocIssueListResponseDTO.of(sortedIssueList, this.intoDTO(corpDocPendingMasters));
-    }
-
-    private List<CorpDocIssueResponseDTO> intoDTO(List<CorpDocMaster> corpDocMasters) {
-
-        return corpDocMasters.stream()
-                .map(corpDocMaster -> {
-                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not found corp doc detail"));
-
-                    CorpDocIssueResponseDTO corpDocIssueResponseDTO = CorpDocIssueResponseDTO.of(corpDocMaster, corpDocDetail);
-                    if(!"X".equals(corpDocMaster.getStatus())){
-                        corpDocIssueResponseDTO.setInstNm(stdBcdService.getInstNm(corpDocMaster.getInstCd()));
-                    }
-
-                    return corpDocIssueResponseDTO;
-                }).toList();
     }
 
     @Override
@@ -114,45 +54,8 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocRnpResponseDTO> getCorpDocRnpList(String searchType, String keyword, String instCd) {
-        // 1. 해당 기관 코드(instCd)로 "E" 상태인 법인서류 호출
-        List<CorpDocMaster> corpDocMasters = corpDocMasterRepository.findAllByStatusAndInstCdOrderByEndDateAsc("E", instCd);
-
-        // 2. searchType과 keyword를 통한 필터링
-        corpDocMasters = corpDocMasters.stream()
-                .filter(corpDocMaster -> {
-                    boolean matchesSearchType = true;
-
-                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not found corp doc detail"));
-
-                    if (searchType != null && keyword != null && !keyword.isEmpty()) {
-                        matchesSearchType = switch (searchType) {
-                            case "전체" -> corpDocMaster.getDraftDate() != null && corpDocMaster.getDraftDate().toString().contains(keyword) ||
-                                    corpDocMaster.getDrafter() != null && corpDocMaster.getDrafter().contains(keyword) ||
-                                    corpDocDetail.getSubmission() != null && corpDocDetail.getSubmission().contains(keyword) ||
-                                    corpDocDetail.getPurpose() != null && corpDocDetail.getPurpose().contains(keyword);
-                            case "수령일자" -> corpDocMaster.getDraftDate() != null && corpDocMaster.getDraftDate().toString().contains(keyword);
-                            case "신청자" -> corpDocMaster.getDrafter() != null && corpDocMaster.getDrafter().contains(keyword);
-                            case "제출처" -> corpDocDetail.getSubmission() != null && corpDocDetail.getSubmission().contains(keyword);
-                            case "사용목적" -> corpDocDetail.getPurpose() != null && corpDocDetail.getPurpose().contains(keyword);
-                            default -> true;
-                        };
-                    }
-
-                    return matchesSearchType;
-                })
-                .toList();
-
-        // 3. 각각 responseDTO 형태로 변환 후 반환
-        return corpDocMasters.stream()
-                .map(corpDocMaster -> {
-                    CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(corpDocMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not found corp doc detail"));
-
-                    return CorpDocRnpResponseDTO.of(corpDocMaster, corpDocDetail);
-                })
-                .toList();
+    public Page<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return corpDocQueryRepository.getCorpDocRnpList(instCd, postSearchRequestDTO, page);
     }
 
     @Override
