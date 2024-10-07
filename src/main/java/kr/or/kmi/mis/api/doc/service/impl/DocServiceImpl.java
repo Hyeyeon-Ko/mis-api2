@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
@@ -16,6 +17,7 @@ import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocApplyQueryRepository;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
+import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
@@ -74,10 +76,13 @@ public class DocServiceImpl implements DocService {
     private final FileHistoryRepository fileHistoryRepository;
 
     private final DocApplyQueryRepository docApplyQueryRepository;
+    private final DocPendingQueryRepository docPendingQueryRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
 
+    @Override
+    @Transactional
     public void applyReceiveDoc(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
         String draftId = generateDraftId();
 
@@ -109,6 +114,7 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
+    @Transactional
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
         String draftId = generateDraftId();
 
@@ -170,6 +176,7 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
+    @Transactional
     public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
         String draftId = generateDraftId();
 
@@ -202,13 +209,17 @@ public class DocServiceImpl implements DocService {
     private String generateDraftId() {
         Optional<DocMaster> lastDocMasterOpt = docMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "E")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastDocMasterOpt.isPresent()) {
             String lastDraftId = lastDocMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "rs" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "rs0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 
@@ -406,6 +417,16 @@ public class DocServiceImpl implements DocService {
         return new ArrayList<>(this.getMyDocMasterList(startDate, endDate, userId));
     }
 
+    @Override
+    public Page<DocMyResponseDTO> getMyDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return docApplyQueryRepository.getMyDocApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
+    public List<DocMyResponseDTO> getMyDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return docApplyQueryRepository.getMyDocMasterList2(applyRequestDTO, postSearchRequestDTO);
+    }
+
     public List<DocMyResponseDTO> getMyDocMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<DocMaster> docMasterList = docMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -492,6 +513,11 @@ public class DocServiceImpl implements DocService {
 
                     return docPendingResponseDTO;
                 }).toList();
+    }
+
+    @Override
+    public Page<DocPendingResponseDTO> getDocPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return docPendingQueryRepository.getDocPending2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     public List<DocPendingResponseDTO> getMyDocPendingMasterList(String userId) {

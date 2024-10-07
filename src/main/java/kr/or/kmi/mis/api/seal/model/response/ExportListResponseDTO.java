@@ -22,6 +22,23 @@ public class ExportListResponseDTO {
     private String purpose;
     private String notes;
     private String fileName;
+
+    public ExportListResponseDTO(String draftId, String drafter, String submission, String expNm, String expDate, String returnDate, String corporateSeal, String facsimileSeal, String companySeal, String purpose, String notes, String fileName, String filePath) {
+        this.draftId = draftId;
+        this.drafter = drafter;
+        this.submission = submission;
+        this.expNm = expNm;
+        this.expDate = expDate;
+        this.returnDate = returnDate;
+        this.corporateSeal = corporateSeal;
+        this.facsimileSeal = facsimileSeal;
+        this.companySeal = companySeal;
+        this.purpose = purpose;
+        this.notes = notes;
+        this.fileName = fileName;
+        this.filePath = filePath;
+    }
+
     private String filePath;
 
     public static ExportListResponseDTO of(SealExportDetail sealExportDetail, String drafter, FileHistory fileHistory) {

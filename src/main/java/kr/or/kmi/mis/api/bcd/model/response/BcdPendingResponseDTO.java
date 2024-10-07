@@ -21,6 +21,8 @@ public class BcdPendingResponseDTO {
     private String lastUpdater;        // 최종 수정자
     private String applyStatus;
     private String docType;
+    private String approverChain;
+    private int currentApproverIndex;
 
     // BcdMaster Entity -> BcdPending response Dto
     public static BcdPendingResponseDTO of(BcdMaster bcdMaster, BcdDetail bcdDetail) {

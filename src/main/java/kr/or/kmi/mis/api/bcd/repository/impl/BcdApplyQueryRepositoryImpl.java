@@ -4,14 +4,19 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.dsl.StringTemplate;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdMaster;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdApplyQueryRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdSampleQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,6 +50,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
     private final QBcdMaster bcdMaster = QBcdMaster.bcdMaster;
     private final QBcdDetail bcdDetail = QBcdDetail.bcdDetail;
     private final StdBcdService stdBcdService;
+    private final InfoService infoService;
 
     @Override
     public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
@@ -52,7 +58,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
         String docType = "명함신청";
 
-        List<BcdMasterResponseDTO> resultList = queryFactory.select(
+        List<BcdMasterResponseDTO> resultSet = queryFactory.select(
                     Projections.constructor(
                             BcdMasterResponseDTO.class,
                             bcdMaster.draftId,
@@ -87,34 +93,104 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .limit(page.getPageSize())
                 .fetch();
 
-        List<BcdMasterResponseDTO> resultSet = resultList.stream()
-                .filter(dto -> {
-                    if (dto.getApplyStatus().equals("A")) {
-                        String[] approverChainArray = dto.getApproverChain().split(", ");
-                        int currentIndex = dto.getCurrentApproverIndex();
-                        return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
-                    }
-                    // 조건에 해당하지 않는 경우 포함하지 않음
-                    return false;
-                })
+        Long count = queryFactory.select(bcdMaster.count())
+                .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        bcdMaster.status.ne("F"),
+                        bcdDetail.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+
+        List<BcdMaster> bcdMasters = queryFactory.select(bcdMaster)
+                .from(bcdMaster)
+                .where(
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(bcdMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        List<BcdMyResponseDTO> resultSet = bcdMasters.stream()
+                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
                 .collect(Collectors.toList());
 
-//        Long count = queryFactory.select(bcdMaster.count())
-//                .from(bcdMaster)
-//                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
-//                .where(
-//                        bcdMaster.status.ne("F"),
-//                        bcdDetail.instCd.eq(applyRequestDTO.getInstCd()),
-//                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
-//                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
-//                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-//                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-//                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
-//                )
-//                .fetchOne();
+        Long count = queryFactory.select(bcdMaster.count())
+                .from(bcdMaster)
+                .where(
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(bcdMaster.rgstDt.desc())
+                .fetchOne();
 
+        return new PageImpl<>(resultSet, page, count);
+    }
 
-        return new PageImpl<>(resultSet, page, resultSet.size());
+    @Override
+    public List<BcdMyResponseDTO> getMyBcdList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+
+        List<BcdMaster> bcdMasters = queryFactory.select(bcdMaster)
+                .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        bcdMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(bcdMaster.rgstDt.desc())
+                .fetch();
+
+        List<BcdMyResponseDTO> resultSet;
+        resultSet = bcdMasters.stream()
+                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
+                .collect(Collectors.toList());
+
+        return resultSet;
+    }
+
+    @Override
+    public List<BcdMyResponseDTO> getAnotherMasterList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+
+        List<BcdMaster> bcdMasters = queryFactory.select(bcdMaster)
+                .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        bcdDetail.userId.eq(applyRequestDTO.getUserId()),
+                        bcdMaster.drafterId.ne(applyRequestDTO.getUserId()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .orderBy(bcdMaster.rgstDt.desc())
+                .fetch();
+
+        List<BcdMyResponseDTO> resultSet = bcdMasters.stream()
+                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService)) // infoService를 활용하여 BcdMyResponseDTO 변환
+                .collect(Collectors.toList());
+
+        return resultSet;
+
     }
 
     private BooleanExpression titleContains(String searchType, String title) {

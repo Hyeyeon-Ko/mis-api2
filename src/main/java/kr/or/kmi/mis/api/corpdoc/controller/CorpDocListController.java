@@ -7,14 +7,13 @@ import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocStoreRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueListResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
+import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/corpDoc")
@@ -26,20 +25,15 @@ public class CorpDocListController {
 
     @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
     @GetMapping(value = "/issueList")
-    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(@RequestParam(required = false) LocalDateTime startDate,
-                                                                        @RequestParam(required = false) LocalDateTime endDate,
-                                                                        @RequestParam(required = false) String searchType,
-                                                                        @RequestParam(required = false) String keyword) {
-        return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(startDate, endDate, searchType, keyword));
+    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, PostPageRequest page) {
+        return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(postSearchRequestDTO, page.of()));
     }
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")
-    @GetMapping(value = "/rnpList")
-    public ApiResponse<List<CorpDocRnpResponseDTO>> getCorpDocRnpList(@RequestParam(required = false) String searchType,
-                                                                      @RequestParam(required = false) String keyword,
-                                                                      @RequestParam("instCd") String instCd) {
-        return ResponseWrapper.success(corpDocListService.getCorpDocRnpList(searchType, keyword, instCd));
-    }
+        @GetMapping(value = "/rnpList")
+        public ApiResponse<Page<CorpDocRnpResponseDTO>> getCorpDocRnpList(String instCd, PostSearchRequestDTO postSearchRequestDTO, PostPageRequest page) {
+            return ResponseWrapper.success(corpDocListService.getCorpDocRnpList(instCd, postSearchRequestDTO, page.of()));
+        }
 
     @Operation(summary = "issue corpDoc", description = "법인서류 발급")
     @PutMapping(value = "/issue")

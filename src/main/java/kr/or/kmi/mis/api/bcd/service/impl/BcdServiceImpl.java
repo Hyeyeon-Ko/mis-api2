@@ -12,6 +12,7 @@ import kr.or.kmi.mis.api.bcd.model.response.*;
 import kr.or.kmi.mis.api.bcd.repository.BcdApplyQueryRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
+import kr.or.kmi.mis.api.bcd.repository.BcdPendingQueryRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
@@ -53,6 +54,7 @@ public class BcdServiceImpl implements BcdService {
     private final StdDetailRepository stdDetailRepository;
 
     private final BcdApplyQueryRepository bcdApplyQueryRepository;
+    private final BcdPendingQueryRepository bcdPendingQueryRepository;
 
     @Override
     @Transactional
@@ -127,13 +129,17 @@ public class BcdServiceImpl implements BcdService {
     private String generateDraftId() {
         Optional<BcdMaster> lastBcdMasterOpt = bcdMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "A")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastBcdMasterOpt.isPresent()) {
             String lastDraftId = lastBcdMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "bc" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "bc0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 
@@ -220,11 +226,6 @@ public class BcdServiceImpl implements BcdService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
-        return bcdApplyQueryRepository.getBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
-    }
-
     private boolean isValidForSearch(BcdMaster bcdMaster, String instCd, String searchType, String keyword, String userId) {
         if (bcdMaster.getStatus().equals("A")) {
             String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
@@ -254,6 +255,11 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
+    public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return bcdApplyQueryRepository.getBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         List<BcdMyResponseDTO> results = new ArrayList<>();
@@ -263,8 +269,21 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
+    @Override
+    public Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return bcdApplyQueryRepository.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
+    public List<BcdMyResponseDTO> getMyBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        List<BcdMyResponseDTO> results = new ArrayList<>();
+        results.addAll(this.getMyMasterList2(applyRequestDTO, postSearchRequestDTO));
+        results.addAll(this.getAnotherMasterList2(applyRequestDTO, postSearchRequestDTO));
+        return results;
+    }
+
     /**
-     * 2-1. 내가 신청한 나의 명함신청 내역
+     * 2-1. 내가 신청한 명함신청 내역
      * @param userId
      * @return List<BcdMyResponseDTO>
      */
@@ -277,6 +296,16 @@ public class BcdServiceImpl implements BcdService {
                 .toList();
     }
 
+    public List<BcdMyResponseDTO> getMyMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return bcdApplyQueryRepository.getMyBcdList(applyRequestDTO, postSearchRequestDTO);
+//        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(applyRequestDTO.getUserId(), postSearchRequestDTO.getStartDate(), postSearchRequestDTO.getEndDate())
+//                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+//
+//        return bcdMasters.stream()
+//                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
+//                .toList();
+    }
+
     /**
      * 2-2. 타인이 신청한 나의 명함신청 내역
      * @param userId
@@ -287,15 +316,19 @@ public class BcdServiceImpl implements BcdService {
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
 
         return bcdDetails.stream()
-                .flatMap(bcdDetail -> {
-                    // startDate, endDate 사이에 있는 BcdMaster 조회
-                    List<BcdMaster> newBcdMasters = bcdMasterRepository
-                            .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
-                            .orElse(new ArrayList<>());
+            .flatMap(bcdDetail -> {
+                // startDate, endDate 사이에 있는 BcdMaster 조회
+                List<BcdMaster> newBcdMasters = bcdMasterRepository
+                        .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
+                        .orElse(new ArrayList<>());
 
-                    return newBcdMasters.stream()
-                            .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
-                }).toList();
+                return newBcdMasters.stream()
+                        .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
+            }).toList();
+    }
+
+    public List<BcdMyResponseDTO> getAnotherMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return bcdApplyQueryRepository.getAnotherMasterList(applyRequestDTO, postSearchRequestDTO);
     }
 
     @Override
@@ -328,6 +361,11 @@ public class BcdServiceImpl implements BcdService {
                 })
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    public Page<BcdPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return bcdPendingQueryRepository.getBcdPending2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override

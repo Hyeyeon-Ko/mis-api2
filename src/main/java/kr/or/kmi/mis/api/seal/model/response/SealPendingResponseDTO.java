@@ -22,6 +22,19 @@ public class SealPendingResponseDTO {
     private String applyStatus;
     private String docType;
 
+    public SealPendingResponseDTO(String draftId, String title, String instCd, String instNm, LocalDateTime draftDate, String drafter, LocalDateTime lastUpdateDate, String lastUpdater, String applyStatus, String docType) {
+        this.draftId = draftId;
+        this.title = title;
+        this.instCd = instCd;
+        this.instNm = instNm;
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.lastUpdateDate = lastUpdateDate;
+        this.lastUpdater = lastUpdater;
+        this.applyStatus = applyStatus;
+        this.docType = docType;
+    }
+
     public static SealPendingResponseDTO of(SealMaster sealMaster) {
 
         String docType = "A".equals(sealMaster.getDivision()) ? "인장신청(날인)" : "인장신청(반출)";

@@ -17,8 +17,9 @@ public class SealRegisterRequestDTO {
 
     private String sealImageBase64;
 
-    public SealRegisterDetail toDetailEntity() {
+    public SealRegisterDetail toDetailEntity(String draftId) {
         return SealRegisterDetail.builder()
+                .draftId(draftId)
                 .sealNm(sealNm)
                 .sealImage(sealImageBase64)
                 .useDept(useDept)

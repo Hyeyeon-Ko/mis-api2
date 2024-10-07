@@ -23,6 +23,8 @@ public class DocPendingResponseDTO {
     private String lastUpdater;        // 최종 수정자
     private String applyStatus;
     private String docType;
+    private String approverChain;
+    private int currentApproverIndex;
 
     public static DocPendingResponseDTO of(DocMaster docMaster, String division) {
 

@@ -61,6 +61,14 @@ public class ApplyController {
         return ResponseWrapper.success(applyService.getPendingListByType(documentType, startDate, endDate, instCd, userId));
     }
 
+    @Operation(summary = "승인대기 신청목록 호출", description = "전체 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
+    @GetMapping(value = "/pendingList2")
+    public ApiResponse<PendingResponseDTO> getPendingApplyList2(@Valid ApplyRequestDTO applyRequestDTO,
+                                                                @Valid PostSearchRequestDTO postSearchRequestDTO,
+                                                                PostPageRequest page) {
+        return ResponseWrapper.success(applyService.getPendingListByType2(applyRequestDTO, postSearchRequestDTO, page.of()));
+    }
+
     @Operation(summary = "승인대기내역 개수", description = "승인대기 내역의 개수를 알려줍니다.")
     @GetMapping(value = "/pendingCount")
     public ApiResponse<PendingCountResponseDTO> getPendingCountList(@RequestParam String documentType,
@@ -79,6 +87,15 @@ public class ApplyController {
                                                              @RequestParam String userId) {
 
         return ResponseWrapper.success(applyService.getAllMyApplyList(documentType, startDate, endDate, userId));
+    }
+
+    @Operation(summary = "나의 신청내역 > 전체 신청목록 호출", description = "나의 모든 신청 내역을 호출합니다.")
+    @GetMapping(value = "/myApplyList2")
+    public ApiResponse<MyApplyResponseDTO> getAllMyApplyList2(@Valid ApplyRequestDTO applyRequestDTO,
+                                                              @Valid PostSearchRequestDTO postSearchRequestDTO,
+                                                              PostPageRequest page) {
+
+        return ResponseWrapper.success(applyService.getAllMyApplyList2(applyRequestDTO, postSearchRequestDTO, page.of()));
     }
 
     @Operation(summary = "나의 신청내역 > 승인대기 목록 호출", description = "나의 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")

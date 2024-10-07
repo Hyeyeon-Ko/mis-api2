@@ -6,14 +6,16 @@ import lombok.Data;
 @Data
 public class FileDownloadRequestDTO {
 
+    private String attachId;
     private String draftId;
     private String downloadType;
     private String downloadNotes;
     private String downloaderNm;
     private String downloaderId;
 
-    public FileDownloadHistory toEntity(String fileName, FileDownloadRequestDTO fileDownloadRequestDTO) {
+    public FileDownloadHistory toEntity(FileDownloadRequestDTO fileDownloadRequestDTO, String attachId) {
         return FileDownloadHistory.builder()
+                .attachId(attachId)
                 .draftId(fileDownloadRequestDTO.getDraftId())
                 .downloadType(fileDownloadRequestDTO.getDownloadType())
                 .downloadNotes(fileDownloadRequestDTO.getDownloadNotes())

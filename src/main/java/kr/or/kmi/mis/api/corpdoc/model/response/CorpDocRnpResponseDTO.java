@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -15,8 +15,8 @@ public class CorpDocRnpResponseDTO {
 
     private String draftId;
     private String drafter;
-    private String draftDate;
-    private String endDate;
+    private LocalDateTime draftDate;
+    private LocalDateTime endDate;
     private String submission;
     private String purpose;
     private int certCorpseal;
@@ -25,13 +25,12 @@ public class CorpDocRnpResponseDTO {
     private int warrant;
 
     public static CorpDocRnpResponseDTO of(CorpDocMaster corpDocMaster, CorpDocDetail corpDocDetail) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         return CorpDocRnpResponseDTO.builder()
                 .draftId(corpDocMaster.getDraftId())
                 .drafter(corpDocMaster.getDrafter())
-                .draftDate(sdf.format(corpDocMaster.getDraftDate()))
-                .endDate(sdf.format(corpDocMaster.getEndDate()))
+                .draftDate(corpDocMaster.getDraftDate())
+                .endDate(corpDocMaster.getEndDate())
                 .submission(corpDocDetail.getSubmission())
                 .purpose(corpDocDetail.getPurpose())
                 .certCorpseal(corpDocDetail.getCertCorpseal())

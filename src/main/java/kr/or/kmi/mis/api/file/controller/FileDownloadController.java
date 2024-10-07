@@ -10,6 +10,10 @@ import kr.or.kmi.mis.api.file.model.request.FileDownloadRequestDTO;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.file.repository.FileDownloadHistoryRepository;
 import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +31,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -40,6 +45,8 @@ public class FileDownloadController {
     private final FileDownloadHistoryRepository fileDownloadHistoryRepository;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Value("${sftp.remote-directory.doc}")
     private String docRemoteDirectory;
@@ -55,6 +62,16 @@ public class FileDownloadController {
     @GetMapping("/download/{filename}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable("filename") String filename, FileDownloadRequestDTO fileDownloadRequestDTO) {
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail corpDocStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail sealStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "D")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        System.out.println("fileDownloadRequestDTO = " + fileDownloadRequestDTO.getDownloadType());
+        System.out.println("fileDownloadRequestDTO = " + fileDownloadRequestDTO.getDownloadNotes());
+
         Map<String, String> directoryMap = Map.of(
                 "doc", docRemoteDirectory,
                 "seal", exportRemoteDirectory,
@@ -62,10 +79,10 @@ public class FileDownloadController {
         );
 
         String remoteDirectory;
-        // TODO: draftId 관련 코드 기준자료에 입력 후 수정!!!!!!! 임시 if문
-        if (fileDownloadRequestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("cd")) {
+
+        if (fileDownloadRequestDTO.getDraftId().substring(0, 2).equalsIgnoreCase(corpDocStdDetail.getEtcItem1())) {
             remoteDirectory = directoryMap.get("corpdoc");
-        } else if (fileDownloadRequestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("sl")) {
+        } else if (fileDownloadRequestDTO.getDraftId().substring(0, 2).equalsIgnoreCase(sealStdDetail.getEtcItem1())) {
             remoteDirectory = directoryMap.get("seal");
         } else {
             remoteDirectory = directoryMap.get("doc");
@@ -81,7 +98,9 @@ public class FileDownloadController {
             String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
 
             // 다운로드 사유 기록
-            FileDownloadHistory fileDownloadHistory = fileDownloadRequestDTO.toEntity(filename, fileDownloadRequestDTO);
+            String attachId = generateAttachId();
+
+            FileDownloadHistory fileDownloadHistory = fileDownloadRequestDTO.toEntity(fileDownloadRequestDTO, attachId);
             fileDownloadHistory.setRgstDt(LocalDateTime.now());
             fileDownloadHistory.setRgstrId(fileDownloadRequestDTO.getDownloaderId());
             fileDownloadHistoryRepository.save(fileDownloadHistory);
@@ -110,6 +129,13 @@ public class FileDownloadController {
     @PostMapping("/download/multiple")
     public ResponseEntity<byte[]> downloadMultipleFiles(@RequestBody List<FileDownloadRequestDTO> fileDownloadRequestDTOs) {
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail corpDocStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "C")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail sealStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "D")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream)) {
 
@@ -128,10 +154,9 @@ public class FileDownloadController {
                 );
 
                 String remoteDirectory;
-                // TODO: draftId 관련 코드 기준자료에 입력 후 수정!!!!!!! 임시 if문
-                if (requestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("cd")) {
+                if (requestDTO.getDraftId().substring(0, 2).equalsIgnoreCase(corpDocStdDetail.getEtcItem1())) {
                     remoteDirectory = directoryMap.get("corpdoc");
-                } else if (requestDTO.getDraftId().substring(0, 2).equalsIgnoreCase("sl")) {
+                } else if (requestDTO.getDraftId().substring(0, 2).equalsIgnoreCase(sealStdDetail.getEtcItem1())) {
                     remoteDirectory = directoryMap.get("seal");
                 } else {
                     remoteDirectory = directoryMap.get("doc");
@@ -148,7 +173,9 @@ public class FileDownloadController {
                 }
 
                 // 다운로드 사유 기록
-                FileDownloadHistory fileDownloadHistory = requestDTO.toEntity(filename, requestDTO);
+                String attachId = generateAttachId();
+
+                FileDownloadHistory fileDownloadHistory = requestDTO.toEntity(requestDTO, attachId);
                 fileDownloadHistory.setRgstDt(LocalDateTime.now());
                 fileDownloadHistory.setRgstrId(requestDTO.getDownloaderId());
                 fileDownloadHistoryRepository.save(fileDownloadHistory);
@@ -178,4 +205,22 @@ public class FileDownloadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    private String generateAttachId() {
+        Optional<FileDetail> lastFileDetailOpt = fileDetailRepository.findTopByOrderByAttachIdDesc();
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "F")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        if (lastFileDetailOpt.isPresent()) {
+            String lastAttachId = lastFileDetailOpt.get().getAttachId();
+            int lastIdNum = Integer.parseInt(lastAttachId.substring(2));
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
+        } else {
+            return stdDetail.getEtcItem1() + "0000000001";
+        }
+    }
+
 }

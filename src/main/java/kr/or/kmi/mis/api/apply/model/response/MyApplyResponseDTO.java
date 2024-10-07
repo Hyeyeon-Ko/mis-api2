@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -15,18 +16,31 @@ import java.util.List;
 @AllArgsConstructor
 public class MyApplyResponseDTO {
 
-    private List<BcdMyResponseDTO> myBcdResponses;
-    private List<DocMyResponseDTO> myDocResponses;
-    private List<CorpDocMyResponseDTO> myCorpDocResponses;
-    private List<SealMyResponseDTO> mySealResponses;
+    private Page<BcdMyResponseDTO> myBcdResponses;
+    private Page<DocMyResponseDTO> myDocResponses;
+    private Page<CorpDocMyResponseDTO> myCorpDocResponses;
+    private Page<SealMyResponseDTO> mySealResponses;
 
-    public static MyApplyResponseDTO of(List<BcdMyResponseDTO> bcdMyResponses, List<DocMyResponseDTO> myDocResponses,
-                                        List<CorpDocMyResponseDTO> myCorpDocResponses, List<SealMyResponseDTO> mySealResponses) {
+//    private List<BcdMyResponseDTO> myBcdResponses2;
+//    private List<DocMyResponseDTO> myDocResponses2;
+//    private List<CorpDocMyResponseDTO> myCorpDocResponses2;
+//    private List<SealMyResponseDTO> mySealResponses2;
+
+    private Page<Object> pagedResult;
+
+    public static MyApplyResponseDTO of(Page<BcdMyResponseDTO> bcdMyResponses, Page<DocMyResponseDTO> myDocResponses,
+                                        Page<CorpDocMyResponseDTO> myCorpDocResponses, Page<SealMyResponseDTO> mySealResponses) {
         return MyApplyResponseDTO.builder()
                 .myBcdResponses(bcdMyResponses)
                 .myDocResponses(myDocResponses)
                 .myCorpDocResponses(myCorpDocResponses)
                 .mySealResponses(mySealResponses)
+                .build();
+    }
+
+    public static MyApplyResponseDTO of(Page<Object> pagedResult) {
+        return MyApplyResponseDTO.builder()
+                .pagedResult(pagedResult)
                 .build();
     }
 }

@@ -38,6 +38,8 @@ public class SealListServiceImpl implements SealListService {
     private final FileHistoryRepository fileHistoryRepository;
 
     private final SealApplyQueryRepository sealApplyQueryRepository;
+    private final SealPendingQueryRepository sealPendingQueryRepository;
+    private final SealListQueryRepository sealListQueryRepository;
 
 
     @Override
@@ -81,6 +83,12 @@ public class SealListServiceImpl implements SealListService {
                     return ManagementListResponseDTO.of(sealImprintDetail, sealMaster.getDrafter());
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ManagementListResponseDTO> getSealManagementList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return sealListQueryRepository.getSealManagementList(applyRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override
@@ -163,6 +171,12 @@ public class SealListServiceImpl implements SealListService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ExportListResponseDTO> getSealExportList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return sealListQueryRepository.getSealExportList(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
     private boolean containsIgnoreCase(String source, String target) {
         if (source == null || target == null) return false;
         return source.toLowerCase().contains(target.toLowerCase());
@@ -185,6 +199,12 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<RegistrationListResponseDTO> getSealRegistrationList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        return sealListQueryRepository.getRegistrationList(applyRequestDTO, page);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<TotalRegistrationListResponseDTO> getTotalSealRegistrationList() {
         return sealRegisterDetailRepository.findAllByDeletedtNull()
                 .stream()
@@ -196,6 +216,12 @@ public class SealListServiceImpl implements SealListService {
                 })
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TotalRegistrationListResponseDTO> getTotalSealRegistrationList2(Pageable page) {
+        return sealListQueryRepository.getTotalSealRegistrationList(page);
     }
 
     @Override
@@ -241,9 +267,24 @@ public class SealListServiceImpl implements SealListService {
     }
 
     @Override
+    public Page<SealPendingResponseDTO> getSealPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return sealPendingQueryRepository.getSealPending2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<SealMyResponseDTO> getMySealApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
         return new ArrayList<>(this.getMySealMasterList(userId, startDate, endDate));
+    }
+
+    @Override
+    public List<SealMyResponseDTO> getMySealApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return sealApplyQueryRepository.getMySealApply(applyRequestDTO, postSearchRequestDTO);
+    }
+
+    @Override
+    public Page<SealMyResponseDTO> getMySealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        return sealApplyQueryRepository.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
     }
 
     public List<SealMyResponseDTO> getMySealMasterList(String userId, LocalDateTime startDate, LocalDateTime endDate) {

@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.doc.service;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
+import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.SendDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
@@ -28,8 +29,11 @@ public interface DocService {
     void cancelDocApply(String draftId);
     DocDetailResponseDTO getDoc(String draftId);
     List<DocMyResponseDTO> getMyDocApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
+    Page<DocMyResponseDTO> getMyDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    List<DocMyResponseDTO> getMyDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     List<DocPendingResponseDTO> getMyDocPendingList(String userId);
     List<DocMasterResponseDTO> getDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId);
     Page<DocMasterResponseDTO> getDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
     List<DocPendingResponseDTO> getDocPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
+    Page<DocPendingResponseDTO> getDocPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 }

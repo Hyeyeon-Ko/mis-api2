@@ -47,6 +47,7 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
 
     Long count = queryFactory.select(authority.count())
             .from(authority)
+            .where(authority.deletedt.isNull())
             .fetchOne();
 
     return new PageImpl<>(resultSet, page, count);

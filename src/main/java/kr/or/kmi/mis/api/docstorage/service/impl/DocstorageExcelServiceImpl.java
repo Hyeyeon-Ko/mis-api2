@@ -9,6 +9,10 @@ import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
 import kr.or.kmi.mis.api.docstorage.service.DocstorageExcelService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,8 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
 
     private final DocStorageDetailRepository docStorageDetailRepository;
     private final DocStorageMasterRepository docStorageMasterRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     public void downloadExcel(HttpServletResponse response, List<Long> detailIds) throws IOException {
@@ -111,13 +117,17 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     private String generateDraftId() {
         Optional<DocStorageMaster> lastDocStorageMasterOpt = docStorageMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "B")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastDocStorageMasterOpt.isPresent()) {
             String lastDraftId = lastDocStorageMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "dc" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "dc0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 

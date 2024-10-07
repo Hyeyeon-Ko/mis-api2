@@ -16,6 +16,10 @@ import kr.or.kmi.mis.api.seal.repository.SealExportDetailRepository;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
 import kr.or.kmi.mis.api.seal.service.SealExportHistoryService;
 import kr.or.kmi.mis.api.seal.service.SealExportService;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +44,8 @@ public class SealExportServiceImpl implements SealExportService {
     private final SftpClient sftpClient;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Value("${sftp.remote-directory.export}")
     private String exportRemoteDirectory;
@@ -108,13 +114,17 @@ public class SealExportServiceImpl implements SealExportService {
     private String generateDraftId() {
         Optional<SealMaster> lastSealMasterOpt = sealMasterRepository.findTopByOrderByDraftIdDesc();
 
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "D")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (lastSealMasterOpt.isPresent()) {
             String lastDraftId = lastSealMasterOpt.get().getDraftId();
             int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return "se" + String.format("%010d", lastIdNum + 1);
+            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
         } else {
-            // TODO: draftId 관련 기준자료 추가 후 수정!!!
-            return "se0000000001";
+            return stdDetail.getEtcItem1() + "0000000001";
         }
     }
 
