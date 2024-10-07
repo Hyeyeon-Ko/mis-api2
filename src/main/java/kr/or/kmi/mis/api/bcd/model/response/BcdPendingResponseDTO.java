@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Builder
 @Data
-@AllArgsConstructor
 public class BcdPendingResponseDTO {
     private String draftId;
     private String title;
@@ -23,6 +22,21 @@ public class BcdPendingResponseDTO {
     private String docType;
     private String approverChain;
     private int currentApproverIndex;
+
+    public BcdPendingResponseDTO(String draftId, String title, String instCd, String instNm, LocalDateTime draftDate, String drafter, LocalDateTime lastUpdateDate, String lastUpdater, String applyStatus, String docType, String approverChain, int currentApproverIndex) {
+        this.draftId = draftId;
+        this.title = title;
+        this.instCd = instCd;
+        this.instNm = instNm;
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.lastUpdateDate = lastUpdateDate;
+        this.lastUpdater = lastUpdater;
+        this.applyStatus = applyStatus;
+        this.docType = docType;
+        this.approverChain = approverChain;
+        this.currentApproverIndex = currentApproverIndex;
+    }
 
     // BcdMaster Entity -> BcdPending response Dto
     public static BcdPendingResponseDTO of(BcdMaster bcdMaster, BcdDetail bcdDetail) {

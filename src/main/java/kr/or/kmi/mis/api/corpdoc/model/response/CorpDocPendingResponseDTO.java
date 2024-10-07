@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 @Builder
 @Data
-@AllArgsConstructor
 public class CorpDocPendingResponseDTO {
     private String draftId;
     private String title;
@@ -22,6 +21,20 @@ public class CorpDocPendingResponseDTO {
     private LocalDateTime lastUpdateDate;
     private String lastUpdater;
     private String applyStatus;
+
+    public CorpDocPendingResponseDTO(String draftId, String title, String instCd, String instNm, LocalDateTime draftDate, String drafter, LocalDateTime lastUpdateDate, String lastUpdater, String applyStatus, String docType) {
+        this.draftId = draftId;
+        this.title = title;
+        this.instCd = instCd;
+        this.instNm = instNm;
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.lastUpdateDate = lastUpdateDate;
+        this.lastUpdater = lastUpdater;
+        this.applyStatus = applyStatus;
+        this.docType = docType;
+    }
+
     private String docType;
 
     public static CorpDocPendingResponseDTO of(CorpDocMaster corpDocMaster, CorpDocDetail corpDocDetail) {

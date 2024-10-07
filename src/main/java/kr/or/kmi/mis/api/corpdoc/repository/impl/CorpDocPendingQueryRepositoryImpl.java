@@ -84,6 +84,7 @@ public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRep
 
     @Override
     public Page<CorpDocPendingResponseDTO> getMyCorpDocPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        System.out.println("CorpDocPendingQueryRepositoryImpl.getMyCorpDocPendingList2");
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 

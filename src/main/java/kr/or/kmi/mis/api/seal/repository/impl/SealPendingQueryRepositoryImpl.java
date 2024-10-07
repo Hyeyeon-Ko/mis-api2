@@ -83,6 +83,7 @@ public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepositor
 
     @Override
     public Page<SealPendingResponseDTO> getMySealPendingList(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        System.out.println("SealPendingQueryRepositoryImpl.getMySealPendingList");
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 

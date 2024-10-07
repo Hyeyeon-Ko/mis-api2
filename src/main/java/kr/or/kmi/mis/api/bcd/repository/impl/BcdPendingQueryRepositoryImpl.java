@@ -102,6 +102,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
     public Page<BcdPendingResponseDTO> getMyBcdPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
+        System.out.println("BcdPendingQueryRepositoryImpl.getMyBcdPendingList2");
 
         String docType = "명함신청";
 

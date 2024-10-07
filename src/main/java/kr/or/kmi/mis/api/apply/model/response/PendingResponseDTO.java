@@ -24,6 +24,8 @@ public class PendingResponseDTO {
     private Page<CorpDocPendingResponseDTO> corpDocPendingResponses;
     private Page<SealPendingResponseDTO> sealPendingResponses;
 
+    private Page<Object> pagedResult;
+
     public static PendingResponseDTO of(Page<BcdPendingResponseDTO> bcdPendingResponses, Page<DocPendingResponseDTO> docPendingResponses,
                                         Page<CorpDocPendingResponseDTO> corpDocPendingResponses, Page<SealPendingResponseDTO> sealPendingResponses) {
         return PendingResponseDTO.builder()
@@ -31,6 +33,12 @@ public class PendingResponseDTO {
                 .docPendingResponses(docPendingResponses)
                 .corpDocPendingResponses(corpDocPendingResponses)
                 .sealPendingResponses(sealPendingResponses)
+                .build();
+    }
+
+    public static PendingResponseDTO of(Page<Object> pagedResult) {
+        return PendingResponseDTO.builder()
+                .pagedResult(pagedResult)
                 .build();
     }
 

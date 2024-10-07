@@ -97,7 +97,6 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
 
     @Override
     public Page<DocPendingResponseDTO> getMyDocPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
-
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 
         List<DocPendingResponseDTO> resultSet = queryFactory.select(
@@ -118,6 +117,7 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
                         )
                 )
                 .from(docMaster)
+                .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
                 .where(
                         docMaster.drafterId.eq(applyRequestDTO.getUserId()),
                         docMaster.status.eq("A"),

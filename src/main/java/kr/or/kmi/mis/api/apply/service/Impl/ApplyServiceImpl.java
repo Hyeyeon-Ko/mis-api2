@@ -302,13 +302,31 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingResponseDTO getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+    public PendingResponseDTO getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable pageable) {
 
-        return PendingResponseDTO.of(
-                bcdService.getMyPendingList2(applyRequestDTO, page),
-                docService.getMyDocPendingList2(applyRequestDTO, page),
-                corpDocService.getMyPendingList2(applyRequestDTO, page),
-                sealListService.getMySealPendingList2(applyRequestDTO, page));
+        List<BcdPendingResponseDTO> myBcdPendingList2 = new ArrayList<>();
+        List<DocPendingResponseDTO> myDocPendingList2 = new ArrayList<>();
+        List<CorpDocPendingResponseDTO> myCorpDocPendingList2 = new ArrayList<>();
+        List<SealPendingResponseDTO> mySealPendingList2 = new ArrayList<>();
+
+        myBcdPendingList2 = bcdService.getMyPendingList(applyRequestDTO);
+        myDocPendingList2 = docService.getMyDocPendingList(applyRequestDTO);
+        myCorpDocPendingList2 = corpDocService.getMyPendingList(applyRequestDTO);
+        mySealPendingList2 = sealListService.getMySealPendingList(applyRequestDTO);
+
+        List<Object> combinedList = Stream.concat(
+                Stream.concat(myBcdPendingList2.stream(), myDocPendingList2.stream()),
+                Stream.concat(myCorpDocPendingList2.stream(), mySealPendingList2.stream())
+        ).collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), combinedList.size());
+        List<Object> pagedList = combinedList.subList(start, end);
+
+        long totalCount = combinedList.size();
+
+        Page<Object> pagedResult = new PageImpl<>(pagedList, pageable, totalCount);
+
+        return PendingResponseDTO.of(pagedResult);
     }
-
 }

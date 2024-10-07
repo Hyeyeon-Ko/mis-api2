@@ -43,6 +43,5 @@ public interface SealListService {
     Page<SealMyResponseDTO> getMySealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
 
     /* 인장 나의 승인대기내역 */
-    List<SealPendingResponseDTO> getMySealPendingList(String userId);
-    Page<SealPendingResponseDTO> getMySealPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page);
+    List<SealPendingResponseDTO> getMySealPendingList(ApplyRequestDTO applyRequestDTO);
 }

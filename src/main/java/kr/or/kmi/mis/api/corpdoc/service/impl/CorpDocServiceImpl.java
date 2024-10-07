@@ -240,13 +240,8 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocPendingResponseDTO> getMyPendingList(String userId) {
-        return new ArrayList<>(this.getMyCorpDocPendingList(userId));
-    }
-
-    @Override
-    public Page<CorpDocPendingResponseDTO> getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
-        return corpDocPendingQueryRepository.getMyCorpDocPendingList2(applyRequestDTO, page);
+    public List<CorpDocPendingResponseDTO> getMyPendingList(ApplyRequestDTO applyRequestDTO) {
+        return new ArrayList<>(this.getMyCorpDocPendingList(applyRequestDTO.getUserId()));
     }
 
     @Override

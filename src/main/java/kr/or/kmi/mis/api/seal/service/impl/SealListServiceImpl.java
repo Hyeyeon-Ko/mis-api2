@@ -297,13 +297,8 @@ public class SealListServiceImpl implements SealListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SealPendingResponseDTO> getMySealPendingList(String userId) {
-        return new ArrayList<>(this.getMySealPendingMasterList(userId));
-    }
-
-    @Override
-    public Page<SealPendingResponseDTO> getMySealPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
-        return sealPendingQueryRepository.getMySealPendingList(applyRequestDTO, page);
+    public List<SealPendingResponseDTO> getMySealPendingList(ApplyRequestDTO applyRequestDTO) {
+        return new ArrayList<>(this.getMySealPendingMasterList(applyRequestDTO.getUserId()));
     }
 
     public List<SealPendingResponseDTO> getMySealPendingMasterList(String userId) {
