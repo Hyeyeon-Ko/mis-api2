@@ -292,8 +292,6 @@ public class ApplyServiceImpl implements ApplyService {
     @Transactional(readOnly = true)
     public PendingResponseDTO getMyPendingList(String userId) {
 
-        // TODO: 수정 필요!!!!
-
 //        return PendingResponseDTO.of(
 //                bcdService.getMyPendingList(userId),
 //                docService.getMyDocPendingList(userId),
@@ -302,18 +300,15 @@ public class ApplyServiceImpl implements ApplyService {
         return null;
     }
 
-//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
-//
-//        if (startDate == null) {
-//            startDate = LocalDateTime.now().minusMonths(1);
-//        }
-//        if (endDate == null) {
-//            endDate = LocalDateTime.now();
-//        }
-//
-//        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
-//        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
-//
-//        return new Timestamp[]{startTimestamp, endTimestamp};
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public PendingResponseDTO getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+
+        return PendingResponseDTO.of(
+                bcdService.getMyPendingList2(applyRequestDTO, page),
+                docService.getMyDocPendingList2(applyRequestDTO, page),
+                corpDocService.getMyPendingList2(applyRequestDTO, page),
+                sealListService.getMySealPendingList2(applyRequestDTO, page));
+    }
+
 }

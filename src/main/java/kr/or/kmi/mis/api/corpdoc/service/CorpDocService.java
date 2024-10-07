@@ -30,6 +30,7 @@ public interface CorpDocService {
     void cancelCorpDocApply(String draftId);
     /** 법인서류 나의 승인대기내역 조회 */
     List<CorpDocPendingResponseDTO> getMyPendingList(String userId);
+    Page<CorpDocPendingResponseDTO> getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page);
     /** 법인서류 전체 승인대기내역, 센터별 조회 */
     List<CorpDocPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate);
     Page<CorpDocPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);

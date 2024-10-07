@@ -82,6 +82,47 @@ public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepositor
     }
 
     @Override
+    public Page<SealPendingResponseDTO> getMySealPendingList(ApplyRequestDTO applyRequestDTO, Pageable page) {
+
+        String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
+
+        List<SealPendingResponseDTO> resultSet = queryFactory.select(
+                        Projections.constructor(
+                                SealPendingResponseDTO.class,
+                                sealMaster.draftId,
+                                sealMaster.title,
+                                sealMaster.instCd,
+                                Expressions.constant(instNm),
+                                sealMaster.draftDate,
+                                sealMaster.drafter,
+                                sealMaster.updtDt,
+                                sealMaster.drafter,
+                                sealMaster.status,
+                                Expressions.stringTemplate("case when {0} = 'A' then '인장신청(날인)' else '인장신청(반출)' end", sealMaster.division).as("docType")
+                        )
+                )
+                .from(sealMaster)
+                .where(
+                        sealMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        sealMaster.status.eq("A")
+                )
+                .orderBy(sealMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(sealMaster.count())
+                .from(sealMaster)
+                .where(
+                        sealMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        sealMaster.status.eq("A")
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
     public Long getSealPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return queryFactory.select(sealMaster.count())
                 .from(sealMaster)

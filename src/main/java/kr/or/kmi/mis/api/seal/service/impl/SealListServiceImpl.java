@@ -301,6 +301,11 @@ public class SealListServiceImpl implements SealListService {
         return new ArrayList<>(this.getMySealPendingMasterList(userId));
     }
 
+    @Override
+    public Page<SealPendingResponseDTO> getMySealPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        return sealPendingQueryRepository.getMySealPendingList(applyRequestDTO, page);
+    }
+
     public List<SealPendingResponseDTO> getMySealPendingMasterList(String userId) {
         List<SealMaster> sealMasterList = sealMasterRepository.findByDrafterIdAndStatus(userId, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));

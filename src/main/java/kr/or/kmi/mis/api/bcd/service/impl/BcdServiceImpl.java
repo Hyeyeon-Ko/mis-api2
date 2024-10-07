@@ -380,6 +380,11 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
+    @Override
+    public Page<BcdPendingResponseDTO> getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        return bcdPendingQueryRepository.getMyBcdPendingList2(applyRequestDTO, page);
+    }
+
     /**
      * 2-1. 내가 신청한 나의 명함신청 승인대기 내역
      *    - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.

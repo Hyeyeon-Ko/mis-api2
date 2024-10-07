@@ -83,6 +83,51 @@ public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRep
     }
 
     @Override
+    public Page<CorpDocPendingResponseDTO> getMyCorpDocPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+
+        String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
+
+        String docType = "법인서류";
+
+        List<CorpDocPendingResponseDTO> resultSet = queryFactory.select(
+                        Projections.constructor(
+                                CorpDocPendingResponseDTO.class,
+                                corpDocMaster.draftId,
+                                corpDocMaster.title,
+                                corpDocMaster.instCd,
+                                Expressions.constant(instNm),
+                                corpDocMaster.draftDate,
+                                corpDocMaster.drafter,
+                                corpDocDetail.updtDt,
+                                corpDocDetail.updtrId,
+                                corpDocMaster.status,
+                                Expressions.constant(docType)
+                        )
+                )
+                .from(corpDocMaster)
+                .join(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        corpDocMaster.status.eq("A")
+                )
+                .orderBy(corpDocMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory
+                .select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .where(
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        corpDocMaster.status.eq("A")
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
     public Long getCorpDocPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return queryFactory.select(corpDocMaster.count())
                 .from(corpDocMaster)

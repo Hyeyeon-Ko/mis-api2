@@ -245,6 +245,11 @@ public class CorpDocServiceImpl implements CorpDocService {
     }
 
     @Override
+    public Page<CorpDocPendingResponseDTO> getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        return corpDocPendingQueryRepository.getMyCorpDocPendingList2(applyRequestDTO, page);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<CorpDocPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate) {
         List<CorpDocMaster> corpDocMasters = corpDocMasterRepository

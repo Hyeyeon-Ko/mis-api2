@@ -446,6 +446,11 @@ public class DocServiceImpl implements DocService {
     }
 
     @Override
+    public Page<DocPendingResponseDTO> getMyDocPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        return docPendingQueryRepository.getMyDocPendingList2(applyRequestDTO, page);
+    }
+
+    @Override
     public Page<DocMasterResponseDTO> getDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
         return docApplyQueryRepository.getDocApply2(applyRequestDTO, postSearchRequestDTO, page);
     }

@@ -99,6 +99,64 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
     }
 
     @Override
+    public Page<BcdPendingResponseDTO> getMyBcdPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+
+        String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
+
+        String docType = "명함신청";
+
+        List<BcdPendingResponseDTO> resultSet = queryFactory.select(
+                Projections.constructor(
+                        BcdPendingResponseDTO.class,
+                        bcdMaster.draftId,
+                        bcdMaster.title,
+                        bcdDetail.instCd,
+                        Expressions.constant(instNm),
+                        bcdMaster.draftDate,
+                        bcdMaster.drafter,
+                        bcdDetail.lastupdtDate,
+                        bcdDetail.lastUpdtr,
+                        bcdMaster.status,
+                        Expressions.constant(docType),
+                        bcdMaster.approverChain,
+                        bcdMaster.currentApproverIndex
+                        )
+                )
+                .from(bcdMaster)
+                .join(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        (bcdMaster.drafterId.eq(applyRequestDTO.getUserId()).and(bcdMaster.status.eq("A")).and(bcdMaster.currentApproverIndex.eq(0)))
+                                .or(
+                                        bcdDetail.userId.eq(applyRequestDTO.getUserId())
+                                                .and(bcdMaster.status.eq("A"))
+                                                .and(bcdMaster.currentApproverIndex.eq(0))
+                                                .and(bcdMaster.drafterId.ne(applyRequestDTO.getUserId()))
+                                )
+                )
+                .orderBy(bcdMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory
+                .select(bcdMaster.count())
+                .from(bcdMaster)
+                .join(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        (bcdMaster.drafterId.eq(applyRequestDTO.getUserId()).and(bcdMaster.status.eq("A")).and(bcdMaster.currentApproverIndex.eq(0)))
+                                .or(
+                                        bcdDetail.userId.eq(applyRequestDTO.getUserId())
+                                                .and(bcdMaster.status.eq("A"))
+                                                .and(bcdMaster.currentApproverIndex.eq(0))
+                                                .and(bcdMaster.drafterId.ne(applyRequestDTO.getUserId()))
+                                )
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
     public Long getBcdPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return queryFactory.select(bcdMaster.count())
                 .from(bcdMaster)
