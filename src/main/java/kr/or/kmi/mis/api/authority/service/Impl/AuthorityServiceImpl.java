@@ -17,6 +17,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.cmm.model.entity.SessionExpiredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,9 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .orElseThrow(() -> new EntityNotFoundException("B001"));
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+        if (sessionUserId == null) {
+            throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
 
         return stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, sessionUserId).isPresent();
     }
@@ -61,6 +65,9 @@ public class AuthorityServiceImpl implements AuthorityService {
     public String getMemberName(String userId) {
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+        if (sessionUserId == null) {
+            throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
 
         if (sessionUserId.equals(userId)) {
             throw new IllegalArgumentException("로그인한 사용자의 userId와 동일합니다");
@@ -108,7 +115,11 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .etcItem1(request.getUserId())
                     .etcItem2(request.getUserRole())
                     .build();
-            newStdDetail.setRgstrId((String) httpServletRequest.getSession().getAttribute("userId"));
+            String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+            if (sessionUserId == null) {
+                throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+            }
+            newStdDetail.setRgstrId(sessionUserId);
             newStdDetail.setRgstDt(LocalDateTime.now());
             stdDetailRepository.save(newStdDetail);
         }
@@ -125,6 +136,9 @@ public class AuthorityServiceImpl implements AuthorityService {
         authorityRepository.save(authority);
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+        if (sessionUserId == null) {
+            throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
 
         if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
             StdDetail stdDetail = stdDetailRepository.findByEtcItem1(authority.getUserId())

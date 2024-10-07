@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.cmm.controller;
 
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.cmm.model.entity.SessionExpiredException;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -37,6 +38,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchBeanDefinitionException.class)
     public ResponseEntity<ApiResponse<String>> handleNoSuchBeanDefinitionException(NoSuchBeanDefinitionException e) {
         return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(SessionExpiredException.class)
+    public ResponseEntity<ApiResponse<String>> handleSessionExpiredException(SessionExpiredException e) {
+        return new ResponseEntity<>(ResponseWrapper.error(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(RuntimeException.class)
