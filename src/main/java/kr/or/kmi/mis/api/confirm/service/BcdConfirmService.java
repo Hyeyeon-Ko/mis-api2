@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.confirm.service;
 
+import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 
@@ -13,10 +14,10 @@ public interface BcdConfirmService {
     BcdDetailResponseDTO getBcdDetailInfo(String draftId);
 
     /* 승인 */
-    void approve(String draftId, String userId);
+    void approve(String draftId, ConfirmRequestDTO confirmRequestDTO);
 
     /* 반려 */
-    void disapprove(String draftId, String rejectReason, String userId);
+    void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO);
 
     /* 명함 신청이력 조회 */
     List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDateTime startDate, LocalDateTime endDate, String draftId);

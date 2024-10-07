@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
 import kr.or.kmi.mis.api.confirm.service.CorpDocConfirmService;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocMasterRepository;
@@ -20,14 +21,15 @@ public class CorpDocConfirmServiceImpl implements CorpDocConfirmService {
 
     @Override
     @Transactional
-    public void approve(String draftId) {
+    public void approve(String draftId, ConfirmRequestDTO confirmRequestDTO) {
 
         // 1. 법인서류신청 승인
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + draftId));
 
-        String approver = infoService.getUserInfo().getUserName();
-        String approverId = infoService.getUserInfo().getUserId();
+        String approverId = confirmRequestDTO.getUserId();
+        String approver = infoService.getUserInfoDetail(approverId).getUserName();
+
         corpDocMaster.approve(approver, approverId);
 
         corpDocMasterRepository.save(corpDocMaster);
@@ -39,15 +41,16 @@ public class CorpDocConfirmServiceImpl implements CorpDocConfirmService {
 
     @Override
     @Transactional
-    public void reject(String draftId, String rejectReason) {
+    public void reject(String draftId, ConfirmRequestDTO confirmRequestDTO) {
 
         // 1. 법인서류신청 반려
         CorpDocMaster corpDocMaster = corpDocMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + draftId));
 
-        String disapprover = infoService.getUserInfo().getUserName();
-        String disapproverId = infoService.getUserInfo().getUserId();
-        corpDocMaster.disapprove(disapprover, disapproverId, rejectReason);
+        String disapproverId = confirmRequestDTO.getUserId();
+        String disapprover = infoService.getUserInfoDetail(disapproverId).getUserName();
+
+        corpDocMaster.disapprove(disapprover, disapproverId, corpDocMaster.getRejectReason());
 
         corpDocMasterRepository.save(corpDocMaster);
 

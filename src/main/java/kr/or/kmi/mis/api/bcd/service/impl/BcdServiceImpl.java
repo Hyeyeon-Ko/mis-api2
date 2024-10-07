@@ -298,12 +298,6 @@ public class BcdServiceImpl implements BcdService {
 
     public List<BcdMyResponseDTO> getMyMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return bcdApplyQueryRepository.getMyBcdList(applyRequestDTO, postSearchRequestDTO);
-//        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(applyRequestDTO.getUserId(), postSearchRequestDTO.getStartDate(), postSearchRequestDTO.getEndDate())
-//                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-//
-//        return bcdMasters.stream()
-//                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
-//                .toList();
     }
 
     /**

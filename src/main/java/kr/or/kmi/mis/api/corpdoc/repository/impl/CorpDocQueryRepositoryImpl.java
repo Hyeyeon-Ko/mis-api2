@@ -321,7 +321,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 )
                 .from(corpDocMaster)
                 .where(
-                        corpDocMaster.draftId.eq(applyRequestDTO.getUserId()),
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -334,8 +334,9 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
     private BooleanExpression titleContains(String searchType, String title) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
-                case "제목": return corpDocMaster.title.like("%" + title + "%");
-                case "신청자": return corpDocMaster.drafter.like("%" + title + "%");
+                case "전체": return corpDocMaster.title.containsIgnoreCase(title).or(corpDocMaster.drafter.containsIgnoreCase(title));
+                case "제목": return corpDocMaster.title.containsIgnoreCase(title);
+                case "신청자": return corpDocMaster.drafter.containsIgnoreCase(title);
                 default: return null;
             }
         }

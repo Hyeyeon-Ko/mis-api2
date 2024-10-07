@@ -108,10 +108,15 @@ public class DocQueryRepositoryImpl implements DocQueryRepository {
     private BooleanExpression titleContains(String searchType, String title) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
-                case "제목": return docDetail.docTitle.like("%" + title + "%");
-                case "수신처": return docDetail.receiver.like("%" + title + "%");
-                case "발신처": return docDetail.sender.like("%" + title + "%");
-                case "접수인": return docMaster.drafter.like("%" + title + "%");
+                case "전체": return docMaster.title.containsIgnoreCase(title)
+                        .or(docDetail.docTitle.containsIgnoreCase(title))
+                        .or(docDetail.receiver.containsIgnoreCase(title))
+                        .or(docDetail.sender.containsIgnoreCase(title))
+                        .or(docMaster.drafter.containsIgnoreCase(title));
+                case "제목": return docDetail.docTitle.containsIgnoreCase(title);
+                case "수신처": return docDetail.receiver.containsIgnoreCase(title);
+                case "발신처": return docDetail.sender.containsIgnoreCase(title);
+                case "접수인": return docMaster.drafter.containsIgnoreCase(title);
                 default: return null;
             }
         }

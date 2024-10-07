@@ -55,8 +55,9 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         boolean isLastApprover = docMaster.getCurrentApproverIndex() == docMaster.getApproverChain().split(", ").length - 1;
 
         // 승인 상태 변경
-        String approver = infoService.getUserInfo().getUserName();
-        String approverId = infoService.getUserInfo().getUserId();
+        String approverId = userId;
+        String approver = infoService.getUserInfoDetail(approverId).getUserName();
+
         docMaster.confirm(isLastApprover ? "E" : "A", approver, approverId);
 
         docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex() + 1);

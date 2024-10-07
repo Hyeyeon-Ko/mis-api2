@@ -161,8 +161,9 @@ public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
     private BooleanExpression titleContains(String searchType, String title) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
-                case "제목": return sealMaster.title.like("%" + title + "%");
-                case "신청자": return sealMaster.drafter.like("%" + title + "%");
+                case "전체": return sealMaster.title.containsIgnoreCase(title).or(sealMaster.drafter.containsIgnoreCase(title));
+                case "제목": return sealMaster.title.containsIgnoreCase(title);
+                case "신청자": return sealMaster.drafter.containsIgnoreCase(title);
                 default: return null;
             }
         }
