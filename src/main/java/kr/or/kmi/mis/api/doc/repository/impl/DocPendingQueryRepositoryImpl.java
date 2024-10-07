@@ -3,6 +3,8 @@ package kr.or.kmi.mis.api.doc.repository.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.doc.model.entity.QDocDetail;
@@ -91,6 +93,31 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Long getDocPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return queryFactory.select(docMaster.count())
+                .from(docMaster)
+                .where(
+                        docMaster.status.eq("A"),
+                        docMaster.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),
+                        approverMatchCondition(applyRequestDTO.getUserId(), docMaster.approverChain, docMaster.currentApproverIndex)
+                )
+                .fetchOne();
+    }
+
+    private BooleanExpression approverMatchCondition(String userId, StringPath approverChain, NumberPath<Integer> currentApproverIndex) {
+        return Expressions.booleanTemplate(
+                "substring_index({0}, ', ', {1}+1) = {2}",
+                approverChain,
+                currentApproverIndex,
+                userId
+        );
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {

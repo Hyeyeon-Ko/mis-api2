@@ -7,22 +7,27 @@ import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
+import kr.or.kmi.mis.api.bcd.repository.BcdPendingQueryRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.repository.CorpDocPendingQueryRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocService;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
+import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
+import kr.or.kmi.mis.api.doc.repository.impl.DocPendingQueryRepositoryImpl;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
+import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +57,11 @@ public class ApplyServiceImpl implements ApplyService {
     private final SealListService sealListService;
     private final CorpDocListService corpDocListService;
     private final OrderService orderService;
+
+    private final BcdPendingQueryRepository bcdPendingQueryRepository;
+    private final DocPendingQueryRepository docPendingQueryRepository;
+    private final CorpDocPendingQueryRepository corpDocPendingQueryRepository;
+    private final SealPendingQueryRepository sealPendingQueryRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -264,16 +274,16 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PendingCountResponseDTO getPendingCountList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
+    public PendingCountResponseDTO getPendingCountList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
 
 //        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
-        int bcdPendingCount = bcdService.getPendingList(startDate, endDate, instCd, userId).size();
-        int docPendingCount = docService.getDocPendingList(startDate, endDate, instCd, userId).size();
-        int corpDocPendingCount = corpDocService.getPendingList(startDate, endDate).size();
-        int sealPendingCount = sealListService.getSealPendingList(startDate, endDate, instCd).size();
+        int bcdPendingCount = Math.toIntExact(bcdPendingQueryRepository.getBcdPendingCount(applyRequestDTO, postSearchRequestDTO));
+        int docPendingCount = Math.toIntExact(docPendingQueryRepository.getDocPendingCount(applyRequestDTO, postSearchRequestDTO));
+        int corpDocPendingCount = Math.toIntExact(corpDocPendingQueryRepository.getCorpDocPendingCount(applyRequestDTO, postSearchRequestDTO));
+        int sealPendingCount = Math.toIntExact(sealPendingQueryRepository.getSealPendingCount(applyRequestDTO, postSearchRequestDTO));
         int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingList();
-        int orderPendingCount = orderService.getOrderList(instCd).size();
+        int orderPendingCount = orderService.getOrderList(applyRequestDTO.getInstCd()).size();
 
         return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount, corpDocIssuePendingCount, orderPendingCount);
     }

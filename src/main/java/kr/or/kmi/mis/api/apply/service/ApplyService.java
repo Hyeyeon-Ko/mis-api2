@@ -19,6 +19,6 @@ public interface ApplyService {
     MyApplyResponseDTO getAllMyApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
     PendingResponseDTO getPendingListByType(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
     PendingResponseDTO getPendingListByType2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
-    PendingCountResponseDTO getPendingCountList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
+    PendingCountResponseDTO getPendingCountList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     PendingResponseDTO getMyPendingList(String userId);
 }

@@ -71,12 +71,9 @@ public class ApplyController {
 
     @Operation(summary = "승인대기내역 개수", description = "승인대기 내역의 개수를 알려줍니다.")
     @GetMapping(value = "/pendingCount")
-    public ApiResponse<PendingCountResponseDTO> getPendingCountList(@RequestParam String documentType,
-                                                                    @RequestParam(required = false) LocalDateTime startDate,
-                                                                    @RequestParam(required = false) LocalDateTime endDate,
-                                                                    @RequestParam String instCd,
-                                                                    @RequestParam String userId) {
-        return ResponseWrapper.success(applyService.getPendingCountList(documentType, startDate, endDate, instCd, userId));
+    public ApiResponse<PendingCountResponseDTO> getPendingCountList(@Valid ApplyRequestDTO applyRequestDTO,
+                                                                    @Valid PostSearchRequestDTO postSearchRequestDTO) {
+        return ResponseWrapper.success(applyService.getPendingCountList(applyRequestDTO, postSearchRequestDTO));
     }
 
     @Operation(summary = "나의 신청내역 > 전체 신청목록 호출", description = "나의 모든 신청 내역을 호출합니다.")

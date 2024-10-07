@@ -8,4 +8,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface BcdPendingQueryRepository {
     Page<BcdPendingResponseDTO> getBcdPending2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    Long getBcdPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
 }

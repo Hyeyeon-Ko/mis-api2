@@ -81,6 +81,21 @@ public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepositor
         return new PageImpl<>(resultSet, page, count);
     }
 
+    @Override
+    public Long getSealPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return queryFactory.select(sealMaster.count())
+                .from(sealMaster)
+                .where(
+                        sealMaster.status.eq("A"),
+                        sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
+    }
+
     private BooleanExpression afterStartDate(LocalDate startDate) {
         if (startDate == null) {
             return Expressions.asBoolean(true).isTrue();

@@ -3,6 +3,8 @@ package kr.or.kmi.mis.api.bcd.repository.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdDetail;
@@ -94,6 +96,32 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Long getBcdPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return queryFactory.select(bcdMaster.count())
+                .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        bcdMaster.status.eq("A"),
+                        bcdDetail.instCd.eq(applyRequestDTO.getInstCd()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),
+                        approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
+                )
+                .fetchOne();
+    }
+
+    private BooleanExpression approverMatchCondition(String userId, StringPath approverChain, NumberPath<Integer> currentApproverIndex) {
+        return Expressions.booleanTemplate(
+                "substring_index({0}, ', ', {1}+1) = {2}",
+                approverChain,
+                currentApproverIndex,
+                userId
+        );
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {

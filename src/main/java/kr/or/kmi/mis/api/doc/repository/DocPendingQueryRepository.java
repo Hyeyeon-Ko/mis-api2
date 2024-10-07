@@ -8,4 +8,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface DocPendingQueryRepository {
     Page<DocPendingResponseDTO> getDocPending2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    Long getDocPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
 }
