@@ -196,8 +196,9 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
     private BooleanExpression titleContains(String searchType, String title) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
-                case "제목": return bcdMaster.title.like("%" + title + "%");
-                case "신청자": return bcdMaster.drafter.like("%" + title + "%");
+                case "전체": return bcdMaster.title.containsIgnoreCase(title).or(bcdMaster.drafter.containsIgnoreCase(title));
+                case "제목": return bcdMaster.title.containsIgnoreCase(title);
+                case "신청자": return bcdMaster.drafter.containsIgnoreCase(title);
                 default: return null;
             }
         }

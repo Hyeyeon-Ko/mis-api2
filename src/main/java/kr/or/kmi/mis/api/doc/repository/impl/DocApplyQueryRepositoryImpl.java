@@ -224,8 +224,9 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
     private BooleanExpression titleContains(String searchType, String title) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
-                case "제목": return docMaster.title.like("%" + title + "%");
-                case "신청자": return docMaster.drafter.like("%" + title + "%");
+                case "전체": return docMaster.title.containsIgnoreCase(title).or(docMaster.drafter.containsIgnoreCase(title));
+                case "제목": return docMaster.title.containsIgnoreCase(title);
+                case "신청자": return docMaster.drafter.containsIgnoreCase(title);
                 default: return null;
             }
         }
