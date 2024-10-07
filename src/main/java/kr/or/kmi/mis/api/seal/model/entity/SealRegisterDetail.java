@@ -26,6 +26,9 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     @Column(name = "seal_image", columnDefinition = "longtext")
     private String sealImage;
 
+    @Column(name = "seal_image_nm", length = 255)
+    private String sealImageNm;
+
     @Column(length = 50)
     private String useDept;
 
@@ -50,11 +53,12 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     private LocalDateTime deletedt;
 
     @Builder
-    public SealRegisterDetail(String draftId, String sealNm, String sealImage, String useDept, String purpose,
+    public SealRegisterDetail(String draftId, String sealNm, String sealImage, String sealImageNm, String useDept, String purpose,
                               String manager, String subManager, String draftDate, String instCd, LocalDateTime lastUpdateDate) {
         this.draftId = draftId;
         this.sealNm = sealNm;
         this.sealImage = sealImage;
+        this.sealImageNm = sealImageNm;
         this.useDept = useDept;
         this.purpose = purpose;
         this.manager = manager;
@@ -73,13 +77,14 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
         this.subManager = sealRegisterRequestDTO.getSubManager();
     }
 
-    public void updateFile(SealUpdateRequestDTO sealUpdateRequestDTO, String sealImage) {
+    public void updateFile(SealUpdateRequestDTO sealUpdateRequestDTO, String sealImage, String sealImageNm) {
         this.sealNm = sealUpdateRequestDTO.getSealNm();
         this.useDept = sealUpdateRequestDTO.getUseDept();
         this.purpose = sealUpdateRequestDTO.getPurpose();
         this.manager = sealUpdateRequestDTO.getManager();
         this.subManager = sealUpdateRequestDTO.getSubManager();
         this.sealImage = sealImage;
+        this.sealImageNm = sealImageNm;
     }
 
     public void deleteSeal(LocalDateTime deletedt) {
