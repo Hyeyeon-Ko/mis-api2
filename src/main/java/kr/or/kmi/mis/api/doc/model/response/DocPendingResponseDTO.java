@@ -41,7 +41,7 @@ public class DocPendingResponseDTO {
     private String approverChain;
     private int currentApproverIndex;
 
-    public static DocPendingResponseDTO of(DocMaster docMaster, String division) {
+    public static DocPendingResponseDTO of(DocMaster docMaster, String division, String updater) {
 
         String docType = "A".equals(division) ? "문서수신" : "문서발신";
 
@@ -52,7 +52,7 @@ public class DocPendingResponseDTO {
                 .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .lastUpdateDate(docMaster.getUpdtDt())
-                .lastUpdater(docMaster.getDrafter())
+                .lastUpdater(updater)
                 .applyStatus(docMaster.getStatus())
                 .docType(docType)
                 .build();

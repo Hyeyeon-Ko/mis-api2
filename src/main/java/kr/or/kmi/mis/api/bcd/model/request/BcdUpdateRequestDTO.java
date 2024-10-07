@@ -24,4 +24,6 @@ public class BcdUpdateRequestDTO {
     String division;
     Integer quantity;
 
+    String userId;
+
 }

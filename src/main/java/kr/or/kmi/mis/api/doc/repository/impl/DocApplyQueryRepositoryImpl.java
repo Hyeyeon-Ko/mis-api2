@@ -67,7 +67,7 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                                 docMaster.respondDate,
                                 docMaster.drafter,
                                 docMaster.approver,
-                                docDetail.division,
+                                docMaster.status,
                                 Expressions.stringTemplate("case when {0} = 'A' then '문서수신' else '문서발신' end", docDetail.division),
                                 docMaster.approverChain,
                                 docMaster.currentApproverIndex
@@ -78,8 +78,6 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                     .where(
                             docMaster.status.ne("F"),
                             docMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                            // 권한에 따라 전체 조회 달라짐
-
                             this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                             this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                     LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)

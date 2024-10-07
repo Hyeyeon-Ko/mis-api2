@@ -190,7 +190,7 @@ public class BcdServiceImpl implements BcdService {
 
         bcdHistoryService.createBcdHistory(existingDetail);
 
-        String updtr = infoService.getUserInfo().getUserName();
+        String updtr = infoService.getUserInfoDetail(updateBcdRequestDTO.getUserId()).getUserName();
         existingDetail.update(updateBcdRequestDTO, updtr);
         existingMaster.updateTitle(updateBcdRequestDTO);
 

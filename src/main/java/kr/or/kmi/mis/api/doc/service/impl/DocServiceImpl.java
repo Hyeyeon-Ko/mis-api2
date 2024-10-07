@@ -508,7 +508,7 @@ public class DocServiceImpl implements DocService {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
 
-                    DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
+                    DocPendingResponseDTO docPendingResponseDTO = DocPendingResponseDTO.of(docMaster, docDetail.getDivision(), null);
                     docPendingResponseDTO.setInstNm(stdBcdService.getInstNm(docMaster.getInstCd()));
 
                     return docPendingResponseDTO;
@@ -528,7 +528,9 @@ public class DocServiceImpl implements DocService {
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
-                    return DocPendingResponseDTO.of(docMaster, docDetail.getDivision());
+                    String updaterId = docMaster.getUpdtrId();
+                    String updaterNm = updaterId != null ? infoService.getUserInfoDetail(updaterId).getUserName() : null;
+                    return DocPendingResponseDTO.of(docMaster, docDetail.getDivision(), updaterNm);
                 }).toList();
     }
 

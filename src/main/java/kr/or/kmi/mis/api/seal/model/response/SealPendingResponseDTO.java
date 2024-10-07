@@ -35,7 +35,7 @@ public class SealPendingResponseDTO {
         this.docType = docType;
     }
 
-    public static SealPendingResponseDTO of(SealMaster sealMaster) {
+    public static SealPendingResponseDTO of(SealMaster sealMaster, String updater) {
 
         String docType = "A".equals(sealMaster.getDivision()) ? "인장신청(날인)" : "인장신청(반출)";
 
@@ -46,7 +46,7 @@ public class SealPendingResponseDTO {
                 .draftDate(sealMaster.getDraftDate())
                 .drafter(sealMaster.getDrafter())
                 .lastUpdateDate(sealMaster.getUpdtDt())
-                .lastUpdater(sealMaster.getDrafter())
+                .lastUpdater(updater)
                 .applyStatus(sealMaster.getStatus())
                 .docType(docType)
                 .build();
