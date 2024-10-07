@@ -12,6 +12,7 @@ import kr.or.kmi.mis.api.seal.model.response.*;
 import kr.or.kmi.mis.api.seal.repository.*;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,7 @@ public class SealListServiceImpl implements SealListService {
     private final SealExportDetailRepository sealExportDetailRepository;
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
     private final StdBcdService stdBcdService;
+    private final InfoService infoService;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
 
@@ -263,7 +265,8 @@ public class SealListServiceImpl implements SealListService {
                 .findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("A", instCd, startDate, endDate);
 
         return sealMasters.stream()
-                .map(SealPendingResponseDTO::of).toList();
+                .map(sealMaster -> SealPendingResponseDTO.of(sealMaster, null))
+                .toList();
     }
 
     @Override
@@ -306,7 +309,12 @@ public class SealListServiceImpl implements SealListService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return sealMasterList.stream()
-                .map(SealPendingResponseDTO::of).toList();
-    }
+                .map(sealMaster -> {
+                    String updaterId = sealMaster.getUpdtrId();
+                    String updaterNm = updaterId != null ? infoService.getUserInfoDetail(updaterId).getUserName() : null;
 
+                    return SealPendingResponseDTO.of(sealMaster, updaterNm);
+                })
+                .toList();
+    }
 }
