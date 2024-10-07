@@ -1,11 +1,12 @@
 package kr.or.kmi.mis.api.doc.service.impl;
 
-import kr.or.kmi.mis.api.apply.service.Impl.ApplyServiceImpl;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
+import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
+import kr.or.kmi.mis.api.doc.repository.DocQueryRepository;
 import kr.or.kmi.mis.api.doc.service.DocListService;
 import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
@@ -17,16 +18,16 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,8 @@ public class DocListServiceImpl implements DocListService {
     private final StdGroupRepository stdGroupRepository;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
+
+    private final DocQueryRepository docQueryRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -90,28 +93,8 @@ public class DocListServiceImpl implements DocListService {
     }
 
     @Override
-    public List<DocResponseDTO> getDeptReceiveApplyList(String deptCd) {
-
-        List<DocMaster> docMasters = docMasterRepository.findAllByDeptCd(deptCd);
-        if (docMasters == null) {
-            return Collections.emptyList();
-        }
-
-        return docMasters.stream()
-                .map(docMaster -> {
-                    DocDetail docDetail = docDetailRepository.findByDraftIdAndDivision(docMaster.getDraftId(), "A")
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId())
-                            .orElse(null);
-                    FileHistory fileHistory = null;
-                    if (fileDetail != null) {
-                        fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
-                                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-                    }
-                    DocResponseDTO docResponseDTO = DocResponseDTO.rOf(docDetail, docMaster, fileHistory);
-                    docResponseDTO.setStatus(stdBcdService.getApplyStatusNm(docMaster.getStatus()));
-                    return docResponseDTO;
-                }).toList();
+    public Page<DocResponseDTO> getDocList(DocRequestDTO docRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return docQueryRepository.getDocList(docRequestDTO, postSearchRequestDTO, page);
     }
 
     @Override
@@ -163,22 +146,4 @@ public class DocListServiceImpl implements DocListService {
                 }).toList();
     }
 
-    @Override
-    public List<DeptResponseDTO> getDeptList(String instCd) {
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A002")
-                .orElseThrow(() -> new IllegalArgumentException("Standard Group not found for code: " + "A002"));
-        List<StdDetail> stdDetailList = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        return stdDetailList.stream()
-                .map(stdDetail -> DeptResponseDTO.builder()
-                        .detailCd(stdDetail.getDetailCd())
-                        .detailNm(stdDetail.getDetailNm())
-                        .build())
-                .toList();
-    }
-
-//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
-//        return ApplyServiceImpl.getDateIntoTimestamp(startDate, endDate);
-//    }
 }

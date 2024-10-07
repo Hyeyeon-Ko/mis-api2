@@ -6,15 +6,18 @@ import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
+@RequiredArgsConstructor
 public class DocResponseDTO {
 
     private String draftId;
-    private String draftDate;
+    private LocalDateTime draftDate;
     private String drafter;
     private String docId;
     private String resSender;
@@ -27,12 +30,26 @@ public class DocResponseDTO {
         return filePath != null ? "/api/doc/download/" + fileName : null;
     }
 
-    static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
+//    static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    public DocResponseDTO(String draftId, LocalDateTime draftDate, String drafter, String docId, String resSender, String title, String status, String fileName, String filePath) {
+        this.draftId = draftId;
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.docId = docId;
+        this.resSender = resSender;
+        this.title = title;
+        this.status = status;
+        this.fileName = fileName;
+        this.filePath = filePath;
+    }
+
 
     public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster, FileHistory fileHistory) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
-                .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
+//                .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
+                .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())
                 .resSender(docDetail.getReceiver())
@@ -46,7 +63,8 @@ public class DocResponseDTO {
     public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster, FileHistory fileHistory) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
-                .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
+//                .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
+                .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())
                 .resSender(docDetail.getSender())
