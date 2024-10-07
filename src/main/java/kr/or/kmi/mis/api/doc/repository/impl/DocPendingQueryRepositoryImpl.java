@@ -65,34 +65,29 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        approverMatchCondition(applyRequestDTO.getUserId(), docMaster.approverChain, docMaster.currentApproverIndex)
                 )
                 .orderBy(docMaster.rgstDt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
 
-        List<DocPendingResponseDTO> resultSet = resultList.stream()
-                .filter(dto -> {
-                    String[] approverChainArray = dto.getApproverChain().split(", ");
-                    int currentIndex = dto.getCurrentApproverIndex();
-                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
-                })
-                .collect(Collectors.toList());
-
         Long count = queryFactory.select(docMaster.count())
                 .from(docMaster)
+                .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
                 .where(
                         docMaster.status.eq("A"),
                         docMaster.instCd.eq(applyRequestDTO.getInstCd()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        approverMatchCondition(applyRequestDTO.getUserId(), docMaster.approverChain, docMaster.currentApproverIndex)
                 )
                 .fetchOne();
 
-        return new PageImpl<>(resultSet, page, count);
+        return new PageImpl<>(resultList, page, count);
     }
 
     @Override

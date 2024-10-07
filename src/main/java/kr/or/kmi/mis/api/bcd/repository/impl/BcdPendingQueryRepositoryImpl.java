@@ -42,21 +42,21 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
 
         String docType = "명함신청";
 
-        List<BcdPendingResponseDTO> resultList = queryFactory.select(
-                Projections.constructor(
-                        BcdPendingResponseDTO.class,
-                        bcdMaster.draftId,
-                        bcdMaster.title,
-                        bcdDetail.instCd,
-                        Expressions.constant(instNm),
-                        bcdMaster.draftDate,
-                        bcdMaster.drafter,
-                        bcdDetail.lastupdtDate,
-                        bcdDetail.lastUpdtr,
-                        bcdMaster.status,
-                        Expressions.constant(docType),
-                        bcdMaster.approverChain,
-                        bcdMaster.currentApproverIndex
+        List<BcdPendingResponseDTO> resultSet = queryFactory.select(
+                        Projections.constructor(
+                                BcdPendingResponseDTO.class,
+                                bcdMaster.draftId,
+                                bcdMaster.title,
+                                bcdDetail.instCd,
+                                Expressions.constant(instNm),
+                                bcdMaster.draftDate,
+                                bcdMaster.drafter,
+                                bcdDetail.lastupdtDate,
+                                bcdDetail.lastUpdtr,
+                                bcdMaster.status,
+                                Expressions.constant(docType),
+                                bcdMaster.approverChain,
+                                bcdMaster.currentApproverIndex
                         )
                 )
                 .from(bcdMaster)
@@ -67,20 +67,13 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
-
-        List<BcdPendingResponseDTO> resultSet = resultList.stream()
-                .filter(dto -> {
-                    String[] approverChainArray = dto.getApproverChain().split(", ");
-                    int currentIndex = dto.getCurrentApproverIndex();
-                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(applyRequestDTO.getUserId());
-                })
-                .collect(Collectors.toList());
 
         Long count = queryFactory.select(bcdMaster.count())
                 .from(bcdMaster)
@@ -91,7 +84,8 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
                 )
                 .fetchOne();
 
