@@ -22,7 +22,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -59,7 +63,11 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.status.eq("E"),
                         sealMaster.division.eq("A"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        containsKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword(), sealImprintDetail)
+                        this.containsImprintKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(sealMaster.rgstDt.desc())
                 .offset(page.getOffset())
@@ -73,7 +81,11 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.status.eq("E"),
                         sealMaster.division.eq("A"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        containsKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword(), sealImprintDetail)
+                        this.containsImprintKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
 
@@ -108,7 +120,11 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.status.eq("E"),
                         sealMaster.division.eq("B"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        containsKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword(), sealExportDetail)
+                        this.containsExportKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(sealExportDetail.rgstDt.desc())
                 .offset(pageable.getOffset())
@@ -123,7 +139,11 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.status.eq("E"),
                         sealMaster.division.eq("B"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
-                        containsKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword(), sealExportDetail)
+                        this.containsExportKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
 
@@ -203,35 +223,49 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
         return new PageImpl<>(resultSet, page, count);
     }
 
-    private BooleanExpression containsKeyword(String searchType, String keyword, QSealImprintDetail sealImprintDetail) {
-        if (keyword == null || keyword.isEmpty()) {
-            return Expressions.asBoolean(true).isTrue();
+    private BooleanExpression containsImprintKeyword(String searchType, String keyword) {
+        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(keyword)) {
+            switch (searchType) {
+                case "일자": return sealImprintDetail.useDate.like("%" + keyword + "%");
+                case "제출처": return sealImprintDetail.submission.like("%" + keyword + "%");
+                case "사용목적": return sealImprintDetail.purpose.like("%" + keyword + "%");
+                case "전체": return sealImprintDetail.useDate.contains(keyword)
+                        .or(sealImprintDetail.submission.contains(keyword))
+                        .or(sealImprintDetail.purpose.contains(keyword));
+                default: return null;
+            }
         }
-
-        return switch (searchType) {
-            case "일자" -> sealImprintDetail.useDate.contains(keyword);
-            case "제출처" -> sealImprintDetail.submission.contains(keyword);
-            case "사용목적" -> sealImprintDetail.purpose.contains(keyword);
-            case "전체" -> sealImprintDetail.useDate.contains(keyword)
-                    .or(sealImprintDetail.submission.contains(keyword))
-                    .or(sealImprintDetail.purpose.contains(keyword));
-            default -> Expressions.asBoolean(true).isTrue();
-        };
+        return null;
     }
 
-    private BooleanExpression containsKeyword(String searchType, String keyword, QSealExportDetail sealExportDetail) {
-        if (keyword == null || keyword.isEmpty()) {
+    private BooleanExpression containsExportKeyword(String searchType, String keyword) {
+        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(keyword)) {
+            switch (searchType) {
+                case "반출일자": return sealExportDetail.expDate.like("%" + keyword + "%");
+                case "반납일자": return sealExportDetail.submission.like("%" + keyword + "%");
+                case "사용목적": return sealExportDetail.purpose.like("%" + keyword + "%");
+                case "전체": return sealExportDetail.expDate.contains(keyword)
+                        .or(sealExportDetail.submission.contains(keyword))
+                        .or(sealExportDetail.purpose.contains(keyword));
+                default: return null;
+            }
+        }
+        return null;
+    }
+
+    private BooleanExpression afterStartDate(LocalDate startDate) {
+        if (startDate == null) {
             return Expressions.asBoolean(true).isTrue();
         }
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        return sealMaster.draftDate.goe(startDateTime);
+    }
 
-        return switch (searchType) {
-            case "반출일자" -> sealExportDetail.expDate.contains(keyword);
-            case "반납일자" -> sealExportDetail.returnDate.contains(keyword);
-            case "사용목적" -> sealExportDetail.purpose.contains(keyword);
-            case "전체" -> sealExportDetail.expDate.contains(keyword)
-                    .or(sealExportDetail.returnDate.contains(keyword))
-                    .or(sealExportDetail.purpose.contains(keyword));
-            default -> Expressions.asBoolean(true).isTrue();
-        };
+    private BooleanExpression beforeEndDate(LocalDate endDate) {
+        if (endDate == null) {
+            return Expressions.asBoolean(true).isTrue();
+        }
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return sealMaster.draftDate.loe(endDateTime);
     }
 }
