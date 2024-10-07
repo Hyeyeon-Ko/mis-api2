@@ -8,4 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface SealPendingQueryRepository {
     Page<SealPendingResponseDTO> getSealPending2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
+    Page<SealPendingResponseDTO> getMySealPendingList(ApplyRequestDTO applyRequestDTO, Pageable page);
+    Long getSealPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
 }

@@ -16,6 +16,7 @@ import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,12 +72,9 @@ public class ApplyController {
 
     @Operation(summary = "승인대기내역 개수", description = "승인대기 내역의 개수를 알려줍니다.")
     @GetMapping(value = "/pendingCount")
-    public ApiResponse<PendingCountResponseDTO> getPendingCountList(@RequestParam String documentType,
-                                                                    @RequestParam(required = false) LocalDateTime startDate,
-                                                                    @RequestParam(required = false) LocalDateTime endDate,
-                                                                    @RequestParam String instCd,
-                                                                    @RequestParam String userId) {
-        return ResponseWrapper.success(applyService.getPendingCountList(documentType, startDate, endDate, instCd, userId));
+    public ApiResponse<PendingCountResponseDTO> getPendingCountList(@Valid ApplyRequestDTO applyRequestDTO,
+                                                                    @Valid PostSearchRequestDTO postSearchRequestDTO) {
+        return ResponseWrapper.success(applyService.getPendingCountList(applyRequestDTO, postSearchRequestDTO));
     }
 
     @Operation(summary = "나의 신청내역 > 전체 신청목록 호출", description = "나의 모든 신청 내역을 호출합니다.")
@@ -102,5 +100,12 @@ public class ApplyController {
     @GetMapping(value = "/myPendingList")
     public ApiResponse<PendingResponseDTO> getMyPendingApplyList(String userId) {
         return ResponseWrapper.success(applyService.getMyPendingList(userId));
+    }
+
+    @Operation(summary = "나의 신청내역 > 승인대기 목록 호출", description = "나의 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
+    @GetMapping(value = "/myPendingList2")
+    public ApiResponse<PendingResponseDTO> getMyPendingApplyList2(@Valid ApplyRequestDTO applyRequestDTO,
+                                                                  PostPageRequest page) {
+        return ResponseWrapper.success(applyService.getMyPendingList2(applyRequestDTO, page.of()));
     }
 }

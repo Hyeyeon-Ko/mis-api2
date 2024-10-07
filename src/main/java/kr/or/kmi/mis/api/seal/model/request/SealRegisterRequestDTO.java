@@ -16,12 +16,14 @@ public class SealRegisterRequestDTO {
     private String instCd;
 
     private String sealImageBase64;
+    private String sealImageNm;
 
     public SealRegisterDetail toDetailEntity(String draftId) {
         return SealRegisterDetail.builder()
                 .draftId(draftId)
                 .sealNm(sealNm)
                 .sealImage(sealImageBase64)
+                .sealImageNm(sealImageNm)
                 .useDept(useDept)
                 .purpose(purpose)
                 .manager(manager)

@@ -370,13 +370,13 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdPendingResponseDTO> getMyPendingList(String userId) {
+    public List<BcdPendingResponseDTO> getMyPendingList(ApplyRequestDTO applyRequestDTO) {
 
         List<BcdPendingResponseDTO> results = new ArrayList<>();
 
         // 나의 모든 명함신청 승인대기 내역을 호출한다.
-        results.addAll(this.getMyPndMasterList(userId));
-        results.addAll(this.getAnotherPndMasterList(userId));
+        results.addAll(this.getMyPndMasterList(applyRequestDTO.getUserId()));
+        results.addAll(this.getAnotherPndMasterList(applyRequestDTO.getUserId()));
         return results;
     }
 

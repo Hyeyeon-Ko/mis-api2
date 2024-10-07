@@ -11,6 +11,7 @@ public class SealDetailResponseDTO {
     private String draftId;
     private String sealNm;
     private String sealImage;
+    private String sealImageNm;
     private String useDept;
     private String purpose;
     private String manager;
@@ -22,6 +23,7 @@ public class SealDetailResponseDTO {
                 .draftId(sealRegisterDetail.getDraftId())
                 .sealNm(sealRegisterDetail.getSealNm())
                 .sealImage(sealRegisterDetail.getSealImage())
+                .sealImageNm(sealRegisterDetail.getSealImageNm())
                 .useDept(sealRegisterDetail.getUseDept())
                 .purpose(sealRegisterDetail.getPurpose())
                 .manager(sealRegisterDetail.getManager())

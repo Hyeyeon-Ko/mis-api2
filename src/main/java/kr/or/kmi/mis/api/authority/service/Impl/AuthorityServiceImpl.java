@@ -17,6 +17,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.cmm.model.entity.SessionExpiredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,65 +44,6 @@ public class AuthorityServiceImpl implements AuthorityService {
     public Page<AuthorityResponseDTO2> getAuthorityList2(Pageable page) {
         return authorityQueryRepository.getAuthorityList(page);
     }
-//    @Override
-//    @Transactional(readOnly = true)
-//    public List<AuthorityListResponseDTO> getAuthorityList() {
-//        List<Authority> authorityList = authorityRepository.findAllByDeletedtIsNull();
-//        return authorityList.stream()
-//                .map(authority -> {
-//                    // 기준자료 참조
-//                    // 1. 팀 이름 -> 부서 코드
-//                    StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("A003")
-//                            .orElseThrow(() -> new EntityNotFoundException("A003"));
-//
-//                    // 여러 개의 StdDetail을 리스트로 받아옴
-//                    List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndDetailNm(stdGroup1, authority.getDeptNm())
-//                            .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-//
-//                    if (stdDetails.isEmpty()) {
-//                        throw new EntityNotFoundException("No StdDetail found for DeptNm: " + authority.getDeptNm());
-//                    }
-//
-//                    // A002 그룹 코드의 StdDetail 찾기
-//                    Optional<StdDetail> matchingDetailOpt = stdDetails.stream()
-//                            .map(stdDetail -> {
-//                                StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("A002")
-//                                        .orElseThrow(() -> new EntityNotFoundException("A002"));
-//
-//                                return stdDetailRepository.findByGroupCdAndDetailCdAndEtcItem1(stdGroup2, stdDetail.getEtcItem1(), authority.getInstCd())
-//                                        .orElse(null);
-//                            })
-//                            .filter(Objects::nonNull)
-//                            .findFirst();
-//
-//                    if (matchingDetailOpt.isEmpty()) {
-//                        throw new EntityNotFoundException("No matching StdDetail found for DeptCd and InstCd");
-//                    }
-//
-//                    StdDetail matchingDetail = matchingDetailOpt.get();
-//                    String deptNm = matchingDetail.getDetailNm();
-//                    String instCd = matchingDetail.getEtcItem1();
-//
-//                    // 3. 센터 코드 -> 센터 이름
-//                    StdGroup stdGroup3 = stdGroupRepository.findByGroupCd("A001")
-//                            .orElseThrow(() -> new EntityNotFoundException("A001"));
-//                    StdDetail stdDetail3 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup3, instCd)
-//                            .orElseThrow(() -> new EntityNotFoundException(instCd));
-//                    String instNm = stdDetail3.getDetailNm();
-//
-//                    return AuthorityListResponseDTO.builder()
-//                            .authId(authority.getAuthId())
-//                            .userId(authority.getUserId())
-//                            .hngNm(authority.getHngNm())
-//                            .userRole(authority.getRole())
-//                            .email(authority.getEmail())
-//                            .instNm(instNm)
-//                            .deptNm(deptNm)
-//                            .detailCd(authority.getUserId())
-//                            .build();
-//                })
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -111,6 +53,9 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .orElseThrow(() -> new EntityNotFoundException("B001"));
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+        if (sessionUserId == null) {
+            throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
 
         return stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, sessionUserId).isPresent();
     }
@@ -120,6 +65,9 @@ public class AuthorityServiceImpl implements AuthorityService {
     public String getMemberName(String userId) {
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+        if (sessionUserId == null) {
+            throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
 
         if (sessionUserId.equals(userId)) {
             throw new IllegalArgumentException("로그인한 사용자의 userId와 동일합니다");
@@ -167,7 +115,11 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .etcItem1(request.getUserId())
                     .etcItem2(request.getUserRole())
                     .build();
-            newStdDetail.setRgstrId((String) httpServletRequest.getSession().getAttribute("userId"));
+            String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+            if (sessionUserId == null) {
+                throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+            }
+            newStdDetail.setRgstrId(sessionUserId);
             newStdDetail.setRgstDt(LocalDateTime.now());
             stdDetailRepository.save(newStdDetail);
         }
@@ -184,6 +136,9 @@ public class AuthorityServiceImpl implements AuthorityService {
         authorityRepository.save(authority);
 
         String sessionUserId = (String) httpServletRequest.getSession().getAttribute("userId");
+        if (sessionUserId == null) {
+            throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
 
         if (request.getDetailRole() != null && request.getDetailRole().equals("Y")) {
             StdDetail stdDetail = stdDetailRepository.findByEtcItem1(authority.getUserId())
@@ -200,7 +155,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             stdDetailRepository.save(stdDetail);
         } else {
             stdDetailRepository.findByEtcItem1(authority.getUserId()).ifPresent(stdDetail -> {
-                stdDetailRepository.deleteByGroupCdAndDetailCd(stdDetail.getGroupCd(), stdDetail.getDetailCd());
+                stdDetailService.deleteInfo("B001", stdDetail.getDetailCd());
             });
         }
     }
@@ -219,7 +174,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .orElseThrow(() -> new EntityNotFoundException("B001"));
 
         // 기준자료 관리자였다면 -> 기준자료 테이블 데이터 삭제
-        if (authority.getUserId() != null) {
+        if(stdDetailRepository.existsByGroupCdAndDetailCd(stdGroup, authority.getUserId())){
             stdDetailService.deleteInfo(stdGroup.getGroupCd(), authority.getUserId());
         }
     }

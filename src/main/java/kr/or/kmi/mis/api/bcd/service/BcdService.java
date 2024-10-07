@@ -38,6 +38,6 @@ public interface BcdService {
     List<BcdMyResponseDTO> getMyBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     List<BcdPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
     Page<BcdPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
-    List<BcdPendingResponseDTO> getMyPendingList(String userId);
+    List<BcdPendingResponseDTO> getMyPendingList(ApplyRequestDTO applyRequestDTO);
     void completeBcdApply(String draftId);
 }

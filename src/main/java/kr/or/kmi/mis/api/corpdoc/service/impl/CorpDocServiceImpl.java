@@ -123,13 +123,13 @@ public class CorpDocServiceImpl implements CorpDocService {
     @Transactional(readOnly = true)
     public CorpDocDetailResponseDTO getCorpDocApply(String draftId) {
         CorpDocDetail corpDocDetail = corpDocDetailRepository.findById(draftId)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                .orElseThrow(() -> new IllegalArgumentException("Not Found1"));
         FileDetail fileDetail = fileDetailRepository.findByDraftId(corpDocDetail.getDraftId())
                 .orElse(null);
         FileHistory fileHistory = null;
         if (fileDetail != null) {
             fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
         }
         return CorpDocDetailResponseDTO.of(corpDocDetail, fileHistory);
     }
@@ -240,8 +240,8 @@ public class CorpDocServiceImpl implements CorpDocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CorpDocPendingResponseDTO> getMyPendingList(String userId) {
-        return new ArrayList<>(this.getMyCorpDocPendingList(userId));
+    public List<CorpDocPendingResponseDTO> getMyPendingList(ApplyRequestDTO applyRequestDTO) {
+        return new ArrayList<>(this.getMyCorpDocPendingList(applyRequestDTO.getUserId()));
     }
 
     @Override

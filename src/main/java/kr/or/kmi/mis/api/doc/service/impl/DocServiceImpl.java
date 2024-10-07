@@ -441,8 +441,8 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocPendingResponseDTO> getMyDocPendingList(String userId) {
-        return new ArrayList<>(this.getMyDocPendingMasterList(userId));
+    public List<DocPendingResponseDTO> getMyDocPendingList(ApplyRequestDTO applyRequestDTO) {
+        return new ArrayList<>(this.getMyDocPendingMasterList(applyRequestDTO.getUserId()));
     }
 
     @Override

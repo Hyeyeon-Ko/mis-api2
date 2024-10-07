@@ -30,7 +30,6 @@ public class SealRegisterServiceImpl implements SealRegisterService {
 
     private final SealRegisterDetailRepository sealRegisterDetailRepository;
     private final SealRegisterHistoryService sealRegisterHistoryService;
-    private final SealMasterRepository sealMasterRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
@@ -38,11 +37,14 @@ public class SealRegisterServiceImpl implements SealRegisterService {
     public void registerSeal(SealRegisterRequestDTO sealRegisterRequestDTO, MultipartFile sealImage) throws IOException {
 
         String base64EncodedImage = null;
+        String sealImageNm = null;
         if (sealImage != null && !sealImage.isEmpty()) {
             base64EncodedImage = ImageUtil.encodeImageToBase64(sealImage);
+            sealImageNm = sealImage.getOriginalFilename();
         }
 
         sealRegisterRequestDTO.setSealImageBase64(base64EncodedImage);
+        sealRegisterRequestDTO.setSealImageNm(sealImageNm);
 
         String draftId = generateDraftId();
 
@@ -78,16 +80,18 @@ public class SealRegisterServiceImpl implements SealRegisterService {
         sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
 
         String base64EncodedImage;
+        String sealImageNm = sealRegisterDetail.getSealImageNm();
         if (sealImage != null && !sealImage.isEmpty()) {
             base64EncodedImage = ImageUtil.encodeImageToBase64(sealImage);
+            sealImageNm = sealImage.getOriginalFilename();
         } else if (isFileDeleted) {
             base64EncodedImage = null;
+            sealImageNm = null;
         } else {
             base64EncodedImage = sealRegisterDetail.getSealImage();
         }
 
-        sealRegisterDetail.updateFile(sealUpdateRequestDTO, base64EncodedImage);
-
+        sealRegisterDetail.updateFile(sealUpdateRequestDTO, base64EncodedImage, sealImageNm);
         sealRegisterDetailRepository.save(sealRegisterDetail);
     }
 

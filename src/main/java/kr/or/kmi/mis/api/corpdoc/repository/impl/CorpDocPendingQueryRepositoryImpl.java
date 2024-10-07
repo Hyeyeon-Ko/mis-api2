@@ -42,7 +42,7 @@ public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRep
         List<CorpDocPendingResponseDTO> resultSet = queryFactory.select(
                         Projections.constructor(
                                 CorpDocPendingResponseDTO.class,
-                                corpDocMaster.drafterId,
+                                corpDocMaster.draftId,
                                 corpDocMaster.title,
                                 corpDocMaster.instCd,
                                 Expressions.constant(instNm),
@@ -80,6 +80,66 @@ public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRep
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Page<CorpDocPendingResponseDTO> getMyCorpDocPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
+        System.out.println("CorpDocPendingQueryRepositoryImpl.getMyCorpDocPendingList2");
+
+        String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
+
+        String docType = "법인서류";
+
+        List<CorpDocPendingResponseDTO> resultSet = queryFactory.select(
+                        Projections.constructor(
+                                CorpDocPendingResponseDTO.class,
+                                corpDocMaster.draftId,
+                                corpDocMaster.title,
+                                corpDocMaster.instCd,
+                                Expressions.constant(instNm),
+                                corpDocMaster.draftDate,
+                                corpDocMaster.drafter,
+                                corpDocDetail.updtDt,
+                                corpDocDetail.updtrId,
+                                corpDocMaster.status,
+                                Expressions.constant(docType)
+                        )
+                )
+                .from(corpDocMaster)
+                .join(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
+                .where(
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        corpDocMaster.status.eq("A")
+                )
+                .orderBy(corpDocMaster.rgstDt.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory
+                .select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .where(
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
+                        corpDocMaster.status.eq("A")
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultSet, page, count);
+    }
+
+    @Override
+    public Long getCorpDocPendingCount(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return queryFactory.select(corpDocMaster.count())
+                .from(corpDocMaster)
+                .where(
+                        corpDocMaster.status.eq("A"),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                )
+                .fetchOne();
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {

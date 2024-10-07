@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Builder
 @Data
-@AllArgsConstructor
 public class DocPendingResponseDTO {
 
     private String draftId;
@@ -23,6 +22,22 @@ public class DocPendingResponseDTO {
     private String lastUpdater;        // 최종 수정자
     private String applyStatus;
     private String docType;
+
+    public DocPendingResponseDTO(String draftId, String title, String instCd, String instNm, LocalDateTime draftDate, String drafter, LocalDateTime lastUpdateDate, String lastUpdater, String applyStatus, String docType, String approverChain, int currentApproverIndex) {
+        this.draftId = draftId;
+        this.title = title;
+        this.instCd = instCd;
+        this.instNm = instNm;
+        this.draftDate = draftDate;
+        this.drafter = drafter;
+        this.lastUpdateDate = lastUpdateDate;
+        this.lastUpdater = lastUpdater;
+        this.applyStatus = applyStatus;
+        this.docType = docType;
+        this.approverChain = approverChain;
+        this.currentApproverIndex = currentApproverIndex;
+    }
+
     private String approverChain;
     private int currentApproverIndex;
 
