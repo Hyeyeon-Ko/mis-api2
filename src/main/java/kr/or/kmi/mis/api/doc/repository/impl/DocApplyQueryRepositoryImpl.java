@@ -199,6 +199,7 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                 .from(docMaster)
                 .leftJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
                 .where(
+                        docMaster.drafterId.eq(applyRequestDTO.getUserId()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?

@@ -321,7 +321,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 )
                 .from(corpDocMaster)
                 .where(
-                        corpDocMaster.draftId.eq(applyRequestDTO.getUserId()),
+                        corpDocMaster.drafterId.eq(applyRequestDTO.getUserId()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
