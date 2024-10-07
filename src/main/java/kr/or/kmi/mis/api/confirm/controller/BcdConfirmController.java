@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.confirm.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.confirm.service.BcdConfirmService;
@@ -30,15 +31,15 @@ public class BcdConfirmController {
 
     @Operation(summary = "approve application", description = "명함신청 승인")
     @PostMapping("/{draftId}")
-    public ApiResponse<?> approve(@PathVariable String draftId, @RequestBody String userId) {
-        bcdConfirmService.approve(draftId, userId);
+    public ApiResponse<?> approve(@PathVariable String draftId, @RequestBody ConfirmRequestDTO confirmRequestDTO) {
+        bcdConfirmService.approve(draftId, confirmRequestDTO);
         return ResponseWrapper.success();
     }
 
     @Operation(summary = "disapprove application", description = "명함신청 반려")
     @PostMapping("/return/{draftId}")
-    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody String rejectReason, @RequestBody String userId) {
-        bcdConfirmService.disapprove(draftId, rejectReason, userId);
+    public ApiResponse<?> disapprove(@PathVariable String draftId, @RequestBody ConfirmRequestDTO confirmRequestDTO) {
+        bcdConfirmService.disapprove(draftId, confirmRequestDTO);
         return ResponseWrapper.success();
     }
 

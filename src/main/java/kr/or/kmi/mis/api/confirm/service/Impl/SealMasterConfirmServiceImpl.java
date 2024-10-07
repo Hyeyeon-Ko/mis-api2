@@ -1,11 +1,13 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
 import kr.or.kmi.mis.api.confirm.service.SealMasterConfirmService;
 import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
 import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.noti.service.NotificationService;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
+import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,16 +26,16 @@ public class SealMasterConfirmServiceImpl implements SealMasterConfirmService {
 
     @Override
     @Transactional
-    public void approve(String draftId) {
+    public void approve(String draftId, ConfirmRequestDTO confirmRequestDTO) {
 
         // 1. 인장신청 승인
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        String approver = infoService.getUserInfo().getUserName();
-        String approverId = infoService.getUserInfo().getUserId();
+        System.out.println("userId = " + confirmRequestDTO.getUserId());
+        String approver = infoService.getUserInfoDetail(confirmRequestDTO.getUserId()).getUserName();
 
-        sealMaster.confirm("E", approver, approverId);
+        sealMaster.confirm("E", approver, confirmRequestDTO.getUserId());
         sealMasterRepository.save(sealMaster);
 
         // 2. 알림 전송
@@ -42,16 +44,15 @@ public class SealMasterConfirmServiceImpl implements SealMasterConfirmService {
 
     @Override
     @Transactional
-    public void disapprove(String draftId, String rejectReason) {
+    public void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO) {
 
         // 1. 인장신청 반려
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        String disapprover = infoService.getUserInfo().getUserName();
-        String disapproverId = infoService.getUserInfo().getUserId();
+        String disapprover = infoService.getUserInfoDetail(confirmRequestDTO.getUserId()).getUserName();
 
-        sealMaster.reject("C", disapprover, disapproverId, rejectReason);
+        sealMaster.reject("C", disapprover, confirmRequestDTO.getUserId(), confirmRequestDTO.getRejectReason());
         sealMasterRepository.save(sealMaster);
 
         // 2. 알림 전송

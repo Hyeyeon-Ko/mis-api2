@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
 import kr.or.kmi.mis.api.apply.service.Impl.ApplyServiceImpl;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
@@ -69,21 +70,24 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     @Override
     @Transactional
-    public void approve(String draftId, String userId) {
+    public void approve(String draftId, ConfirmRequestDTO confirmRequestDTO) {
 
         // 1. 승인
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
 
-        if (!bcdMaster.getCurrentApproverId().equals(userId)) {
+        if (!bcdMaster.getCurrentApproverId().equals(confirmRequestDTO.getUserId())) {
             throw new IllegalArgumentException("현재 결재자가 아닙니다.");
         }
 
         boolean isLastApprover = bcdMaster.getCurrentApproverIndex() == bcdMaster.getApproverChain().split(", ").length - 1;
 
+        String approverId = confirmRequestDTO.getUserId();
+        String approver = infoService.getUserInfoDetail(approverId).getUserName();
+
         BcdApproveRequestDTO approveRequest = BcdApproveRequestDTO.builder()
-                .approverId(userId)
-                .approver(infoService.getUserInfo().getUserName())
+                .approverId(approverId)
+                .approver(approver)
                 .respondDate(LocalDateTime.now())
                 .status(isLastApprover ? "B" : "A")  // 마지막 결재자라면 B(완료), 아니면 A(승인 대기)
                 .build();
@@ -97,12 +101,12 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("C002")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        String instCd = infoService.getUserInfoDetail(userId).getInstCd();
+        String instCd = infoService.getUserInfoDetail(approverId).getInstCd();
         List<StdDetail> stdDetail1 = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup1, instCd)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         boolean userIdExistsInStdDetail = stdDetail1.stream()
-                .anyMatch(detail -> userId.equals(detail.getEtcItem2()) || userId.equals(detail.getEtcItem3()));
+                .anyMatch(detail -> approverId.equals(detail.getEtcItem2()) || approverId.equals(detail.getEtcItem3()));
 
         if (userIdExistsInStdDetail) {
             return;
@@ -118,21 +122,21 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         boolean shouldCancelAdminByDoc = true;
 
         for (BcdMaster master : bcdMasterList) {
-            if (master.getCurrentApproverId().equals(userId)) {
+            if (master.getCurrentApproverId().equals(approverId)) {
                 shouldCancelAdminByBcd = false;
                 break;
             }
         }
 
         for (DocMaster master : docMasterList) {
-            if (master.getCurrentApproverId().equals(userId)) {
+            if (master.getCurrentApproverId().equals(approverId)) {
                 shouldCancelAdminByDoc = false;
                 break;
             }
         }
 
         if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(userId)
+            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(approverId)
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
             // ADMIN 권한 취소
@@ -142,7 +146,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
             // 사이드바 권한 취소
             StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("B002")
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-            StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup2, userId)
+            StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup2, approverId)
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
             stdDetailRepository.delete(stdDetail2);
@@ -152,17 +156,20 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     /* 반려 */
     @Override
     @Transactional
-    public void disapprove(String draftId, String rejectReason, String userId) {
+    public void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO) {
         BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
         BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
                 .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + draftId));
 
+        String disapproverId = confirmRequestDTO.getUserId();
+        String disapprover = infoService.getUserInfoDetail(disapproverId).getUserName();
+
         // 1. 명함신청 반려 처리
         BcdDisapproveRequestDTO disapproveRequest = BcdDisapproveRequestDTO.builder()
-                .disapproverId(infoService.getUserInfo().getUserId())
-                .disapprover(infoService.getUserInfo().getUserName())
-                .rejectReason(rejectReason)
+                .disapproverId(disapproverId)
+                .disapprover(disapprover)
+                .rejectReason(confirmRequestDTO.getRejectReason())
                 .respondDate(LocalDateTime.now())
                 .status("C")
                 .build();
@@ -203,14 +210,14 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         boolean shouldCancelAdminByDoc = true;
 
         for (BcdMaster master : bcdMasterList) {
-            if (master.getCurrentApproverId().equals(userId)) {
+            if (master.getCurrentApproverId().equals(disapproverId)) {
                 shouldCancelAdminByBcd = false;
                 break;
             }
         }
 
         for (DocMaster master : docMasterList) {
-            if (master.getCurrentApproverId().equals(userId)) {
+            if (master.getCurrentApproverId().equals(disapproverId)) {
                 shouldCancelAdminByDoc = false;
                 break;
             }
