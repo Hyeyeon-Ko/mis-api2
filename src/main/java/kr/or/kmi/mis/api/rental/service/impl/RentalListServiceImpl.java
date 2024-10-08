@@ -52,9 +52,10 @@ public class RentalListServiceImpl implements RentalListService {
         List<CenterResponseDTO> centerList = fetchAllCenters();
 
         List<RentalResponseDTO> foundationResponses = getCenterRentalListByStatus("100", "E");
-        List<RentalResponseDTO> gwanghwamunResponses = getCenterRentalListByStatus("111", "E");
+        List<RentalResponseDTO> bonwonResponses = getCenterRentalListByStatus("111", "E");
         List<RentalResponseDTO> yeouidoResponses = getCenterRentalListByStatus("112", "E");
         List<RentalResponseDTO> gangnamResponses = getCenterRentalListByStatus("113", "E");
+        List<RentalResponseDTO> gwanghwamunResponses = getCenterRentalListByStatus("119", "E");
         List<RentalResponseDTO> suwonResponses = getCenterRentalListByStatus("211", "E");
         List<RentalResponseDTO> daeguResponses = getCenterRentalListByStatus("611", "E");
         List<RentalResponseDTO> busanResponses = getCenterRentalListByStatus("612", "E");
@@ -63,9 +64,10 @@ public class RentalListServiceImpl implements RentalListService {
 
         List<RentalSummaryResponseDTO> summary = List.of(
                 createSummary("재단본부", foundationResponses),
-                createSummary("광화문", gwanghwamunResponses),
+                createSummary("본원센터", bonwonResponses),
                 createSummary("여의도", yeouidoResponses),
                 createSummary("강남센터", gangnamResponses),
+                createSummary("광화문", gwanghwamunResponses),
                 createSummary("수원센터", suwonResponses),
                 createSummary("대구센터", daeguResponses),
                 createSummary("부산센터", busanResponses),
@@ -74,7 +76,7 @@ public class RentalListServiceImpl implements RentalListService {
         );
 
         CenterRentalListResponseDTO centerRentalResponses = CenterRentalListResponseDTO.of(
-                foundationResponses, gwanghwamunResponses, yeouidoResponses, gangnamResponses,
+                foundationResponses, bonwonResponses, yeouidoResponses, gangnamResponses, gwanghwamunResponses,
                 suwonResponses, daeguResponses, busanResponses, gwangjuResponses, jejuResponses
         );
 

@@ -157,8 +157,8 @@ public class RentalExcelServiceImpl implements RentalExcelService {
             row.setHeight((short) 400);
 
             createCell(row, 0, no.getAndIncrement(), null, null);
-            createCell(row, 1, detail.getCategory(), thinBorderStyle, centeredStyle);
-            createCell(row, 2, detail.getCompanyNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 1, detail.getCompanyNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 2, detail.getCategory(), thinBorderStyle, centeredStyle);
             createCell(row, 3, detail.getContractNum(), thinBorderStyle, centeredStyle);
             createCell(row, 4, detail.getModelNm(), thinBorderStyle, centeredStyle);
             createCell(row, 5, detail.getInstallDate(), thinBorderStyle, centeredStyle);
@@ -343,8 +343,8 @@ public class RentalExcelServiceImpl implements RentalExcelService {
             row.setHeight((short) 400);
 
             createCell(row, 0, no.getAndIncrement(), null, null);
-            createCell(row, 1, detail.getCategory(), thinBorderStyle, centeredStyle);
-            createCell(row, 2, detail.getCompanyNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 1, detail.getCompanyNm(), thinBorderStyle, centeredStyle);
+            createCell(row, 2, detail.getCategory(), thinBorderStyle, centeredStyle);
             createCell(row, 3, detail.getContractNum(), thinBorderStyle, centeredStyle);
             createCell(row, 4, detail.getModelNm(), thinBorderStyle, centeredStyle);
             createCell(row, 5, detail.getInstallDate(), thinBorderStyle, centeredStyle);
@@ -411,9 +411,9 @@ public class RentalExcelServiceImpl implements RentalExcelService {
             case "재단본부":
                 return "100";
             case "본원센터":
-                return "101"; // 본원센터 ???
-            case "광화문":
                 return "111";
+            case "광화문":
+                return "119";
             case "강남센터":
                 return "113";
             case "여의도센터":
@@ -515,8 +515,8 @@ public class RentalExcelServiceImpl implements RentalExcelService {
         Row headerRow = sheet.createRow(4);
         headerRow.setHeight((short) 400);
 
-        createCell(headerRow, 1, "제품군", headerStyle, null);
-        createCell(headerRow, 2, "업체명", headerStyle, null);
+        createCell(headerRow, 1, "업체명", headerStyle, null);
+        createCell(headerRow, 2, "제품군", headerStyle, null);
         createCell(headerRow, 3, "계약번호", headerStyle, null);
         createCell(headerRow, 4, "모델명", headerStyle, null);
         createCell(headerRow, 5, "설치일자", headerStyle, null);
