@@ -75,7 +75,7 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                 .fetch();
 
         Long count = queryFactory
-                .select(sealMaster.count()).
+                .select(sealMaster.count())
                 .from(sealMaster)
                 .leftJoin(sealImprintDetail).on(sealMaster.draftId.eq(sealImprintDetail.draftId))
                 .where(
