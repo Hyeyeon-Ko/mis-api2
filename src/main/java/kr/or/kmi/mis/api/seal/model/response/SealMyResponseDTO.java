@@ -22,6 +22,19 @@ public class SealMyResponseDTO {
     private String rejectReason;
     private String docType;
 
+    public SealMyResponseDTO(String draftId, String title, LocalDateTime draftDate, LocalDateTime respondDate, String drafter, String approver, String disapprover, String applyStatus, String rejectReason, String docType) {
+        this.draftId = draftId;
+        this.title = title;
+        this.draftDate = draftDate;
+        this.respondDate = respondDate;
+        this.drafter = drafter;
+        this.approver = approver;
+        this.disapprover = disapprover;
+        this.applyStatus = applyStatus;
+        this.rejectReason = rejectReason;
+        this.docType = docType;
+    }
+
     public static SealMyResponseDTO of(SealMaster sealMaster) {
 
         String docType = "A".equals(sealMaster.getDivision()) ? "인장신청(날인)" : "인장신청(반출)";

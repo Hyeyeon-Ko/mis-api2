@@ -282,7 +282,7 @@ public class ApplyServiceImpl implements ApplyService {
         int docPendingCount = Math.toIntExact(docPendingQueryRepository.getDocPendingCount(applyRequestDTO, postSearchRequestDTO));
         int corpDocPendingCount = Math.toIntExact(corpDocPendingQueryRepository.getCorpDocPendingCount(applyRequestDTO, postSearchRequestDTO));
         int sealPendingCount = Math.toIntExact(sealPendingQueryRepository.getSealPendingCount(applyRequestDTO, postSearchRequestDTO));
-        int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingList();
+        int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingListCount();
         int orderPendingCount = orderService.getOrderList(applyRequestDTO.getInstCd()).size();
 
         return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount, corpDocIssuePendingCount, orderPendingCount);

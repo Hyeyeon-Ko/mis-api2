@@ -4,7 +4,6 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocLeftRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocStoreRequestDTO;
-import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueListResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocDetailRepository;
@@ -37,17 +36,19 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public CorpDocIssueListResponseDTO getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
-
-        Page<CorpDocIssueResponseDTO> res1 = corpDocQueryRepository.getCorpDocIssueList2(postSearchRequestDTO, page);
-        Page<CorpDocIssueResponseDTO> res2 = corpDocQueryRepository.getCorpDocIssuePendingList(page);
-        return CorpDocIssueListResponseDTO.of(res1, res2);
-
+    public Page<CorpDocIssueResponseDTO> getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return corpDocQueryRepository.getCorpDocIssueList2(postSearchRequestDTO, page);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public int getCorpDocIssuePendingList() {
+    public Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(Pageable page){
+        return corpDocQueryRepository.getCorpDocIssuePendingList(page);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getCorpDocIssuePendingListCount() {
         List<CorpDocMaster> corpDocPendingMasters = corpDocMasterRepository.findAllByStatusOrderByDraftDateAsc("B");
         return corpDocPendingMasters.size();
     }

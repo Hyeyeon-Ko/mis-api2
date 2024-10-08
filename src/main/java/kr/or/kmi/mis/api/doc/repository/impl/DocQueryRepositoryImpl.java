@@ -79,7 +79,7 @@ public class DocQueryRepositoryImpl implements DocQueryRepository {
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
-                .orderBy(fileHistory.seqId.desc())
+                .orderBy(docDetail.docId.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();

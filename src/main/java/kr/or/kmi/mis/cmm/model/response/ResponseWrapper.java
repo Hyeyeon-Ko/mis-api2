@@ -91,4 +91,28 @@ public class ResponseWrapper {
         log.info("data : {}", data);
         return new ApiResponse<T>(999, data);
     }
+
+    /**
+     * Error response with custom HTTP status.
+     *
+     * @param <T>     the type parameter
+     * @param data    the error message or data
+     * @param status  the HTTP status code
+     * @return the api response
+     */
+    public static <T> ApiResponse<T> error(T data, HttpStatus status) {
+        log.error("Error: {}, Status: {}", data, status);
+        return new ApiResponse<T>(status.value(), data.toString(), null);
+    }
+
+    /**
+     * Error response with default message and custom HTTP status.
+     *
+     * @param status the HTTP status code
+     * @return the api response
+     */
+    public static ApiResponse error(HttpStatus status) {
+        log.error("Error Status: {}", status);
+        return new ApiResponse(status.value(), status.getReasonPhrase());
+    }
 }

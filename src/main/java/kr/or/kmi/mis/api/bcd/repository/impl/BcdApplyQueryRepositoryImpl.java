@@ -116,6 +116,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
         List<BcdMaster> bcdMasters = queryFactory.select(bcdMaster)
                 .from(bcdMaster)
                 .where(
+                        bcdMaster.drafterId.eq(applyRequestDTO.getUserId()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -133,6 +134,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
         Long count = queryFactory.select(bcdMaster.count())
                 .from(bcdMaster)
                 .where(
+                        bcdMaster.drafterId.eq(applyRequestDTO.getUserId()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
