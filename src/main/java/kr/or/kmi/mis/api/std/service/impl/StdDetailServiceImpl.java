@@ -57,6 +57,7 @@ public class StdDetailServiceImpl implements StdDetailService {
 
     @Override
     public Page<StdDetailResponseDTO> getInfo2(String groupCd, Pageable page) {
+        System.out.println("groupCd = " + groupCd);
         stdGroupRepository.findById(groupCd)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + groupCd));
 

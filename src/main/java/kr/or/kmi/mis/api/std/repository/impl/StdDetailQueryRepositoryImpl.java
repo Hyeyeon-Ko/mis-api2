@@ -59,7 +59,7 @@ public class StdDetailQueryRepositoryImpl implements StdDetailQueryRepository {
                         stdDetail.groupCd.groupCd.eq(groupCd),
                         stdDetail.useAt.eq("Y")
                 )
-                .orderBy(stdDetail.rgstDt.desc())
+                .orderBy(stdDetail.detailCd.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch()
