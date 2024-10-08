@@ -75,8 +75,9 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                 .fetch();
 
         Long count = queryFactory
-                .select(sealMaster.count())
+                .select(sealMaster.count()).
                 .from(sealMaster)
+                .leftJoin(sealImprintDetail).on(sealMaster.draftId.eq(sealImprintDetail.draftId))
                 .where(
                         sealMaster.status.eq("E"),
                         sealMaster.division.eq("A"),
@@ -226,12 +227,12 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
     private BooleanExpression containsImprintKeyword(String searchType, String keyword) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(keyword)) {
             switch (searchType) {
-                case "일자": return sealImprintDetail.useDate.like("%" + keyword + "%");
-                case "제출처": return sealImprintDetail.submission.like("%" + keyword + "%");
-                case "사용목적": return sealImprintDetail.purpose.like("%" + keyword + "%");
-                case "전체": return sealImprintDetail.useDate.contains(keyword)
-                        .or(sealImprintDetail.submission.contains(keyword))
-                        .or(sealImprintDetail.purpose.contains(keyword));
+                case "일자": return sealImprintDetail.useDate.containsIgnoreCase(keyword);
+                case "제출처": return sealImprintDetail.submission.containsIgnoreCase(keyword);
+                case "사용목적": return sealImprintDetail.purpose.containsIgnoreCase(keyword);
+                case "전체": return sealImprintDetail.useDate.containsIgnoreCase(keyword)
+                        .or(sealImprintDetail.submission.containsIgnoreCase(keyword))
+                        .or(sealImprintDetail.purpose.containsIgnoreCase(keyword));
                 default: return null;
             }
         }
