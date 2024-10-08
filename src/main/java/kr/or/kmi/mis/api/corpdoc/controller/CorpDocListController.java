@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocLeftRequestDTO;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocStoreRequestDTO;
-import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueListResponseDTO;
+import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocIssueResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocRnpResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocListService;
 import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
@@ -25,8 +25,14 @@ public class CorpDocListController {
 
     @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
     @GetMapping(value = "/issueList")
-    public ApiResponse<CorpDocIssueListResponseDTO> getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, PostPageRequest page) {
+    public ApiResponse<Page<CorpDocIssueResponseDTO>> getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, PostPageRequest page) {
         return ResponseWrapper.success(corpDocListService.getCorpDocIssueList(postSearchRequestDTO, page.of()));
+    }
+
+    @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
+    @GetMapping(value = "/issuePendingList")
+    public ApiResponse<Page<CorpDocIssueResponseDTO>> getCorpDocIssueList(PostPageRequest page) {
+        return ResponseWrapper.success(corpDocListService.getCorpDocIssuePendingList(page.of()));
     }
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")
