@@ -115,7 +115,7 @@ public class SealApplyQueryRepositoryImpl implements SealApplyQueryRepository {
 
     @Override
     public Page<SealMyResponseDTO> getMySealApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
-        String docType = "법인서류";
+        String docType = "인장신청";
         List<SealMyResponseDTO> resultSet = queryFactory.select(
                     Projections.constructor(
                             SealMyResponseDTO.class,
