@@ -10,6 +10,7 @@ import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.doc.model.entity.QDocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.QDocMaster;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
+import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -34,6 +35,7 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
     private final QDocMaster docMaster = QDocMaster.docMaster;
     private final QDocDetail docDetail = QDocDetail.docDetail;
     private final StdBcdService stdBcdService;
+    private final DocDetailRepository docDetailRepository;
 
     @Override
     public Page<DocPendingResponseDTO> getDocPending2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
@@ -154,7 +156,7 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
 
     private BooleanExpression approverMatchCondition(String userId, StringPath approverChain, NumberPath<Integer> currentApproverIndex) {
         return Expressions.booleanTemplate(
-                "substring_index({0}, ', ', {1}+1) = {2}",
+                "json_unquote(json_extract(concat('[\"', replace({0}, ', ', '\",\"'), '\"]'), concat('$[', {1}, ']'))) = {2}",
                 approverChain,
                 currentApproverIndex,
                 userId
