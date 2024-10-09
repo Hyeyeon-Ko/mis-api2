@@ -112,7 +112,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
     }
 
     @Override
-    public Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(Pageable page) {
+    public Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
         List<CorpDocIssueResponseDTO> resultSet = queryFactory.select(
                         Projections.constructor(
                                 CorpDocIssueResponseDTO.class,
@@ -138,7 +138,12 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .from(corpDocMaster)
                 .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
-                        corpDocMaster.status.eq("B") // 발급대기
+                        corpDocMaster.status.eq("B"), // 발급대기
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(corpDocMaster.draftDate.asc())
                 .offset(page.getOffset())
@@ -149,7 +154,12 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .from(corpDocMaster)
                 .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
-                        corpDocMaster.status.eq("B")
+                        corpDocMaster.status.eq("B"),
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
 
@@ -182,7 +192,12 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
                         corpDocMaster.status.eq("E"), // 발급대기
-                        corpDocMaster.instCd.eq(instCd)
+                        corpDocMaster.instCd.eq(instCd),
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(corpDocMaster.draftDate.asc())
                 .offset(page.getOffset())
@@ -194,7 +209,12 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
                         corpDocMaster.status.eq("E"),
-                        corpDocMaster.instCd.eq(instCd)
+                        corpDocMaster.instCd.eq(instCd),
+                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
 
@@ -335,8 +355,9 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
                 case "전체": return corpDocMaster.title.containsIgnoreCase(title).or(corpDocMaster.drafter.containsIgnoreCase(title));
-                case "제목": return corpDocMaster.title.containsIgnoreCase(title);
                 case "신청자": return corpDocMaster.drafter.containsIgnoreCase(title);
+                case "제출처": return corpDocDetail.submission.containsIgnoreCase(title);
+                case "사용목적": return corpDocDetail.purpose.containsIgnoreCase(title);
                 default: return null;
             }
         }

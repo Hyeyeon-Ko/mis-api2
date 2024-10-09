@@ -42,8 +42,8 @@ public class CorpDocListServiceImpl implements CorpDocListService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(Pageable page){
-        return corpDocQueryRepository.getCorpDocIssuePendingList(page);
+    public Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(PostSearchRequestDTO postSearchRequestDTO, Pageable page){
+        return corpDocQueryRepository.getCorpDocIssuePendingList(postSearchRequestDTO, page);
     }
 
     @Override

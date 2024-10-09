@@ -27,6 +27,6 @@ public interface CorpDocQueryRepository {
     Page<CorpDocMyResponseDTO> getMyCorpDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<CorpDocMyResponseDTO> getMyCorpDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     Page<CorpDocIssueResponseDTO> getCorpDocIssueList2(PostSearchRequestDTO postSearchRequestDTO, Pageable page);
-    Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(Pageable page);
+    Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     Page<CorpDocRnpResponseDTO> getCorpDocRnpList(String instCd, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 }

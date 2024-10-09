@@ -12,7 +12,7 @@ public interface CorpDocListService {
     /** 법인서류 발급대장 내역 조회 */
     Page<CorpDocIssueResponseDTO> getCorpDocIssueList(PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 
-    Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(Pageable page);
+    Page<CorpDocIssueResponseDTO> getCorpDocIssuePendingList(PostSearchRequestDTO postSearchRequestDTO, Pageable page);
 
     int getCorpDocIssuePendingListCount();
 
