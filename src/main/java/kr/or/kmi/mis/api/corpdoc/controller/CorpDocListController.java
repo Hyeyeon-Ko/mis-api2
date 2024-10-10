@@ -31,8 +31,8 @@ public class CorpDocListController {
 
     @Operation(summary = "get Issuance List of corpDoc", description = "법인서류 발급대장 리스트 조회")
     @GetMapping(value = "/issuePendingList")
-    public ApiResponse<Page<CorpDocIssueResponseDTO>> getCorpDocIssueList(PostPageRequest page) {
-        return ResponseWrapper.success(corpDocListService.getCorpDocIssuePendingList(page.of()));
+    public ApiResponse<Page<CorpDocIssueResponseDTO>> getCorpDocIssueList2(PostSearchRequestDTO postSearchRequestDTO, PostPageRequest page) {
+        return ResponseWrapper.success(corpDocListService.getCorpDocIssuePendingList(postSearchRequestDTO, page.of()));
     }
 
     @Operation(summary = "get Receive and Payment List of corpDoc", description = "법인서류 수불대장 리스트 조회")

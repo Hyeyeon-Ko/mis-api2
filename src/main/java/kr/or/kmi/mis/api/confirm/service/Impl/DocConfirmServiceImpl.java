@@ -63,16 +63,19 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex() + 1);
 
         // 문서번호 생성해, 업데이트
-        DocDetail lastDocDetail = docDetailRepository
-                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
-        String docId = "";
-        if (lastDocDetail != null) {
-            docId = createDocId(lastDocDetail.getDocId());
-        } else {
-            docId = createDocId("");
-        }
+        if (isLastApprover) {
+            DocDetail lastDocDetail = docDetailRepository
+                    .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
 
-        docDetail.updateDocId(docId);
+            String docId = "";
+            if (lastDocDetail != null) {
+                docId = createDocId(lastDocDetail.getDocId());
+            } else {
+                docId = createDocId("");
+            }
+
+            docDetail.updateDocId(docId);
+        }
 
         // 2. 알림 전송
         if(isLastApprover) {
@@ -172,6 +175,4 @@ public class DocConfirmServiceImpl implements DocConfirmService {
 
         return nowYear + "-" + String.format("%03d", num);
     }
-
-
 }

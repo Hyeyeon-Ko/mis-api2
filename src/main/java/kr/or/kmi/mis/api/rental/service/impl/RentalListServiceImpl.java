@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,12 @@ public class RentalListServiceImpl implements RentalListService {
                 createSummary("제주센터", jejuResponses)
         );
 
+        // 전국 센터 합계 계산
+        RentalSummaryResponseDTO totalSummary = createTotalSummary(summary);
+
+        summary = new ArrayList<>(summary);
+        summary.add(totalSummary);
+
         CenterRentalListResponseDTO centerRentalResponses = CenterRentalListResponseDTO.of(
                 foundationResponses, bonwonResponses, yeouidoResponses, gangnamResponses, gwanghwamunResponses,
                 suwonResponses, daeguResponses, busanResponses, gwangjuResponses, jejuResponses
@@ -83,6 +90,29 @@ public class RentalListServiceImpl implements RentalListService {
         List<CenterRentalListResponseDTO> centerRentalResponsesList = List.of(centerRentalResponses);
 
         return RentalTotalListResponseDTO.of(centerList, centerRentalResponsesList, summary);
+    }
+
+    // 새로운 메서드: 전국 센터 합계를 계산
+    private RentalSummaryResponseDTO createTotalSummary(List<RentalSummaryResponseDTO> summaryList) {
+        int totalWaterPurifiers = 0;
+        int totalAirPurifiers = 0;
+        int totalBidets = 0;
+        double totalRentalFee = 0.0;
+
+        for (RentalSummaryResponseDTO summary : summaryList) {
+            totalWaterPurifiers += summary.getWaterPurifier();
+            totalAirPurifiers += summary.getAirPurifier();
+            totalBidets += summary.getBidet();
+            totalRentalFee += summary.getMonthlyRentalFee();
+        }
+
+        return RentalSummaryResponseDTO.builder()
+                .center("합계")
+                .waterPurifier(totalWaterPurifiers)
+                .airPurifier(totalAirPurifiers)
+                .bidet(totalBidets)
+                .monthlyRentalFee((int) totalRentalFee)
+                .build();
     }
 
     private RentalSummaryResponseDTO createSummary(String centerName, List<RentalResponseDTO> rentalResponses) {

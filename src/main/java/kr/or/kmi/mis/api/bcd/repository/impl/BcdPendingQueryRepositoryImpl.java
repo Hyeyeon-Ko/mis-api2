@@ -170,7 +170,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
 
     private BooleanExpression approverMatchCondition(String userId, StringPath approverChain, NumberPath<Integer> currentApproverIndex) {
         return Expressions.booleanTemplate(
-                "substring_index({0}, ', ', {1}+1) = {2}",
+                "json_unquote(json_extract(concat('[\"', replace({0}, ', ', '\",\"'), '\"]'), concat('$[', {1}, ']'))) = {2}",
                 approverChain,
                 currentApproverIndex,
                 userId
