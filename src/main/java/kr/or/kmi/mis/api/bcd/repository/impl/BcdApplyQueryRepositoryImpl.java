@@ -216,7 +216,11 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .from(bcdMaster)
                 .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-                        bcdMaster.drafterId.eq(drafterId)
+                        bcdMaster.drafterId.eq(drafterId),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                        LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                        LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(bcdMaster.draftDate.desc())
                 .offset(page.getOffset())
@@ -226,7 +230,11 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
         Long count = queryFactory.select(bcdMaster.count())
                 .from(bcdMaster)
                 .where(
-                        bcdMaster.drafterId.eq(drafterId)
+                        bcdMaster.drafterId.eq(drafterId),
+                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
+                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
 
