@@ -3,7 +3,7 @@ package kr.or.kmi.mis.api.noti.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.noti.model.entity.Notification;
-import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
+import kr.or.kmi.mis.api.noti.model.response.NotiResponseDTO;
 import kr.or.kmi.mis.api.noti.respository.EmitterRepository;
 import kr.or.kmi.mis.api.noti.respository.NotificationRepository;
 import kr.or.kmi.mis.api.noti.service.NotificationService;
@@ -102,11 +102,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SseResponseDTO> getAllNotification(String userId) {
+    public List<NotiResponseDTO> getAllNotification(String userId) {
         List<Notification> notifications = notificationRepository.findAllByUserIdOrderByCreatedAtAsc(userId);
 
         return notifications.stream()
-                .map(SseResponseDTO::of).toList();
+                .map(NotiResponseDTO::of).toList();
     }
 
 }
