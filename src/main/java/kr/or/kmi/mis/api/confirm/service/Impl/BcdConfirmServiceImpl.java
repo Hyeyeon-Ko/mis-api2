@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.confirm.service.Impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
-import kr.or.kmi.mis.api.apply.service.Impl.ApplyServiceImpl;
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
@@ -9,6 +8,7 @@ import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.response.BcdDetailResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
+import kr.or.kmi.mis.api.bcd.repository.impl.BcdApplyQueryRepositoryImpl;
 import kr.or.kmi.mis.api.confirm.model.request.BcdApproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.request.BcdDisapproveRequestDTO;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
@@ -23,15 +23,15 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +52,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
     private final DocMasterRepository docMasterRepository;
+    private final BcdApplyQueryRepositoryImpl bcdApplyQueryRepositoryImpl;
 
     @Override
     @Transactional(readOnly = true)
@@ -269,11 +270,17 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
             return BcdHistoryResponseDTO.builder()
                     .title(master.getTitle())
-                    .draftDate(master.getDraftDate().toString())
+                    .draftDate(master.getDraftDate())
                     .applyStatus(master.getStatus())
                     .quantity(bcdDetail != null ? bcdDetail.getQuantity() : null)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BcdHistoryResponseDTO> getBcdApplicationHistory2(PostSearchRequestDTO postSearchRequestDTO, Pageable page, String draftId) {
+        return bcdApplyQueryRepositoryImpl.getBcdApplicationHistory(postSearchRequestDTO, page, draftId);
     }
 
 //    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {

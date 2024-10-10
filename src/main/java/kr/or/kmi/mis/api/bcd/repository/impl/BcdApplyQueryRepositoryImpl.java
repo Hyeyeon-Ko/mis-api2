@@ -1,20 +1,17 @@
 package kr.or.kmi.mis.api.bcd.repository.impl;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
-import com.querydsl.core.types.dsl.StringTemplate;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdMaster;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdApplyQueryRepository;
-import kr.or.kmi.mis.api.bcd.repository.BcdSampleQueryRepository;
+import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
+import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -193,6 +190,47 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
 
         return resultSet;
 
+    }
+
+    @Override
+    public Page<BcdHistoryResponseDTO> getBcdApplicationHistory(PostSearchRequestDTO postSearchRequestDTO, Pageable page, String draftId) {
+
+        BcdMaster master = queryFactory.selectFrom(bcdMaster)
+                .where(bcdMaster.draftId.eq(draftId))
+                .fetchOne();
+
+        if (master == null) {
+            throw new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId);
+        }
+
+        String drafterId = master.getDrafterId();
+
+        List<BcdHistoryResponseDTO> resultList = queryFactory.select(
+                        Projections.constructor(
+                                BcdHistoryResponseDTO.class,
+                                bcdMaster.title,
+                                bcdMaster.draftDate,
+                                bcdMaster.status,
+                                bcdDetail.quantity
+                        ))
+                .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
+                .where(
+                        bcdMaster.drafterId.eq(drafterId)
+                )
+                .orderBy(bcdMaster.draftDate.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+
+        Long count = queryFactory.select(bcdMaster.count())
+                .from(bcdMaster)
+                .where(
+                        bcdMaster.drafterId.eq(drafterId)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(resultList, page, count);
     }
 
     private BooleanExpression titleContains(String searchType, String title) {

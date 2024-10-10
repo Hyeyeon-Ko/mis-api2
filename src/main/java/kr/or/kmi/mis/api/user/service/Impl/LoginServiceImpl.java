@@ -59,46 +59,53 @@ public class LoginServiceImpl implements LoginService {
                 .bodyToMono(Map.class)
                 .block();
 
-        if (responseMap != null && "0000".equals(responseMap.get("resultCd"))) {  // 2024.10.4 API 배포 후 code==200 으로 변경 요청 및 return 값 확인 필수 !!!
-            LoginResponseDTO responseDTO = new LoginResponseDTO();
-            responseDTO.setHngNm((String) responseMap.get("hngnm"));
+        if (responseMap != null && "200".equals(responseMap.get("code").toString())) {  // 2024.10.4 API 배포 후 code==200 으로 변경 요청 및 return 값 확인 필수 !!!
 
-            InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(loginRequestDTO.getUserId());
-            String instCd = infoDetailResponseDTO.getInstCd();
-            String teamCd = infoDetailResponseDTO.getTeamCd();
-            String roleNm = infoDetailResponseDTO.getRoleNm();
-            responseDTO.setInstCd(instCd);
-            responseDTO.setTeamCd(teamCd);
-            responseDTO.setRoleNm(roleNm);
+            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
 
-            // teamCd, instCd -> deptCd
-            StdGroup teamStdGroup = stdGroupRepository.findByGroupCd("A003")
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+            if (dataMap != null) {
+                String userNm = (String) dataMap.get("userNm");
+                LoginResponseDTO responseDTO = new LoginResponseDTO();
+                responseDTO.setUserNm(userNm);
 
-            List<StdDetail> teamStdDetails = stdDetailRepository.findByGroupCdAndEtcItem3(teamStdGroup, responseDTO.getTeamCd())
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+                InfoDetailResponseDTO infoDetailResponseDTO = infoService.getUserInfoDetail(loginRequestDTO.getUserId());
+                String instCd = infoDetailResponseDTO.getInstCd();
+                String teamCd = infoDetailResponseDTO.getTeamCd();
+                String roleNm = infoDetailResponseDTO.getRoleNm();
+                responseDTO.setInstCd(instCd);
+                responseDTO.setTeamCd(teamCd);
+                responseDTO.setRoleNm(roleNm);
 
-            Optional<String> deptCdOpt = teamStdDetails.stream()
-                    .map(teamStdDetail -> {
-                        try {
-                            return stdDetailRepository.findByDetailCdAndEtcItem1(teamStdDetail.getEtcItem1(), responseDTO.getInstCd())
-                                    .map(StdDetail::getDetailCd)
-                                    .orElse(null);
-                        } catch (Exception e) {
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .findFirst();
+                // teamCd, instCd -> deptCd
+                StdGroup teamStdGroup = stdGroupRepository.findByGroupCd("A003")
+                        .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-            String deptCd = deptCdOpt.orElseThrow(() -> new IllegalArgumentException("No matching department code found"));
-            responseDTO.setDeptCd(deptCd);
+                List<StdDetail> teamStdDetails = stdDetailRepository.findByGroupCdAndEtcItem3(teamStdGroup, responseDTO.getTeamCd())
+                        .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(loginRequestDTO.getUserId()).orElse(null);
-            responseDTO.setRole(authority != null ? authority.getRole() : "USER");
-            responseDTO.setSidebarPermissions(sidebarPermissions);
+                Optional<String> deptCdOpt = teamStdDetails.stream()
+                        .map(teamStdDetail -> {
+                            try {
+                                return stdDetailRepository.findByDetailCdAndEtcItem1(teamStdDetail.getEtcItem1(), responseDTO.getInstCd())
+                                        .map(StdDetail::getDetailCd)
+                                        .orElse(null);
+                            } catch (Exception e) {
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .findFirst();
 
-            return responseDTO;
+                String deptCd = deptCdOpt.orElseThrow(() -> new IllegalArgumentException("No matching department code found"));
+                responseDTO.setDeptCd(deptCd);
+
+                Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(loginRequestDTO.getUserId()).orElse(null);
+                responseDTO.setRole(authority != null ? authority.getRole() : "USER");
+                responseDTO.setSidebarPermissions(sidebarPermissions);
+
+                return responseDTO;
+            }
+            return null;
         } else {
             return null;
         }
