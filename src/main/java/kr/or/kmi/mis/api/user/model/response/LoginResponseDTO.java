@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class LoginResponseDTO {
-    private String hngNm;
+    private String userNm;
     private String role;
     private String instCd;
     private String deptCd;

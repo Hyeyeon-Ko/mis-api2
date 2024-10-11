@@ -2,19 +2,13 @@ package kr.or.kmi.mis.api.confirm.service.Impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
 import kr.or.kmi.mis.api.confirm.service.SealMasterConfirmService;
-import kr.or.kmi.mis.api.noti.model.response.SseResponseDTO;
 import kr.or.kmi.mis.api.noti.service.NotificationSendService;
-import kr.or.kmi.mis.api.noti.service.NotificationService;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
-import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 
 @Service
 @RequiredArgsConstructor

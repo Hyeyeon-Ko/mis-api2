@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +35,11 @@ public class RentalListServiceImpl implements RentalListService {
         // instCd에 해당하는 모든 렌탈 내역을 가져옴
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCd(instCd)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        return rentalDetailList.stream()
+
+        Map<Long, List<RentalDetail>> groupedDetails = rentalDetailList.stream()
+                .collect(Collectors.groupingBy(RentalDetail::getDetailId));
+
+        return groupedDetails.values().stream()
                 .map(RentalResponseDTO::of)
                 .collect(Collectors.toList());
     }
@@ -43,7 +48,11 @@ public class RentalListServiceImpl implements RentalListService {
     public List<RentalResponseDTO> getCenterRentalListByStatus(String instCd, String status) {
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCdAndStatus(instCd, status)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        return rentalDetailList.stream()
+
+        Map<Long, List<RentalDetail>> groupedDetails = rentalDetailList.stream()
+                .collect(Collectors.groupingBy(RentalDetail::getDetailId));
+
+        return groupedDetails.values().stream()
                 .map(RentalResponseDTO::of)
                 .collect(Collectors.toList());
     }

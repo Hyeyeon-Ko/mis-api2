@@ -6,7 +6,6 @@ import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;

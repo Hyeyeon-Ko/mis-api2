@@ -26,7 +26,7 @@ public class LoginController {
 
         if (responseDTO != null) {
             session.setAttribute("userId", loginRequestDTO.getUserId());
-            session.setAttribute("hngNm", responseDTO.getHngNm());
+            session.setAttribute("userNm", responseDTO.getUserNm());
             session.setAttribute("role", responseDTO.getRole());
             session.setAttribute("instCd", responseDTO.getInstCd());
             session.setAttribute("deptCd", responseDTO.getDeptCd());

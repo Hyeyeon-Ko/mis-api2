@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 @Data
 @AllArgsConstructor
 @Builder
-public class SseResponseDTO {
+public class NotiResponseDTO {
 
     private Long id;
     private String content;
@@ -18,10 +18,10 @@ public class SseResponseDTO {
     private Boolean isRead;
     private String createdDate;
 
-    public static SseResponseDTO of(Notification notification) {
+    public static NotiResponseDTO of(Notification notification) {
         SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 
-        return SseResponseDTO.builder()
+        return NotiResponseDTO.builder()
                 .id(notification.getId())
                 .content(notification.getContent())
                 .type(notification.getType())
