@@ -44,6 +44,13 @@ public class NotificationController {
         return ResponseWrapper.success();
     }
 
+    @Operation(method = "알림 모두 읽음 처리", description = "사용자가 모두읽음 버튼을 눌렀을 때, 모두 읽음 처리")
+    @PutMapping("/allRead")
+    public ApiResponse<?> markAllNotificationAsRead() {
+        notificationService.markAllAsRead();
+        return ResponseWrapper.success();
+    }
+
     @Operation(method = "알림 개수 호출", description = "읽지 않은 알림 개수 호출")
     @GetMapping(value = "/unread/{userId}")
     public ApiResponse<?> getUnreadNotificationNum(@PathVariable("userId") String userId) {
