@@ -82,7 +82,8 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                             this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                     LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                             this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                    LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                    LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                            applyStatusIn(postSearchRequestDTO.getApplyStatus())      // 신청상태 필터링
                     )
                     .orderBy(docMaster.rgstDt.desc())
                     .offset(page.getOffset())
@@ -111,11 +112,19 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        applyStatusIn(postSearchRequestDTO.getApplyStatus())      // 신청상태 필터링
                 )
                 .fetchOne();
 
         return new PageImpl<>(resultSet, page, count);
+    }
+
+    private BooleanExpression applyStatusIn(List<String> applyStatus) {
+        if (applyStatus == null || applyStatus.isEmpty()) {
+            return null; // 조건이 없을 경우 필터링 하지 않음
+        }
+        return docMaster.status.in(applyStatus); // applyStatus 리스트에 해당하는 값만 필터링
     }
 
     @Override
