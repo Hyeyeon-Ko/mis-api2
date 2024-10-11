@@ -83,7 +83,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     @Override
     @Transactional
     public void addAdmin(AuthorityRequestDTO request) {
-        boolean authorityExists = authorityRepository.findByUserIdAndDeletedtIsNull(request.getUserId()).isPresent();
+        boolean authorityExists = authorityRepository.findByUserId(request.getUserId()).isPresent();
         if (authorityExists) {
             throw new IllegalStateException("Authority with userId " + request.getUserId() + " already exists");
         }
@@ -92,6 +92,9 @@ public class AuthorityServiceImpl implements AuthorityService {
         if (resultData == null) {
             throw new EntityNotFoundException("User information not found for userId: " + request.getUserId());
         }
+
+        System.out.println("resultData = " + resultData.getOrgdeptcd());
+        System.out.println("resultData.getBzbzplceCd() = " + resultData.getBzbzplceCd());
         
         String deptCd = stdDetailQueryRepository.findDetailCd(resultData.getOrgdeptcd(), resultData.getBzbzplceCd());
 
@@ -167,8 +170,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                 .orElseThrow(() -> new EntityNotFoundException("Authority with id " + authId + " not found"));
 
         // 권한 테이블 -> 취소할 관리자의 종료일시 저장
-        authority.deleteAdmin(LocalDateTime.now());
-        authorityRepository.save(authority);
+        authorityRepository.delete(authority);
 
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B001")
                 .orElseThrow(() -> new EntityNotFoundException("B001"));
