@@ -44,4 +44,9 @@ public class NotificationController {
         return ResponseWrapper.success();
     }
 
+    @Operation(method = "알림 개수 호출", description = "읽지 않은 알림 개수 호출")
+    @GetMapping(value = "/unread/{userId}")
+    public ApiResponse<?> getUnreadNotificationNum(@PathVariable("userId") String userId) {
+        return ResponseWrapper.success(notificationService.getUnreadNotificationNum(userId));
+    }
 }

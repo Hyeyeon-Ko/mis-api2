@@ -21,7 +21,6 @@ import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
-import kr.or.kmi.mis.api.doc.repository.impl.DocPendingQueryRepositoryImpl;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
@@ -37,12 +36,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

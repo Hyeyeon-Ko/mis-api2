@@ -109,4 +109,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(NotiResponseDTO::of).toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public int getUnreadNotificationNum(String userId) {
+        return notificationRepository.countByUserIdAndIsRead(userId, false);
+    }
+
 }
