@@ -50,7 +50,7 @@ public class RentalServiceImpl implements RentalService {
         RentalDetail rentalDetail = rentalDetailRepository.findById(detailId)
                 .orElseThrow(() -> new EntityNotFoundException("Rental Detail Not Found: " + detailId));
 
-        return RentalResponseDTO.of(rentalDetail);
+        return RentalResponseDTO.of(rentalDetail, String.valueOf(rentalDetail.getRgstDt()));
     }
 
     @Override

@@ -16,7 +16,7 @@ public class AuthorityResponseDTO {
     public static AuthorityResponseDTO of(Authority authority, String detailRole) {
         return AuthorityResponseDTO.builder()
                 .userId(authority.getUserId())
-                .userName(authority.getHngNm())
+                .userName(authority.getUserNm())
                 .userRole(authority.getRole())
                 .detailRole(detailRole)
                 .build();

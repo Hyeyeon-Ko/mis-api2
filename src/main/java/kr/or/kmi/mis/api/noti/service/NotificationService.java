@@ -10,4 +10,5 @@ public interface NotificationService {
     <T> void customNotify(Long userId, T data, String comment);
     void markAsRead(Long notificationId);
     List<NotiResponseDTO> getAllNotification(String userId);
+    int getUnreadNotificationNum(String userId);
 }

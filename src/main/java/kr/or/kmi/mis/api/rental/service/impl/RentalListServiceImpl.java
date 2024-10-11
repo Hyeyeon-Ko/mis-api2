@@ -16,10 +16,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,11 +39,16 @@ public class RentalListServiceImpl implements RentalListService {
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCd(instCd)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        Map<Long, List<RentalDetail>> groupedDetails = rentalDetailList.stream()
-                .collect(Collectors.groupingBy(RentalDetail::getDetailId));
+        LocalDateTime lastUpdateDate = rentalDetailList.stream()
+                .flatMap(detail -> Stream.of(detail.getUpdtDt(), detail.getRgstDt()))
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
 
-        return groupedDetails.values().stream()
-                .map(RentalResponseDTO::of)
+        String lastUpdtDate = (lastUpdateDate != null) ? lastUpdateDate.toLocalDate().toString() : null;
+
+        return rentalDetailList.stream()
+                .map(detail -> RentalResponseDTO.of(detail, lastUpdtDate))
                 .collect(Collectors.toList());
     }
 
@@ -49,11 +57,16 @@ public class RentalListServiceImpl implements RentalListService {
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCdAndStatus(instCd, status)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        Map<Long, List<RentalDetail>> groupedDetails = rentalDetailList.stream()
-                .collect(Collectors.groupingBy(RentalDetail::getDetailId));
+        LocalDateTime lastUpdateDate = rentalDetailList.stream()
+                .flatMap(detail -> Stream.of(detail.getUpdtDt(), detail.getRgstDt()))
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
 
-        return groupedDetails.values().stream()
-                .map(RentalResponseDTO::of)
+        String lastUpdtDate = (lastUpdateDate != null) ? lastUpdateDate.toLocalDate().toString() : null;
+
+        return rentalDetailList.stream()
+                .map(detail -> RentalResponseDTO.of(detail, lastUpdtDate))
                 .collect(Collectors.toList());
     }
 

@@ -30,7 +30,7 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
                         AuthorityResponseDTO2.class,
                         authority.authId,
                         authority.userId,
-                        authority.hngNm,
+                        authority.userNm,
                         authority.role,
                         Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A001", authority.instCd),
                         Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A002", authority.deptCd),
