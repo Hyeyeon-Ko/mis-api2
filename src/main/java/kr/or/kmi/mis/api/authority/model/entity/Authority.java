@@ -20,7 +20,7 @@ public class Authority {
     private String userId;
 
     @Column(nullable = false, length = 20)
-    private String hngNm;
+    private String userNm;
 
     @Column(nullable = false, length = 20)
     private String instCd;
@@ -45,10 +45,10 @@ public class Authority {
     private LocalDateTime deletedt;
 
     @Builder
-    public Authority(String userId, String hngNm, String instCd, String deptCd,
+    public Authority(String userId, String userNm, String instCd, String deptCd,
                      String teamCd, String teamNm, String email, String role, LocalDateTime createdt) {
         this.userId = userId;
-        this.hngNm = hngNm;
+        this.userNm = userNm;
         this.instCd = instCd;
         this.deptCd = deptCd;
         this.teamCd = teamCd;

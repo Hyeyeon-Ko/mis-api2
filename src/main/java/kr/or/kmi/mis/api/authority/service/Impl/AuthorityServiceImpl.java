@@ -97,7 +97,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
         Authority authorityInfo = Authority.builder()
                 .userId(resultData.getUserid())
-                .hngNm(resultData.getUsernm())
+                .userNm(resultData.getUsernm())
                 .instCd(resultData.getBzbzplceCd())
                 .deptCd(deptCd)
                 .teamCd(resultData.getOrgdeptcd())
@@ -145,7 +145,7 @@ public class AuthorityServiceImpl implements AuthorityService {
                     .orElseGet(() -> StdDetail.builder()
                             .detailCd(authority.getUserId())
                             .groupCd(stdGroupRepository.findById("B001").orElseThrow(() -> new IllegalArgumentException("Invalid groupCd")))
-                            .detailNm(authority.getHngNm())
+                            .detailNm(authority.getUserNm())
                             .etcItem1(authority.getUserId())
                             .etcItem2(authority.getRole())
                             .build()
