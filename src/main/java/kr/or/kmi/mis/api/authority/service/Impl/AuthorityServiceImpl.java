@@ -93,9 +93,6 @@ public class AuthorityServiceImpl implements AuthorityService {
             throw new EntityNotFoundException("User information not found for userId: " + request.getUserId());
         }
 
-        System.out.println("resultData = " + resultData.getOrgdeptcd());
-        System.out.println("resultData.getBzbzplceCd() = " + resultData.getBzbzplceCd());
-        
         String deptCd = stdDetailQueryRepository.findDetailCd(resultData.getOrgdeptcd(), resultData.getBzbzplceCd());
 
         Authority authorityInfo = Authority.builder()

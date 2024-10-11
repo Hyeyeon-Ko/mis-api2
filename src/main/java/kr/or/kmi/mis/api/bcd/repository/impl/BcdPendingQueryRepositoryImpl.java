@@ -70,7 +70,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
                         approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
                 )
-                .orderBy(bcdMaster.rgstDt.desc())
+                .orderBy(bcdMaster.rgstDt.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -96,7 +96,6 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
     public Page<BcdPendingResponseDTO> getMyBcdPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
-        System.out.println("BcdPendingQueryRepositoryImpl.getMyBcdPendingList2");
 
         String docType = "명함신청";
 

@@ -69,9 +69,6 @@ public class FileDownloadController {
         StdDetail sealStdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "D")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        System.out.println("fileDownloadRequestDTO = " + fileDownloadRequestDTO.getDownloadType());
-        System.out.println("fileDownloadRequestDTO = " + fileDownloadRequestDTO.getDownloadNotes());
-
         Map<String, String> directoryMap = Map.of(
                 "doc", docRemoteDirectory,
                 "seal", exportRemoteDirectory,
