@@ -46,8 +46,8 @@ public class NotificationController {
 
     @Operation(method = "알림 모두 읽음 처리", description = "사용자가 모두읽음 버튼을 눌렀을 때, 모두 읽음 처리")
     @PutMapping("/allRead")
-    public ApiResponse<?> markAllNotificationAsRead() {
-        notificationService.markAllAsRead();
+    public ApiResponse<?> markAllNotificationAsRead(@RequestParam String userId) {
+        notificationService.markAllAsRead(userId);
         return ResponseWrapper.success();
     }
 

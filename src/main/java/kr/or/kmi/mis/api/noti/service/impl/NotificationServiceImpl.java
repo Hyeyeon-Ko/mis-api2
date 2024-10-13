@@ -103,8 +103,8 @@ public class NotificationServiceImpl implements NotificationService {
     // 모든 알림 읽음 처리
     @Override
     @Transactional
-    public void markAllAsRead() {
-        List<Notification> notifications = notificationRepository.findAllByIsRead(false);
+    public void markAllAsRead(String userId) {
+        List<Notification> notifications = notificationRepository.findAllByIsReadAndUserId(false, userId);
         notifications.stream()
                 .peek(Notification::markAsRead)
                 .forEach(notificationRepository::save);
