@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.doc.repository.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.doc.model.entity.QDocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.QDocMaster;
@@ -11,7 +12,6 @@ import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocQueryRepository;
 import kr.or.kmi.mis.api.file.model.entity.QFileDetail;
 import kr.or.kmi.mis.api.file.model.entity.QFileHistory;
-import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,20 +51,28 @@ public class DocQueryRepositoryImpl implements DocQueryRepository {
     @Override
     public Page<DocResponseDTO> getDocList(DocRequestDTO docRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
 
+        QFileHistory fileHistorySub = new QFileHistory("fileHistorySub");
+        BooleanExpression maxSeqIdCondition = fileHistory.seqId.eq(
+                JPAExpressions.select(fileHistorySub.seqId.max())
+                        .from(fileHistorySub)
+                        .where(fileHistorySub.attachId.eq(fileDetail.attachId))
+        );
+
         List<DocResponseDTO> resultSet = queryFactory.select(
-                Projections.constructor(
-                        DocResponseDTO.class,
-                        docMaster.draftId,
-                        docMaster.draftDate,
-                        docMaster.drafter,
-                        docDetail.docId,
-                        docDetail.receiver,
-                        docMaster.title,
-                        Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A005", docMaster.status),
-                        fileHistory.fileName,
-                        fileHistory.filePath
+                        Projections.constructor(
+                                DocResponseDTO.class,
+                                docMaster.draftId,
+                                docMaster.draftDate,
+                                docMaster.drafter,
+                                docDetail.docId,
+                                docDetail.sender,
+                                docDetail.receiver,
+                                docMaster.title,
+                                Expressions.stringTemplate("function('fn_getCodeNm', {0}, {1})", "A005", docMaster.status),
+                                fileHistory.fileName,
+                                fileHistory.filePath
+                        )
                 )
-            )
                 .from(docMaster)
                 .innerJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
                 .innerJoin(fileDetail).on(docMaster.draftId.eq(fileDetail.draftId))
@@ -77,15 +85,15 @@ public class DocQueryRepositoryImpl implements DocQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        maxSeqIdCondition
                 )
                 .orderBy(docDetail.docId.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
 
-        Long count = queryFactory.select(docMaster.count()
-                )
+        Long count = queryFactory.select(docMaster.count())
                 .from(docMaster)
                 .innerJoin(docDetail).on(docMaster.draftId.eq(docDetail.draftId))
                 .innerJoin(fileDetail).on(docMaster.draftId.eq(fileDetail.draftId))
@@ -98,7 +106,8 @@ public class DocQueryRepositoryImpl implements DocQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        maxSeqIdCondition
                 )
                 .fetchOne();
 
@@ -113,7 +122,7 @@ public class DocQueryRepositoryImpl implements DocQueryRepository {
                         .or(docDetail.receiver.containsIgnoreCase(title))
                         .or(docDetail.sender.containsIgnoreCase(title))
                         .or(docMaster.drafter.containsIgnoreCase(title));
-                case "제목": return docDetail.docTitle.containsIgnoreCase(title);
+                case "제목": return docMaster.title.containsIgnoreCase(title);
                 case "수신처": return docDetail.receiver.containsIgnoreCase(title);
                 case "발신처": return docDetail.sender.containsIgnoreCase(title);
                 case "접수인": return docMaster.drafter.containsIgnoreCase(title);

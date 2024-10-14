@@ -242,8 +242,7 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
     private BooleanExpression containsExportKeyword(String searchType, String keyword) {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(keyword)) {
             switch (searchType) {
-                case "반출일자": return sealExportDetail.expDate.like("%" + keyword + "%");
-                case "반납일자": return sealExportDetail.submission.like("%" + keyword + "%");
+                case "반납일자": return sealExportDetail.returnDate.like("%" + keyword + "%");
                 case "사용목적": return sealExportDetail.purpose.like("%" + keyword + "%");
                 case "전체": return sealExportDetail.expDate.contains(keyword)
                         .or(sealExportDetail.submission.contains(keyword))

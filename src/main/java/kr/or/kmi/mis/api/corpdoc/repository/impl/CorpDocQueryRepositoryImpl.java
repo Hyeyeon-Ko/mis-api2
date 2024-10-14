@@ -75,7 +75,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                         corpDocMaster.status.eq("G") // 발급완료
                                 .or(corpDocMaster.status.eq("X") // 입고
                                         .or(corpDocMaster.status.eq("E"))), // 처리완료
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.titleIssueContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterIssueStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeIssueEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -93,7 +93,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                         corpDocMaster.status.eq("G")
                                 .or(corpDocMaster.status.eq("X")
                                         .or(corpDocMaster.status.eq("E"))), // 처리완료
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.titleIssueContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterIssueStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeIssueEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -139,7 +139,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
                         corpDocMaster.status.eq("B"), // 발급대기
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.titleIssueContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -155,7 +155,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .leftJoin(corpDocDetail).on(corpDocMaster.draftId.eq(corpDocDetail.draftId))
                 .where(
                         corpDocMaster.status.eq("B"),
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.titleIssueContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -193,7 +193,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .where(
                         corpDocMaster.status.eq("E"), // 발급대기
                         corpDocMaster.instCd.eq(instCd),
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.titleRnpContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterRnpStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeRnpEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -210,7 +210,7 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
                 .where(
                         corpDocMaster.status.eq("E"),
                         corpDocMaster.instCd.eq(instCd),
-                        this.titleContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
+                        this.titleRnpContains(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
                         this.afterRnpStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeRnpEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -364,6 +364,40 @@ public class CorpDocQueryRepositoryImpl implements CorpDocQueryRepository {
         if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
             switch (searchType) {
                 case "전체": return corpDocMaster.title.containsIgnoreCase(title).or(corpDocMaster.drafter.containsIgnoreCase(title));
+                case "신청자": return corpDocMaster.drafter.containsIgnoreCase(title);
+                case "제출처": return corpDocDetail.submission.containsIgnoreCase(title);
+                case "사용목적": return corpDocDetail.purpose.containsIgnoreCase(title);
+                default: return null;
+            }
+        }
+        return null;
+    }
+
+    private BooleanExpression titleIssueContains(String searchType, String title) {
+        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
+            switch (searchType) {
+                case "전체":
+                    return corpDocMaster.title.containsIgnoreCase(title)
+                            .or(corpDocMaster.drafter.containsIgnoreCase(title))
+                            .or(corpDocDetail.submission.containsIgnoreCase(title))
+                            .or(corpDocDetail.purpose.containsIgnoreCase(title));
+                case "이름": return corpDocMaster.drafter.containsIgnoreCase(title);
+                case "제출처": return corpDocDetail.submission.containsIgnoreCase(title);
+                case "사용목적": return corpDocDetail.purpose.containsIgnoreCase(title);
+                default: return null;
+            }
+        }
+        return null;
+    }
+
+    private BooleanExpression titleRnpContains(String searchType, String title) {
+        if (StringUtils.hasLength(searchType) && StringUtils.hasLength(title)) {
+            switch (searchType) {
+                case "전체":
+                    return corpDocMaster.title.containsIgnoreCase(title)
+                            .or(corpDocMaster.drafter.containsIgnoreCase(title))
+                            .or(corpDocDetail.submission.containsIgnoreCase(title))
+                            .or(corpDocDetail.purpose.containsIgnoreCase(title));
                 case "신청자": return corpDocMaster.drafter.containsIgnoreCase(title);
                 case "제출처": return corpDocDetail.submission.containsIgnoreCase(title);
                 case "사용목적": return corpDocDetail.purpose.containsIgnoreCase(title);
