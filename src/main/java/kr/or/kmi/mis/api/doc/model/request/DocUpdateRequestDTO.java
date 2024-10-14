@@ -2,8 +2,6 @@ package kr.or.kmi.mis.api.doc.model.request;
 
 import lombok.Getter;
 
-import java.sql.Timestamp;
-
 @Getter
 public class DocUpdateRequestDTO {
 

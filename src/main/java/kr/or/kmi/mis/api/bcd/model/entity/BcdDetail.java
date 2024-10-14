@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import lombok.*;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

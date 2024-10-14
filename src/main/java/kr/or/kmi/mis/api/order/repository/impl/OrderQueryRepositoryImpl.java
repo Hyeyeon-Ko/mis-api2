@@ -3,11 +3,8 @@ package kr.or.kmi.mis.api.order.repository.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdMaster;
-import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.repository.OrderQueryRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
@@ -19,8 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * packageName    : kr.or.kmi.mis.api.order.repository.impl

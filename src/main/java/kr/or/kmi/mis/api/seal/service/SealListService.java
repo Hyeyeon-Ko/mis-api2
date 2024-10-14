@@ -6,8 +6,6 @@ import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

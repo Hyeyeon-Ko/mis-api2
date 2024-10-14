@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
-import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
@@ -28,9 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Optional;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

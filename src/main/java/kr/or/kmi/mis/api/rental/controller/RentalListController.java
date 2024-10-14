@@ -1,8 +1,6 @@
 package kr.or.kmi.mis.api.rental.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageResponseDTO;
-import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageTotalListResponseDTO;
 import kr.or.kmi.mis.api.rental.model.response.RentalResponseDTO;
 import kr.or.kmi.mis.api.rental.model.response.RentalTotalListResponseDTO;
 import kr.or.kmi.mis.api.rental.service.RentalListService;

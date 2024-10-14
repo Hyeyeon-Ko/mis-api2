@@ -7,9 +7,6 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
-import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
 import kr.or.kmi.mis.api.doc.model.entity.QDocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.QDocMaster;
@@ -28,7 +25,6 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

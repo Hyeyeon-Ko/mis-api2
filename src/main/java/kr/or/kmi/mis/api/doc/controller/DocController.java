@@ -2,9 +2,9 @@ package kr.or.kmi.mis.api.doc.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.SendDocRequestDTO;
-import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.service.DocService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;

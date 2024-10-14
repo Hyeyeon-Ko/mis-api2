@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.corpdoc.model.response;
 
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
-import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

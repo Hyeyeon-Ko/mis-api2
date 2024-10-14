@@ -1,7 +1,5 @@
 package kr.or.kmi.mis.api.seal.model.response;
 
-import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
-import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import lombok.Builder;
 import lombok.Data;
 

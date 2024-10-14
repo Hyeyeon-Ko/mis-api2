@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.seal.repository;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.seal.model.response.ManagementListResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;

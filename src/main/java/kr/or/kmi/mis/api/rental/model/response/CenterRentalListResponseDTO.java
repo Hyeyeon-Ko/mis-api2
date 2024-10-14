@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.rental.model.response;
 
-import kr.or.kmi.mis.api.docstorage.domain.response.CenterDocstorageListResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

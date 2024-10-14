@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.std.model.request;
 
-import com.fasterxml.jackson.databind.BeanProperty;
 import kr.or.kmi.mis.api.std.model.entity.StdClass;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import lombok.AllArgsConstructor;

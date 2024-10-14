@@ -1,9 +1,14 @@
 package kr.or.kmi.mis.api.file.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

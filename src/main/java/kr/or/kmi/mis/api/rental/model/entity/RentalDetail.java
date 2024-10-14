@@ -2,8 +2,8 @@ package kr.or.kmi.mis.api.rental.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.rental.model.request.RentalRequestDTO;
-import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import kr.or.kmi.mis.api.rental.model.response.RentalExcelResponseDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

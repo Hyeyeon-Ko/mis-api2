@@ -1,7 +1,5 @@
 package kr.or.kmi.mis.api.std.model.request;
 
-import kr.or.kmi.mis.api.std.model.entity.StdDetail;
-import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

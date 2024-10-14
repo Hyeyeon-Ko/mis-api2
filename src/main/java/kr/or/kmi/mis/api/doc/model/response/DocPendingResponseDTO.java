@@ -1,11 +1,9 @@
 package kr.or.kmi.mis.api.doc.model.response;
 
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Builder

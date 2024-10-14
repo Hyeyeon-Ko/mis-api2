@@ -4,7 +4,6 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Getter

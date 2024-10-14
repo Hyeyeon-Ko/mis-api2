@@ -5,7 +5,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.seal.model.entity.QSealMaster;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;

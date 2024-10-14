@@ -1,8 +1,8 @@
 package kr.or.kmi.mis.api.docstorage.service;
 
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageBulkUpdateRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageUpdateRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocStorageDetailResponseDTO;
 

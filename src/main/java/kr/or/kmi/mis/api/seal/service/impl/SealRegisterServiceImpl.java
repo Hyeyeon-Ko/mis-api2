@@ -1,8 +1,5 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
-import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
-import kr.or.kmi.mis.api.seal.repository.SealMasterRepository;
-import kr.or.kmi.mis.api.seal.util.ImageUtil;
 import kr.or.kmi.mis.api.seal.model.entity.SealRegisterDetail;
 import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
 import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
@@ -10,6 +7,7 @@ import kr.or.kmi.mis.api.seal.model.response.SealDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealRegisterDetailRepository;
 import kr.or.kmi.mis.api.seal.service.SealRegisterHistoryService;
 import kr.or.kmi.mis.api.seal.service.SealRegisterService;
+import kr.or.kmi.mis.api.seal.util.ImageUtil;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
@@ -20,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Optional;
 

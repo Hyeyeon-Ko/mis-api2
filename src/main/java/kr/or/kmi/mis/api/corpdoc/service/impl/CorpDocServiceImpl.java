@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.corpdoc.service.impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
@@ -27,7 +26,6 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;

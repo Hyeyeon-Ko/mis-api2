@@ -2,7 +2,10 @@ package kr.or.kmi.mis.api.file.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

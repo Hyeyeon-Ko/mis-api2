@@ -1,7 +1,9 @@
 package kr.or.kmi.mis.api.bcd.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 

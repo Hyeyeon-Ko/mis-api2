@@ -2,8 +2,6 @@ package kr.or.kmi.mis.api.doc.service;
 
 import kr.or.kmi.mis.api.doc.model.request.DocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocResponseDTO;
-import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
-import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

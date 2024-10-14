@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
-import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.seal.model.entity.SealImprintDetail;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import kr.or.kmi.mis.api.seal.model.request.ImprintRequestDTO;
@@ -18,9 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.util.Optional;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

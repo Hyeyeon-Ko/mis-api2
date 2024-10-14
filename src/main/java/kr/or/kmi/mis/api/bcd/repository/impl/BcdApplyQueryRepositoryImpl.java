@@ -1,7 +1,8 @@
 package kr.or.kmi.mis.api.bcd.repository.impl;
 
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;

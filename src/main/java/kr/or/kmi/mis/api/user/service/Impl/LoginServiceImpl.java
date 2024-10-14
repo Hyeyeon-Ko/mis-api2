@@ -9,7 +9,6 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.user.model.request.LoginRequestDTO;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
-import kr.or.kmi.mis.api.user.model.response.InfoResponseDTO;
 import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.api.user.service.LoginService;
