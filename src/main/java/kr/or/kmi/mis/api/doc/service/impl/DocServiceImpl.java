@@ -348,7 +348,7 @@ public class DocServiceImpl implements DocService {
                     String newFilePath = docRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), docRemoteDirectory);
                     sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
-                    fileService.updateFile(new FileUploadRequestDTO(docMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.updateFile(new FileUploadRequestDTO(docMaster.getDraftId(), docMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
@@ -357,7 +357,7 @@ public class DocServiceImpl implements DocService {
                 try {
                     String newFilePath = docRemoteDirectory + "/" + newFileName;
                     sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
-                    fileService.uploadFile(new FileUploadRequestDTO(docMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.uploadFile(new FileUploadRequestDTO(docMaster.getDraftId(), docMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
                 }

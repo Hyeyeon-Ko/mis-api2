@@ -164,7 +164,7 @@ public class SealExportServiceImpl implements SealExportService {
                     String newFilePath = exportRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), exportRemoteDirectory);
                     sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
-                    fileService.updateFile(new FileUploadRequestDTO(sealMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.updateFile(new FileUploadRequestDTO(sealMaster.getDraftId(), sealMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
@@ -173,7 +173,7 @@ public class SealExportServiceImpl implements SealExportService {
                 try {
                     String newFilePath = exportRemoteDirectory + "/" + newFileName;
                     sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
-                    fileService.uploadFile(new FileUploadRequestDTO(sealMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.uploadFile(new FileUploadRequestDTO(sealMaster.getDraftId(), sealMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
                 }

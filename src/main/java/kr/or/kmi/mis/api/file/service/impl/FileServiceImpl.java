@@ -35,11 +35,13 @@ public class FileServiceImpl implements FileService {
         // 1. FileDetail 업로드
         FileDetail fileDetail = new FileDetail(fileUploadRequestDTO, attachId);
         fileDetail.setRgstDt(LocalDateTime.now());
+        fileDetail.setRgstrId(fileUploadRequestDTO.getUserId());
         fileDetailRepository.save(fileDetail);
 
         // 2. FileHistory 업로드
         FileHistory fileHistory = new FileHistory(fileUploadRequestDTO, attachId, seqId);
         fileHistory.setRgstDt(LocalDateTime.now());
+        fileDetail.setRgstrId(fileUploadRequestDTO.getUserId());
         fileHistoryRepository.save(fileHistory);
     }
 

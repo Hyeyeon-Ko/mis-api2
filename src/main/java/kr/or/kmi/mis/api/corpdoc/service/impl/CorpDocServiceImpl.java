@@ -172,7 +172,7 @@ public class CorpDocServiceImpl implements CorpDocService {
                     String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), corpdocRemoteDirectory);
                     sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
-                    fileService.updateFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.updateFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
@@ -181,7 +181,7 @@ public class CorpDocServiceImpl implements CorpDocService {
                 try {
                     String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
                     sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
-                    fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
                 }
