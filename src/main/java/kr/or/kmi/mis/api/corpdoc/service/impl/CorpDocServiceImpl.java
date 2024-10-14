@@ -167,20 +167,20 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String newFileName = file.getOriginalFilename();
+                String fileName = file.getOriginalFilename();
                 try {
-                    String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), corpdocRemoteDirectory);
-                    sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
+                    String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
+                    String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
                     fileService.updateFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String newFileName = file.getOriginalFilename();
+                String filename = file.getOriginalFilename();
                 try {
+                    String newFileName = sftpClient.uploadFile(file, filename, corpdocRemoteDirectory);
                     String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
-                    sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
                     fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);

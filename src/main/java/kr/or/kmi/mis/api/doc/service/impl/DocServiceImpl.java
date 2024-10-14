@@ -345,20 +345,20 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String newFileName = file.getOriginalFilename();
+                String fileName = file.getOriginalFilename();
                 try {
-                    String newFilePath = docRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), docRemoteDirectory);
-                    sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
+                    String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
+                    String newFilePath = docRemoteDirectory + "/" + newFileName;
                     fileService.updateFile(new FileUploadRequestDTO(docMaster.getDraftId(), docMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String newFileName = file.getOriginalFilename();
+                String filename = file.getOriginalFilename();
                 try {
+                    String newFileName = sftpClient.uploadFile(file, filename, docRemoteDirectory);
                     String newFilePath = docRemoteDirectory + "/" + newFileName;
-                    sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
                     fileService.uploadFile(new FileUploadRequestDTO(docMaster.getDraftId(), docMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);

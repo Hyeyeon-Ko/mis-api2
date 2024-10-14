@@ -162,20 +162,20 @@ public class SealExportServiceImpl implements SealExportService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String newFileName = file.getOriginalFilename();
+                String filename = file.getOriginalFilename();
                 try {
-                    String newFilePath = exportRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), exportRemoteDirectory);
-                    sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
+                    String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
+                    String newFilePath = exportRemoteDirectory + "/" + newFileName;
                     fileService.updateFile(new FileUploadRequestDTO(sealMaster.getDraftId(), sealMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String newFileName = file.getOriginalFilename();
+                String filename = file.getOriginalFilename();
                 try {
+                    String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
                     String newFilePath = exportRemoteDirectory + "/" + newFileName;
-                    sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
                     fileService.uploadFile(new FileUploadRequestDTO(sealMaster.getDraftId(), sealMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
