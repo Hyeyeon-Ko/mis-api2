@@ -64,9 +64,9 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.division.eq("A"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
                         this.containsImprintKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
-                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                        this.afterUseDateStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                        this.beforeUseDateEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(sealMaster.rgstDt.desc())
@@ -83,9 +83,9 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.division.eq("A"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
                         this.containsImprintKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
-                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                        this.afterUseDateStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                        this.beforeUseDateEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
@@ -122,9 +122,9 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.division.eq("B"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
                         this.containsExportKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
-                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                        this.afterExportDateStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                        this.beforeExportDateEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(sealExportDetail.rgstDt.desc())
@@ -141,9 +141,9 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
                         sealMaster.division.eq("B"),
                         sealMaster.instCd.eq(applyRequestDTO.getInstCd()),
                         this.containsExportKeyword(postSearchRequestDTO.getSearchType(), postSearchRequestDTO.getKeyword()),
-                        this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
+                        this.afterExportDateStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
-                        this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
+                        this.beforeExportDateEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
@@ -254,19 +254,35 @@ public class SealListQueryRepositoryImpl implements SealListQueryRepository {
         return null;
     }
 
-    private BooleanExpression afterStartDate(LocalDate startDate) {
+    private BooleanExpression afterUseDateStartDate(LocalDate startDate) {
         if (startDate == null) {
             return Expressions.asBoolean(true).isTrue();
         }
         LocalDateTime startDateTime = startDate.atStartOfDay();
-        return sealMaster.draftDate.goe(startDateTime);
+        return sealImprintDetail.useDate.goe(String.valueOf(startDateTime));
     }
 
-    private BooleanExpression beforeEndDate(LocalDate endDate) {
+    private BooleanExpression beforeUseDateEndDate(LocalDate endDate) {
         if (endDate == null) {
             return Expressions.asBoolean(true).isTrue();
         }
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return sealMaster.draftDate.loe(endDateTime);
+        return sealImprintDetail.useDate.loe(String.valueOf(endDateTime));
+    }
+
+    private BooleanExpression afterExportDateStartDate(LocalDate startDate) {
+        if (startDate == null) {
+            return Expressions.asBoolean(true).isTrue();
+        }
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        return sealExportDetail.expDate.goe(String.valueOf(startDateTime));
+    }
+
+    private BooleanExpression beforeExportDateEndDate(LocalDate endDate) {
+        if (endDate == null) {
+            return Expressions.asBoolean(true).isTrue();
+        }
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return sealExportDetail.expDate.loe(String.valueOf(endDateTime));
     }
 }
