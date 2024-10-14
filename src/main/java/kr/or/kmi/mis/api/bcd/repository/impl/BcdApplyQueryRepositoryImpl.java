@@ -126,7 +126,8 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        applyStatusIn(postSearchRequestDTO.getApplyStatus())
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .offset(page.getOffset())
@@ -144,7 +145,8 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        applyStatusIn(postSearchRequestDTO.getApplyStatus())
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .fetchOne();
@@ -163,7 +165,8 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        applyStatusIn(postSearchRequestDTO.getApplyStatus())
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .fetch();
@@ -188,7 +191,8 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
+                        applyStatusIn(postSearchRequestDTO.getApplyStatus())
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .fetch();
