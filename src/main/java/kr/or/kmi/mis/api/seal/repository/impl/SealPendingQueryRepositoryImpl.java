@@ -61,7 +61,7 @@ public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepositor
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
-                .orderBy(sealMaster.rgstDt.desc())
+                .orderBy(sealMaster.rgstDt.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -83,7 +83,6 @@ public class SealPendingQueryRepositoryImpl implements SealPendingQueryRepositor
 
     @Override
     public Page<SealPendingResponseDTO> getMySealPendingList(ApplyRequestDTO applyRequestDTO, Pageable page) {
-        System.out.println("SealPendingQueryRepositoryImpl.getMySealPendingList");
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 

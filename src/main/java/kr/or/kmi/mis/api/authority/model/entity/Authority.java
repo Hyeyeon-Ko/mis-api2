@@ -42,8 +42,6 @@ public class Authority {
 
     private LocalDateTime createdt;
 
-    private LocalDateTime deletedt;
-
     @Builder
     public Authority(String userId, String userNm, String instCd, String deptCd,
                      String teamCd, String teamNm, String email, String role, LocalDateTime createdt) {
@@ -63,8 +61,4 @@ public class Authority {
         this.role = userRole;
     }
 
-    // 권한 취소 -> 종료일시 기록
-    public void deleteAdmin(LocalDateTime deletedt) {
-        this.deletedt = deletedt;
-    }
 }

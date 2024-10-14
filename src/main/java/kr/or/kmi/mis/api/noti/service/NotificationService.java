@@ -9,6 +9,8 @@ public interface NotificationService {
     SseEmitter subscribe(String userId);
     <T> void customNotify(Long userId, T data, String comment);
     void markAsRead(Long notificationId);
+
+    void markAllAsRead(String userId);
     List<NotiResponseDTO> getAllNotification(String userId);
     int getUnreadNotificationNum(String userId);
 }

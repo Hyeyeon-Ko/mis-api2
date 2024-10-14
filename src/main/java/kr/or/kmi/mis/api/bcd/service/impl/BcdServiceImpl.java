@@ -75,7 +75,7 @@ public class BcdServiceImpl implements BcdService {
     }
 
     private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetail) {
-        boolean authorityExists = authorityRepository.findAllByDeletedtIsNull()
+        boolean authorityExists = authorityRepository.findAll()
                 .stream()
                 .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
 

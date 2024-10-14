@@ -63,7 +63,7 @@ public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRep
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
-                .orderBy(corpDocMaster.rgstDt.desc())
+                .orderBy(corpDocMaster.rgstDt.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -84,7 +84,6 @@ public class CorpDocPendingQueryRepositoryImpl implements CorpDocPendingQueryRep
 
     @Override
     public Page<CorpDocPendingResponseDTO> getMyCorpDocPendingList2(ApplyRequestDTO applyRequestDTO, Pageable page) {
-        System.out.println("CorpDocPendingQueryRepositoryImpl.getMyCorpDocPendingList2");
 
         String instNm = stdBcdService.getInstNm(applyRequestDTO.getInstCd());
 

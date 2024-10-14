@@ -70,7 +70,7 @@ public class DocPendingQueryRepositoryImpl implements DocPendingQueryRepository 
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
                         approverMatchCondition(applyRequestDTO.getUserId(), docMaster.approverChain, docMaster.currentApproverIndex)
                 )
-                .orderBy(docMaster.rgstDt.desc())
+                .orderBy(docMaster.rgstDt.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();

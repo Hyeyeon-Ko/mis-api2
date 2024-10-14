@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * packageName    : kr.or.kmi.mis.cmm.model.request
@@ -28,4 +29,6 @@ public class PostSearchRequestDTO {
     private String searchType;
     @Schema(description = "검색어")
     private String keyword;
+    @Schema(description = "신청상태")
+    private List<String> applyStatus;
 }

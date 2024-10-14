@@ -121,12 +121,11 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         }
 
         if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(userId)
+            Authority authority = authorityRepository.findByUserId(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
 
             // ADMIN 권한 취소
-            authority.deleteAdmin(LocalDateTime.now());
-            authorityRepository.save(authority);
+            authorityRepository.delete(authority);
 
             // 사이드바 권한 취소
             StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")

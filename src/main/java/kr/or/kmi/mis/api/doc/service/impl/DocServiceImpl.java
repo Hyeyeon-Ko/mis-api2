@@ -241,7 +241,7 @@ public class DocServiceImpl implements DocService {
     }
 
     private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetailResponseDTO) {
-        boolean authorityExists = authorityRepository.findAllByDeletedtIsNull()
+        boolean authorityExists = authorityRepository.findAll()
                 .stream()
                 .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
 

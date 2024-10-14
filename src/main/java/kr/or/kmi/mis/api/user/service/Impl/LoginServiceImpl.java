@@ -99,7 +99,7 @@ public class LoginServiceImpl implements LoginService {
                 String deptCd = deptCdOpt.orElseThrow(() -> new IllegalArgumentException("No matching department code found"));
                 responseDTO.setDeptCd(deptCd);
 
-                Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(loginRequestDTO.getUserId()).orElse(null);
+                Authority authority = authorityRepository.findByUserId(loginRequestDTO.getUserId()).orElse(null);
                 responseDTO.setRole(authority != null ? authority.getRole() : "USER");
                 responseDTO.setSidebarPermissions(sidebarPermissions);
 

@@ -38,8 +38,7 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
                 )
         )
                 .from(authority)
-                .where(authority.deletedt.isNull())
-                .orderBy(authority.createdt.desc())
+                .orderBy(authority.userNm.asc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch()
@@ -47,11 +46,9 @@ public class AuthorityQueryRepositoryImpl implements AuthorityQueryRepository {
 
     Long count = queryFactory.select(authority.count())
             .from(authority)
-            .where(authority.deletedt.isNull())
             .fetchOne();
 
     return new PageImpl<>(resultSet, page, count);
 
     }
-
 }

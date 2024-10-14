@@ -64,7 +64,8 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
                 .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
                         bcdMaster.status.eq("B"),
-                        bcdMaster.orderDate.isNull()
+                        bcdMaster.orderDate.isNull(),
+                        bcdDetail.instCd.eq(instCd)
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .offset(page.getOffset())
@@ -76,7 +77,8 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
                 .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
                         bcdMaster.status.eq("B"),
-                        bcdMaster.orderDate.isNull()
+                        bcdMaster.orderDate.isNull(),
+                        bcdDetail.instCd.eq(instCd)
                 )
                 .fetchOne();
 

@@ -137,12 +137,11 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         }
 
         if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(approverId)
+            Authority authority = authorityRepository.findByUserId(approverId)
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
             // ADMIN 권한 취소
-            authority.deleteAdmin(LocalDateTime.now());
-            authorityRepository.save(authority);
+            authorityRepository.delete(authority);
 
             // 사이드바 권한 취소
             StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("B002")
@@ -225,12 +224,11 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         }
 
         if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserIdAndDeletedtIsNull(bcdMaster.getCurrentApproverId())
+            Authority authority = authorityRepository.findByUserId(bcdMaster.getCurrentApproverId())
                     .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
 
             // ADMIN 권한 취소
-            authority.deleteAdmin(LocalDateTime.now());
-            authorityRepository.save(authority);
+            authorityRepository.delete(authority);
 
             // 사이드바 권한 취소
             StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("B002")

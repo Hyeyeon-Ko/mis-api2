@@ -26,7 +26,6 @@ public class SealMasterConfirmServiceImpl implements SealMasterConfirmService {
         SealMaster sealMaster = sealMasterRepository.findById(draftId)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        System.out.println("userId = " + confirmRequestDTO.getUserId());
         String approver = infoService.getUserInfoDetail(confirmRequestDTO.getUserId()).getUserName();
 
         sealMaster.confirm("E", approver, confirmRequestDTO.getUserId());

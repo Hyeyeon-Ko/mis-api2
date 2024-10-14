@@ -20,7 +20,8 @@ public class DocResponseDTO {
     private LocalDateTime draftDate;
     private String drafter;
     private String docId;
-    private String resSender;
+    private String sender;
+    private String receiver;
     private String title;
     private String status;
     private String fileName;
@@ -32,12 +33,13 @@ public class DocResponseDTO {
 
 //    static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public DocResponseDTO(String draftId, LocalDateTime draftDate, String drafter, String docId, String resSender, String title, String status, String fileName, String filePath) {
+    public DocResponseDTO(String draftId, LocalDateTime draftDate, String drafter, String docId, String sender, String receiver, String title, String status, String fileName, String filePath) {
         this.draftId = draftId;
         this.draftDate = draftDate;
         this.drafter = drafter;
         this.docId = docId;
-        this.resSender = resSender;
+        this.sender = sender;
+        this.receiver = receiver;
         this.title = title;
         this.status = status;
         this.fileName = fileName;
@@ -52,7 +54,7 @@ public class DocResponseDTO {
                 .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())
-                .resSender(docDetail.getReceiver())
+                .receiver(docDetail.getReceiver())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
                 .fileName(fileHistory != null ? fileHistory.getFileName() : "")
@@ -67,11 +69,12 @@ public class DocResponseDTO {
                 .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())
-                .resSender(docDetail.getSender())
+                .sender(docDetail.getSender())
                 .title(docDetail.getDocTitle())
                 .status(docMaster.getStatus())
                 .fileName(fileHistory != null ? fileHistory.getFileName() : "")
                 .filePath(fileHistory != null ? fileHistory.getFilePath() : "")
                 .build();
     }
+
 }
