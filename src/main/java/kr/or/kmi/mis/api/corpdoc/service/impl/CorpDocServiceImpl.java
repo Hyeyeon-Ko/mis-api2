@@ -223,12 +223,15 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         if (file != null && !file.isEmpty()) {
             fileName = file.getOriginalFilename();
-            filePath = corpdocRemoteDirectory + "/" + fileName;
-            sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
+            String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
+            filePath = corpdocRemoteDirectory + "/" + newFileName;
 
             if (existingFilePath != null) {
                 sftpClient.deleteFile(existingFilePath, corpdocRemoteDirectory);
             }
+
+            return new String[]{newFileName, filePath};
+
         } else if (isFileDeleted && existingFilePath != null) {
             sftpClient.deleteFile(existingFilePath, corpdocRemoteDirectory);
         }

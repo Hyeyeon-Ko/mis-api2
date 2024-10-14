@@ -30,8 +30,8 @@ public class SftpClient {
     private Session session;
     private ChannelSftp channelSftp;
 
-    public void uploadFile(MultipartFile file, String fileName, String remoteDirectory) throws Exception {
-
+    public String uploadFile(MultipartFile file, String fileName, String remoteDirectory) throws Exception {
+        String newFileName = fileName;
         try {
             JSch jsch = new JSch();
             session = jsch.getSession(sftpUsername, sftpHost, sftpPort);
@@ -47,11 +47,23 @@ public class SftpClient {
 
             channelSftp.cd(remoteDirectory);
 
-            try (InputStream inputStream = file.getInputStream()) {
-//                channelSftp.put(inputStream, fileName);
-                channelSftp.put(inputStream, fileName, ChannelSftp.OVERWRITE);
+            // 동일한 파일명이 존재할 경우 새로운 이름 생성
+            int count = 1;
+            while (isFileExist(channelSftp, newFileName)) {
+                int dotIndex = fileName.lastIndexOf('.');
+                if (dotIndex != -1) {
+                    newFileName = fileName.substring(0, dotIndex) + "(" + count + ")" + fileName.substring(dotIndex);
+                } else {
+                    newFileName = fileName + "(" + count + ")";
+                }
+                count++;
             }
 
+            try (InputStream inputStream = file.getInputStream()) {
+                channelSftp.put(inputStream, newFileName, ChannelSftp.OVERWRITE);
+            }
+
+            return newFileName;
 
         } finally {
             if (channelSftp != null) {
@@ -60,6 +72,15 @@ public class SftpClient {
             if (session != null) {
                 session.disconnect();
             }
+        }
+    }
+
+    public boolean isFileExist(ChannelSftp channelSftp, String fileName) {
+        try {
+            channelSftp.lstat(fileName);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

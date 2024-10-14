@@ -228,10 +228,12 @@ public class DocServiceImpl implements DocService {
         if (file != null && !file.isEmpty()) {
             String fileName = file.getOriginalFilename();
             try {
-                sftpClient.uploadFile(file, fileName, docRemoteDirectory);
-                String filePath = docRemoteDirectory + "/" + fileName;
-                fileInfo[0] = fileName;
+                String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
+                String filePath = docRemoteDirectory + "/" + newFileName;
+                fileInfo[0] = newFileName;
                 fileInfo[1] = filePath;
+
+                return new String[]{newFileName, filePath};
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 업로드 실패", e);
             }

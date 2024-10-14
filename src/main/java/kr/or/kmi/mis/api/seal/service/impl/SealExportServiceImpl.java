@@ -56,12 +56,15 @@ public class SealExportServiceImpl implements SealExportService {
             fileName = file.getOriginalFilename();
 
             try {
-                sftpClient.uploadFile(file, fileName, remoteDirectory);
-                filePath = remoteDirectory + "/" + fileName;
+                String newFileName = sftpClient.uploadFile(file, fileName, remoteDirectory);
+                filePath = remoteDirectory + "/" + newFileName;
 
                 if (existingFileName != null) {
                     deleteFileFromSftp(existingFileName, remoteDirectory);
                 }
+
+                return new String[]{newFileName, filePath};
+
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 업로드 실패: " + fileName, e);
             }
