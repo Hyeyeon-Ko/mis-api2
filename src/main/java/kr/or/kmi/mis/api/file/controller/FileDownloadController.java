@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -96,18 +95,10 @@ public class FileDownloadController {
                 throw new IOException("File not found on SFTP server.");
             }
 
-            FileDetail fileDetail = fileDetailRepository.findByDraftId(fileDownloadRequestDTO.getDraftId())
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-            String fileDate = fileDetail.getRgstDt().toLocalDate().toString();
-            String fileDrafter = infoService.getUserInfoDetail(fileDetail.getRgstrId()).getUserName();
-
-            String customFileName = fileDate + "_" + fileDrafter + "_" + filename;
-
-            String encodedFileName = UriUtils.encode(customFileName, StandardCharsets.UTF_8);
+            String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
 
             responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + customFileName + "\"; filename*=UTF-8''" + encodedFileName);
+                    "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // 캐시 방지 헤더 추가
             responseHeaders.setCacheControl("no-cache, no-store, must-revalidate");
