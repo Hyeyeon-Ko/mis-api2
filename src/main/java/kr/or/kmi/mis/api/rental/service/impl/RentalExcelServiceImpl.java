@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -127,6 +128,7 @@ public class RentalExcelServiceImpl implements RentalExcelService {
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
             existingDetail.updateExcelData(dto);
+            existingDetail.setUpdtDt(LocalDateTime.now());
 
             rentalDetailRepository.save(existingDetail);
         });

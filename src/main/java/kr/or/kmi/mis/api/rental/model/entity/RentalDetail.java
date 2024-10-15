@@ -6,6 +6,8 @@ import kr.or.kmi.mis.api.rental.model.response.RentalExcelResponseDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
@@ -70,6 +72,7 @@ public class RentalDetail extends BaseSystemFieldEntity {
         this.installationSite = installationSite;
         this.specialNote = specialNote;
         this.status = "A";
+        this.setRgstDt(LocalDateTime.now());
     }
 
     public void update(RentalRequestDTO rentalUpdateRequestDTO) {
