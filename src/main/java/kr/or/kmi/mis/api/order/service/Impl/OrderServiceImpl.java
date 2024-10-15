@@ -96,11 +96,11 @@ public class OrderServiceImpl implements OrderService {
         byte[] excelData = excelService.generateExcel(orderRequest.getDraftIds());
 
         // 엑셀 파일 암호화
-        byte[] encryptedExcelData = excelService.getEncryptedExcelBytes(excelData, "password@!");
+        byte[] encryptedExcelData = excelService.getEncryptedExcelBytes(excelData, "06960");
 
         // 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
         sendEmailWithDynamicCredentials(
-                "smtps.hiworks.com",
+                "smtp.sirteam.net",
                 465,
                 orderRequest.getFromEmail(),
                 orderRequest.getPassword(),
