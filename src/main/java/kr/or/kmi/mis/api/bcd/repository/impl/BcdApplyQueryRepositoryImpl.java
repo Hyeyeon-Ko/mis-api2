@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdMaster;
@@ -209,15 +210,15 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
     @Override
     public Page<BcdHistoryResponseDTO> getBcdApplicationHistory(PostSearchRequestDTO postSearchRequestDTO, Pageable page, String draftId) {
 
-        BcdMaster master = queryFactory.selectFrom(bcdMaster)
-                .where(bcdMaster.draftId.eq(draftId))
+        BcdDetail detail = queryFactory.selectFrom(bcdDetail)
+                .where(bcdDetail.draftId.eq(draftId))
                 .fetchOne();
 
-        if (master == null) {
+        if (detail == null) {
             throw new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId);
         }
 
-        String drafterId = master.getDrafterId();
+        String drafterId = detail.getUserId();
 
         List<BcdHistoryResponseDTO> resultList = queryFactory.select(
                         Projections.constructor(
@@ -230,7 +231,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .from(bcdMaster)
                 .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-                        bcdMaster.drafterId.eq(drafterId),
+                        bcdDetail.userId.eq(drafterId),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                         LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
@@ -243,8 +244,9 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
 
         Long count = queryFactory.select(bcdMaster.count())
                 .from(bcdMaster)
+                .leftJoin(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-                        bcdMaster.drafterId.eq(drafterId),
+                        bcdDetail.userId.eq(drafterId),
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
