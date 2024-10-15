@@ -26,6 +26,10 @@ public class DocStorageDetailResponseDTO {
     private LocalDateTime lastupdtDt;
     private String type;
     private String status;
+    private String transferDate;
+    private String tsdNum;
+    private String dpdNum;
+    private String location;
 
     public static DocStorageDetailResponseDTO of(DocStorageDetail detail, String type, String status) {
         return DocStorageDetailResponseDTO.builder()
@@ -38,6 +42,10 @@ public class DocStorageDetailResponseDTO {
                 .storageYear(detail.getStorageYear())
                 .createDate(detail.getCreateDate())
                 .disposalDate(detail.getDisposalDate())
+                .transferDate(detail.getTransferDate())
+                .tsdNum(detail.getTsdNum())
+                .dpdNum(detail.getDpdNum())
+                .location(detail.getLocation())
                 .registr(detail.getRgstrId())
                 .lastupdtr(detail.getUpdtrId())
                 .lastupdtDt(detail.getUpdtDt())
