@@ -48,12 +48,12 @@ public class SealExportServiceImpl implements SealExportService {
     @Value("${sftp.remote-directory.export}")
     private String exportRemoteDirectory;
 
-    private String[] handleFileUpload(MultipartFile file, String existingFileName, String remoteDirectory) throws IOException {
+    private String[] handleFileUpload(String drafter, MultipartFile file, String existingFileName, String remoteDirectory) throws IOException {
         String fileName = null;
         String filePath = null;
 
         if (file != null && !file.isEmpty()) {
-            fileName = file.getOriginalFilename();
+            fileName = LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
 
             try {
                 String newFileName = sftpClient.uploadFile(file, fileName, remoteDirectory);
@@ -101,7 +101,7 @@ public class SealExportServiceImpl implements SealExportService {
         sealExportDetailRepository.save(sealExportDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file, null, exportRemoteDirectory);
+        String[] savedFileInfo = handleFileUpload(sealMaster.getDrafter(), file, null, exportRemoteDirectory);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -162,7 +162,7 @@ public class SealExportServiceImpl implements SealExportService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String filename = file.getOriginalFilename();
+                String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     sftpClient.deleteFile(fileHistory.getFileName(), exportRemoteDirectory);
                     String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
@@ -172,7 +172,7 @@ public class SealExportServiceImpl implements SealExportService {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String filename = file.getOriginalFilename();
+                String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
                     String newFilePath = exportRemoteDirectory + "/" + newFileName;

@@ -89,7 +89,7 @@ public class CorpDocServiceImpl implements CorpDocService {
         corpDocDetailRepository.save(corpDocDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        String[] savedFileInfo = handleFileUpload(corpDocMaster.getDrafter(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -167,7 +167,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String fileName = file.getOriginalFilename();
+                String fileName = LocalDateTime.now().toLocalDate() + "_" + corpDocMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     sftpClient.deleteFile(fileHistory.getFileName(), corpdocRemoteDirectory);
                     String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
@@ -177,9 +177,9 @@ public class CorpDocServiceImpl implements CorpDocService {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String filename = file.getOriginalFilename();
+                String fileName = LocalDateTime.now().toLocalDate() + "_" + corpDocMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
-                    String newFileName = sftpClient.uploadFile(file, filename, corpdocRemoteDirectory);
+                    String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
                     String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
                     fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
@@ -213,16 +213,16 @@ public class CorpDocServiceImpl implements CorpDocService {
         fileDetail.updateUseAt("N");
     }
 
-    private String[] handleFileUpload(MultipartFile file) throws Exception {
-        return handleFileUpload(file, null, false);
+    private String[] handleFileUpload(String drafter, MultipartFile file) throws Exception {
+        return handleFileUpload(drafter, file, null, false);
     }
 
-    private String[] handleFileUpload(MultipartFile file, String existingFilePath, boolean isFileDeleted) throws Exception {
+    private String[] handleFileUpload(String drafter, MultipartFile file, String existingFilePath, boolean isFileDeleted) throws Exception {
         String fileName = null;
         String filePath = null;
 
         if (file != null && !file.isEmpty()) {
-            fileName = file.getOriginalFilename();
+            fileName = LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
             String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
             filePath = corpdocRemoteDirectory + "/" + newFileName;
 

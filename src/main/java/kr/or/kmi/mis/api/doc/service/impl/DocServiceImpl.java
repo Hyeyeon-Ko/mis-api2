@@ -100,7 +100,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -131,7 +131,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -162,7 +162,7 @@ public class DocServiceImpl implements DocService {
         updateSidebarPermissionsIfNeeded(firstApproverId);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -193,7 +193,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -221,12 +221,12 @@ public class DocServiceImpl implements DocService {
         }
     }
 
-    private String[] handleFileUpload(MultipartFile file) throws IOException {
+    private String[] handleFileUpload(String drafter, MultipartFile file) throws IOException {
 
         String[] fileInfo = new String[2];
 
         if (file != null && !file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
+            String fileName = LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
             try {
                 String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
                 String filePath = docRemoteDirectory + "/" + newFileName;
@@ -345,7 +345,7 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String fileName = file.getOriginalFilename();
+                String fileName = docMaster.getDraftDate().toLocalDate() + "_" + docMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     sftpClient.deleteFile(fileHistory.getFileName(), docRemoteDirectory);
                     String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
