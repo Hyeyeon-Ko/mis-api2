@@ -127,6 +127,10 @@ public class RentalExcelServiceImpl implements RentalExcelService {
             RentalDetail existingDetail = rentalDetailRepository.findByContractNum(dto.getContractNum())
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+            if ("E".equals(existingDetail.getStatus())) {
+                throw new IllegalStateException("완료된 항목은 수정할 수 없습니다.");
+            }
+
             existingDetail.updateExcelData(dto);
             existingDetail.setUpdtDt(LocalDateTime.now());
 
