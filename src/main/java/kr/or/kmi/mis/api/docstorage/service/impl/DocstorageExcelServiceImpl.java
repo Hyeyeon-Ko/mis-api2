@@ -3,7 +3,7 @@ package kr.or.kmi.mis.api.docstorage.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageExcelApplyRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocstorageExcelRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
@@ -74,18 +74,15 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     }
 
     @Override
-    public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details, DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO) {
-        String draftId = generateDraftId();
+    public void saveDocstorageDetails(DocstorageExcelRequestDTO docStorageExcelRequestDTO) {
+        docStorageExcelRequestDTO.getDocStorageExcelApplyRequestDTO().toMasterEntity(docStorageExcelRequestDTO.getDocStorageExcelApplyRequestDTO());
 
-        docStorageExcelApplyRequestDTO.toMasterEntity(docStorageExcelApplyRequestDTO, draftId);
-
-        List<DocStorageDetail> entities = details.stream().map(dto -> {
+        List<DocStorageDetail> entities = docStorageExcelRequestDTO.getDetails().stream().map(dto -> {
             if (docStorageDetailRepository.existsByDocId(dto.getDocId())) {
                 throw new IllegalArgumentException("문서관리번호가 중복됩니다: " + dto.getDocId());
             }
 
             DocStorageDetail entity = DocStorageDetail.builder()
-                    .draftId(draftId)
                     .teamNm(dto.getTeamNm())
                     .docId(dto.getDocId())
                     .location(dto.getLocation())
@@ -101,7 +98,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
                     .deptCd(dto.getDeptCd())
                     .build();
 
-            entity.setRgstrId(docStorageExcelApplyRequestDTO.getDrafterId());
+            entity.setRgstrId(docStorageExcelRequestDTO.getDocStorageExcelApplyRequestDTO().getDrafterId());
             entity.setRgstDt(new Timestamp(System.currentTimeMillis()).toLocalDateTime());
 
             return entity;

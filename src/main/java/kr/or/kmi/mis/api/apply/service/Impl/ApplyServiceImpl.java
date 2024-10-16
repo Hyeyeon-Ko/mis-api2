@@ -22,6 +22,7 @@ import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
 import kr.or.kmi.mis.api.doc.service.DocService;
+import kr.or.kmi.mis.api.docstorage.service.DocstorageListService;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
@@ -53,6 +54,7 @@ public class ApplyServiceImpl implements ApplyService {
     private final SealListService sealListService;
     private final CorpDocListService corpDocListService;
     private final OrderService orderService;
+    private final DocstorageListService docstorageListService;
 
     private final BcdPendingQueryRepository bcdPendingQueryRepository;
     private final DocPendingQueryRepository docPendingQueryRepository;
@@ -280,8 +282,10 @@ public class ApplyServiceImpl implements ApplyService {
         int sealPendingCount = Math.toIntExact(sealPendingQueryRepository.getSealPendingCount(applyRequestDTO, postSearchRequestDTO));
         int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingListCount();
         int orderPendingCount = orderService.getOrderList(applyRequestDTO.getInstCd()).size();
+        int docstoragePendingCount = docstorageListService.getDocstoragePendingList(applyRequestDTO.getInstCd()).size();
 
-        return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount, corpDocIssuePendingCount, orderPendingCount);
+        return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount,
+                                          corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount);
     }
 
     @Override

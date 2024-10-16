@@ -1,7 +1,7 @@
 package kr.or.kmi.mis.api.docstorage.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageExcelApplyRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocstorageExcelRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public interface DocstorageExcelService {
     byte[] generateExcel(List<Long> detailIds) throws IOException;
 
     /* 문서보관 내역 저장 */
-    void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details, DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO);
+    void saveDocstorageDetails(DocstorageExcelRequestDTO docStorageExcelRequestDTO);
 
     /* 문서보관 내역 수정 */
     void updateDocstorageDetails(List<DocstorageExcelResponseDTO> details);

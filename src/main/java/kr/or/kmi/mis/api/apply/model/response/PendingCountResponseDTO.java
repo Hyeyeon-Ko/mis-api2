@@ -15,8 +15,10 @@ public class PendingCountResponseDTO {
     private int sealPendingCount;
     private int corpDocIssuePendingCount;
     private int orderPendingCount;
+    private int docstoragePendingCount;
 
-    public static PendingCountResponseDTO of(int bcdPendingCount, int docPendingCount, int corpDocPendingCount, int sealPendingCount, int corpDocIssuePendingCount, int orderPendingCount) {
+    public static PendingCountResponseDTO of(int bcdPendingCount, int docPendingCount, int corpDocPendingCount, int sealPendingCount,
+                                             int corpDocIssuePendingCount, int orderPendingCount, int docstoragePendingCount) {
         return PendingCountResponseDTO.builder()
                 .bcdPendingCount(bcdPendingCount)
                 .docPendingCount(docPendingCount)
@@ -24,6 +26,7 @@ public class PendingCountResponseDTO {
                 .sealPendingCount(sealPendingCount)
                 .corpDocIssuePendingCount(corpDocIssuePendingCount)
                 .orderPendingCount(orderPendingCount)
+                .docstoragePendingCount(docstoragePendingCount)
                 .build();
     }
 }
