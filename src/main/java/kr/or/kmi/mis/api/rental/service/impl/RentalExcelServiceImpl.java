@@ -95,7 +95,7 @@ public class RentalExcelServiceImpl implements RentalExcelService {
                 throw new IllegalArgumentException("위치분류가 비어 있습니다: " + dto);
             }
             if (dto.getInstallationSite() == null || dto.getInstallationSite().isEmpty()) {
-                throw new IllegalArgumentException("설치위치가 비어 있습니다: " + dto);
+                throw new IllegalArgumentException("설치장소가 비어 있습니다: " + dto);
             }
 
             if (rentalDetailRepository.existsByContractNum(dto.getContractNum())) {
@@ -529,7 +529,7 @@ public class RentalExcelServiceImpl implements RentalExcelService {
         createCell(headerRow, 6, "만료일자", headerStyle, null);
         createCell(headerRow, 7, "렌탈료", headerStyle, null);
         createCell(headerRow, 8, "위치분류", headerStyle, null);
-        createCell(headerRow, 9, "설치위치", headerStyle, null);
+        createCell(headerRow, 9, "설치장소", headerStyle, null);
         createCell(headerRow, 10, "특이사항", headerStyle, null);
     }
 

@@ -100,15 +100,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
+        getReceiveCenterNm(receiveDocRequestDTO, file, draftId, docMaster);
     }
 
     @Override
@@ -131,15 +123,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
+        getReceiveCenterNm(receiveDocRequestDTO, file, draftId, docMaster);
     }
 
     @Override
@@ -162,15 +146,7 @@ public class DocServiceImpl implements DocService {
         updateSidebarPermissionsIfNeeded(firstApproverId);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
+        getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
     }
 
     @Override
@@ -193,7 +169,34 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), file);
+        getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
+    }
+
+
+    private void getReceiveCenterNm(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
+        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, receiveDocRequestDTO.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), receiveDocRequestDTO.getDivision(), file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(draftId)
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
+    }
+
+    private void getSendCenterNm(SendDocRequestDTO sendDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
+        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, sendDocRequestDTO.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), sendDocRequestDTO.getDivision(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -221,12 +224,13 @@ public class DocServiceImpl implements DocService {
         }
     }
 
-    private String[] handleFileUpload(String drafter, MultipartFile file) throws IOException {
+    private String[] handleFileUpload(String drafter, String centerNm, String division, MultipartFile file) throws IOException {
 
         String[] fileInfo = new String[2];
+        String divisionNm = "A".equals(division) ? "수신" : "발신";
 
         if (file != null && !file.isEmpty()) {
-            String fileName = LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
+            String fileName = "(" + centerNm + "_" + divisionNm + ")" + LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
             try {
                 String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
                 String filePath = docRemoteDirectory + "/" + newFileName;
@@ -333,6 +337,13 @@ public class DocServiceImpl implements DocService {
         FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId()).orElse(null);
         FileHistory fileHistory = null;
 
+        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, docMaster.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String divisionNm = "A".equals(docDetailInfo.getDivision()) ? "수신" : "발신";
+
         if (fileDetail != null) {
             fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -345,7 +356,7 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String fileName = docMaster.getDraftDate().toLocalDate() + "_" + docMaster.getDrafter() + "_" + file.getOriginalFilename();
+                String fileName = "(" + centerDetail.getDetailNm() + "_" + divisionNm + ")" + docMaster.getDraftDate().toLocalDate() + "_" + docMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     sftpClient.deleteFile(fileHistory.getFileName(), docRemoteDirectory);
                     String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
