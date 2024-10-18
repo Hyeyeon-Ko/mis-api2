@@ -5,11 +5,9 @@ import kr.or.kmi.mis.api.doc.model.entity.DocHistory;
 import kr.or.kmi.mis.api.doc.repository.DocHistoryRepository;
 import kr.or.kmi.mis.api.doc.service.DocHistoryService;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Service

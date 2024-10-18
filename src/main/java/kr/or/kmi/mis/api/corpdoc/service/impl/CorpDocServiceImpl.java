@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.corpdoc.service.impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocMaster;
 import kr.or.kmi.mis.api.corpdoc.model.request.CorpDocRequestDTO;
@@ -27,7 +26,6 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
@@ -91,7 +89,7 @@ public class CorpDocServiceImpl implements CorpDocService {
         corpDocDetailRepository.save(corpDocDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        String[] savedFileInfo = handleFileUpload(corpDocMaster.getDrafter(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -169,21 +167,21 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String newFileName = file.getOriginalFilename();
+                String fileName = LocalDateTime.now().toLocalDate() + "_" + corpDocMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
-                    String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), corpdocRemoteDirectory);
-                    sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
-                    fileService.updateFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), newFileName, newFilePath));
+                    String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
+                    String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
+                    fileService.updateFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String newFileName = file.getOriginalFilename();
+                String fileName = LocalDateTime.now().toLocalDate() + "_" + corpDocMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
+                    String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
                     String newFilePath = corpdocRemoteDirectory + "/" + newFileName;
-                    sftpClient.uploadFile(file, newFileName, corpdocRemoteDirectory);
-                    fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.uploadFile(new FileUploadRequestDTO(corpDocMaster.getDraftId(), corpDocMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
                 }
@@ -215,22 +213,25 @@ public class CorpDocServiceImpl implements CorpDocService {
         fileDetail.updateUseAt("N");
     }
 
-    private String[] handleFileUpload(MultipartFile file) throws Exception {
-        return handleFileUpload(file, null, false);
+    private String[] handleFileUpload(String drafter, MultipartFile file) throws Exception {
+        return handleFileUpload(drafter, file, null, false);
     }
 
-    private String[] handleFileUpload(MultipartFile file, String existingFilePath, boolean isFileDeleted) throws Exception {
+    private String[] handleFileUpload(String drafter, MultipartFile file, String existingFilePath, boolean isFileDeleted) throws Exception {
         String fileName = null;
         String filePath = null;
 
         if (file != null && !file.isEmpty()) {
-            fileName = file.getOriginalFilename();
-            filePath = corpdocRemoteDirectory + "/" + fileName;
-            sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
+            fileName = LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
+            String newFileName = sftpClient.uploadFile(file, fileName, corpdocRemoteDirectory);
+            filePath = corpdocRemoteDirectory + "/" + newFileName;
 
             if (existingFilePath != null) {
                 sftpClient.deleteFile(existingFilePath, corpdocRemoteDirectory);
             }
+
+            return new String[]{newFileName, filePath};
+
         } else if (isFileDeleted && existingFilePath != null) {
             sftpClient.deleteFile(existingFilePath, corpdocRemoteDirectory);
         }

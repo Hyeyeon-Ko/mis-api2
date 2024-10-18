@@ -6,9 +6,9 @@ import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
 import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
+import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.ReceiveDocRequestDTO;
 import kr.or.kmi.mis.api.doc.model.request.SendDocRequestDTO;
-import kr.or.kmi.mis.api.doc.model.request.DocUpdateRequestDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocDetailResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
@@ -100,15 +100,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
+        getReceiveCenterNm(receiveDocRequestDTO, file, draftId, docMaster);
     }
 
     @Override
@@ -131,15 +123,7 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
+        getReceiveCenterNm(receiveDocRequestDTO, file, draftId, docMaster);
     }
 
     @Override
@@ -162,15 +146,7 @@ public class DocServiceImpl implements DocService {
         updateSidebarPermissionsIfNeeded(firstApproverId);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
+        getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
     }
 
     @Override
@@ -193,7 +169,34 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file);
+        getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
+    }
+
+
+    private void getReceiveCenterNm(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
+        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, receiveDocRequestDTO.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), receiveDocRequestDTO.getDivision(), file);
+
+        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
+                .draftId(draftId)
+                .fileName(savedFileInfo[0])
+                .filePath(savedFileInfo[1])
+                .build();
+
+        fileService.uploadFile(fileUploadRequestDTO);
+    }
+
+    private void getSendCenterNm(SendDocRequestDTO sendDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
+        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, sendDocRequestDTO.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), sendDocRequestDTO.getDivision(), file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -221,17 +224,20 @@ public class DocServiceImpl implements DocService {
         }
     }
 
-    private String[] handleFileUpload(MultipartFile file) throws IOException {
+    private String[] handleFileUpload(String drafter, String centerNm, String division, MultipartFile file) throws IOException {
 
         String[] fileInfo = new String[2];
+        String divisionNm = "A".equals(division) ? "수신" : "발신";
 
         if (file != null && !file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
+            String fileName = "(" + centerNm + "_" + divisionNm + ")" + LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
             try {
-                sftpClient.uploadFile(file, fileName, docRemoteDirectory);
-                String filePath = docRemoteDirectory + "/" + fileName;
-                fileInfo[0] = fileName;
+                String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
+                String filePath = docRemoteDirectory + "/" + newFileName;
+                fileInfo[0] = newFileName;
                 fileInfo[1] = filePath;
+
+                return new String[]{newFileName, filePath};
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 업로드 실패", e);
             }
@@ -331,6 +337,13 @@ public class DocServiceImpl implements DocService {
         FileDetail fileDetail = fileDetailRepository.findByDraftId(docMaster.getDraftId()).orElse(null);
         FileHistory fileHistory = null;
 
+        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, docMaster.getInstCd())
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String divisionNm = "A".equals(docDetailInfo.getDivision()) ? "수신" : "발신";
+
         if (fileDetail != null) {
             fileHistory = fileHistoryRepository.findTopByAttachIdOrderBySeqIdDesc(fileDetail.getAttachId())
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -343,21 +356,21 @@ public class DocServiceImpl implements DocService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String newFileName = file.getOriginalFilename();
+                String fileName = "(" + centerDetail.getDetailNm() + "_" + divisionNm + ")" + docMaster.getDraftDate().toLocalDate() + "_" + docMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
-                    String newFilePath = docRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), docRemoteDirectory);
-                    sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
-                    fileService.updateFile(new FileUploadRequestDTO(docMaster.getDraftId(), newFileName, newFilePath));
+                    String newFileName = sftpClient.uploadFile(file, fileName, docRemoteDirectory);
+                    String newFilePath = docRemoteDirectory + "/" + newFileName;
+                    fileService.updateFile(new FileUploadRequestDTO(docMaster.getDraftId(), docMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String newFileName = file.getOriginalFilename();
+                String filename = file.getOriginalFilename();
                 try {
+                    String newFileName = sftpClient.uploadFile(file, filename, docRemoteDirectory);
                     String newFilePath = docRemoteDirectory + "/" + newFileName;
-                    sftpClient.uploadFile(file, newFileName, docRemoteDirectory);
-                    fileService.uploadFile(new FileUploadRequestDTO(docMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.uploadFile(new FileUploadRequestDTO(docMaster.getDraftId(), docMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
                 }

@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.seal.model.response;
 
-import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.seal.model.entity.SealExportDetail;
 import lombok.Builder;

@@ -13,9 +13,8 @@ public class DocStorageExcelApplyRequestDTO {
     private String drafter;
     private String drafterId;
 
-    public DocStorageMaster toMasterEntity(DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO, String draftId) {
+    public DocStorageMaster toMasterEntity(DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO) {
         return DocStorageMaster.builder()
-                .draftId(draftId)
                 .draftDate(new Timestamp(System.currentTimeMillis()).toLocalDateTime())
                 .drafter(docStorageExcelApplyRequestDTO.getDrafter())
                 .drafterId(docStorageExcelApplyRequestDTO.getDrafterId())

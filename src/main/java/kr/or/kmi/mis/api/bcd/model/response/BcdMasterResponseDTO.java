@@ -1,9 +1,10 @@
 package kr.or.kmi.mis.api.bcd.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Builder

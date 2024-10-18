@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.user.model.response;
 
 import lombok.Data;
+
 import java.util.List;
 
 @Data

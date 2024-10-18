@@ -3,8 +3,7 @@ package kr.or.kmi.mis.api.docstorage.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
 import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageApplyRequestDTO;
-import kr.or.kmi.mis.api.docstorage.domain.request.DocStorageExcelApplyRequestDTO;
+import kr.or.kmi.mis.api.docstorage.domain.request.DocstorageExcelRequestDTO;
 import kr.or.kmi.mis.api.docstorage.domain.response.DocstorageExcelResponseDTO;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageDetailRepository;
 import kr.or.kmi.mis.api.docstorage.repository.DocStorageMasterRepository;
@@ -13,8 +12,6 @@ import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
-import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -27,7 +24,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,18 +74,15 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
     }
 
     @Override
-    public void saveDocstorageDetails(List<DocstorageExcelResponseDTO> details, DocStorageExcelApplyRequestDTO docStorageExcelApplyRequestDTO) {
-        String draftId = generateDraftId();
+    public void saveDocstorageDetails(DocstorageExcelRequestDTO docStorageExcelRequestDTO) {
+        docStorageExcelRequestDTO.getDocStorageExcelApplyRequestDTO().toMasterEntity(docStorageExcelRequestDTO.getDocStorageExcelApplyRequestDTO());
 
-        docStorageExcelApplyRequestDTO.toMasterEntity(docStorageExcelApplyRequestDTO, draftId);
-
-        List<DocStorageDetail> entities = details.stream().map(dto -> {
+        List<DocStorageDetail> entities = docStorageExcelRequestDTO.getDetails().stream().map(dto -> {
             if (docStorageDetailRepository.existsByDocId(dto.getDocId())) {
                 throw new IllegalArgumentException("문서관리번호가 중복됩니다: " + dto.getDocId());
             }
 
             DocStorageDetail entity = DocStorageDetail.builder()
-                    .draftId(draftId)
                     .teamNm(dto.getTeamNm())
                     .docId(dto.getDocId())
                     .location(dto.getLocation())
@@ -105,7 +98,7 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
                     .deptCd(dto.getDeptCd())
                     .build();
 
-            entity.setRgstrId(docStorageExcelApplyRequestDTO.getDrafterId());
+            entity.setRgstrId(docStorageExcelRequestDTO.getDocStorageExcelApplyRequestDTO().getDrafterId());
             entity.setRgstDt(new Timestamp(System.currentTimeMillis()).toLocalDateTime());
 
             return entity;

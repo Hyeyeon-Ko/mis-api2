@@ -4,13 +4,11 @@ import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocDetail;
 import kr.or.kmi.mis.api.corpdoc.model.entity.CorpDocHistory;
 import kr.or.kmi.mis.api.corpdoc.repository.CorpDocHistoryRepository;
 import kr.or.kmi.mis.api.corpdoc.service.CorpDocHistoryService;
-import kr.or.kmi.mis.api.doc.repository.DocHistoryRepository;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Service

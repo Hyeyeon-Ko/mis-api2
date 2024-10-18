@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.seal.service.impl;
 
-import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageMaster;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.model.request.FileUploadRequestDTO;
@@ -28,9 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Optional;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,20 +48,23 @@ public class SealExportServiceImpl implements SealExportService {
     @Value("${sftp.remote-directory.export}")
     private String exportRemoteDirectory;
 
-    private String[] handleFileUpload(MultipartFile file, String existingFileName, String remoteDirectory) throws IOException {
+    private String[] handleFileUpload(String drafter, MultipartFile file, String existingFileName, String remoteDirectory) throws IOException {
         String fileName = null;
         String filePath = null;
 
         if (file != null && !file.isEmpty()) {
-            fileName = file.getOriginalFilename();
+            fileName = LocalDateTime.now().toLocalDate() + "_" + drafter + "_" + file.getOriginalFilename();
 
             try {
-                sftpClient.uploadFile(file, fileName, remoteDirectory);
-                filePath = remoteDirectory + "/" + fileName;
+                String newFileName = sftpClient.uploadFile(file, fileName, remoteDirectory);
+                filePath = remoteDirectory + "/" + newFileName;
 
                 if (existingFileName != null) {
                     deleteFileFromSftp(existingFileName, remoteDirectory);
                 }
+
+                return new String[]{newFileName, filePath};
+
             } catch (Exception e) {
                 throw new IOException("SFTP 파일 업로드 실패: " + fileName, e);
             }
@@ -100,7 +101,7 @@ public class SealExportServiceImpl implements SealExportService {
         sealExportDetailRepository.save(sealExportDetail);
 
         // 3. File 업로드
-        String[] savedFileInfo = handleFileUpload(file, null, exportRemoteDirectory);
+        String[] savedFileInfo = handleFileUpload(sealMaster.getDrafter(), file, null, exportRemoteDirectory);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
                 .draftId(draftId)
@@ -161,21 +162,21 @@ public class SealExportServiceImpl implements SealExportService {
 
         if (file != null && !file.isEmpty()) {
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String newFileName = file.getOriginalFilename();
+                String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
-                    String newFilePath = exportRemoteDirectory + "/" + newFileName;
                     sftpClient.deleteFile(fileHistory.getFileName(), exportRemoteDirectory);
-                    sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
-                    fileService.updateFile(new FileUploadRequestDTO(sealMaster.getDraftId(), newFileName, newFilePath));
+                    String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
+                    String newFilePath = exportRemoteDirectory + "/" + newFileName;
+                    fileService.updateFile(new FileUploadRequestDTO(sealMaster.getDraftId(), sealMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String newFileName = file.getOriginalFilename();
+                String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
+                    String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
                     String newFilePath = exportRemoteDirectory + "/" + newFileName;
-                    sftpClient.uploadFile(file, newFileName, exportRemoteDirectory);
-                    fileService.uploadFile(new FileUploadRequestDTO(sealMaster.getDraftId(), newFileName, newFilePath));
+                    fileService.uploadFile(new FileUploadRequestDTO(sealMaster.getDraftId(), sealMaster.getDrafterId(), newFileName, newFilePath));
                 } catch (Exception e) {
                     throw new IOException("SFTP 파일 업로드 실패", e);
                 }

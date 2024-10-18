@@ -40,7 +40,7 @@ public class RentalController {
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "modify Rental info", description = "렌탈현황 관련 정보 수정")
+    @Operation(summary = "modify Rental info", description = "렌탈현황 관련 정보 일괄 수정")
     @PutMapping("/bulkUpdate")
     public ApiResponse<?> bulkUpdateRentalInfo(@RequestBody RentalBulkUpdateRequestDTO rentalBulkUpdateRequestDTO) {
         rentalService.bulkUpdateRentalInfo(rentalBulkUpdateRequestDTO);

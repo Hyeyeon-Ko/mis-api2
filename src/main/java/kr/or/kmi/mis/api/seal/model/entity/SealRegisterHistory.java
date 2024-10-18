@@ -5,7 +5,6 @@ import kr.or.kmi.mis.api.bcd.model.entity.DraftSeqPK;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

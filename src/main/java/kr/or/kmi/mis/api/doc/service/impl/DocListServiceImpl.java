@@ -8,15 +8,10 @@ import kr.or.kmi.mis.api.doc.repository.DocDetailRepository;
 import kr.or.kmi.mis.api.doc.repository.DocMasterRepository;
 import kr.or.kmi.mis.api.doc.repository.DocQueryRepository;
 import kr.or.kmi.mis.api.doc.service.DocListService;
-import kr.or.kmi.mis.api.docstorage.domain.response.DeptResponseDTO;
 import kr.or.kmi.mis.api.file.model.entity.FileDetail;
 import kr.or.kmi.mis.api.file.model.entity.FileHistory;
 import kr.or.kmi.mis.api.file.repository.FileDetailRepository;
 import kr.or.kmi.mis.api.file.repository.FileHistoryRepository;
-import kr.or.kmi.mis.api.std.model.entity.StdDetail;
-import kr.or.kmi.mis.api.std.model.entity.StdGroup;
-import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
-import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +31,6 @@ public class DocListServiceImpl implements DocListService {
     private final DocMasterRepository docMasterRepository;
     private final DocDetailRepository docDetailRepository;
     private final StdBcdService stdBcdService;
-    private final StdDetailRepository stdDetailRepository;
-    private final StdGroupRepository stdGroupRepository;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
 

@@ -1,16 +1,16 @@
 package kr.or.kmi.mis.api.apply.service.Impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
+import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
 import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
 import kr.or.kmi.mis.api.bcd.repository.BcdPendingQueryRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
-import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMyResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
@@ -22,6 +22,7 @@ import kr.or.kmi.mis.api.doc.model.response.DocMyResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.repository.DocPendingQueryRepository;
 import kr.or.kmi.mis.api.doc.service.DocService;
+import kr.or.kmi.mis.api.docstorage.service.DocstorageListService;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
@@ -53,6 +54,7 @@ public class ApplyServiceImpl implements ApplyService {
     private final SealListService sealListService;
     private final CorpDocListService corpDocListService;
     private final OrderService orderService;
+    private final DocstorageListService docstorageListService;
 
     private final BcdPendingQueryRepository bcdPendingQueryRepository;
     private final DocPendingQueryRepository docPendingQueryRepository;
@@ -280,8 +282,10 @@ public class ApplyServiceImpl implements ApplyService {
         int sealPendingCount = Math.toIntExact(sealPendingQueryRepository.getSealPendingCount(applyRequestDTO, postSearchRequestDTO));
         int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingListCount();
         int orderPendingCount = orderService.getOrderList(applyRequestDTO.getInstCd()).size();
+        int docstoragePendingCount = docstorageListService.getDocstoragePendingList(applyRequestDTO.getInstCd()).size();
 
-        return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount, corpDocIssuePendingCount, orderPendingCount);
+        return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount,
+                                          corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount);
     }
 
     @Override

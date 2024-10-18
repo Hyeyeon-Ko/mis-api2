@@ -10,7 +10,7 @@ public interface DocStorageDetailRepository extends JpaRepository<DocStorageDeta
 
     Optional<List<DocStorageDetail>> findAllByDraftId(String draftId);
     Optional<List<DocStorageDetail>> findAllByDeptCd(String deptCd);
-    Optional<List<DocStorageDetail>> findByDeptCdAndStatus(String detailCd, String status);
+    Optional<List<DocStorageDetail>> findByDeptCdAndStatusIn(String deptCd, List<String> status);
     List<DocStorageDetail> findAllByDetailIdIn(List<Long> detailIds);
     Optional<DocStorageDetail> findByDocId(String DocId);
     boolean existsByDocId(String docId);

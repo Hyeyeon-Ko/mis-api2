@@ -3,9 +3,7 @@ package kr.or.kmi.mis.api.seal.model.response;
 import kr.or.kmi.mis.api.seal.model.entity.SealMaster;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Data

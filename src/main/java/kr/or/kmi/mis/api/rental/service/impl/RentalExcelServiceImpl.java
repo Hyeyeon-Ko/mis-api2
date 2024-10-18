@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,7 +95,7 @@ public class RentalExcelServiceImpl implements RentalExcelService {
                 throw new IllegalArgumentException("위치분류가 비어 있습니다: " + dto);
             }
             if (dto.getInstallationSite() == null || dto.getInstallationSite().isEmpty()) {
-                throw new IllegalArgumentException("설치위치가 비어 있습니다: " + dto);
+                throw new IllegalArgumentException("설치장소가 비어 있습니다: " + dto);
             }
 
             if (rentalDetailRepository.existsByContractNum(dto.getContractNum())) {
@@ -126,7 +127,12 @@ public class RentalExcelServiceImpl implements RentalExcelService {
             RentalDetail existingDetail = rentalDetailRepository.findByContractNum(dto.getContractNum())
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+            if ("E".equals(existingDetail.getStatus())) {
+                throw new IllegalStateException("완료된 항목은 수정할 수 없습니다.");
+            }
+
             existingDetail.updateExcelData(dto);
+            existingDetail.setUpdtDt(LocalDateTime.now());
 
             rentalDetailRepository.save(existingDetail);
         });
@@ -523,7 +529,7 @@ public class RentalExcelServiceImpl implements RentalExcelService {
         createCell(headerRow, 6, "만료일자", headerStyle, null);
         createCell(headerRow, 7, "렌탈료", headerStyle, null);
         createCell(headerRow, 8, "위치분류", headerStyle, null);
-        createCell(headerRow, 9, "설치위치", headerStyle, null);
+        createCell(headerRow, 9, "설치장소", headerStyle, null);
         createCell(headerRow, 10, "특이사항", headerStyle, null);
     }
 

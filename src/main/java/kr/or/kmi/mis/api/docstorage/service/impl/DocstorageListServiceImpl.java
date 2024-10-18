@@ -97,7 +97,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
         List<DocstorageResponseDTO> responseList = new ArrayList<>();
 
         for (StdDetail stdDetail : stdDetailList) {
-            List<DocStorageDetail> docstorageDetails = docStorageDetailRepository.findByDeptCdAndStatus(stdDetail.getDetailCd(), "E")
+            List<DocStorageDetail> docstorageDetails = docStorageDetailRepository.findByDeptCdAndStatusIn(stdDetail.getDetailCd(), Arrays.asList("B", "E"))
                     .orElse(Collections.emptyList());
 
             for (DocStorageDetail docstorageDetail : docstorageDetails) {

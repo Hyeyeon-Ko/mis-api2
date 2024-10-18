@@ -14,6 +14,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +42,7 @@ import java.util.zip.ZipOutputStream;
 public class FileDownloadController {
 
     private final SftpClient sftpClient;
+    private final InfoService infoService;
     private final FileDownloadHistoryRepository fileDownloadHistoryRepository;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;
@@ -86,13 +87,23 @@ public class FileDownloadController {
         }
 
         try {
+            HttpHeaders responseHeaders = new HttpHeaders();
+
             byte[] fileBytes = sftpClient.downloadFile(filename, remoteDirectory);
 
             if (fileBytes == null || fileBytes.length == 0) {
                 throw new IOException("File not found on SFTP server.");
             }
 
-            String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+            String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+
+            responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+
+            // 캐시 방지 헤더 추가
+            responseHeaders.setCacheControl("no-cache, no-store, must-revalidate");
+            responseHeaders.setPragma("no-cache");
+            responseHeaders.setExpires(0L);
 
             // 다운로드 사유 기록
             String attachId = generateAttachId();
@@ -103,8 +114,8 @@ public class FileDownloadController {
             fileDownloadHistoryRepository.save(fileDownloadHistory);
 
             return ResponseEntity.ok()
+                    .headers(responseHeaders)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"")
                     .body(fileBytes);
 
         } catch (SftpException e) {
