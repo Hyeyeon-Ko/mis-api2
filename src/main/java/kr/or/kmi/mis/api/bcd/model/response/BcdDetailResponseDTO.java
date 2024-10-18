@@ -40,6 +40,14 @@ public class BcdDetailResponseDTO {
 
     // BcdMaster Entity -> BcdMaster response Dto
     public static BcdDetailResponseDTO of(BcdDetail bcdDetail, String drafter, List<String> names) {
+
+        String address = bcdDetail.getAddress();
+
+        if (address != null && address.endsWith("층")) {
+            address = address.replaceFirst("층$", "");
+        }
+
+        System.out.println("bcdDetail = " + bcdDetail.getEngAddress());
         return BcdDetailResponseDTO.builder()
                 .draftId(bcdDetail.getDraftId())
                 .drafter(drafter)
@@ -55,7 +63,7 @@ public class BcdDetailResponseDTO {
                 .faxTel(bcdDetail.getFaxTel())
                 .phoneTel(bcdDetail.getPhoneTel())
                 .email(bcdDetail.getEmail())
-                .address(bcdDetail.getAddress())
+                .address(address)
                 .engAddress(bcdDetail.getEngAddress())
                 .quantity(bcdDetail.getQuantity())
                 .instNm(names.get(0))
