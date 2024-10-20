@@ -53,9 +53,6 @@ public class TonerInfo extends BaseSystemFieldEntity {
     @Column(name = "toner_nm", length = 50)
     private String tonerNm;
 
-    @Column(name = "price")
-    private String price;
-
     @Column(name = "color", length = 20)
     private String color;
 
@@ -63,7 +60,9 @@ public class TonerInfo extends BaseSystemFieldEntity {
     private String instCd;
 
     @Builder
-    public TonerInfo(String mngNum, String floor, String teamNm, String manager, String subManager, String location, String productNm, String modelNm, String sn, String company, String manuDate, String tonerNm, String price, String color, String instCd) {
+    public TonerInfo(String mngNum, String floor, String teamNm, String manager, String subManager,
+                     String location, String productNm, String modelNm, String sn, String company,
+                     String manuDate, String tonerNm, String color, String instCd) {
         this.mngNum = mngNum;
         this.floor = floor;
         this.teamNm = teamNm;
@@ -76,7 +75,6 @@ public class TonerInfo extends BaseSystemFieldEntity {
         this.company = company;
         this.manuDate = manuDate;
         this.tonerNm = tonerNm;
-        this.price = price;
         this.color = color;
         this.instCd = instCd;
     }
