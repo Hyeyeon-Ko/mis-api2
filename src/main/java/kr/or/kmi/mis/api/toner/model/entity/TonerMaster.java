@@ -65,4 +65,8 @@ public class TonerMaster extends BaseSystemFieldEntity {
         this.status = status;
         this.instCd = instCd;
     }
+
+    public void updateStatus(String applyStatus) {
+        this.status = applyStatus;
+    }
 }

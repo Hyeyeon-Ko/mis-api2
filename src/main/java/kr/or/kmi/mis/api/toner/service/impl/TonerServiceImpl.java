@@ -53,7 +53,7 @@ public class TonerServiceImpl implements TonerService {
 
     @Override
     @Transactional(readOnly = true)
-    public TonerApplyResponseDTO getTonerApply(Long draftId) {
+    public TonerApplyResponseDTO getTonerApply(String draftId) {
         return null;
     }
 
@@ -123,7 +123,9 @@ public class TonerServiceImpl implements TonerService {
 
     @Override
     @Transactional
-    public void cancelTonerApply(Long draftId) {
-
+    public void cancelTonerApply(String draftId) {
+        TonerMaster tonerMaster = tonerMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("Not found: " + draftId));
+        tonerMaster.updateStatus("F");
     }
 }

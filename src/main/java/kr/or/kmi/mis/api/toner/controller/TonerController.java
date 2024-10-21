@@ -28,7 +28,7 @@ public class TonerController {
 
     @Operation(summary = "토너신청 상세정보를 조회합니다.")
     @GetMapping("/apply")
-    public ApiResponse<TonerApplyResponseDTO> getTonerApply(@RequestParam("draftId") Long draftId ) {
+    public ApiResponse<TonerApplyResponseDTO> getTonerApply(@RequestParam("draftId") String draftId ) {
 
         return ResponseWrapper.success(tonerService.getTonerApply(draftId));
     }
@@ -51,7 +51,7 @@ public class TonerController {
 
     @Operation(summary = "토너신청을 취소합니다.")
     @PutMapping("/cancel")
-    public ApiResponse<?> cancelTonerApply(@RequestParam("draftId") Long draftId ) {
+    public ApiResponse<?> cancelTonerApply(@RequestParam("draftId") String draftId ) {
         tonerService.cancelTonerApply(draftId);
 
         return ResponseWrapper.success();

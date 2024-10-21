@@ -10,11 +10,11 @@ public interface TonerService {
     /* 토너 상세정보 호출 */
     TonerInfo2ResponseDTO getTonerInfo(String mngNum);
     /* 토너신청 상세정보 호출 */
-    TonerApplyResponseDTO getTonerApply(Long draftId);
+    TonerApplyResponseDTO getTonerApply(String draftId);
     /* 토너 신청 */
     void applytoner(TonerApplyRequestDTO tonerRequestDTO);
     /* 토너신청 수정 */
     void updateTonerApply(TonerApplyRequestDTO tonerRequestDTO);
     /* 토너신청 취소 */
-    void cancelTonerApply(Long draftId);
+    void cancelTonerApply(String draftId);
 }
