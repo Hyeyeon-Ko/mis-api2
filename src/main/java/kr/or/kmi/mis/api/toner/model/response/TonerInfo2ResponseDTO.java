@@ -13,6 +13,7 @@ public class TonerInfo2ResponseDTO {
     private String location;   // 위치
     private String modelNm;  // 모델명
     private String tonerNm;  // 토너명
+//    private String color;    // 색상   todo: 토너명에 색상값 포함 예정. 추후 삭제
     private String price;    // 가격
 
 
@@ -24,6 +25,7 @@ public class TonerInfo2ResponseDTO {
                 .location(tonerInfo.getLocation())
                 .modelNm(tonerInfo.getModelNm())
                 .tonerNm(tonerInfo.getTonerNm())
+//                .color(tonerInfo.getColor())
                 .price(price)
                 .build();
     }

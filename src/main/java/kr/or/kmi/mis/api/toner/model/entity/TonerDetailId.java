@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class TonerDetailId {
+import java.io.Serializable;
 
-    private Long draftId;
+@Data
+public class TonerDetailId implements Serializable {
+
+    private String draftId;
     private Long itemId;
 }

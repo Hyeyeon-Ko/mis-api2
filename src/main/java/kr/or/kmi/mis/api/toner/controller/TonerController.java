@@ -2,7 +2,7 @@ package kr.or.kmi.mis.api.toner.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.or.kmi.mis.api.toner.model.request.TonerRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
 import kr.or.kmi.mis.api.toner.service.TonerService;
@@ -35,19 +35,19 @@ public class TonerController {
 
     @Operation(summary = "토너를 신청합니다.")
     @PostMapping("")
-    public ApiResponse<?> applyToner(@RequestBody TonerRequestDTO tonerRequestDTO ) {
+    public ApiResponse<?> applyToner(@RequestBody TonerApplyRequestDTO tonerRequestDTO ) {
         tonerService.applytoner(tonerRequestDTO);
 
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "토너신청을 수정합니다.")
-    @PutMapping("")
-    public ApiResponse<?> updateTonerApply(@RequestBody TonerRequestDTO tonerRequestDTO ) {
-        tonerService.updateTonerApply(tonerRequestDTO);
-
-        return ResponseWrapper.success();
-    }
+//    @Operation(summary = "토너신청을 수정합니다.")
+//    @PutMapping("")
+//    public ApiResponse<?> updateTonerApply(@RequestBody TonerRequestDTO tonerRequestDTO ) {
+//        tonerService.updateTonerApply(tonerRequestDTO);
+//
+//        return ResponseWrapper.success();
+//    }
 
     @Operation(summary = "토너신청을 취소합니다.")
     @PutMapping("/cancel")

@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.toner.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,13 +14,10 @@ import lombok.NoArgsConstructor;
 public class TonerDetail {
 
     @Id
-    @Column(name = "item_id", nullable = false)
     private Long itemId;
 
     @Id
-    @ManyToOne
-    @JoinColumn(name = "draft_id", nullable = false)
-    private TonerMaster draftId;
+    private String draftId;
 
     @Column(name = "mng_num", length = 10)
     private String mngNum;
@@ -42,12 +40,23 @@ public class TonerDetail {
     @Column(name = "quantity")
     private int quantity;
 
-    @Column(name = "price", length = 20)
-    private String price;
+    @Column(name = "total_price", length = 20)
+    private String totalPrice;
 
-
-
-
+    @Builder
+    public TonerDetail(Long itemId, String draftId, String mngNum, String teamNm,
+                       String location, String printNm, String tonerNm, String color, int quantity, String totalPrice) {
+        this.itemId = itemId;
+        this.draftId = draftId;
+        this.mngNum = mngNum;
+        this.teamNm = teamNm;
+        this.location = location;
+        this.printNm = printNm;
+        this.tonerNm = tonerNm;
+        this.color = color;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
+    }
 
 
 }
