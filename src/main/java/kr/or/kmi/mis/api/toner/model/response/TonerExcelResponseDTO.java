@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.toner.model.response;
 
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
+import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
 import lombok.Builder;
 import lombok.Data;
 
@@ -42,7 +43,7 @@ public class TonerExcelResponseDTO {
         this.color = color;
     }
 
-    public static TonerExcelResponseDTO of(TonerInfo tonerInfo) {
+    public static TonerExcelResponseDTO of(TonerInfo tonerInfo, TonerPrice tonerPrice) {
         return TonerExcelResponseDTO.builder()
                 .mngNum(tonerInfo.getMngNum())
                 .floor(tonerInfo.getFloor())
@@ -56,7 +57,7 @@ public class TonerExcelResponseDTO {
                 .company(tonerInfo.getCompany())
                 .manuDate(tonerInfo.getManuDate())
                 .tonerNm(tonerInfo.getTonerNm())
-                .price(tonerInfo.getPrice())
+                .price(tonerPrice != null ? tonerPrice.getPrice() : null)
                 .color(tonerInfo.getColor())
                 .build();
     }

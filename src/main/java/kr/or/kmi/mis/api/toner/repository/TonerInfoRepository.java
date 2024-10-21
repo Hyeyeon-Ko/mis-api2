@@ -8,9 +8,8 @@ import java.util.Optional;
 
 public interface TonerInfoRepository extends JpaRepository<TonerInfo, String> {
 
-    boolean existsByMngNum(String MngNum);
-
     List<TonerInfo> findAllByInstCd(String instCd);
-
     Optional<TonerInfo> findByModelNmAndTonerNm(String modelNm, String tonerNm);
+    Optional<TonerInfo> findFirstByTonerNm(String tonerNm);
+    Optional<List<TonerInfo>> findAllByTonerNm(String tonerNm);
 }

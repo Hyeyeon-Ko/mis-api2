@@ -6,46 +6,76 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
+import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
 import kr.or.kmi.mis.api.toner.model.response.CenterTonerListResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerExcelResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerTotalListResponseDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerInfoRepository;
-import kr.or.kmi.mis.api.toner.service.TonerListService;
+import kr.or.kmi.mis.api.toner.repository.TonerPriceRepository;
+import kr.or.kmi.mis.api.toner.service.TonerManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
-public class TonerListServiceImpl implements TonerListService {
+public class TonerManageServiceImpl implements TonerManageService {
 
-    private final TonerInfoRepository tonerInfoRepository;
+    private final TonerPriceRepository tonerPriceRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
+    private final TonerInfoRepository tonerInfoRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<TonerExcelResponseDTO> getTonerList(String instCd) {
 
+        // 1. tonerInfoList 조회
         List<TonerInfo> tonerInfoList = tonerInfoRepository.findAllByInstCd(instCd);
 
+        // 2. 모든 TonerPrice 조회
+        List<TonerPrice> tonerPriceList = tonerPriceRepository.findAll();
+
+        Map<String, TonerPrice> tonerPriceMap = tonerPriceList.stream()
+                .collect(Collectors.toMap(TonerPrice::getTonerNm, Function.identity()));
+
+        // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
-                .map(TonerExcelResponseDTO::of)
+                .map(tonerInfo -> {
+                    TonerPrice tonerPrice = tonerPriceMap.get(tonerInfo.getTonerNm());
+                    return TonerExcelResponseDTO.of(tonerInfo, tonerPrice);
+                })
                 .collect(Collectors.toList());
     }
 
     public List<TonerExcelResponseDTO> getCenterTonerList(String instCd) {
+
+        // 1. TonerInfo 리스트 조회
         List<TonerInfo> tonerInfoList = tonerInfoRepository.findAllByInstCd(instCd);
 
+        // 2. 모든 TonerPrice 조회
+        List<TonerPrice> tonerPriceList = tonerPriceRepository.findAll();
+
+        Map<String, TonerPrice> tonerPriceMap = tonerPriceList.stream()
+                .collect(Collectors.toMap(TonerPrice::getTonerNm, Function.identity()));
+
+        // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
-                .map(TonerExcelResponseDTO::of)
+                .map(tonerInfo -> {
+                    TonerPrice tonerPrice = tonerPriceMap.get(tonerInfo.getTonerNm());
+                    return TonerExcelResponseDTO.of(tonerInfo, tonerPrice);
+                })
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TonerTotalListResponseDTO getTotalTonerList() {
 
         List<CenterResponseDTO> centerList = fetchAllCenters();
