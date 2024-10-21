@@ -55,6 +55,12 @@ public class TonerMaster extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String instCd;
 
+    @Column(length = 1000)
+    private String approverChain;
+
+    @Column(nullable = false)
+    private Integer currentApproverIndex;
+
     @Builder
     public TonerMaster(String draftId, LocalDateTime draftDate, String drafter, String drafterId, String status, String instCd) {
         this.draftId = draftId;
