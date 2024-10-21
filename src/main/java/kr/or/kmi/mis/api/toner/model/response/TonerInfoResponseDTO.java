@@ -3,10 +3,10 @@ package kr.or.kmi.mis.api.toner.model.response;
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class TonerExcelResponseDTO {
+@Getter
+public class TonerInfoResponseDTO {
 
     private String mngNum;
     private String floor;
@@ -23,9 +23,10 @@ public class TonerExcelResponseDTO {
     private String price;
 
     @Builder
-    public TonerExcelResponseDTO(String mngNum, String floor, String teamNm, String manager, String subManager,
-                                 String location, String productNm, String modelNm, String sn, String company,
-                                 String manuDate, String tonerNm, String price) {
+    public TonerInfoResponseDTO(String mngNum, String floor, String teamNm, String manager,
+                                String subManager, String location, String productNm,
+                                String modelNm, String sn, String company,
+                                String manuDate, String tonerNm, String price) {
         this.mngNum = mngNum;
         this.floor = floor;
         this.teamNm = teamNm;
@@ -41,8 +42,8 @@ public class TonerExcelResponseDTO {
         this.price = price;
     }
 
-    public static TonerExcelResponseDTO of(TonerInfo tonerInfo, TonerPrice tonerPrice) {
-        return TonerExcelResponseDTO.builder()
+    public static TonerInfoResponseDTO of(TonerInfo tonerInfo, TonerPrice tonerPrice) {
+        return TonerInfoResponseDTO.builder()
                 .mngNum(tonerInfo.getMngNum())
                 .floor(tonerInfo.getFloor())
                 .teamNm(tonerInfo.getTeamNm())

@@ -3,7 +3,7 @@ package kr.or.kmi.mis.api.toner.model.request;
 import lombok.Getter;
 
 @Getter
-public class TonerAddRequestDTO {
+public class TonerInfoAddRequestDTO {
 
     private String mngNm;
     private String floor;

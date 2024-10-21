@@ -26,31 +26,30 @@ public class TonerPriceController {
         return ResponseWrapper.success(tonerPriceService.getTonerPriceList());
     }
 
-    @Operation(summary = "get Toner info", description = "토너 관련 정보 조회, 토너 정보 수정 시 사용")
+    @Operation(summary = "get Toner price", description = "토너 관련 정보 조회, 토너 정보 수정 시 사용")
     @GetMapping("/{tonerNm}")
-    public ApiResponse<?> getTonerInfo(@PathVariable String tonerNm) {
+    public ApiResponse<?> getTonerPrice(@PathVariable String tonerNm) {
         return ResponseWrapper.success(tonerPriceService.getTonerPriceInfo(tonerNm));
     }
 
-    @Operation(summary = "add Toner info", description = "토너 관련 정보 추가")
+    @Operation(summary = "add Toner price", description = "토너 관련 정보 추가")
     @PostMapping
-    public ApiResponse<?> addTonerInfo(@RequestBody TonerPriceRequestDTO tonerPriceRequestDTO, String userId) {
+    public ApiResponse<?> addTonerPrice(@RequestBody TonerPriceRequestDTO tonerPriceRequestDTO, String userId) {
         tonerPriceService.addTonerPriceInfo(tonerPriceRequestDTO, userId);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "modify Toner info", description = "토너 관련 정보 수정")
+    @Operation(summary = "modify Toner price", description = "토너 관련 정보 수정")
     @PutMapping("/{tonerNm}")
-    public ApiResponse<?> updateTonerInfo(@PathVariable String tonerNm, @RequestBody TonerPriceRequestDTO tonerPriceRequestDTO, String userId) {
+    public ApiResponse<?> updateTonerPrice(@PathVariable String tonerNm, @RequestBody TonerPriceRequestDTO tonerPriceRequestDTO, String userId) {
         tonerPriceService.updateTonerPriceInfo(tonerNm, tonerPriceRequestDTO, userId);
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "delete Toner info", description = "토너 관련 정보 삭제")
+    @Operation(summary = "delete Toner price", description = "토너 관련 정보 삭제")
     @DeleteMapping("/{tonerNm}")
-    public ApiResponse<?> deleteTonerInfo(@RequestParam("tonerNm") String tonerNm) {
+    public ApiResponse<?> deleteTonerPrice(@RequestParam("tonerNm") String tonerNm) {
         tonerPriceService.deleteTonerPriceInfo(tonerNm);
         return ResponseWrapper.success();
     }
-
 }

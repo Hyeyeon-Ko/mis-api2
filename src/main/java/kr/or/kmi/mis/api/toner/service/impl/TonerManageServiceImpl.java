@@ -1,15 +1,18 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
+import jakarta.persistence.EntityExistsException;
 import kr.or.kmi.mis.api.docstorage.domain.response.CenterResponseDTO;
+import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
-import kr.or.kmi.mis.api.toner.model.request.TonerAddRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerInfoRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.CenterTonerListResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerExcelResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerInfoResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerTotalListResponseDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerInfoRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerPriceRepository;
@@ -18,8 +21,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -103,9 +108,69 @@ public class TonerManageServiceImpl implements TonerManageService {
     }
 
     @Override
-    @Transactional
-    public void addToner(TonerAddRequestDTO tonerAddRequestDTO) {
+    public TonerInfoResponseDTO getTonerInfo(String mngNum) {
 
+        TonerInfo tonerInfo = tonerInfoRepository.findByMngNum(mngNum)
+                .orElseThrow(() -> new EntityNotFoundException("Toner Info Detail Not Found: " + mngNum));
+
+        Optional<TonerPrice> optionalTonerPrice = tonerPriceRepository.findByTonerNm(tonerInfo.getTonerNm());
+
+        TonerPrice tonerPrice = optionalTonerPrice.orElse(null);
+
+        return TonerInfoResponseDTO.of(tonerInfo, tonerPrice);
+    }
+
+    @Override
+    public void addTonerInfo(TonerInfoRequestDTO tonerInfoRequestDTO, String userId, String instCd) {
+
+        // 1. 관리번호 중복 예외처리
+        boolean exists = tonerInfoRepository.existsByMngNum(tonerInfoRequestDTO.getMngNum());
+        if (exists) {
+            throw new EntityExistsException("Toner Info already exists");
+        }
+
+        // 2. 토너 정보 입력
+        TonerInfo tonerInfo = tonerInfoRequestDTO.toEntity(instCd);
+        tonerInfo.setRgstDt(LocalDateTime.now());
+        tonerInfo.setRgstrId(userId);
+
+        // 3. 저장
+        tonerInfoRepository.save(tonerInfo);
+    }
+
+    @Override
+    public void updateTonerInfo(String mngNum, TonerInfoRequestDTO tonerInfoRequestDTO, String userId) {
+
+        // 1. tonerInfo 조회
+        TonerInfo tonerInfo = tonerInfoRepository.findByMngNum(tonerInfoRequestDTO.getMngNum())
+                .orElseThrow(() -> new EntityNotFoundException("Toner Info Detail Not Found: " + mngNum));
+
+        // 2. mngNum 중복 예외처리
+        if (!mngNum.equals(tonerInfoRequestDTO.getMngNum())) {
+            boolean exists = tonerPriceRepository.existsByTonerNm(tonerInfoRequestDTO.getMngNum());
+            if (exists) {
+                throw new EntityExistsException("Toner with the same name already exists: " + tonerInfoRequestDTO.getMngNum());
+            }
+        }
+
+        // 3. tonerInfo 업데이트
+        tonerInfo.tonerInfoUpdate(tonerInfoRequestDTO);
+        tonerInfo.setUpdtDt(LocalDateTime.now());
+        tonerInfo.setUpdtrId(userId);
+
+        // 4. 저장
+        tonerInfoRepository.save(tonerInfo);
+    }
+
+    @Override
+    public void deleteTonerInfo(String mngNum) {
+
+        // 1. tonerInfo 조회
+        TonerInfo tonerInfo = tonerInfoRepository.findByMngNum(mngNum)
+                .orElseThrow(() -> new EntityNotFoundException("Toner Info Detail Not Found: " + mngNum));
+
+        // 2. 삭제
+        tonerInfoRepository.delete(tonerInfo);
     }
 
     /* 모든 센터 정보 조회 */

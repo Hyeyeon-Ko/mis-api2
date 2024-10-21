@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import kr.or.kmi.mis.api.toner.model.request.TonerInfoRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -53,16 +54,13 @@ public class TonerInfo extends BaseSystemFieldEntity {
     @Column(name = "toner_nm", length = 50)
     private String tonerNm;
 
-    @Column(name = "color", length = 20)
-    private String color;
-
     @Column(name = "inst_cd", length = 20)
     private String instCd;
 
     @Builder
     public TonerInfo(String mngNum, String floor, String teamNm, String manager, String subManager,
                      String location, String productNm, String modelNm, String sn, String company,
-                     String manuDate, String tonerNm, String color, String instCd) {
+                     String manuDate, String tonerNm, String instCd) {
         this.mngNum = mngNum;
         this.floor = floor;
         this.teamNm = teamNm;
@@ -75,7 +73,21 @@ public class TonerInfo extends BaseSystemFieldEntity {
         this.company = company;
         this.manuDate = manuDate;
         this.tonerNm = tonerNm;
-        this.color = color;
         this.instCd = instCd;
+    }
+
+    public void tonerInfoUpdate(TonerInfoRequestDTO tonerInfoRequestDTO) {
+        this.mngNum = tonerInfoRequestDTO.getMngNum();
+        this.floor = tonerInfoRequestDTO.getFloor();
+        this.teamNm = tonerInfoRequestDTO.getTeamNm();
+        this.manager = tonerInfoRequestDTO.getManager();
+        this.subManager = tonerInfoRequestDTO.getSubManager();
+        this.location = tonerInfoRequestDTO.getLocation();
+        this.productNm = tonerInfoRequestDTO.getProductNm();
+        this.modelNm = tonerInfoRequestDTO.getModelNm();
+        this.sn = tonerInfoRequestDTO.getSn();
+        this.company = tonerInfoRequestDTO.getCompany();
+        this.manuDate = tonerInfoRequestDTO.getManuDate();
+        this.tonerNm = tonerInfoRequestDTO.getTonerNm();
     }
 }

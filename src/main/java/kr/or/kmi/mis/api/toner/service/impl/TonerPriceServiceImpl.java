@@ -51,7 +51,7 @@ public class TonerPriceServiceImpl implements TonerPriceService {
         // 1. 토너명 중복 예외처리
         boolean exists = tonerPriceRepository.existsByTonerNm(tonerPriceRequestDTO.getTonerNm());
         if (exists) {
-            throw new EntityExistsException("Toner already exists");
+            throw new EntityExistsException("Toner Price already exists");
         }
 
         // 2. 토너 단가 정보 입력
@@ -78,7 +78,7 @@ public class TonerPriceServiceImpl implements TonerPriceService {
             }
         }
 
-        // 3. tonerInfo 업데이트
+        // 3. tonerPrice 업데이트
         tonerPrice.tonerPriceUpdate(tonerPriceRequestDTO);
         tonerPrice.setUpdtDt(LocalDateTime.now());
         tonerPrice.setUpdtrId(userId);
