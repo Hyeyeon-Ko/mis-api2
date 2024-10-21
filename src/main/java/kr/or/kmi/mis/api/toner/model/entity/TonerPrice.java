@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,6 +34,7 @@ public class TonerPrice {
     @Column(name = "special_note", length = 100)
     private String specialNote;
 
+    @Builder
     public TonerPrice(String tonerNm, String modelNm, String company,
                       String division, String price, String specialNote) {
         this.tonerNm = tonerNm;
