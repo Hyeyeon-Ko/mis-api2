@@ -72,6 +72,7 @@ public class RentalServiceImpl implements RentalService {
             rentalDetail.updateStatus("A");
         }
 
+        // 4. 저장
         rentalDetailRepository.save(rentalDetail);
     }
 
