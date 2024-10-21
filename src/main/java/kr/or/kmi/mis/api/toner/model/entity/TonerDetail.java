@@ -34,9 +34,6 @@ public class TonerDetail {
     @Column(name = "toner_nm", length = 100)
     private String tonerNm;
 
-    @Column(name = "color", length = 1)
-    private String color;
-
     @Column(name = "quantity")
     private int quantity;
 
@@ -45,7 +42,7 @@ public class TonerDetail {
 
     @Builder
     public TonerDetail(Long itemId, String draftId, String mngNum, String teamNm,
-                       String location, String printNm, String tonerNm, String color, int quantity, String totalPrice) {
+                       String location, String printNm, String tonerNm, int quantity, String totalPrice) {
         this.itemId = itemId;
         this.draftId = draftId;
         this.mngNum = mngNum;
@@ -53,7 +50,6 @@ public class TonerDetail {
         this.location = location;
         this.printNm = printNm;
         this.tonerNm = tonerNm;
-        this.color = color;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
     }
