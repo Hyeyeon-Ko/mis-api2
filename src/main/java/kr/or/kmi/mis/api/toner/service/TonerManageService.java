@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.toner.service;
 
+import kr.or.kmi.mis.api.toner.model.request.TonerAddRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerExcelResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerTotalListResponseDTO;
 
@@ -18,4 +19,7 @@ public interface TonerManageService {
 
     /* 전국 토너 관리표 정보 */
     TonerTotalListResponseDTO getTotalTonerList();
+
+    /* 토너 정보 추가 */
+    void addToner(TonerAddRequestDTO tonerAddRequestDTO);
 }

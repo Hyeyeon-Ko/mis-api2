@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
+import kr.or.kmi.mis.api.toner.model.request.TonerAddRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.CenterTonerListResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerExcelResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerTotalListResponseDTO;
@@ -99,6 +100,12 @@ public class TonerManageServiceImpl implements TonerManageService {
         List<CenterTonerListResponseDTO> centerTonerListResponsesList = List.of(centerTonerResponses);
 
         return TonerTotalListResponseDTO.of(centerList, centerTonerListResponsesList);
+    }
+
+    @Override
+    @Transactional
+    public void addToner(TonerAddRequestDTO tonerAddRequestDTO) {
+
     }
 
     /* 모든 센터 정보 조회 */
