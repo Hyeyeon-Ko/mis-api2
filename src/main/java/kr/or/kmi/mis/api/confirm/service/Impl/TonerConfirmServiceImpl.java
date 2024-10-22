@@ -5,6 +5,7 @@ import kr.or.kmi.mis.api.confirm.service.TonerConfirmService;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.toner.model.entity.TonerMaster;
 import kr.or.kmi.mis.api.toner.model.request.TonerApproverRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerConfirmRequestDTO;
 import kr.or.kmi.mis.api.toner.model.request.TonerDisApproverRequestDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
 import kr.or.kmi.mis.api.user.service.InfoService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,46 +25,47 @@ public class TonerConfirmServiceImpl implements TonerConfirmService {
 
     /**
      * TonerMaster 엔티티를 draftId로 조회하여 반환.
-     * @param draftId 결재 문서 ID
+     * @param draftIds 결재 문서 ID
      * @return TonerMaster 엔티티
      */
-    private TonerMaster getTonerMaster(String draftId) {
-        return tonerMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
+    private List<TonerMaster> getTonerMaster(List<String> draftIds) {
+        return tonerMasterRepository.findAllByDraftIdIn(draftIds)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftIds));
     }
 
     /**
-     * 결재 승인 처리.
-     * @param draftId 결재 문서 ID
-     * @param confirmRequestDTO 결재 요청 데이터
+     * 결재 일괄 승인 처리.
+     * @param tonerConfirmRequestDTO 결재 요청 데이터
      */
     @Override
     @Transactional
-    public void approve(String draftId, ConfirmRequestDTO confirmRequestDTO) {
+    public void approve(TonerConfirmRequestDTO tonerConfirmRequestDTO) {
 
-        TonerMaster tonerMaster = getTonerMaster(draftId);
-
-        String approverId = confirmRequestDTO.getUserId();
+        List<TonerMaster> tonerMasterList = getTonerMaster(tonerConfirmRequestDTO.getDraftIds());
+        System.out.println("TonerConfirmServiceImpl.approve");
+        String approverId = tonerConfirmRequestDTO.getConfirmRequestDTO().getUserId();
         String approver = infoService.getUserInfoDetail(approverId).getUserName();
 
         TonerApproverRequestDTO approveRequest = createApproveRequest(approverId, approver);
-        tonerMaster.updateApprove(approveRequest);
-        tonerMasterRepository.save(tonerMaster);
+        tonerMasterList.forEach(tonerMaster -> tonerMaster.updateApprove(approveRequest));
+        tonerMasterRepository.saveAll(tonerMasterList);
     }
-
-
+    /**
+     * 결재 일괄 반려 처리.
+     * @param tonerConfirmRequestDTO 결재 요청 데이터
+     */
     @Override
     @Transactional
-    public void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO) {
+    public void disapprove(TonerConfirmRequestDTO tonerConfirmRequestDTO) {
 
-        TonerMaster tonerMaster = getTonerMaster(draftId);
+        List<TonerMaster> tonerMasterList = getTonerMaster(tonerConfirmRequestDTO.getDraftIds());
 
-        String disapproverId = confirmRequestDTO.getUserId();
+        String disapproverId = tonerConfirmRequestDTO.getConfirmRequestDTO().getUserId();
         String disappover = infoService.getUserInfoDetail(disapproverId).getUserName();
 
-        TonerDisApproverRequestDTO disApproverRequest = createDisapproverRequest(confirmRequestDTO, disappover, disapproverId);
-        tonerMaster.updateDisapprove(disApproverRequest);
-        tonerMasterRepository.save(tonerMaster);
+        TonerDisApproverRequestDTO disApproverRequest = createDisapproverRequest(tonerConfirmRequestDTO.getConfirmRequestDTO(), disappover, disapproverId);
+        tonerMasterList.forEach(tonerMaster -> tonerMaster.updateDisapprove(disApproverRequest));
+        tonerMasterRepository.saveAll(tonerMasterList);
 
         // 2. 반려 알림 전송
         // TODO: 반려 알림 구현 후 추가

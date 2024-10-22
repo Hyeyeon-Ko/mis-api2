@@ -1,12 +1,12 @@
 package kr.or.kmi.mis.api.confirm.service;
 
-import kr.or.kmi.mis.api.apply.model.request.ConfirmRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerConfirmRequestDTO;
 
 public interface TonerConfirmService {
 
     /* 승인 */
-    void approve(String draftId, ConfirmRequestDTO confirmRequestDTO);
+    void approve(TonerConfirmRequestDTO tonerConfirmRequestDTO);
 
     /* 반려 */
-    void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO);
+    void disapprove(TonerConfirmRequestDTO tonerConfirmRequestDTO);
 }

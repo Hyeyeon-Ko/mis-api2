@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/toner/manage")
 @RequiredArgsConstructor
-@Tag(name = "TonerManageList", description = "토너 관리표 호출 관련 API")
+@Tag(name = "TonerManageList", description = "토너 관리표 관련 API")
 public class TonerManageController {
 
     private final TonerManageService tonerManageService;

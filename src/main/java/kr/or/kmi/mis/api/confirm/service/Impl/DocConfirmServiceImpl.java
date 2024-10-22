@@ -125,8 +125,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
     @Transactional
     public void delete(String draftId) {
 
-        DocMaster docMaster = docMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("docMaster not found: " + draftId));
+        DocMaster docMaster = getDocMaster(draftId);
 
         // 신청 취소 상태로 변경, 취소일시로 update
         docMaster.delete("F");

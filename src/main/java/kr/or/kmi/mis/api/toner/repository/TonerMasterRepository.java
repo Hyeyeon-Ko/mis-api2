@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface TonerMasterRepository extends JpaRepository<TonerMaster, String> {
 
     Optional<TonerMaster> findTopByOrderByDraftIdDesc();
-    Optional<List<TonerMaster>> findAllByStatusAndCurrentApproverIndex(String status, Integer approverIndex);
 
+    Optional<List<TonerMaster>> findAllByStatus(String status);
+
+    Optional<List<TonerMaster>> findAllByDraftIdIn(List<String> draftIds);
 }

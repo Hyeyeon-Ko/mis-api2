@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/toner/price")
 @RequiredArgsConstructor
-@Tag(name = "TonerPrice", description = "토너 단가표 호출 관련 API")
+@Tag(name = "TonerPrice", description = "토너 단가표 관련 API")
 public class TonerPriceController {
 
     private final TonerPriceService tonerPriceService;
