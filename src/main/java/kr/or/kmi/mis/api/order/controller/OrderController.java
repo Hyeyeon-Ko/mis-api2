@@ -7,11 +7,9 @@ import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.EmailSettingsResponseDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.service.OrderService;
-import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -32,11 +30,11 @@ public class OrderController {
         return ResponseWrapper.success(orderService.getOrderList(instCd));
     }
 
-    @Operation(summary = "get order list", description = "발주 목록 조회")
-    @GetMapping("/get")
-    public ApiResponse<Page<OrderListResponseDTO>> getOrderList2(String instCd, PostPageRequest pageRequest) {
-        return ResponseWrapper.success(orderService.getOrderList2(instCd, pageRequest.of()));
-    }
+//    @Operation(summary = "get order list", description = "발주 목록 조회")
+//    @GetMapping("/get")
+//    public ApiResponse<Page<OrderListResponseDTO>> getOrderList2(String instCd, PostPageRequest pageRequest) {
+//        return ResponseWrapper.success(orderService.getOrderList2(instCd, pageRequest.of()));
+//    }
 
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
     @PostMapping

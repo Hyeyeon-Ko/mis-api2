@@ -11,7 +11,6 @@ import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.EmailSettingsResponseDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
-import kr.or.kmi.mis.api.order.repository.OrderQueryRepository;
 import kr.or.kmi.mis.api.order.service.ExcelService;
 import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
@@ -21,8 +20,6 @@ import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -50,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
     private final StdBcdService stdBcdService;
     private final NotificationSendService notificationSendService;
 
-    private final OrderQueryRepository orderQueryRepository;
+//    private final OrderQueryRepository orderQueryRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,10 +81,10 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public Page<OrderListResponseDTO> getOrderList2(String instCd, Pageable page) {
-        return orderQueryRepository.getOrderList2(instCd, page);
-    }
+//    @Override
+//    public Page<OrderListResponseDTO> getOrderList2(String instCd, Pageable page) {
+//        return orderQueryRepository.getOrderList2(instCd, page);
+//    }
 
     @Override
     @Transactional
