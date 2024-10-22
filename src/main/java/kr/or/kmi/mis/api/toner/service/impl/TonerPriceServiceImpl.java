@@ -26,6 +26,10 @@ public class TonerPriceServiceImpl implements TonerPriceService {
 
     private final TonerPriceRepository tonerPriceRepository;
 
+    /**
+     * 토너 단가표의 항목들을 TonerPriceResponseDTO 리스트로 반환.
+     * @return TonerPriceResponseDTO의 리스트
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TonerPriceResponseDTO> getTonerPriceList() {
@@ -37,6 +41,11 @@ public class TonerPriceServiceImpl implements TonerPriceService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 상세 정보 조회 또는 수정을 위해 단일 항목 반환.
+     * @param tonerNm 조회할 토너의 토너명
+     * @return TonerPriceResponseDTO
+     */
     @Override
     public TonerPriceResponseDTO getTonerPriceInfo(String tonerNm) {
         TonerPrice tonerPrice = tonerPriceRepository.findByTonerNm(tonerNm)
@@ -45,6 +54,11 @@ public class TonerPriceServiceImpl implements TonerPriceService {
         return TonerPriceResponseDTO.of(tonerPrice);
     }
 
+    /**
+     * 토너 단가 항목 추가.
+     * @param tonerPriceRequestDTO 토너 단가 정보
+     * @param userId 추가자 사번
+     */
     @Override
     public void addTonerPriceInfo(TonerPriceRequestDTO tonerPriceRequestDTO, String userId) {
 
@@ -63,6 +77,12 @@ public class TonerPriceServiceImpl implements TonerPriceService {
         tonerPriceRepository.save(tonerPrice);
     }
 
+    /**
+     * 토너 단가 항목 수정.
+     * @param tonerNm 수정할 토너의 토너명
+     * @param tonerPriceRequestDTO 토너 수정 정보
+     * @param userId 수정자 사번
+     */
     @Override
     public void updateTonerPriceInfo(String tonerNm, TonerPriceRequestDTO tonerPriceRequestDTO, String userId) {
 
@@ -87,6 +107,10 @@ public class TonerPriceServiceImpl implements TonerPriceService {
         tonerPriceRepository.save(tonerPrice);
     }
 
+    /**
+     * 토너 단가 항목 삭제.
+     * @param tonerNm 삭제할 토너의 토너명
+     */
     @Override
     public void deleteTonerPriceInfo(String tonerNm) {
 

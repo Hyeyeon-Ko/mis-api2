@@ -38,6 +38,11 @@ public class TonerManageServiceImpl implements TonerManageService {
     private final StdDetailRepository stdDetailRepository;
     private final TonerInfoRepository tonerInfoRepository;
 
+    /**
+     * 토너 관리표의 항목들을 TonerExcelResponseDTO 리스트로 반환.
+     * @param instCd
+     * @return TonerExcelResponseDTO의 리스트
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TonerExcelResponseDTO> getTonerList(String instCd) {
@@ -60,6 +65,11 @@ public class TonerManageServiceImpl implements TonerManageService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 각 센터의 토너 관리표 항목들을 TonerExcelResponseDTO 리스트로 반환.
+     * @param instCd
+     * @return TonerExcelResponseDTO의 리스트
+     */
     public List<TonerExcelResponseDTO> getCenterTonerList(String instCd) {
 
         // 1. TonerInfo 리스트 조회
@@ -80,6 +90,10 @@ public class TonerManageServiceImpl implements TonerManageService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 전국의 토너 관리표 항목들을 하나의 TonerTotalListResponseDTO로 반환.
+     * @return TonerTotalListResponseDTO
+     */
     @Override
     @Transactional(readOnly = true)
     public TonerTotalListResponseDTO getTotalTonerList() {
@@ -107,6 +121,11 @@ public class TonerManageServiceImpl implements TonerManageService {
         return TonerTotalListResponseDTO.of(centerList, centerTonerListResponsesList);
     }
 
+    /**
+     * 상세 정보 조회 또는 수정을 위해 단일 항목 반환.
+     * @param mngNum 조회할 토너의 관리번호
+     * @return TonerInfoResponseDTO
+     */
     @Override
     @Transactional(readOnly = true)
     public TonerInfoResponseDTO getTonerInfo(String mngNum) {
@@ -121,6 +140,12 @@ public class TonerManageServiceImpl implements TonerManageService {
         return TonerInfoResponseDTO.of(tonerInfo, tonerPrice);
     }
 
+    /**
+     * 토너 관리 항목 추가.
+     * @param tonerInfoRequestDTO 토너 관리 정보
+     * @param userId 추가자 사번
+     * @param instCd 추가자 센터코드
+     */
     @Override
     @Transactional
     public void addTonerInfo(TonerInfoRequestDTO tonerInfoRequestDTO, String userId, String instCd) {
@@ -140,6 +165,12 @@ public class TonerManageServiceImpl implements TonerManageService {
         tonerInfoRepository.save(tonerInfo);
     }
 
+    /**
+     * 토너 관리 항목 수정.
+     * @param mngNum 수정할 토너의 관리번호
+     * @param tonerInfoRequestDTO 토너 수정 정보
+     * @param userId 수정자 사번
+     */
     @Override
     @Transactional
     public void updateTonerInfo(String mngNum, TonerInfoRequestDTO tonerInfoRequestDTO, String userId) {
@@ -165,6 +196,10 @@ public class TonerManageServiceImpl implements TonerManageService {
         tonerInfoRepository.save(tonerInfo);
     }
 
+    /**
+     * 토너 관리 항목 삭제.
+     * @param mngNum 삭제할 토너의 관리번호
+     */
     @Override
     @Transactional
     public void deleteTonerInfo(String mngNum) {

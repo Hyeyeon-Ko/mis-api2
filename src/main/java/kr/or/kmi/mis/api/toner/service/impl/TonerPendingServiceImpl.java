@@ -23,7 +23,7 @@ public class TonerPendingServiceImpl implements TonerPendingService {
     private final TonerDetailRepository tonerDetailRepository;
 
     /**
-     * 승인 대기 상태의 항목들을 TonerPendingResponseDTO 리스트로 반환합니다.
+     * 승인 대기 상태의 항목들을 TonerPendingResponseDTO 리스트로 반환.
      * @param instCd 센터 코드 (instCd)로 해당 센터의 TonerMaster 및 관련 TonerDetail 항목을 조회합니다.
      * @return TonerPendingResponseDTO의 리스트. 각 TonerMaster와 연결된 TonerDetail 항목을 기반으로 한 DTO 리스트.
      */

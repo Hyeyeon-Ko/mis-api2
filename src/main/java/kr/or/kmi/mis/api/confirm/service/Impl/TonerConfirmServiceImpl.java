@@ -72,7 +72,7 @@ public class TonerConfirmServiceImpl implements TonerConfirmService {
     }
 
     /**
-     * 승인 요청 생성
+     * 승인 요청 생성.
      * @param approverId 결재자 ID
      * @param approver 결재자 이름
      * @return TonerApproverRequestDTO 승인 요청
@@ -87,7 +87,7 @@ public class TonerConfirmServiceImpl implements TonerConfirmService {
     }
 
     /**
-     * 반려 요청 생성
+     * 반려 요청 생성.
      * @param confirmRequestDTO 반려 요청 데이터
      * @param disapprover 반려자 이름
      * @param disapproverId 반려자 ID
