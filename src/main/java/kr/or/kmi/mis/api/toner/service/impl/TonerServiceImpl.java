@@ -38,8 +38,6 @@ public class TonerServiceImpl implements TonerService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
-    DecimalFormat formatter = new DecimalFormat("#,###");
-
     @Override
     @Transactional(readOnly = true)
     public TonerInfo2ResponseDTO getTonerInfo(String mngNum) {
@@ -73,13 +71,8 @@ public class TonerServiceImpl implements TonerService {
 
         tonerApplyRequestDTO.getTonerDetailDTOs()
                 .forEach(tonerDetailDTO -> {
-                    // 2-1) 수량 및 금액 계산
-                    int quantity = tonerDetailDTO.getQuantity();
-                    String str = tonerDetailDTO.getPrice().replace(",", "");
-                    int price = Integer.parseInt(str);
-                    long totalPrice = (long)price * quantity;
 
-                    // 2-2) tonerDetail 객체 생성
+                    // 2-1) tonerDetail 객체 생성
                     TonerDetail tonerDetail = TonerDetail.builder()
                             .itemId(itemId.getAndIncrement())
                             .draftId(draftId)
@@ -88,11 +81,11 @@ public class TonerServiceImpl implements TonerService {
                             .location(tonerDetailDTO.getLocation())
                             .printNm(tonerDetailDTO.getPrintNm())
                             .tonerNm(tonerDetailDTO.getTonerNm())
-                            .quantity(quantity)
-                            .totalPrice(formatter.format(totalPrice))
+                            .quantity(tonerDetailDTO.getQuantity())
+                            .totalPrice(tonerDetailDTO.getTotalPrice())
                             .build();
 
-                    // 2-3) 상세정보 저장
+                    // 2-2) 상세정보 저장
                     tonerDetailRepository.save(tonerDetail);
         });
 
