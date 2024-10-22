@@ -22,6 +22,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,246 +51,261 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     private final StdDetailRepository stdDetailRepository;
     private final DocMasterRepository docMasterRepository;
     private final BcdApplyQueryRepositoryImpl bcdApplyQueryRepositoryImpl;
+    private final TonerMasterRepository tonerMasterRepository;
 
+    /**
+     * BcdMaster 엔티티를 draftId로 조회하여 반환.
+     * @param draftId 결재 문서 ID
+     * @return BcdMaster 엔티티
+     */
+    private BcdMaster getBcdMaster(String draftId) {
+        return bcdMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
+    }
+
+    /**
+     * BcdDetail 엔티티를 draftId로 조회하여 반환.
+     * @param draftId 결재 문서 ID
+     * @return BcdDetail 엔티티
+     */
+    private BcdDetail getBcdDetail(String draftId) {
+        return bcdDetailRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + draftId));
+    }
+
+    /**
+     * 결재 상세 정보를 반환.
+     * @param draftId 결재 문서 ID
+     * @return BcdDetailResponseDTO 결재 상세 정보 DTO
+     */
     @Override
     @Transactional(readOnly = true)
     public BcdDetailResponseDTO getBcdDetailInfo(String draftId) {
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found"));
-        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + draftId));
+        BcdMaster bcdMaster = getBcdMaster(draftId);
+        BcdDetail bcdDetail = getBcdDetail(draftId);
 
         String drafter = bcdMaster.getDrafter();
-        // 기준자료에서 각 기준자료 코드에 해당하는 명칭 불러오기
         List<String> names = stdBcdService.getBcdStdNames(bcdDetail);
 
         return BcdDetailResponseDTO.of(bcdDetail, drafter, names);
     }
 
+    /**
+     * 결재 승인 처리.
+     * @param draftId 결재 문서 ID
+     * @param confirmRequestDTO 결재 요청 데이터
+     */
     @Override
     @Transactional
     public void approve(String draftId, ConfirmRequestDTO confirmRequestDTO) {
 
         // 1. 승인
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
-
-        if (!bcdMaster.getCurrentApproverId().equals(confirmRequestDTO.getUserId())) {
-            throw new IllegalArgumentException("현재 결재자가 아닙니다.");
-        }
-
-        boolean isLastApprover = bcdMaster.getCurrentApproverIndex() == bcdMaster.getApproverChain().split(", ").length - 1;
+        BcdMaster bcdMaster = getBcdMaster(draftId);
+        validateApprover(bcdMaster, confirmRequestDTO.getUserId());
+        boolean isLastApprover = checkLastApprover(bcdMaster);
 
         String approverId = confirmRequestDTO.getUserId();
         String approver = infoService.getUserInfoDetail(approverId).getUserName();
 
-        BcdApproveRequestDTO approveRequest = BcdApproveRequestDTO.builder()
-                .approverId(approverId)
-                .approver(approver)
-                .respondDate(LocalDateTime.now())
-                .status(isLastApprover ? "B" : "A")  // 마지막 결재자라면 B(완료), 아니면 A(승인 대기)
-                .build();
-
+        BcdApproveRequestDTO approveRequest = createApproveRequest(approverId, approver, isLastApprover);
         bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
         bcdMaster.updateApprove(approveRequest);
-
         bcdMasterRepository.save(bcdMaster);
 
-        // 2. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
-        StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("C002")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
+        // 2. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(approverId).getInstCd();
-        List<StdDetail> stdDetail1 = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup1, instCd)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        boolean userIdExistsInStdDetail = stdDetail1.stream()
-                .anyMatch(detail -> approverId.equals(detail.getEtcItem2()) || approverId.equals(detail.getEtcItem3()));
-
-        if (userIdExistsInStdDetail) {
+        if (existsInStdDetail(approverId, "C002", instCd)) {
             return;
         }
 
-        // 권한 취소 여부 결정
+        // 3. 결재자들의 권한 취소 여부 체크 및 처리
         List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        boolean shouldCancelAdminByBcd = true;
-        boolean shouldCancelAdminByDoc = true;
-
-        for (BcdMaster master : bcdMasterList) {
-            if (master.getCurrentApproverId().equals(approverId)) {
-                shouldCancelAdminByBcd = false;
-                break;
-            }
-        }
-
-        for (DocMaster master : docMasterList) {
-            if (master.getCurrentApproverId().equals(approverId)) {
-                shouldCancelAdminByDoc = false;
-                break;
-            }
-        }
+        boolean shouldCancelAdminByBcd = shouldCancelAdmin(bcdMasterList, approverId);
+        boolean shouldCancelAdminByDoc = shouldCancelAdmin(docMasterList, approverId);
 
         if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserId(approverId)
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-            // ADMIN 권한 취소
-            authorityRepository.delete(authority);
-
-            // 사이드바 권한 취소
-            StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("B002")
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-            StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup2, approverId)
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-            stdDetailRepository.delete(stdDetail2);
+            cancelAdminAndSidebarAuthorities(approverId);
         }
     }
 
-    /* 반려 */
+    /**
+     * 결재 반려 처리.
+     * @param draftId 결재 문서 ID
+     * @param confirmRequestDTO 결재 요청 데이터
+     */
     @Override
     @Transactional
     public void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO) {
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
-        BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for draft ID: " + draftId));
+
+        BcdMaster bcdMaster = getBcdMaster(draftId);
+        BcdDetail bcdDetail = getBcdDetail(draftId);
 
         String disapproverId = confirmRequestDTO.getUserId();
         String disapprover = infoService.getUserInfoDetail(disapproverId).getUserName();
 
-        // 1. 명함신청 반려 처리
-        BcdDisapproveRequestDTO disapproveRequest = BcdDisapproveRequestDTO.builder()
+        // 1. 반려 처리 요청 생성
+        BcdDisapproveRequestDTO disapproveRequest = createDisapproveRequest(confirmRequestDTO, disapprover, disapproverId);
+        bcdMaster.updateDisapprove(disapproveRequest);
+        bcdMasterRepository.save(bcdMaster);
+
+        // 2. 반려 알림 전송
+        sendRejectionNotifications(bcdMaster, bcdDetail);
+
+        // 3. 권한 취소 여부 결정
+        String instCd = infoService.getUserInfoDetail(bcdMaster.getCurrentApproverId()).getInstCd();
+        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), "C002", instCd)) {
+            return;
+        }
+
+        // 4. 결재자들의 권한 취소 여부 체크 및 처리
+        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        boolean shouldCancelAdminByBcd = shouldCancelAdmin(bcdMasterList, disapproverId);
+        boolean shouldCancelAdminByDoc = shouldCancelAdmin(docMasterList, disapproverId);
+
+        if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
+            cancelAdminAndSidebarAuthorities(bcdMaster.getCurrentApproverId());
+        }
+    }
+
+    /**
+     * 승인 요청 생성
+     * @param approverId 결재자 ID
+     * @param approver 결재자 이름
+     * @param isLastApprover 마지막 결재자인지 여부
+     * @return BcdApproveRequestDTO 승인 요청
+     */
+    private BcdApproveRequestDTO createApproveRequest(String approverId, String approver, boolean isLastApprover) {
+        return BcdApproveRequestDTO.builder()
+                .approverId(approverId)
+                .approver(approver)
+                .respondDate(LocalDateTime.now())
+                .status(isLastApprover ? "B" : "A")
+                .build();
+    }
+
+    /**
+     * 결재자가 맞는지 검증
+     * @param bcdMaster 결재 마스터 엔티티
+     * @param userId 검증할 사용자 ID
+     */
+    private void validateApprover(BcdMaster bcdMaster, String userId) {
+        if (!bcdMaster.getCurrentApproverId().equals(userId)) {
+            throw new IllegalArgumentException("현재 결재자가 아닙니다.");
+        }
+    }
+
+    /**
+     * 마지막 결재자인지 확인
+     * @param bcdMaster 결재 마스터 엔티티
+     * @return 마지막 결재자 여부
+     */
+    private boolean checkLastApprover(BcdMaster bcdMaster) {
+        return bcdMaster.getCurrentApproverIndex() == bcdMaster.getApproverChain().split(", ").length - 1;
+    }
+
+    /**
+     * 결재자의 StdDetail 데이터가 존재하는지 확인
+     * @param approverId 결재자 ID
+     * @param groupCd 그룹 코드
+     * @param instCd 기관 코드
+     * @return 존재 여부
+     */
+    private boolean existsInStdDetail(String approverId, String groupCd, String instCd) {
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd(groupCd)
+                .orElseThrow(() -> new IllegalArgumentException("StdGroup not found"));
+
+        List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)
+                .orElseThrow(() -> new IllegalArgumentException("StdDetail not found"));
+
+        return stdDetails.stream()
+                .anyMatch(detail -> approverId.equals(detail.getEtcItem2()) || approverId.equals(detail.getEtcItem3()));
+    }
+
+    /**
+     * 권한 취소 여부 결정
+     * @param masterList 결재 마스터 리스트
+     * @param approverId 결재자 ID
+     * @return 권한 취소 여부
+     */
+    private boolean shouldCancelAdmin(List<?> masterList, String approverId) {
+        return masterList.stream().noneMatch(master -> {
+            if (master instanceof BcdMaster) {
+                return ((BcdMaster) master).getCurrentApproverId().equals(approverId);
+            } else if (master instanceof DocMaster) {
+                return ((DocMaster) master).getCurrentApproverId().equals(approverId);
+            }
+            return false;
+        });
+    }
+
+    /**
+     * ADMIN 및 사이드바 권한 취소
+     * @param approverId 결재자 ID
+     */
+    private void cancelAdminAndSidebarAuthorities(String approverId) {
+
+        // ADMIN 권한 취소
+        Authority authority = authorityRepository.findByUserId(approverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        authorityRepository.delete(authority);
+
+        // 사이드바 권한 취소
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, approverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        stdDetailRepository.delete(stdDetail);
+    }
+
+    /**
+     * 반려 요청 생성
+     * @param confirmRequestDTO 반려 요청 데이터
+     * @param disapprover 반려자 이름
+     * @param disapproverId 반려자 ID
+     * @return BcdDisapproveRequestDTO 반려 요청
+     */
+    private BcdDisapproveRequestDTO createDisapproveRequest(ConfirmRequestDTO confirmRequestDTO, String disapprover, String disapproverId) {
+        return BcdDisapproveRequestDTO.builder()
                 .disapproverId(disapproverId)
                 .disapprover(disapprover)
                 .rejectReason(confirmRequestDTO.getRejectReason())
                 .respondDate(LocalDateTime.now())
                 .status("C")
                 .build();
+    }
 
-        bcdMaster.updateDisapprove(disapproveRequest);
-        bcdMasterRepository.save(bcdMaster);
-
-        // 2. 알림 전송
-        //  - 명함 신청자와 대상자가 다를 경우, 대상자에게도 알림 전송
+    /**
+     * 반려 알림 전송
+     * @param bcdMaster 결재 마스터 엔티티
+     * @param bcdDetail 결재 상세 엔티티
+     */
+    private void sendRejectionNotifications(BcdMaster bcdMaster, BcdDetail bcdDetail) {
         if (!Objects.equals(bcdMaster.getDrafterId(), bcdDetail.getUserId())) {
             notificationSendService.sendBcdRejection(bcdMaster.getDraftDate(), bcdDetail.getUserId());
         }
         notificationSendService.sendBcdRejection(bcdMaster.getDraftDate(), bcdMaster.getDrafterId());
-
-        // 3. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
-        StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("C002")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        String instCd = infoService.getUserInfoDetail(bcdMaster.getCurrentApproverId()).getInstCd();
-        List<StdDetail> stdDetail1 = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup1, instCd)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        boolean userIdExistsInStdDetail = stdDetail1.stream()
-                .anyMatch(detail -> bcdMaster.getCurrentApproverId().equals(detail.getEtcItem2()) ||
-                        bcdMaster.getCurrentApproverId().equals(detail.getEtcItem3()));
-
-        if (userIdExistsInStdDetail) {
-            return;
-        }
-
-        // 권한 취소 여부 결정
-        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        boolean shouldCancelAdminByBcd = true;
-        boolean shouldCancelAdminByDoc = true;
-
-        for (BcdMaster master : bcdMasterList) {
-            if (master.getCurrentApproverId().equals(disapproverId)) {
-                shouldCancelAdminByBcd = false;
-                break;
-            }
-        }
-
-        for (DocMaster master : docMasterList) {
-            if (master.getCurrentApproverId().equals(disapproverId)) {
-                shouldCancelAdminByDoc = false;
-                break;
-            }
-        }
-
-        if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserId(bcdMaster.getCurrentApproverId())
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
-
-            // ADMIN 권한 취소
-            authorityRepository.delete(authority);
-
-            // 사이드바 권한 취소
-            StdGroup stdGroup2 = stdGroupRepository.findByGroupCd("B002")
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found3"));
-            StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup2, bcdMaster.getCurrentApproverId())
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found4"));
-
-            stdDetailRepository.delete(stdDetail2);
-        }
     }
 
-    /*신청이력조회*/
-    @Override
-    @Transactional(readOnly = true)
-    public List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDateTime startDate, LocalDateTime endDate, String draftId) {
-
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
-        BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + draftId));
-
-        String drafterId = bcdMaster.getDrafterId();
-
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDrafterIdAndDraftDateBetweenOrderByDraftDateDesc(drafterId, startDate, endDate)
-                .orElseThrow(() -> new EntityNotFoundException("BcdMaster not found for draft ID: " + drafterId));
-
-        Map<String, BcdDetail> bcdDetailMap = new HashMap<>();
-
-        for (BcdMaster master : bcdMasters) {
-            BcdDetail bcdDetail = bcdDetailRepository.findById(master.getDraftId())
-                    .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found for BcdMaster ID: " + master.getDraftId()));
-            bcdDetailMap.put(master.getDraftId(), bcdDetail);
-        }
-
-        return bcdMasters.stream().map(master -> {
-            BcdDetail bcdDetail = bcdDetailMap.get(master.getDraftId());
-
-            return BcdHistoryResponseDTO.builder()
-                    .title(master.getTitle())
-                    .draftDate(master.getDraftDate())
-                    .applyStatus(master.getStatus())
-                    .quantity(bcdDetail != null ? bcdDetail.getQuantity() : null)
-                    .build();
-        }).collect(Collectors.toList());
-    }
-
+    /**
+     * 신청 이력 조회
+     * @param postSearchRequestDTO 검색 요청 데이터
+     * @param page 페이지 정보
+     * @param draftId 결재 문서 ID
+     * @return 신청 이력 페이지
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<BcdHistoryResponseDTO> getBcdApplicationHistory2(PostSearchRequestDTO postSearchRequestDTO, Pageable page, String draftId) {
         return bcdApplyQueryRepositoryImpl.getBcdApplicationHistory(postSearchRequestDTO, page, draftId);
     }
-
-//    public static Timestamp[] getDateIntoTimestamp(LocalDateTime startDate, LocalDateTime endDate) {
-//
-//        if (startDate == null) {
-//            startDate = LocalDate.now().minusMonths(1);
-//        }
-//        if (endDate == null) {
-//            endDate = LocalDate.now();
-//        }
-//
-//        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
-//        Timestamp endTimestamp = Timestamp.valueOf(endDate.atTime(LocalTime.MAX));
-//
-//        return new Timestamp[]{startTimestamp, endTimestamp};
-//    }
 }

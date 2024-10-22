@@ -41,7 +41,7 @@ public class TonerManageController {
 
     @Operation(summary = "add Toner Info", description = "토너 관련 정보 추가")
     @PostMapping
-    public ApiResponse<?> addTonerInfo(TonerInfoRequestDTO tonerInfoRequestDTO, String userId, String instCd) {
+    public ApiResponse<?> addTonerInfo(@RequestBody TonerInfoRequestDTO tonerInfoRequestDTO, String userId, String instCd) {
         tonerManageService.addTonerInfo(tonerInfoRequestDTO, userId, instCd);
         return ResponseWrapper.success();
     }

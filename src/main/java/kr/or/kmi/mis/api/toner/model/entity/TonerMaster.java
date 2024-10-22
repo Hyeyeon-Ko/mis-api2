@@ -1,6 +1,11 @@
 package kr.or.kmi.mis.api.toner.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import kr.or.kmi.mis.api.toner.model.request.TonerApproverRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerDisApproverRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -55,12 +60,6 @@ public class TonerMaster extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String instCd;
 
-    @Column(length = 1000)
-    private String approverChain;
-
-    @Column(nullable = false)
-    private Integer currentApproverIndex;
-
     @Builder
     public TonerMaster(String draftId, LocalDateTime draftDate, String drafter, String drafterId, String status, String instCd) {
         this.draftId = draftId;
@@ -75,4 +74,22 @@ public class TonerMaster extends BaseSystemFieldEntity {
     public void updateStatus(String applyStatus) {
         this.status = applyStatus;
     }
+
+    // 승인 -> 승인자, 대응일시, 상태 업데이트
+    public void updateApprove(TonerApproverRequestDTO tonerApproverRequestDTO) {
+        this.approver = tonerApproverRequestDTO.getApprover();
+        this.approverId = tonerApproverRequestDTO.getApproverId();
+        this.respondDate = tonerApproverRequestDTO.getRespondDate();
+        this.status = tonerApproverRequestDTO.getStatus();
+    }
+
+    // 반려 -> 반려자, 대응일시, 상태 업데이트
+    public void updateDisapprove(TonerDisApproverRequestDTO tonerDisApproverRequestDTO) {
+        this.disapprover = tonerDisApproverRequestDTO.getDisapprover();
+        this.disapproverId = tonerDisApproverRequestDTO.getDisapproverId();
+        this.rejectReason = tonerDisApproverRequestDTO.getRejectReason();
+        this.respondDate = tonerDisApproverRequestDTO.getRespondDate();
+        this.status = tonerDisApproverRequestDTO.getStatus();
+    }
+
 }

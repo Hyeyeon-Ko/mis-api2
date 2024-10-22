@@ -108,6 +108,7 @@ public class TonerManageServiceImpl implements TonerManageService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TonerInfoResponseDTO getTonerInfo(String mngNum) {
 
         TonerInfo tonerInfo = tonerInfoRepository.findByMngNum(mngNum)
@@ -121,6 +122,7 @@ public class TonerManageServiceImpl implements TonerManageService {
     }
 
     @Override
+    @Transactional
     public void addTonerInfo(TonerInfoRequestDTO tonerInfoRequestDTO, String userId, String instCd) {
 
         // 1. 관리번호 중복 예외처리
@@ -139,6 +141,7 @@ public class TonerManageServiceImpl implements TonerManageService {
     }
 
     @Override
+    @Transactional
     public void updateTonerInfo(String mngNum, TonerInfoRequestDTO tonerInfoRequestDTO, String userId) {
 
         // 1. tonerInfo 조회
@@ -147,9 +150,9 @@ public class TonerManageServiceImpl implements TonerManageService {
 
         // 2. mngNum 중복 예외처리
         if (!mngNum.equals(tonerInfoRequestDTO.getMngNum())) {
-            boolean exists = tonerPriceRepository.existsByTonerNm(tonerInfoRequestDTO.getMngNum());
+            boolean exists = tonerInfoRepository.existsByMngNum(tonerInfoRequestDTO.getMngNum());
             if (exists) {
-                throw new EntityExistsException("Toner with the same name already exists: " + tonerInfoRequestDTO.getMngNum());
+                throw new EntityExistsException("Toner with the same management number already exists: " + tonerInfoRequestDTO.getMngNum());
             }
         }
 
@@ -163,6 +166,7 @@ public class TonerManageServiceImpl implements TonerManageService {
     }
 
     @Override
+    @Transactional
     public void deleteTonerInfo(String mngNum) {
 
         // 1. tonerInfo 조회

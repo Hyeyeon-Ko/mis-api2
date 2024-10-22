@@ -7,9 +7,6 @@ import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 public interface BcdConfirmService {
 
     /* 명함신청 상세 정보 불러오기 */
@@ -22,6 +19,5 @@ public interface BcdConfirmService {
     void disapprove(String draftId, ConfirmRequestDTO confirmRequestDTO);
 
     /* 명함 신청이력 조회 */
-    List<BcdHistoryResponseDTO> getBcdApplicationHistory(LocalDateTime startDate, LocalDateTime endDate, String draftId);
     Page<BcdHistoryResponseDTO> getBcdApplicationHistory2(PostSearchRequestDTO postSearchRequestDTO, Pageable page, String draftId);
 }

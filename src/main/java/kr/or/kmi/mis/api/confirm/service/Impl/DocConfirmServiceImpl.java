@@ -37,27 +37,44 @@ public class DocConfirmServiceImpl implements DocConfirmService {
     private final StdDetailRepository stdDetailRepository;
     private final BcdMasterRepository bcdMasterRepository;
 
+    /**
+     * DocMaster 엔티티를 draftId로 조회하여 반환.
+     * @param draftId 결재 문서 ID
+     * @return DocMaster 에티티
+     */
+    private DocMaster getDocMaster(String draftId) {
+        return docMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("DocMaster not found for draft Id: " + draftId));
+    }
+
+    /**
+     * DocDetail 엔티티를 draftId로 조회하여 반환.
+     * @param draftId 결재 문서 ID
+     * @return DocDetail 엔티티
+     */
+    private DocDetail getDocDetail(String draftId) {
+        return docDetailRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("DocDetail not found for draft Id: " + draftId));
+    }
+
+    /**
+     * 결재 승인 처리.
+     * @param draftId 결재 문서 ID
+     * @param userId 결재 요청 유저 ID
+     */
     @Override
     @Transactional
     public void confirm(String draftId, String userId) {
 
         // 1. 문서수발신신청 승인
-        DocMaster docMaster = docMasterRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("docMaster not found: " + draftId));
-        DocDetail docDetail = docDetailRepository.findById(draftId)
-                .orElseThrow(() -> new EntityNotFoundException("docDetail not found: " + draftId));
+        DocMaster docMaster = getDocMaster(draftId);
+        DocDetail docDetail = getDocDetail(draftId);
+        validateApprover(docMaster, userId);
+        boolean isLastApprover = checkLastApprover(docMaster);
 
-        if (!docMaster.getCurrentApproverId().equals(userId)) {
-            throw new IllegalArgumentException("현재 결재자가 아닙니다.");
-        }
-        boolean isLastApprover = docMaster.getCurrentApproverIndex() == docMaster.getApproverChain().split(", ").length - 1;
+        String approver = infoService.getUserInfoDetail(userId).getUserName();
 
-        // 승인 상태 변경
-        String approverId = userId;
-        String approver = infoService.getUserInfoDetail(approverId).getUserName();
-
-        docMaster.confirm(isLastApprover ? "E" : "A", approver, approverId);
-
+        docMaster.confirm(isLastApprover ? "E" : "A", approver, userId);
         docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex() + 1);
 
         // 문서번호 생성해, 업데이트
@@ -81,17 +98,8 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         }
 
         // 3. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
-        StdGroup stdGroup1 = stdGroupRepository.findByGroupCd("C002")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        String instCd = infoService.getUserInfoDetail(userId).getInstCd();
-        List<StdDetail> stdDetail1 = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup1, instCd)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        boolean userIdExistsInStdDetail = stdDetail1.stream()
-                .anyMatch(detail -> userId.equals(detail.getEtcItem2()) || userId.equals(detail.getEtcItem3()));
-
-        if (userIdExistsInStdDetail) {
+        String instCd = infoService.getUserInfoDetail(docMaster.getCurrentApproverId()).getInstCd();
+        if (existsInStdDetail(docMaster.getCurrentApproverId(), "C002", instCd)) {
             return;
         }
 
@@ -101,41 +109,18 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        boolean shouldCancelAdminByBcd = true;
-        boolean shouldCancelAdminByDoc = true;
-
-        for (BcdMaster master : bcdMasterList) {
-            if (master.getCurrentApproverId().equals(userId)) {
-                shouldCancelAdminByBcd = false;
-                break;
-            }
-        }
-
-        for (DocMaster master : docMasterList) {
-            if (master.getCurrentApproverId().equals(userId)) {
-                shouldCancelAdminByDoc = false;
-                break;
-            }
-        }
+        boolean shouldCancelAdminByBcd = shouldCancelAdmin(bcdMasterList, userId);
+        boolean shouldCancelAdminByDoc = shouldCancelAdmin(docMasterList, userId);
 
         if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-            Authority authority = authorityRepository.findByUserId(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found2"));
-
-            // ADMIN 권한 취소
-            authorityRepository.delete(authority);
-
-            // 사이드바 권한 취소
-            StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found3"));
-            StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found4"));
-
-            stdDetailRepository.delete(stdDetail);
+            cancelAdminAndSidebarAuthorities(userId);
         }
-
     }
 
+    /**
+     * 신청 삭제 처리.
+     * @param draftId
+     */
     @Override
     @Transactional
     public void delete(String draftId) {
@@ -171,5 +156,81 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         }
 
         return nowYear + "-" + String.format("%03d", num);
+    }
+
+    /**
+     * 결재자가 맞는지 검증
+     * @param docMaster 결재 마스터 엔티티
+     * @param userId 검증할 사용자 ID
+     */
+    private void validateApprover(DocMaster docMaster, String userId) {
+        if (!docMaster.getCurrentApproverId().equals(userId)) {
+            throw new IllegalArgumentException("현재 결재자가 아닙니다.");
+        }
+    }
+
+    /**
+     * 마지막 결재자인지 확인
+     * @param docMaster 결재 마스터 엔티티
+     * @return 마지막 결재자 여부
+     */
+    private boolean checkLastApprover(DocMaster docMaster) {
+        return docMaster.getCurrentApproverIndex() == docMaster.getApproverChain().split(", ").length - 1;
+    }
+
+    /**
+     * 결재자의 StdDetail 데이터가 존재하는지 확인
+     * @param approverId 결재자 ID
+     * @param groupCd 그룹 코드
+     * @param instCd 기관 코드
+     * @return 존재 여부
+     */
+    private boolean existsInStdDetail(String approverId, String groupCd, String instCd) {
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd(groupCd)
+                .orElseThrow(() -> new IllegalArgumentException("StdGroup not found"));
+
+        List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)
+                .orElseThrow(() -> new IllegalArgumentException("StdDetail not found"));
+
+        return stdDetails.stream()
+                .anyMatch(detail -> approverId.equals(detail.getEtcItem2()) || approverId.equals(detail.getEtcItem3()));
+    }
+
+    /**
+     * 권한 취소 여부 결정
+     * @param masterList 결재 마스터 리스트
+     * @param approverId 결재자 ID
+     * @return 권한 취소 여부
+     */
+    private boolean shouldCancelAdmin(List<?> masterList, String approverId) {
+        return masterList.stream().noneMatch(master -> {
+            if (master instanceof BcdMaster) {
+                return ((BcdMaster) master).getCurrentApproverId().equals(approverId);
+            } else if (master instanceof DocMaster) {
+                return ((DocMaster) master).getCurrentApproverId().equals(approverId);
+            }
+            return false;
+        });
+    }
+
+    /**
+     * ADMIN 및 사이드바 권한 취소
+     * @param approverId 결재자 ID
+     */
+    private void cancelAdminAndSidebarAuthorities(String approverId) {
+
+        // ADMIN 권한 취소
+        Authority authority = authorityRepository.findByUserId(approverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        authorityRepository.delete(authority);
+
+        // 사이드바 권한 취소
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, approverId)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        stdDetailRepository.delete(stdDetail);
     }
 }

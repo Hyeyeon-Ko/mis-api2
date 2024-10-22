@@ -48,7 +48,7 @@ public class TonerPriceController {
 
     @Operation(summary = "delete Toner price", description = "토너 관련 정보 삭제")
     @DeleteMapping("/{tonerNm}")
-    public ApiResponse<?> deleteTonerPrice(@RequestParam("tonerNm") String tonerNm) {
+    public ApiResponse<?> deleteTonerPrice(@PathVariable String tonerNm) {
         tonerPriceService.deleteTonerPriceInfo(tonerNm);
         return ResponseWrapper.success();
     }
