@@ -18,6 +18,6 @@ public interface OrderService {
     /* 발주 요청 -> 이메일로 엑셀 파일 전송 */
     void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException;
 
-    /* 기본 발신/수신 이메일 설정 */
+    /* 기본 수신 이메일 설정 */
     EmailSettingsResponseDTO getEmailSettings();
 }

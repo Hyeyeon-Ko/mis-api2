@@ -54,5 +54,9 @@ public class TonerDetail {
         this.totalPrice = totalPrice;
     }
 
-
+    public int getUnitPrice() {
+        String cleanedTotalPrice = totalPrice.replace(",", "");
+        int totalPriceInteger = Integer.parseInt(cleanedTotalPrice);
+        return totalPriceInteger / quantity;
+    }
 }

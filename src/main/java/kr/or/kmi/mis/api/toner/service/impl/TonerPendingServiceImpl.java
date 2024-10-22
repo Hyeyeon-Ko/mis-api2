@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
-import jakarta.servlet.http.HttpServletResponse;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.toner.model.entity.TonerDetail;
 import kr.or.kmi.mis.api.toner.model.entity.TonerMaster;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +24,7 @@ public class TonerPendingServiceImpl implements TonerPendingService {
 
     /**
      * 승인 대기 상태의 항목들을 TonerPendingResponseDTO 리스트로 반환합니다.
-     * @param instCd 기관 코드 (instCd)로 해당 기관의 TonerMaster 및 관련 TonerDetail 항목을 조회합니다.
+     * @param instCd 센터 코드 (instCd)로 해당 센터의 TonerMaster 및 관련 TonerDetail 항목을 조회합니다.
      * @return TonerPendingResponseDTO의 리스트. 각 TonerMaster와 연결된 TonerDetail 항목을 기반으로 한 DTO 리스트.
      */
     @Override
@@ -54,31 +52,4 @@ public class TonerPendingServiceImpl implements TonerPendingService {
                 })
                 .collect(Collectors.toList());
     }
-
-    // TODO: 기안상신용 파일 형식 받은 후 구현
-    @Override
-    public void downloadExcel(HttpServletResponse response, List<String> draftIds) throws IOException {
-//        byte[] excelData = generateExcel(draftIds);
-//
-//        try {
-//            // HTTP 응답에 엑셀 파일 첨부
-//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-//            response.setContentLength(excelData.length);
-//            response.getOutputStream().write(excelData);
-//            response.getOutputStream().flush();
-//            response.getOutputStream().close();
-//        } catch (Exception e) {
-//            throw new IOException("Failed to send Excel file", e);
-//        }
-    }
-
-//    @Override
-//    public byte[] generateExcel(List<String> draftIds) throws IOException {
-//        List<TonerDetail> tonerDetails = tonerDetailRepository.findAllByDraftIdIn(draftIds);
-//        return createExcelData(tonerDetails);
-//    }
-//
-//    private byte[] createExcelData(List<TonerDetail> tonerDetails) throws IOException {
-//    }
 }

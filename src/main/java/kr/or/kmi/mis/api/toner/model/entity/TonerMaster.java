@@ -28,6 +28,8 @@ public class TonerMaster extends BaseSystemFieldEntity {
 
     private LocalDateTime respondDate;
 
+    private LocalDateTime orderDate;
+
     private LocalDateTime endDate;
 
     @Column(length = 20)
@@ -92,4 +94,9 @@ public class TonerMaster extends BaseSystemFieldEntity {
         this.status = tonerDisApproverRequestDTO.getStatus();
     }
 
+    // 발주 -> 발주일시 및 상태 업데이트
+    public void updateOrder() {
+        this.orderDate = LocalDateTime.now();
+        this.status = "D";
+    }
 }

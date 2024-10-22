@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -109,9 +108,6 @@ public class OrderServiceImpl implements OrderService {
                 orderRequest.getFileName()
         );
 
-        SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy.MM.dd");
-        SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-
         // 발주일시 업데이트
         orderRequest.getDraftIds().forEach(draftId -> {
             BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
@@ -132,10 +128,10 @@ public class OrderServiceImpl implements OrderService {
     public EmailSettingsResponseDTO getEmailSettings() {
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
                 .orElseThrow(() -> new EntityNotFoundException("B003"));
-        StdDetail stdDetail2 = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "001")
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "001")
                 .orElseThrow(() -> new EntityNotFoundException("001"));
 
-        return new EmailSettingsResponseDTO(stdDetail2.getEtcItem2());
+        return new EmailSettingsResponseDTO(stdDetail.getEtcItem2());
     }
 
     private void sendEmailWithDynamicCredentials(String smtpHost, int smtpPort, String username, String password, String fromEmail, String toEmail, byte[] excelData, String subject, String body, String fileName) throws MessagingException {
