@@ -8,8 +8,8 @@ import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.toner.model.entity.TonerDetail;
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerMaster;
-import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerDetailRepository;
@@ -21,8 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -43,10 +44,15 @@ public class TonerServiceImpl implements TonerService {
     public TonerInfo2ResponseDTO getTonerInfo(String mngNum) {
         TonerInfo tonerInfo = tonerInfoRepository.findById(mngNum)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + mngNum));
-        TonerPrice tonerPrice = tonerPriceRepository.findByTonerNm(tonerInfo.getTonerNm())
-                .orElseThrow(() -> new EntityNotFoundException("Not found: " + tonerInfo.getTonerNm()));
 
-        return TonerInfo2ResponseDTO.of(tonerInfo, tonerPrice.getPrice());
+        List<TonerPriceDTO> tonerPriceList = Arrays.stream(tonerInfo.getTonerNm().split(","))
+                .map(String::trim)
+                .map(tonerName -> tonerPriceRepository.findByTonerNm(tonerName)
+                        .orElseThrow(() -> new EntityNotFoundException("Not found: " + tonerName)))
+                .map(tonerPrice -> TonerPriceDTO.of(tonerPrice.getTonerNm(), tonerPrice.getPrice()))
+                .toList();
+
+        return TonerInfo2ResponseDTO.of(tonerInfo, tonerPriceList);
     }
 
     @Override

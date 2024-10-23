@@ -1,8 +1,11 @@
 package kr.or.kmi.mis.api.toner.model.response;
 
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
+import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -12,21 +15,16 @@ public class TonerInfo2ResponseDTO {
     private String teamNm;  // 사용부서
     private String location;   // 위치
     private String modelNm;  // 모델명
-    private String tonerNm;  // 토너명
-//    private String color;    // 색상   todo: 토너명에 색상값 포함 예정. 추후 삭제
-    private String price;    // 가격
+    private List<TonerPriceDTO> tonerPriceDTOList;
 
-
-    public static TonerInfo2ResponseDTO of(TonerInfo tonerInfo, String price) {
+    public static TonerInfo2ResponseDTO of(TonerInfo tonerInfo, List<TonerPriceDTO> tonerPriceDTOs) {
 
         return TonerInfo2ResponseDTO.builder()
                 .mngNum(tonerInfo.getMngNum())
                 .teamNm(tonerInfo.getTeamNm())
                 .location(tonerInfo.getLocation())
                 .modelNm(tonerInfo.getModelNm())
-                .tonerNm(tonerInfo.getTonerNm())
-//                .color(tonerInfo.getColor())
-                .price(price)
+                .tonerPriceDTOList(tonerPriceDTOs)
                 .build();
     }
 }
