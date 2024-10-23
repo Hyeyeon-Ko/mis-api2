@@ -48,6 +48,7 @@ public class TonerPendingServiceImpl implements TonerPendingService {
                             .tonerNm(tonerDetail.getTonerNm())
                             .quantity(String.valueOf(tonerDetail.getQuantity()))
                             .totalPrice(tonerDetail.getTotalPrice())
+                            .holding(tonerDetail.getHolding())
                             .build());
                 })
                 .collect(Collectors.toList());

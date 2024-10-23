@@ -62,6 +62,7 @@ public class TonerOrderServiceImpl implements TonerOrderService {
                             .price(tonerDetail.getUnitPrice())
                             .totalPrice(tonerDetail.getTotalPrice())
                             .mngNum(tonerDetail.getMngNum())
+                            .holding(tonerDetail.getHolding())
                             .build());
                 })
                 .collect(Collectors.toList());
