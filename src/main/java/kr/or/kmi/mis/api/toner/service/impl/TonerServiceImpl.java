@@ -12,6 +12,7 @@ import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMngResponseDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerDetailRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerInfoRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
@@ -38,6 +39,15 @@ public class TonerServiceImpl implements TonerService {
 
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public TonerMngResponseDTO getMngInfo(String instCd) {
+        List<TonerInfo> tonerInfoList = tonerInfoRepository.findAllByInstCd(instCd);
+        List<String> mngNums = tonerInfoList.stream().map(TonerInfo::getMngNum).toList();
+
+        return new TonerMngResponseDTO(mngNums);
+    }
 
     @Override
     @Transactional(readOnly = true)

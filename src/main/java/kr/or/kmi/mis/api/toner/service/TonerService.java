@@ -4,6 +4,7 @@ package kr.or.kmi.mis.api.toner.service;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMngResponseDTO;
 
 public interface TonerService {
 
@@ -17,4 +18,6 @@ public interface TonerService {
     void updateTonerApply(TonerApplyRequestDTO tonerRequestDTO);
     /* 토너신청 취소 */
     void cancelTonerApply(String draftId);
+    /* 토너 관리번호 조회 */
+    TonerMngResponseDTO getMngInfo(String instCd);
 }

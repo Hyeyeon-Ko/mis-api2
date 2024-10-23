@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMngResponseDTO;
 import kr.or.kmi.mis.api.toner.service.TonerService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
@@ -18,6 +19,13 @@ import org.springframework.web.bind.annotation.*;
 public class TonerController {
 
     private final TonerService tonerService;
+
+    @Operation(summary = "관리번호를 조회합니다.")
+    @GetMapping("/mngNum")
+    public ApiResponse<TonerMngResponseDTO> getMngInfo(@RequestParam("instCd") String instCd) {
+
+        return ResponseWrapper.success(tonerService.getMngInfo(instCd));
+    }
 
     @Operation(summary = "토너 상세정보를 조회합니다.")
     @GetMapping("/info")
