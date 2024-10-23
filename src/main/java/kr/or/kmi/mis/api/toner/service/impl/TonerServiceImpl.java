@@ -89,7 +89,7 @@ public class TonerServiceImpl implements TonerService {
                 .forEach(tonerDetailDTO -> {
 
                     // 2-1) tonerDetail 객체 생성
-                    TonerDetail tonerDetail = TonerDetail.builder()
+                    TonerDetail.TonerDetailBuilder detailBuilder = TonerDetail.builder()
                             .itemId(itemId.getAndIncrement())
                             .draftId(draftId)
                             .mngNum(tonerDetailDTO.getMngNum())
@@ -99,8 +99,13 @@ public class TonerServiceImpl implements TonerService {
                             .tonerNm(tonerDetailDTO.getTonerNm())
                             .price(tonerDetailDTO.getPrice())
                             .quantity(tonerDetailDTO.getQuantity())
-                            .totalPrice(tonerDetailDTO.getTotalPrice())
-                            .build();
+                            .totalPrice(tonerDetailDTO.getTotalPrice());
+
+                    if (itemId.get() > 2) {
+                        detailBuilder.holding("T");
+                    }
+
+                    TonerDetail tonerDetail = detailBuilder.build();
 
                     // 2-2) 상세정보 저장
                     tonerDetailRepository.save(tonerDetail);

@@ -43,9 +43,12 @@ public class TonerDetail {
     @Column(name = "total_price", length = 20)
     private String totalPrice;
 
+    @Column(name = "holding", length = 1)
+    private String holding;
+
     @Builder
     public TonerDetail(Long itemId, String draftId, String mngNum, String teamNm, String location,
-                       String printNm, String tonerNm, String price, int quantity, String totalPrice) {
+                       String printNm, String tonerNm, String price, int quantity, String totalPrice, String holding) {
         this.itemId = itemId;
         this.draftId = draftId;
         this.mngNum = mngNum;
@@ -56,6 +59,7 @@ public class TonerDetail {
         this.price = price;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
+        this.holding = holding;
     }
 
     public int getUnitPrice() {
