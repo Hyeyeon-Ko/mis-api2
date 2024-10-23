@@ -44,7 +44,7 @@ public class TonerController {
     @Operation(summary = "토너를 신청합니다.")
     @PostMapping("")
     public ApiResponse<?> applyToner(@RequestBody TonerApplyRequestDTO tonerRequestDTO ) {
-        tonerService.applytoner(tonerRequestDTO);
+        tonerService.applyToner(tonerRequestDTO);
 
         return ResponseWrapper.success();
     }

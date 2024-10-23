@@ -73,7 +73,7 @@ public class TonerServiceImpl implements TonerService {
 
     @Override
     @Transactional
-    public void applytoner(TonerApplyRequestDTO tonerApplyRequestDTO) {
+    public void applyToner(TonerApplyRequestDTO tonerApplyRequestDTO) {
         String draftId = generateDraftId();
 
         // 1. tonerMaster 저장
@@ -97,6 +97,7 @@ public class TonerServiceImpl implements TonerService {
                             .location(tonerDetailDTO.getLocation())
                             .printNm(tonerDetailDTO.getPrintNm())
                             .tonerNm(tonerDetailDTO.getTonerNm())
+                            .price(tonerDetailDTO.getPrice())
                             .quantity(tonerDetailDTO.getQuantity())
                             .totalPrice(tonerDetailDTO.getTotalPrice())
                             .build();

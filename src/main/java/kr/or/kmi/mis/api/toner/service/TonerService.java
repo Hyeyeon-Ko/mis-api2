@@ -13,7 +13,7 @@ public interface TonerService {
     /* 토너신청 상세정보 호출 */
     TonerApplyResponseDTO getTonerApply(String draftId);
     /* 토너 신청 */
-    void applytoner(TonerApplyRequestDTO tonerRequestDTO);
+    void applyToner(TonerApplyRequestDTO tonerRequestDTO);
     /* 토너신청 수정 */
     void updateTonerApply(TonerApplyRequestDTO tonerRequestDTO);
     /* 토너신청 취소 */

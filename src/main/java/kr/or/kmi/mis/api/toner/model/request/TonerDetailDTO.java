@@ -10,7 +10,7 @@ public class TonerDetailDTO {
     private String location;
     private String printNm;
     private String tonerNm;
-//    private String color; // N(없음),B(흑백),L(컬러),K(검정),C(파랑),M(빨강),Y(노랑)
+    private String price;
     private int quantity;
     private String totalPrice;
 
