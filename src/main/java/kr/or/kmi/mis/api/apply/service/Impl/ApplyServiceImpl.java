@@ -29,6 +29,8 @@ import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
+import kr.or.kmi.mis.api.toner.service.TonerOrderService;
+import kr.or.kmi.mis.api.toner.service.TonerPendingService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,6 +57,8 @@ public class ApplyServiceImpl implements ApplyService {
     private final CorpDocListService corpDocListService;
     private final OrderService orderService;
     private final DocstorageListService docstorageListService;
+    private final TonerPendingService tonerPendingService;
+    private final TonerOrderService tonerOrderService;
 
     private final BcdPendingQueryRepository bcdPendingQueryRepository;
     private final DocPendingQueryRepository docPendingQueryRepository;
@@ -283,9 +287,11 @@ public class ApplyServiceImpl implements ApplyService {
         int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingListCount();
         int orderPendingCount = orderService.getOrderList(applyRequestDTO.getInstCd()).size();
         int docstoragePendingCount = docstorageListService.getDocstoragePendingList(applyRequestDTO.getInstCd()).size();
+        int tonerPendingCount = tonerPendingService.getTonerPendingList(applyRequestDTO.getInstCd()).size();
+        int tonerOrderPendingCount = tonerOrderService.getTonerOrderList(applyRequestDTO.getInstCd()).size();
 
         return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount,
-                corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount);
+                corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount, tonerPendingCount, tonerOrderPendingCount);
     }
 
     @Override
