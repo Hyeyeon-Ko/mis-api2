@@ -10,6 +10,18 @@ public interface TonerExcelService {
     /* 토너 관리표 파일 첨부 */
 //    void saveTonerDetails(TonerExcelRequestDTO tonerExcelRequestDTO);
 
+    /* 토너 단가표 엑셀 파일 다운로드 */
+    void downloadPriceExcel(HttpServletResponse response, List<String> tonerNms) throws IOException;
+
+    /* 토너 단가표 엑셀 파일 생성 */
+    byte[] generatePriceExcel(List<String> draftIds) throws IOException;
+
+    /* 토너 관리표 엑셀 파일 다운로드 */
+    void downloadManageExcel(HttpServletResponse response, List<String> mngNums) throws IOException;
+
+    /* 토너 관리표 엑셀 파일 생성 */
+    byte[] generateManageExcel(List<String> draftIds) throws IOException;
+
     /* 기안 상신용 엑셀 파일 다운로드 */
     void downloadPendingExcel(HttpServletResponse response, List<String> draftIds) throws IOException;
 
@@ -17,10 +29,9 @@ public interface TonerExcelService {
 //    byte[] generatePendingExcel(List<String> draftIds) throws IOException;
 
     /* 발주용 엑셀 파일 다운로드 */
-    void downloadOrderExcel(HttpServletResponse response, List<String> draftIds);
-
+    void downloadOrderExcel(HttpServletResponse response, List<String> draftIds) throws IOException;
 
     /* 발주용 엑셀 파일 생성 */
-//    byte[] generateOrderExcel(List<String> draftIds) throws IOException;
+    byte[] generateOrderExcel(List<String> draftIds) throws IOException;
 
 }

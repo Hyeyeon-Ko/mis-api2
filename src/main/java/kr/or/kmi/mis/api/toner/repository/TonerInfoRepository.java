@@ -10,5 +10,7 @@ public interface TonerInfoRepository extends JpaRepository<TonerInfo, String> {
 
     boolean existsByMngNum(String MngNum);
     List<TonerInfo> findAllByInstCd(String instCd);
+
+    List<TonerInfo> findAllByMngNumIn(List<String> mngNums);
     Optional<TonerInfo> findByMngNum(String mngNum);
 }
