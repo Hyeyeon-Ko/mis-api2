@@ -128,7 +128,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         CellStyle thickBorderStyle = createThickBorderStyle(wb);
 
         // 제목 생성
-        createPriceTitle(sheet, titleStyle, "토너 발주내역");
+        createPriceTitle(sheet, titleStyle, "토너 발주 내역");
 
         // 헤더 생성
         createPriceHeader(sheet, headerStyle);
@@ -193,7 +193,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
             String price = (tonerPrice != null) ? tonerPrice.getPrice() : null;
 
             Row row = sheet.createRow(rowNum.getAndIncrement());
-            row.setHeight((short) 500);
+            row.setHeight((short) 550);
 
             createCell(row, 0, info.getMngNum(), thinBorderStyle, centeredStyle);  // 관리번호
             createCell(row, 1, info.getFloor(), thinBorderStyle, centeredStyle);   // 층
@@ -211,19 +211,19 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         });
 
         // 열 너비 조정
-        sheet.setColumnWidth(0, 3000);  // 관리번호
-        sheet.setColumnWidth(1, 3000);  // 층
-        sheet.setColumnWidth(2, 5000);  // 사용부서
-        sheet.setColumnWidth(3, 5000);  // 관리자(정)
-        sheet.setColumnWidth(4, 5000);  // 관리자(부)
+        sheet.setColumnWidth(0, 2500);  // 관리번호
+        sheet.setColumnWidth(1, 2000);  // 층
+        sheet.setColumnWidth(2, 4500);  // 사용부서
+        sheet.setColumnWidth(3, 2500);  // 관리자(정)
+        sheet.setColumnWidth(4, 2500);  // 관리자(부)
         sheet.setColumnWidth(5, 5000);  // 위치
-        sheet.setColumnWidth(6, 4000);  // 품명
-        sheet.setColumnWidth(7, 6000);  // 모델명
-        sheet.setColumnWidth(8, 6000);  // S/N
+        sheet.setColumnWidth(6, 3500);  // 품명
+        sheet.setColumnWidth(7, 6500);  // 모델명
+        sheet.setColumnWidth(8, 7500);  // S/N
         sheet.setColumnWidth(9, 4000);  // 제조사
-        sheet.setColumnWidth(10, 4000);  // 제조년월
-        sheet.setColumnWidth(11, 5000);  // 토너(잉크)명
-        sheet.setColumnWidth(12, 3000);  // 단가
+        sheet.setColumnWidth(10, 3500);  // 제조년월
+        sheet.setColumnWidth(11, 7500);  // 토너(잉크)명
+        sheet.setColumnWidth(12, 3500);  // 단가
 
         // 엑셀 파일을 ByteArrayOutputStream에 쓰기
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -275,6 +275,9 @@ public class TonerExcelServiceImpl implements TonerExcelService {
 
         createThickTopBorderForRow2(sheet, 4, thickBorderStyle);
 
+        Row blankRow = sheet.createRow(4);
+        blankRow.setHeight((short) 80);
+
         Row receiverRow = sheet.createRow(5);
         receiverRow.setHeight((short) 400);
 
@@ -316,9 +319,6 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         CellRangeAddress addressRegion = new CellRangeAddress(6, 6, 3, 6);
         sheet.addMergedRegion(addressRegion);
         applyBorderToMergedCells(sheet, addressRegion, subTitleStyle);
-
-        Row blankRow = sheet.createRow(6);
-        blankRow.setHeight((short) 80);
 
         Row orderTitleRow = sheet.createRow(7);
         orderTitleRow.setHeight((short) 400);
@@ -474,7 +474,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
 
     private void createManageHeader(Sheet sheet, CellStyle style) {
         Row headerRow = sheet.createRow(1);
-        headerRow.setHeight((short) 500);
+        headerRow.setHeight((short) 550);
         String[] headers = {"관리번호", "층", "사용부서", "관리자(정)", "관리자(부)", "위치", "품명", "모델명", "S/N", "제조사", "제조년월", "토너(잉크)명", "단가"};
 
         for (int i = 0; i < headers.length; i++) {

@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 public class TonerOrderResponseDTO {
 
+    private String draftId;
     private String tonerNm;
     private int quantity;
     private int price;
@@ -13,7 +14,8 @@ public class TonerOrderResponseDTO {
     private String mngNum;
 
     @Builder
-    public TonerOrderResponseDTO(String tonerNm, int quantity, int price, String totalPrice, String mngNum) {
+    public TonerOrderResponseDTO(String draftId, String tonerNm, int quantity, int price, String totalPrice, String mngNum) {
+        this.draftId = draftId;
         this.tonerNm = tonerNm;
         this.quantity = quantity;
         this.price = price;

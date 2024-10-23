@@ -56,6 +56,7 @@ public class TonerOrderServiceImpl implements TonerOrderService {
                 .flatMap(tonerMaster -> {
                     List<TonerDetail> tonerDetails = tonerDetailRepository.findAllByDraftId(tonerMaster.getDraftId());
                     return tonerDetails.stream().map(tonerDetail -> TonerOrderResponseDTO.builder()
+                            .draftId(tonerDetail.getDraftId())
                             .tonerNm(tonerDetail.getTonerNm())
                             .quantity(tonerDetail.getQuantity())
                             .price(tonerDetail.getUnitPrice())

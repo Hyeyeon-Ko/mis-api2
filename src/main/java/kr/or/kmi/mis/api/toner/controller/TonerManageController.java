@@ -55,7 +55,7 @@ public class TonerManageController {
 
     @Operation(summary = "delete Toner Info", description = "토너 관련 정보 삭제")
     @DeleteMapping("/{mngNum}")
-    public ApiResponse<?> deleteTonerPrice(@RequestParam("tonerNm") String mngNum) {
+    public ApiResponse<?> deleteTonerPrice(@PathVariable("mngNum") String mngNum) {
         tonerManageService.deleteTonerInfo(mngNum);
         return ResponseWrapper.success();
     }

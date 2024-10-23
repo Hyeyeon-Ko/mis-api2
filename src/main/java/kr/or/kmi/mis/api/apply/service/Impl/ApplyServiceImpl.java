@@ -285,7 +285,7 @@ public class ApplyServiceImpl implements ApplyService {
         int docstoragePendingCount = docstorageListService.getDocstoragePendingList(applyRequestDTO.getInstCd()).size();
 
         return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount,
-                                          corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount);
+                corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount);
     }
 
     @Override
@@ -330,3 +330,4 @@ public class ApplyServiceImpl implements ApplyService {
         return PendingResponseDTO.of(pagedResult);
     }
 }
+
