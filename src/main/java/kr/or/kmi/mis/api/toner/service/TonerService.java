@@ -1,10 +1,17 @@
 package kr.or.kmi.mis.api.toner.service;
 
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerMngResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface TonerService {
 
@@ -20,4 +27,8 @@ public interface TonerService {
     void cancelTonerApply(String draftId);
     /* 토너 관리번호 조회 */
     TonerMngResponseDTO getMngInfo(String instCd);
+
+    /* 토너 나의 전체신청내역 */
+    List<TonerMyResponseDTO> getMyTonerApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
+    Page<TonerMyResponseDTO> getMyTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
 }

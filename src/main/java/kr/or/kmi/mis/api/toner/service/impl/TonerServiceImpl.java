@@ -1,5 +1,6 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
+import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -13,12 +14,17 @@ import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerMngResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerDetailRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerInfoRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerPriceRepository;
+import kr.or.kmi.mis.api.toner.repository.TonerApplyQueryRepository;
 import kr.or.kmi.mis.api.toner.service.TonerService;
+import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +46,8 @@ public class TonerServiceImpl implements TonerService {
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
+    private final TonerApplyQueryRepository tonerApplyQueryRepository;
+
     @Override
     @Transactional(readOnly = true)
     public TonerMngResponseDTO getMngInfo(String instCd) {
@@ -47,6 +55,16 @@ public class TonerServiceImpl implements TonerService {
         List<String> mngNums = tonerInfoList.stream().map(TonerInfo::getMngNum).toList();
 
         return new TonerMngResponseDTO(mngNums);
+    }
+
+    @Override
+    public List<TonerMyResponseDTO> getMyTonerApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+        return tonerApplyQueryRepository.getMyTonerApply(applyRequestDTO, postSearchRequestDTO);
+    }
+
+    @Override
+    public Page<TonerMyResponseDTO> getMyTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        return tonerApplyQueryRepository.getMyTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
     }
 
     @Override

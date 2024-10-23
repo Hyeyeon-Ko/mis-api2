@@ -29,8 +29,10 @@ import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
+import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
 import kr.or.kmi.mis.api.toner.service.TonerOrderService;
 import kr.or.kmi.mis.api.toner.service.TonerPendingService;
+import kr.or.kmi.mis.api.toner.service.TonerService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -57,6 +59,7 @@ public class ApplyServiceImpl implements ApplyService {
     private final CorpDocListService corpDocListService;
     private final OrderService orderService;
     private final DocstorageListService docstorageListService;
+    private final TonerService tonerService;
     private final TonerPendingService tonerPendingService;
     private final TonerOrderService tonerOrderService;
 
@@ -181,11 +184,13 @@ public class ApplyServiceImpl implements ApplyService {
         Page<DocMyResponseDTO> myDocApplyList = null;
         Page<CorpDocMyResponseDTO> myCorpDocApplyList = null;
         Page<SealMyResponseDTO> mySealApplyList = null;
+        Page<TonerMyResponseDTO> myTonerApplyList = null;
 
         List<BcdMyResponseDTO> myBcdApplyList2 = new ArrayList<>();
         List<DocMyResponseDTO> myDocApplyList2 = new ArrayList<>();
         List<CorpDocMyResponseDTO> myCorpDocApplyList2 = new ArrayList<>();
         List<SealMyResponseDTO> mySealApplyList2 = new ArrayList<>();
+        List<TonerMyResponseDTO> myTonerApplyList2 = new ArrayList<>();
 
         if (applyRequestDTO.getDocumentType() != null) {
             // 각 신청 별 목록 페이징 조회
@@ -199,21 +204,28 @@ public class ApplyServiceImpl implements ApplyService {
                 case "D":
                     mySealApplyList = sealListService.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                     break;
+                case "E":
+                    myTonerApplyList = tonerService.getMyTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
                 default:
                     myBcdApplyList = bcdService.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                     break;
             }
-            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
+            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList, myTonerApplyList);
         } else {
             // 전체 신청 목록 리스트 조회
             myBcdApplyList2 = bcdService.getMyBcdApply(applyRequestDTO, postSearchRequestDTO);
             myDocApplyList2 = docService.getMyDocApply(applyRequestDTO, postSearchRequestDTO);
             myCorpDocApplyList2 = corpDocService.getMyCorpDocApply(applyRequestDTO, postSearchRequestDTO);
             mySealApplyList2 = sealListService.getMySealApply(applyRequestDTO, postSearchRequestDTO);
+            myTonerApplyList2 = tonerService.getMyTonerApply(applyRequestDTO, postSearchRequestDTO);
 
             List<Object> combinedList = Stream.concat(
-                    Stream.concat(myBcdApplyList2.stream(), myDocApplyList2.stream()),
-                    Stream.concat(myCorpDocApplyList2.stream(), mySealApplyList2.stream())
+                    Stream.concat(
+                            Stream.concat(myBcdApplyList2.stream(), myDocApplyList2.stream()),
+                            Stream.concat(myCorpDocApplyList2.stream(), mySealApplyList2.stream())
+                    ),
+                    myTonerApplyList2.stream()
             ).collect(Collectors.toList());
 
             int start = (int) pageable.getOffset();
