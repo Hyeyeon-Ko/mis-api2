@@ -45,6 +45,11 @@ public class TonerServiceImpl implements TonerService {
 
     private final InfoService infoService;
 
+    /**
+     * 센터별 관리번호 항목들을 TonerMngResponseDTO로 반환.
+     * @param instCd 센터코드
+     * @return TonerMngResponseDTO
+     */
     @Override
     @Transactional(readOnly = true)
     public TonerMngResponseDTO getMngInfo(String instCd) {
@@ -54,18 +59,36 @@ public class TonerServiceImpl implements TonerService {
         return new TonerMngResponseDTO(mngNums);
     }
 
+    /**
+     * 나의 토너 신청내역 TonerMyResponseDTO 리스트로 반환.
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @return TonerMyResponseDTO 리스트
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TonerMyResponseDTO> getMyTonerApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return tonerApplyQueryRepository.getMyTonerApply(applyRequestDTO, postSearchRequestDTO);
     }
 
+    /**
+     * 나의 토너 신청내역 TonerMyResponseDTO 페이지로 반환.
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @param pageable
+     * @return TonerMyResponseDTO 페이지
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<TonerMyResponseDTO> getMyTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
         return tonerApplyQueryRepository.getMyTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
     }
 
+    /**
+     * 나의 토너 승인대기내역 TonerPendingListResponseDTO 리스트로 반환.
+     * @param applyRequestDTO
+     * @return
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TonerPendingListResponseDTO> getMyTonerPendingList(ApplyRequestDTO applyRequestDTO) {
@@ -84,12 +107,24 @@ public class TonerServiceImpl implements TonerService {
                 }).toList();
     }
 
+    /**
+     * 토너 전체 신청내역 TonerMasterResponseDTO 페이지로 반환.
+     * @param applyRequestDTO
+     * @param postSearchRequestDTO
+     * @param page
+     * @return TonerMasterResponseDTO 페이지
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<TonerMasterResponseDTO> getTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
         return tonerApplyQueryRepository.getTonerApply2(applyRequestDTO, postSearchRequestDTO, page);
     }
 
+    /**
+     * 토너 상세정보 TonerInfo2ResponseDTO 리스트로 반환.
+     * @param mngNum 조회할 관리번호
+     * @return TonerInfo2ResponseDTO
+     */
     @Override
     @Transactional(readOnly = true)
     public TonerInfo2ResponseDTO getTonerInfo(String mngNum) {
@@ -106,6 +141,11 @@ public class TonerServiceImpl implements TonerService {
         return TonerInfo2ResponseDTO.of(tonerInfo, tonerPriceList);
     }
 
+    /**
+     * 상세 정보 조회 또는 수정을 위해 신청 항목 반환.
+     * @param draftId 조회할 신청건의 기안번호
+     * @return TonerInfo2ResponseDTO 리스트
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TonerApplyResponseDTO> getTonerApply(String draftId) {
@@ -119,6 +159,10 @@ public class TonerServiceImpl implements TonerService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 토너 신청.
+     * @param tonerApplyRequestDTO 토너 신청 정보
+     */
     @Override
     @Transactional
     public void applyToner(TonerApplyRequestDTO tonerApplyRequestDTO) {
@@ -178,6 +222,11 @@ public class TonerServiceImpl implements TonerService {
         }
     }
 
+    /**
+     * 토너 신청 수정.
+     * @param draftId 수정할 신청건의 기안번호
+     * @param tonerUpdateRequestDTO 토너 신청 수정 정보
+     */
     @Override
     @Transactional
     public void updateTonerApply(String draftId, TonerUpdateRequestDTO tonerUpdateRequestDTO) {
@@ -246,7 +295,10 @@ public class TonerServiceImpl implements TonerService {
         tonerMasterRepository.save(tonerMaster);
     }
 
-
+    /**
+     * 토너 신청 취소
+     * @param draftId 취소할 신청건의 기안번호
+     */
     @Override
     @Transactional
     public void cancelTonerApply(String draftId) {
