@@ -31,7 +31,7 @@ public class TonerPendingServiceImpl implements TonerPendingService {
     @Transactional(readOnly = true)
     public List<TonerPendingResponseDTO> getTonerPendingList(String instCd) {
 
-        List<TonerMaster> tonerMasterList = tonerMasterRepository.findAllByStatus("A")
+        List<TonerMaster> tonerMasterList = tonerMasterRepository.findAllByStatusAndInstCd("A", instCd)
                 .orElseThrow(() -> new EntityNotFoundException("TonerMaster"));
 
         return tonerMasterList.stream()

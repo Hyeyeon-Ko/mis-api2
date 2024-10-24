@@ -49,7 +49,7 @@ public class TonerOrderServiceImpl implements TonerOrderService {
     @Transactional(readOnly = true)
     public List<TonerOrderResponseDTO> getTonerOrderList(String instCd) {
 
-        List<TonerMaster> tonerMasterList = tonerMasterRepository.findAllByStatus("B")
+        List<TonerMaster> tonerMasterList = tonerMasterRepository.findAllByStatusAndInstCd("B", instCd)
                 .orElseThrow(() -> new EntityNotFoundException("TonerMaster"));
 
         return tonerMasterList.stream()
