@@ -69,6 +69,13 @@ public class TonerOrderServiceImpl implements TonerOrderService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 발주 요청 -> 이메일 전송
+     * @param orderRequestDTO
+     * @throws IOException
+     * @throws MessagingException
+     * @throws GeneralSecurityException
+     */
     @Override
     @Transactional
     public void orderToner(OrderRequestDTO orderRequestDTO) throws IOException, MessagingException, GeneralSecurityException {
@@ -101,6 +108,10 @@ public class TonerOrderServiceImpl implements TonerOrderService {
         });
     }
 
+    /**
+     * 토너 발주 업체 이메일 -> 수신 이메일로 설정
+     * @return EmailSettingsResponseDTO
+     */
     @Override
     @Transactional
     public EmailSettingsResponseDTO getEmailSettings() {
