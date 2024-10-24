@@ -11,4 +11,7 @@ public interface NotificationSendService {
     void sendDocApproval(LocalDateTime draftDate, String drafterId, String division);
     void sendSealApproval(LocalDateTime draftDate, String drafterId);
     void sendSealDisapproval(LocalDateTime draftDate, String drafterId);
+    void sendTonerApproval(LocalDateTime draftDate, String drafterId);
+    void sendTonerRejection(LocalDateTime draftDate, String drafterId);
+    void sendTonerOrder(LocalDateTime draftDate, String drafterId);
 }

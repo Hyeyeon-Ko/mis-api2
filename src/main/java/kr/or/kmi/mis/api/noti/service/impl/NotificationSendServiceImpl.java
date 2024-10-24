@@ -112,6 +112,41 @@ public class NotificationSendServiceImpl implements NotificationSendService {
         this.sendNotification(notification, drafterId, "인장신청 반려");
     }
 
+    @Override
+    public void sendTonerApproval(LocalDateTime draftDate, String drafterId) {
+
+        String content = "[승인완료] " + draftDate.format(formatter)
+                + " 신청한 [토너신청] 접수가 완료되었습니다.";
+
+        Notification notification = this.createNotification(drafterId, content, "TONER");
+        notificationRepository.save(notification);
+
+        this.sendNotification(notification, drafterId, "토너신청 승인");
+    }
+
+    @Override
+    public void sendTonerRejection(LocalDateTime draftDate, String drafterId) {
+
+        String content = "[반려] " + draftDate.format(formatter)
+                + " [토너신청]이 반려되었습니다./반려 사유를 확인하세요.";
+
+        Notification notification = this.createNotification(drafterId, content, "TONER");
+        notificationRepository.save(notification);
+
+        this.sendNotification(notification, drafterId, "토너신청 반려");
+    }
+
+    @Override
+    public void sendTonerOrder(LocalDateTime draftDate, String drafterId) {
+        String content = "[수령확인] " + draftDate.format(formatter)
+                + " 신청한 토너가 [발주요청] 되었습니다./수령하신 후, 수령확인 버튼을 눌러주세요.";
+
+        Notification notification = this.createNotification(drafterId, content, "TONER");
+        notificationRepository.save(notification);
+
+        this.sendNotification(notification, drafterId, "토너신청 수령안내");
+    }
+
     private Notification createNotification(String drafterId, String content, String type) {
         return Notification.builder()
                 .userId(drafterId)

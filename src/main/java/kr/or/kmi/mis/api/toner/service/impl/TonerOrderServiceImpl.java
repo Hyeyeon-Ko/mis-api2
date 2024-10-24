@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.toner.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
+import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.EmailSettingsResponseDTO;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 public class TonerOrderServiceImpl implements TonerOrderService {
 
     private final TonerExcelService tonerExcelService;
+    private final NotificationSendService notificationSendService;
     private final TonerMasterRepository tonerMasterRepository;
     private final TonerDetailRepository tonerDetailRepository;
     private final StdGroupRepository stdGroupRepository;
@@ -104,7 +106,8 @@ public class TonerOrderServiceImpl implements TonerOrderService {
             tonerMaster.updateOrder();
             tonerMasterRepository.save(tonerMaster);
 
-            // TODO: 알림 전송
+            // 알림 전송
+            notificationSendService.sendTonerOrder(tonerMaster.getDraftDate(), tonerMaster.getDrafterId());
         });
     }
 

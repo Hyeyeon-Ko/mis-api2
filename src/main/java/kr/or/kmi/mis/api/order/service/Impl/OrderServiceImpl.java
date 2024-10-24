@@ -119,7 +119,6 @@ public class OrderServiceImpl implements OrderService {
             BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
                     .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found with id " + draftId));
             notificationSendService.sendBcdOrder(bcdMaster.getDraftDate(), bcdDetail.getUserId());
-
         });
     }
 
