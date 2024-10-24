@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.toner.service;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerUpdateRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.*;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ public interface TonerService {
     /* 토너 신청 */
     void applyToner(TonerApplyRequestDTO tonerRequestDTO);
     /* 토너신청 수정 */
-    void updateTonerApply(TonerApplyRequestDTO tonerRequestDTO);
+    void updateTonerApply(String draftId, TonerUpdateRequestDTO tonerUpdateRequestDTO);
     /* 토너신청 취소 */
     void cancelTonerApply(String draftId);
     /* 토너 관리번호 조회 */

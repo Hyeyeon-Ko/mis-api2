@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class TonerApplyResponseDTO {
 
+    private Long itemId;
     private String mngNum;
     private String teamNm;
     private String location;
@@ -19,6 +20,7 @@ public class TonerApplyResponseDTO {
 
     public static TonerApplyResponseDTO of(TonerDetail tonerDetail) {
         return TonerApplyResponseDTO.builder()
+                .itemId(tonerDetail.getItemId())
                 .mngNum(tonerDetail.getMngNum())
                 .teamNm(tonerDetail.getTeamNm())
                 .location(tonerDetail.getLocation())

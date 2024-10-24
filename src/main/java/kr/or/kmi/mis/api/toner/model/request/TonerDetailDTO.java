@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public class TonerDetailDTO {
 
+    private Long itemId;
     private String mngNum;
     private String teamNm;
     private String location;

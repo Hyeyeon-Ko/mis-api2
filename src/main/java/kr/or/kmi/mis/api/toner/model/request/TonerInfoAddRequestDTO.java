@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class TonerInfoAddRequestDTO {
 
-    private String mngNm;
+    private String mngNum;
     private String floor;
     private String teamNm;
     private String manager;

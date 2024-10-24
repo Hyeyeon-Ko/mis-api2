@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.toner.model.entity;
 
 import jakarta.persistence.*;
+import kr.or.kmi.mis.api.toner.model.request.TonerDetailDTO;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,5 +67,16 @@ public class TonerDetail {
         String cleanedTotalPrice = totalPrice.replace(",", "");
         int totalPriceInteger = Integer.parseInt(cleanedTotalPrice);
         return totalPriceInteger / quantity;
+    }
+
+    public void tonerDetailUpdate(TonerDetailDTO tonerDetailDTO) {
+        this.mngNum = tonerDetailDTO.getMngNum();
+        this.teamNm = tonerDetailDTO.getTeamNm();
+        this.location = tonerDetailDTO.getLocation();
+        this.printNm = tonerDetailDTO.getPrintNm();
+        this.tonerNm = tonerDetailDTO.getTonerNm();
+        this.price = tonerDetailDTO.getPrice();
+        this.quantity = tonerDetailDTO.getQuantity();
+        this.totalPrice = tonerDetailDTO.getTotalPrice();
     }
 }

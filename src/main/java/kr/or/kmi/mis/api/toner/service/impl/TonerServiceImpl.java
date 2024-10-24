@@ -11,6 +11,7 @@ import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerMaster;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
+import kr.or.kmi.mis.api.toner.model.request.TonerUpdateRequestDTO;
 import kr.or.kmi.mis.api.toner.model.response.*;
 import kr.or.kmi.mis.api.toner.repository.*;
 import kr.or.kmi.mis.api.toner.service.TonerService;
@@ -23,14 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TonerServiceImpl implements TonerService {
 
@@ -56,16 +55,19 @@ public class TonerServiceImpl implements TonerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TonerMyResponseDTO> getMyTonerApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return tonerApplyQueryRepository.getMyTonerApply(applyRequestDTO, postSearchRequestDTO);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<TonerMyResponseDTO> getMyTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
         return tonerApplyQueryRepository.getMyTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TonerPendingListResponseDTO> getMyTonerPendingList(ApplyRequestDTO applyRequestDTO) {
         return new ArrayList<>(this.getMyTonerPendingMasterList(applyRequestDTO.getUserId()));
     }
@@ -83,6 +85,7 @@ public class TonerServiceImpl implements TonerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<TonerMasterResponseDTO> getTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
         return tonerApplyQueryRepository.getTonerApply2(applyRequestDTO, postSearchRequestDTO, page);
     }
@@ -146,7 +149,7 @@ public class TonerServiceImpl implements TonerService {
                             .quantity(tonerDetailDTO.getQuantity())
                             .totalPrice(tonerDetailDTO.getTotalPrice());
 
-                    if (itemId.get() > 2) {
+                    if (itemId.get() > 1) {
                         detailBuilder.holding("T");
                     }
 
@@ -177,9 +180,72 @@ public class TonerServiceImpl implements TonerService {
 
     @Override
     @Transactional
-    public void updateTonerApply(TonerApplyRequestDTO tonerRequestDTO) {
+    public void updateTonerApply(String draftId, TonerUpdateRequestDTO tonerUpdateRequestDTO) {
 
+        // 1. tonerMaster 조회
+        TonerMaster tonerMaster = tonerMasterRepository.findById(draftId)
+                .orElseThrow(() -> new EntityNotFoundException("Toner Master Not Found: " + draftId));
+
+        // 2. 기존의 tonerDetail 리스트 조회
+        List<TonerDetail> existingTonerDetails = tonerDetailRepository.findAllByDraftId(draftId);
+
+        Map<Long, TonerDetail> existingDetailMap = existingTonerDetails.stream()
+                .collect(Collectors.toMap(TonerDetail::getItemId, detail -> detail));
+
+        // 3. if) 신규 항목 추가 시 사용할 itemId 값 계산
+        AtomicLong maxItemId = new AtomicLong(existingTonerDetails.stream()
+                .mapToLong(TonerDetail::getItemId)
+                .max()
+                .orElse(1L));
+
+        // 4. 항목 수정 또는 새 항목 추가
+        Set<Long> incomingItemIds = tonerUpdateRequestDTO.getTonerDetailDTOs().stream()
+                .map(tonerDetailDTO -> {
+                    if (tonerDetailDTO.getItemId() != null) {
+                        TonerDetail existingDetail = existingDetailMap.get(tonerDetailDTO.getItemId());
+                        if (existingDetail != null) {
+                            existingDetail.tonerDetailUpdate(tonerDetailDTO);
+                            tonerDetailRepository.save(existingDetail);
+                        } else {
+                            throw new EntityNotFoundException("Toner Detail Not Found: " + tonerDetailDTO.getItemId());
+                        }
+                    } else {
+                        TonerDetail.TonerDetailBuilder newTonerDetail = TonerDetail.builder()
+                                .itemId(maxItemId.incrementAndGet())
+                                .draftId(draftId)
+                                .mngNum(tonerDetailDTO.getMngNum())
+                                .teamNm(tonerDetailDTO.getTeamNm())
+                                .location(tonerDetailDTO.getLocation())
+                                .printNm(tonerDetailDTO.getPrintNm())
+                                .tonerNm(tonerDetailDTO.getTonerNm())
+                                .price(tonerDetailDTO.getPrice())
+                                .quantity(tonerDetailDTO.getQuantity())
+                                .totalPrice(tonerDetailDTO.getTotalPrice());
+
+                        if (maxItemId.incrementAndGet() > 1) {
+                            newTonerDetail.holding("T");
+                        }
+
+                        TonerDetail tonerDetail = newTonerDetail.build();
+
+                        tonerDetailRepository.save(tonerDetail);
+                    }
+                    return tonerDetailDTO.getItemId();
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // 5. 기존의 tonerDetail 항목 중에서 들어온 요청에 없는 itemId 항목 삭제
+        existingTonerDetails.stream()
+                .filter(detail -> !incomingItemIds.contains(detail.getItemId()))
+                .forEach(tonerDetailRepository::delete);
+
+        // 6. tonerMaster 업데이트
+        tonerMaster.setUpdtDt(LocalDateTime.now());
+        tonerMaster.setUpdtrId(tonerUpdateRequestDTO.getDrafterId());
+        tonerMasterRepository.save(tonerMaster);
     }
+
 
     @Override
     @Transactional
