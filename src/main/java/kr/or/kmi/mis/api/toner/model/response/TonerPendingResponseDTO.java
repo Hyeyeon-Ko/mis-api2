@@ -11,7 +11,6 @@ public class TonerPendingResponseDTO {
     private String draftDate;
     private String mngNum;
     private String teamNm;
-    private String location;
     private String printNm;
     private String tonerNm;
     private String quantity;
@@ -20,14 +19,13 @@ public class TonerPendingResponseDTO {
 
     @Builder
     public TonerPendingResponseDTO(String draftId, String drafter, String draftDate, String mngNum,
-                                   String teamNm, String location, String printNm, String tonerNm,
+                                   String teamNm, String printNm, String tonerNm,
                                    String quantity, String totalPrice, String holding) {
         this.draftId = draftId;
         this.drafter = drafter;
         this.draftDate = draftDate;
         this.mngNum = mngNum;
         this.teamNm = teamNm;
-        this.location = location;
         this.printNm = printNm;
         this.tonerNm = tonerNm;
         this.quantity = quantity;

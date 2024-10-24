@@ -43,7 +43,6 @@ public class TonerPendingServiceImpl implements TonerPendingService {
                             .draftDate(tonerMaster.getDraftDate().toLocalDate().toString())
                             .mngNum(tonerDetail.getMngNum())
                             .teamNm(tonerDetail.getTeamNm())
-                            .location(tonerDetail.getLocation())
                             .printNm(tonerDetail.getPrintNm())
                             .tonerNm(tonerDetail.getTonerNm())
                             .quantity(String.valueOf(tonerDetail.getQuantity()))

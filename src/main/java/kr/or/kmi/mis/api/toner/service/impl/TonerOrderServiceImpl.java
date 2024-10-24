@@ -57,6 +57,7 @@ public class TonerOrderServiceImpl implements TonerOrderService {
                     List<TonerDetail> tonerDetails = tonerDetailRepository.findAllByDraftId(tonerMaster.getDraftId());
                     return tonerDetails.stream().map(tonerDetail -> TonerOrderResponseDTO.builder()
                             .draftId(tonerDetail.getDraftId())
+                            .teamNm(tonerDetail.getTeamNm())
                             .tonerNm(tonerDetail.getTonerNm())
                             .quantity(tonerDetail.getQuantity())
                             .price(tonerDetail.getUnitPrice())
@@ -72,22 +73,22 @@ public class TonerOrderServiceImpl implements TonerOrderService {
     @Transactional
     public void orderToner(OrderRequestDTO orderRequestDTO) throws IOException, MessagingException, GeneralSecurityException {
 
-//        // 1. 엑셀 데이터 생성
-//        byte[] excelData = tonerExcelService.generateExcel(orderRequestDTO.getDraftIds());
-//
-//        // 2. 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
-//        sendEmailWithDynamicCredentials(
-//                "smtp.sirteam.net",
-//                465,
-//                orderRequestDTO.getFromEmail(),
-//                orderRequestDTO.getPassword(),
-//                orderRequestDTO.getFromEmail(),
-//                orderRequestDTO.getToEmail(),
-//                excelData,
-//                orderRequestDTO.getEmailSubject(),
-//                orderRequestDTO.getEmailBody(),
-//                orderRequestDTO.getFileName()
-//        );
+        // 1. 엑셀 데이터 생성
+        byte[] excelData = tonerExcelService.generateOrderExcel(orderRequestDTO.getDraftIds());
+
+        // 2. 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
+        sendEmailWithDynamicCredentials(
+                "smtp.sirteam.net",
+                465,
+                orderRequestDTO.getFromEmail(),
+                orderRequestDTO.getPassword(),
+                orderRequestDTO.getFromEmail(),
+                orderRequestDTO.getToEmail(),
+                excelData,
+                orderRequestDTO.getEmailSubject(),
+                orderRequestDTO.getEmailBody(),
+                orderRequestDTO.getFileName()
+        );
 
         // 3. 발주일시 업데이트
         orderRequestDTO.getDraftIds().forEach(draftId -> {

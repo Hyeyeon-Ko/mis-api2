@@ -42,7 +42,6 @@ public class TonerConfirmServiceImpl implements TonerConfirmService {
     public void approve(TonerConfirmRequestDTO tonerConfirmRequestDTO) {
 
         List<TonerMaster> tonerMasterList = getTonerMaster(tonerConfirmRequestDTO.getDraftIds());
-        System.out.println("TonerConfirmServiceImpl.approve");
         String approverId = tonerConfirmRequestDTO.getConfirmRequestDTO().getUserId();
         String approver = infoService.getUserInfoDetail(approverId).getUserName();
 
