@@ -13,4 +13,6 @@ public interface TonerMasterRepository extends JpaRepository<TonerMaster, String
     Optional<List<TonerMaster>> findAllByStatus(String status);
 
     Optional<List<TonerMaster>> findAllByDraftIdIn(List<String> draftIds);
+
+    Optional<List<TonerMaster>> findByDrafterIdAndStatus(String userId, String status);
 }

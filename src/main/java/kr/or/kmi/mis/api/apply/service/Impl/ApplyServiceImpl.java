@@ -31,6 +31,7 @@ import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
 import kr.or.kmi.mis.api.toner.model.response.TonerMasterResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerPendingListResponseDTO;
 import kr.or.kmi.mis.api.toner.service.TonerOrderService;
 import kr.or.kmi.mis.api.toner.service.TonerPendingService;
 import kr.or.kmi.mis.api.toner.service.TonerService;
@@ -286,6 +287,7 @@ public class ApplyServiceImpl implements ApplyService {
         Page<DocPendingResponseDTO> docApplyLists = null;
         Page<CorpDocPendingResponseDTO> corpDocApplyLists = null;
         Page<SealPendingResponseDTO> sealApplyLists = null;
+        Page<TonerPendingListResponseDTO> tonerApplyLists = null;
 
         switch (applyRequestDTO.getDocumentType()) {
             case "B":
@@ -302,7 +304,7 @@ public class ApplyServiceImpl implements ApplyService {
                 break;
         }
 
-        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
+        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists, tonerApplyLists);
     }
 
     @Override
@@ -345,15 +347,20 @@ public class ApplyServiceImpl implements ApplyService {
         List<DocPendingResponseDTO> myDocPendingList2 = new ArrayList<>();
         List<CorpDocPendingResponseDTO> myCorpDocPendingList2 = new ArrayList<>();
         List<SealPendingResponseDTO> mySealPendingList2 = new ArrayList<>();
+        List<TonerPendingListResponseDTO> myTonerPendingList2 = new ArrayList<>();
 
         myBcdPendingList2 = bcdService.getMyPendingList(applyRequestDTO);
         myDocPendingList2 = docService.getMyDocPendingList(applyRequestDTO);
         myCorpDocPendingList2 = corpDocService.getMyPendingList(applyRequestDTO);
         mySealPendingList2 = sealListService.getMySealPendingList(applyRequestDTO);
+        myTonerPendingList2 = tonerService.getMyTonerPendingList(applyRequestDTO);
 
         List<Object> combinedList = Stream.concat(
-                Stream.concat(myBcdPendingList2.stream(), myDocPendingList2.stream()),
-                Stream.concat(myCorpDocPendingList2.stream(), mySealPendingList2.stream())
+                Stream.concat(
+                        Stream.concat(myBcdPendingList2.stream(), myDocPendingList2.stream()),
+                        Stream.concat(myCorpDocPendingList2.stream(), mySealPendingList2.stream())
+                ),
+                myTonerPendingList2.stream()
         ).collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();

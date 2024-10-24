@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdPendingResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocPendingResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocPendingResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerPendingListResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,16 +24,19 @@ public class PendingResponseDTO {
     private Page<DocPendingResponseDTO> docPendingResponses;
     private Page<CorpDocPendingResponseDTO> corpDocPendingResponses;
     private Page<SealPendingResponseDTO> sealPendingResponses;
+    private Page<TonerPendingListResponseDTO> tonerPendingResponses;
 
     private Page<Object> pagedResult;
 
     public static PendingResponseDTO of(Page<BcdPendingResponseDTO> bcdPendingResponses, Page<DocPendingResponseDTO> docPendingResponses,
-                                        Page<CorpDocPendingResponseDTO> corpDocPendingResponses, Page<SealPendingResponseDTO> sealPendingResponses) {
+                                        Page<CorpDocPendingResponseDTO> corpDocPendingResponses, Page<SealPendingResponseDTO> sealPendingResponses,
+                                        Page<TonerPendingListResponseDTO> tonerPendingResponses) {
         return PendingResponseDTO.builder()
                 .bcdPendingResponses(bcdPendingResponses)
                 .docPendingResponses(docPendingResponses)
                 .corpDocPendingResponses(corpDocPendingResponses)
                 .sealPendingResponses(sealPendingResponses)
+                .tonerPendingResponses(tonerPendingResponses)
                 .build();
     }
 

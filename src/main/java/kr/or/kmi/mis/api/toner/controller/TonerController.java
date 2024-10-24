@@ -60,8 +60,8 @@ public class TonerController {
 //    }
 
     @Operation(summary = "토너신청을 취소합니다.")
-    @PutMapping("/cancel")
-    public ApiResponse<?> cancelTonerApply(@RequestParam("draftId") String draftId ) {
+    @PutMapping("/{draftId}")
+    public ApiResponse<?> cancelTonerApply(@PathVariable("draftId") String draftId ) {
         tonerService.cancelTonerApply(draftId);
 
         return ResponseWrapper.success();

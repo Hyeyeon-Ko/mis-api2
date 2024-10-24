@@ -54,8 +54,6 @@ public class TonerApplyQueryRepositoryImpl implements TonerApplyQueryRepository 
 
     @Override
     public Page<TonerMyResponseDTO> getMyTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
-        String docType = "토너신청";
-
         List<TonerMaster> tonerMasters = queryFactory.select(tonerMaster)
                 .from(tonerMaster)
                 .where(

@@ -14,6 +14,7 @@ import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
 import kr.or.kmi.mis.api.toner.model.response.*;
 import kr.or.kmi.mis.api.toner.repository.*;
 import kr.or.kmi.mis.api.toner.service.TonerService;
+import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,8 @@ public class TonerServiceImpl implements TonerService {
 
     private final TonerApplyQueryRepository tonerApplyQueryRepository;
 
+    private final InfoService infoService;
+
     @Override
     @Transactional(readOnly = true)
     public TonerMngResponseDTO getMngInfo(String instCd) {
@@ -59,6 +63,23 @@ public class TonerServiceImpl implements TonerService {
     @Override
     public Page<TonerMyResponseDTO> getMyTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
         return tonerApplyQueryRepository.getMyTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+    }
+
+    @Override
+    public List<TonerPendingListResponseDTO> getMyTonerPendingList(ApplyRequestDTO applyRequestDTO) {
+        return new ArrayList<>(this.getMyTonerPendingMasterList(applyRequestDTO.getUserId()));
+    }
+
+    public List<TonerPendingListResponseDTO> getMyTonerPendingMasterList(String userId) {
+        List<TonerMaster> tonerMasterList = tonerMasterRepository.findByDrafterIdAndStatus(userId, "A")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        return tonerMasterList.stream()
+                .map(tonerMaster -> {
+                    String updaterId = tonerMaster.getUpdtrId();
+                    String updaterNm = updaterId != null ? infoService.getUserInfoDetail(updaterId).getUserName() : null;
+                    return TonerPendingListResponseDTO.of(tonerMaster, updaterNm);
+                }).toList();
     }
 
     @Override
