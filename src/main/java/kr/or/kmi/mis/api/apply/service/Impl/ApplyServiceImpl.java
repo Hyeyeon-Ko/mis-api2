@@ -29,6 +29,7 @@ import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
+import kr.or.kmi.mis.api.toner.model.response.TonerMasterResponseDTO;
 import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
 import kr.or.kmi.mis.api.toner.service.TonerOrderService;
 import kr.or.kmi.mis.api.toner.service.TonerPendingService;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -112,6 +114,7 @@ public class ApplyServiceImpl implements ApplyService {
         Page<DocMasterResponseDTO> docApplyLists = null;
         Page<CorpDocMasterResponseDTO> corpDocApplyLists = null;
         Page<SealMasterResponseDTO> sealApplyLists = null;
+        Page<TonerMasterResponseDTO> tonerApplyLists = null;
 
         switch (applyRequestDTO.getDocumentType()) {
             case "B":
@@ -123,18 +126,20 @@ public class ApplyServiceImpl implements ApplyService {
             case "D":
                 sealApplyLists = sealListService.getSealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
+            case "E":
+                tonerApplyLists = tonerService.getTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                break;
             default:
                 bcdApplyLists = bcdService.getBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
         }
 
-        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
+        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists, tonerApplyLists);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String userId) {
-
         List<BcdMyResponseDTO> myBcdApplyList = new ArrayList<>();
         List<DocMyResponseDTO> myDocApplyList = new ArrayList<>();
         List<CorpDocMyResponseDTO> myCorpDocApplyList = new ArrayList<>();
@@ -180,6 +185,8 @@ public class ApplyServiceImpl implements ApplyService {
      */
     @Override
     public MyApplyResponseDTO getAllMyApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        System.out.println("documentType = " + applyRequestDTO.getDocumentType());
+
         Page<BcdMyResponseDTO> myBcdApplyList = null;
         Page<DocMyResponseDTO> myDocApplyList = null;
         Page<CorpDocMyResponseDTO> myCorpDocApplyList = null;
@@ -220,13 +227,10 @@ public class ApplyServiceImpl implements ApplyService {
             mySealApplyList2 = sealListService.getMySealApply(applyRequestDTO, postSearchRequestDTO);
             myTonerApplyList2 = tonerService.getMyTonerApply(applyRequestDTO, postSearchRequestDTO);
 
-            List<Object> combinedList = Stream.concat(
-                    Stream.concat(
-                            Stream.concat(myBcdApplyList2.stream(), myDocApplyList2.stream()),
-                            Stream.concat(myCorpDocApplyList2.stream(), mySealApplyList2.stream())
-                    ),
-                    myTonerApplyList2.stream()
-            ).collect(Collectors.toList());
+            List<Object> combinedList = Stream.of(myBcdApplyList2, myDocApplyList2, myCorpDocApplyList2, mySealApplyList2, myTonerApplyList2)
+                    .flatMap(List::stream)
+                    .sorted(Comparator.comparing(this::extractDraftDate).reversed())
+                    .collect(Collectors.toList());
 
             int start = (int) pageable.getOffset();
             int end = Math.min((start + pageable.getPageSize()), combinedList.size());
@@ -238,6 +242,21 @@ public class ApplyServiceImpl implements ApplyService {
 
             return MyApplyResponseDTO.of(pagedResult);
         }
+    }
+
+    private LocalDateTime extractDraftDate(Object obj) {
+        if (obj instanceof BcdMyResponseDTO) {
+            return ((BcdMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof DocMyResponseDTO) {
+            return ((DocMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof CorpDocMyResponseDTO) {
+            return ((CorpDocMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof SealMyResponseDTO) {
+            return ((SealMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof TonerMyResponseDTO) {
+            return ((TonerMyResponseDTO) obj).getDraftDate();
+        }
+        return LocalDateTime.now();
     }
 
     @Override

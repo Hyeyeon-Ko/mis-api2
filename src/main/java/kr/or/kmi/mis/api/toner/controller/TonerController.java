@@ -12,6 +12,8 @@ import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/toner")
 @RequiredArgsConstructor
@@ -35,8 +37,8 @@ public class TonerController {
     }
 
     @Operation(summary = "토너신청 상세정보를 조회합니다.")
-    @GetMapping("/apply")
-    public ApiResponse<TonerApplyResponseDTO> getTonerApply(@RequestParam("draftId") String draftId ) {
+    @GetMapping("/{draftId}")
+    public ApiResponse<List<TonerApplyResponseDTO>> getTonerApply(@PathVariable String draftId ) {
 
         return ResponseWrapper.success(tonerService.getTonerApply(draftId));
     }

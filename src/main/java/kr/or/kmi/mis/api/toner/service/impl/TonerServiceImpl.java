@@ -11,15 +11,8 @@ import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerMaster;
 import kr.or.kmi.mis.api.toner.model.request.TonerApplyRequestDTO;
 import kr.or.kmi.mis.api.toner.model.request.TonerPriceDTO;
-import kr.or.kmi.mis.api.toner.model.response.TonerApplyResponseDTO;
-import kr.or.kmi.mis.api.toner.model.response.TonerInfo2ResponseDTO;
-import kr.or.kmi.mis.api.toner.model.response.TonerMngResponseDTO;
-import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
-import kr.or.kmi.mis.api.toner.repository.TonerDetailRepository;
-import kr.or.kmi.mis.api.toner.repository.TonerInfoRepository;
-import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
-import kr.or.kmi.mis.api.toner.repository.TonerPriceRepository;
-import kr.or.kmi.mis.api.toner.repository.TonerApplyQueryRepository;
+import kr.or.kmi.mis.api.toner.model.response.*;
+import kr.or.kmi.mis.api.toner.repository.*;
 import kr.or.kmi.mis.api.toner.service.TonerService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +62,11 @@ public class TonerServiceImpl implements TonerService {
     }
 
     @Override
+    public Page<TonerMasterResponseDTO> getTonerApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
+        return tonerApplyQueryRepository.getTonerApply2(applyRequestDTO, postSearchRequestDTO, page);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public TonerInfo2ResponseDTO getTonerInfo(String mngNum) {
         TonerInfo tonerInfo = tonerInfoRepository.findById(mngNum)
@@ -85,8 +84,15 @@ public class TonerServiceImpl implements TonerService {
 
     @Override
     @Transactional(readOnly = true)
-    public TonerApplyResponseDTO getTonerApply(String draftId) {
-        return null;
+    public List<TonerApplyResponseDTO> getTonerApply(String draftId) {
+
+        // 1. tonerDetailList 조회
+        List<TonerDetail> tonerDetailList = tonerDetailRepository.findAllByDraftId(draftId);
+
+        // 2. TonerApplyResponstDTO 반환
+        return tonerDetailList.stream()
+                .map(TonerApplyResponseDTO::of)
+                .collect(Collectors.toList());
     }
 
     @Override
