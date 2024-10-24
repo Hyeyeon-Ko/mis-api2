@@ -19,6 +19,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -266,8 +268,12 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         sheet.addMergedRegion(orderNoRegion);
         applyBorderToMergedCells(sheet, orderNoRegion, subTitleStyle2);
 
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
+        String formattedDate = today.format(formatter);
+
         Cell dateCell = orderNoRow.createCell(4);
-        dateCell.setCellValue("발주일시?");
+        dateCell.setCellValue(formattedDate);
         dateCell.setCellStyle(subTitleStyle);
         CellRangeAddress dateRegion = new CellRangeAddress(3, 3, 4, 6);
         sheet.addMergedRegion(dateRegion);
@@ -389,6 +395,34 @@ public class TonerExcelServiceImpl implements TonerExcelService {
             createCell(row, 5, detail.getTotalPrice(), thinBorderStyle, centeredStyle);
             createCell(row, 6, detail.getMngNum(), thinBorderStyle, centeredStyle);
         }
+//
+        int lastRowNum = rowNum.getAndIncrement();
+        Row totalRow = sheet.createRow(lastRowNum);
+        totalRow.setHeight((short) 400);
+
+        Cell totalLabelCell = totalRow.createCell(0);
+        totalLabelCell.setCellValue("계");
+        totalLabelCell.setCellStyle(centeredStyle);
+
+        CellRangeAddress totalLabelRegion = new CellRangeAddress(lastRowNum, lastRowNum, 0, 4);
+        sheet.addMergedRegion(totalLabelRegion);
+        applyBorderToMergedCells(sheet, totalLabelRegion, centeredStyle);
+
+        int totalPriceSum = tonerDetails.stream()
+                .mapToInt(detail -> {
+                    String priceStr = detail.getTotalPrice();
+                    priceStr = priceStr.replace(",", "");
+                    return Integer.parseInt(priceStr);
+                })
+                .sum();
+
+        Cell totalPriceCell = totalRow.createCell(5);
+        totalPriceCell.setCellValue(totalPriceSum);
+        totalPriceCell.setCellStyle(centeredStyle);
+
+        Cell blankCell4 = totalRow.createCell(6);
+        blankCell4.setCellValue("");
+        blankCell4.setCellStyle(centeredStyle);
 
         sheet.setColumnWidth(0, 3000);
         sheet.setColumnWidth(1, 8000);
@@ -447,6 +481,10 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         CellStyle style = wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
         return style;
     }
 
