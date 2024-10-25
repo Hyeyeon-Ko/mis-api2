@@ -88,7 +88,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                                 LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
                         applyStatusIn(postSearchRequestDTO.getApplyStatus())      // 신청상태 필터링
                 )
-                .orderBy(bcdMaster.rgstDt.desc())
+                .orderBy(bcdMaster.draftDate.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();

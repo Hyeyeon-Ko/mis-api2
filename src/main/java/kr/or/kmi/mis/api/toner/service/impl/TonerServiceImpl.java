@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
+import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -93,6 +96,17 @@ public class TonerServiceImpl implements TonerService {
     @Transactional(readOnly = true)
     public List<TonerPendingListResponseDTO> getMyTonerPendingList(ApplyRequestDTO applyRequestDTO) {
         return new ArrayList<>(this.getMyTonerPendingMasterList(applyRequestDTO.getUserId()));
+    }
+
+    public LocalDateTime convertStringToLocalDateTime(String dateString) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        try {
+            return LocalDateTime.parse(dateString, formatter);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
     }
 
     public List<TonerPendingListResponseDTO> getMyTonerPendingMasterList(String userId) {

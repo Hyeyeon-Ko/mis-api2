@@ -30,7 +30,7 @@ public interface DocService {
     Page<DocMyResponseDTO> getMyDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<DocMyResponseDTO> getMyDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     List<DocPendingResponseDTO> getMyDocPendingList(ApplyRequestDTO applyRequestDTO);
-    List<DocMasterResponseDTO> getDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId);
+    List<DocMasterResponseDTO> getDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     Page<DocMasterResponseDTO> getDocApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable);
     List<DocPendingResponseDTO> getDocPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
     Page<DocPendingResponseDTO> getDocPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);

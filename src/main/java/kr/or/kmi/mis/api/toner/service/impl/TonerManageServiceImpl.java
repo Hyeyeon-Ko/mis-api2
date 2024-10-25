@@ -53,13 +53,18 @@ public class TonerManageServiceImpl implements TonerManageService {
         // 2. 모든 TonerPrice 조회
         List<TonerPrice> tonerPriceList = tonerPriceRepository.findAll();
 
+        // TonerPrice 목록을 Map으로 변환
         Map<String, TonerPrice> tonerPriceMap = tonerPriceList.stream()
                 .collect(Collectors.toMap(TonerPrice::getTonerNm, Function.identity()));
 
         // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
                 .map(tonerInfo -> {
-                    TonerPrice tonerPrice = tonerPriceMap.get(tonerInfo.getTonerNm());
+                    String[] tonerNmParts = tonerInfo.getTonerNm().split(",");
+                    String firstTonerNm = tonerNmParts[0].trim();
+
+                    TonerPrice tonerPrice = tonerPriceMap.get(firstTonerNm);
+
                     return TonerExcelResponseDTO.of(tonerInfo, tonerPrice);
                 })
                 .collect(Collectors.toList());
@@ -84,7 +89,11 @@ public class TonerManageServiceImpl implements TonerManageService {
         // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
                 .map(tonerInfo -> {
-                    TonerPrice tonerPrice = tonerPriceMap.get(tonerInfo.getTonerNm());
+                    String[] tonerNmParts = tonerInfo.getTonerNm().split(",");
+                    String firstTonerNm = tonerNmParts[0].trim();
+
+                    TonerPrice tonerPrice = tonerPriceMap.get(firstTonerNm);
+
                     return TonerExcelResponseDTO.of(tonerInfo, tonerPrice);
                 })
                 .collect(Collectors.toList());

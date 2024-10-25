@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.*;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -33,14 +30,9 @@ public class ApplyController {
 
     @Operation(summary = "신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList")
-    public ApiResponse<ApplyResponseDTO> getAllApplyList(@RequestParam String documentType,
-                                                         @RequestParam(required = false) LocalDateTime startDate,
-                                                         @RequestParam(required = false) LocalDateTime endDate,
-                                                         @RequestParam(required = false) String searchType,
-                                                         @RequestParam(required = false) String keyword,
-                                                         @RequestParam String instCd,
-                                                         @RequestParam String userId) {
-        return ResponseWrapper.success(applyService.getAllApplyList(documentType, startDate, endDate, searchType, keyword, instCd, userId));
+    public ApiResponse<ApplyListResponseDTO> getAllApplyList(@Valid ApplyRequestDTO applyRequestDTO,
+                                                             @Valid PostSearchRequestDTO postSearchRequestDTO) {
+        return ResponseWrapper.success(applyService.getAllApplyList(applyRequestDTO, postSearchRequestDTO));
     }
     @Operation(summary = "신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList2")

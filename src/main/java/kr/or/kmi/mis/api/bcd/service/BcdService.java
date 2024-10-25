@@ -19,7 +19,7 @@ public interface BcdService {
     void applyBcdByLeader(BcdRequestDTO bcdRequestDTO);
     void updateBcd(String draftId, BcdUpdateRequestDTO updateBcdRequestDTO);
     void cancelBcdApply(String draftId);
-    List<BcdMasterResponseDTO> getBcdApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId);
+    List<BcdMasterResponseDTO> getBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
     /**

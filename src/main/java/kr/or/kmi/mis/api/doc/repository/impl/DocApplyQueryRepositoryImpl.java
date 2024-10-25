@@ -81,7 +81,7 @@ public class DocApplyQueryRepositoryImpl implements DocApplyQueryRepository {
                                     LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
                             applyStatusIn(postSearchRequestDTO.getApplyStatus())      // 신청상태 필터링
                     )
-                    .orderBy(docMaster.rgstDt.desc())
+                    .orderBy(docMaster.draftDate.desc())
                     .offset(page.getOffset())
                     .limit(page.getPageSize())
                     .fetch();

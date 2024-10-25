@@ -45,7 +45,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -463,8 +466,15 @@ public class DocServiceImpl implements DocService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DocMasterResponseDTO> getDocApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
-        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", instCd, startDate, endDate);
+    public List<DocMasterResponseDTO> getDocApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+
+        LocalDateTime startDate = convertStringToLocalDateTime(postSearchRequestDTO.getStartDate());
+        LocalDateTime endDate = convertStringToLocalDateTime(postSearchRequestDTO.getEndDate());
+
+        String searchType = postSearchRequestDTO.getSearchType();
+        String keyword = postSearchRequestDTO.getKeyword();
+
+        List<DocMaster> docMasters = docMasterRepository.findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc("F", applyRequestDTO.getInstCd(), startDate, endDate);
 
         if (docMasters == null) {
             docMasters = new ArrayList<>();
@@ -472,15 +482,6 @@ public class DocServiceImpl implements DocService {
 
         return docMasters.stream()
                 .filter(docMaster -> {
-                    if (docMaster.getStatus().equals("A")) {
-                        String[] approverChainArray = docMaster.getApproverChain().split(", ");
-                        int currentIndex = docMaster.getCurrentApproverIndex();
-
-                        if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
-                            return false;
-                        }
-                    }
-
                     if (searchType != null && keyword != null) {
                         return switch (searchType) {
                             case "전체" ->
@@ -500,6 +501,19 @@ public class DocServiceImpl implements DocService {
                     return docMasterResponseDTO;
                 })
                 .toList();
+    }
+
+    public LocalDateTime convertStringToLocalDateTime(String dateString) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        try {
+            LocalDate date = LocalDate.parse(dateString, formatter);
+            return date.atStartOfDay();
+        } catch (DateTimeParseException e) {
+            System.out.println("Date parsing error: " + e.getMessage());
+            return null;
+        }
     }
 
     @Override

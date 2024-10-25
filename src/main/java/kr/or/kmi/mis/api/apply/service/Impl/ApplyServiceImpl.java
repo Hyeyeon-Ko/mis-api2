@@ -1,10 +1,7 @@
 package kr.or.kmi.mis.api.apply.service.Impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.*;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
@@ -73,32 +70,16 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllApplyList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
+    public ApplyListResponseDTO getAllApplyList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
-        List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
-        List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
 
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
-        switch (documentType) {
-            case "A":
-                bcdApplyLists = bcdService.getBcdApply(startDate, endDate, searchType, keyword, instCd, userId);
-                break;
-            case "B":
-                docApplyLists = docService.getDocApply(startDate, endDate, searchType, keyword, instCd, userId);
-                break;
-            case "C":
-                corpDocApplyLists = corpDocService.getCorpDocApply(startDate, endDate, searchType, keyword);
-                break;
-            case "D":
-                sealApplyLists = sealListService.getSealApply(startDate, endDate, searchType, keyword, instCd);
-                break;
-            default:
-                break;
+        if (applyRequestDTO.getDocumentType().equals("B")) {
+            docApplyLists = docService.getDocApply(applyRequestDTO, postSearchRequestDTO);
+        } else {
+            bcdApplyLists = bcdService.getBcdApply(applyRequestDTO, postSearchRequestDTO);
         }
-        return null;
-//        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
+        return ApplyListResponseDTO.of(bcdApplyLists, docApplyLists);
     }
 
 

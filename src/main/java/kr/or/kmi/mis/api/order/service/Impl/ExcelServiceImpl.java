@@ -267,7 +267,7 @@ public class ExcelServiceImpl implements ExcelService {
         CellStyle centeredStyle = createCenteredStyle(wb);
         CellStyle sumCenterStyle = createSumCenterStyle(wb);
 
-        // 첫 번째 테이블: 명함 발주내역
+        // 첫 번째 테이블: 명함 완료내역
         createOrderTitle(sheet, titleStyle);
         createOrderHeader(sheet, headerStyle);
 
@@ -376,7 +376,7 @@ public class ExcelServiceImpl implements ExcelService {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeight((short) 800);
         Cell cell = titleRow.createCell(0);
-        cell.setCellValue("명함 발주내역");
+        cell.setCellValue("명함 완료내역");
         cell.setCellStyle(style);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
     }
