@@ -17,4 +17,5 @@ public class OrderRequestDTO {
     private String toEmail;
     private String password;
     private String instCd;
+
 }

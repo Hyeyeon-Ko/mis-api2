@@ -25,10 +25,10 @@ public class TonerExcelController {
 
 //    @Operation(summary = "attach Price File", description = "토너 단가표 엑셀 파일 첨부")
 //    @PostMapping("/price/file")
-//    public void tonerData(@RequestBody TonerExcelRequestDTO tonerExcelRequestDTO) {
-//        tonerExcelService.saveTonerDetails(tonerExcelRequestDTO);
+//    public void tonerData(@RequestBody TonerPriceExcelRequestDTO tonerPriceExcelRequestDTO) {
+//        tonerExcelService.saveTonerDetails(tonerPriceExcelRequestDTO);
 //    }
-
+//
 //    @Operation(summary = "attach Manage File", description = "토너 관리표 엑셀 파일 첨부")
 //    @PostMapping("/manage/file")
 //    public void tonerData(@RequestBody TonerExcelRequestDTO tonerExcelRequestDTO) {

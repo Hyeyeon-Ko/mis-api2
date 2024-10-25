@@ -24,6 +24,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -87,14 +88,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void orderRequest(OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
-        // 엑셀 데이터 생성
-        byte[] excelData = excelService.generateExcel(orderRequest.getDraftIds());
+    public void orderRequest(OrderRequestDTO orderRequest, MultipartFile file) throws IOException, MessagingException, GeneralSecurityException {
+        byte[] fileData;
 
-        // 엑셀 파일 암호화
-        byte[] encryptedExcelData = excelService.getEncryptedExcelBytes(excelData, "06960");
+        if (file != null && !file.isEmpty()) {
+            fileData = file.getBytes();
+        } else {
+            fileData = excelService.generateExcel(orderRequest.getDraftIds());
+        }
 
-        // 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
+        byte[] encryptedFileData = excelService.getEncryptedExcelBytes(fileData, "06960");
+
         sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
@@ -102,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
                 orderRequest.getPassword(),
                 orderRequest.getFromEmail(),
                 orderRequest.getToEmail(),
-                encryptedExcelData,
+                encryptedFileData,
                 orderRequest.getEmailSubject(),
                 orderRequest.getEmailBody(),
                 orderRequest.getFileName()
@@ -120,6 +124,12 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found with id " + draftId));
             notificationSendService.sendBcdOrder(bcdMaster.getDraftDate(), bcdDetail.getUserId());
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] previewOrderFile(List<String> draftIds) throws IOException {
+        return excelService.generateExcel(draftIds);
     }
 
     @Override

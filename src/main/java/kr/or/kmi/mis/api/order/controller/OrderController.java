@@ -10,7 +10,11 @@ import kr.or.kmi.mis.api.order.service.OrderService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -37,10 +41,21 @@ public class OrderController {
 //    }
 
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
-    @PostMapping
-    public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
-        orderService.orderRequest(orderRequest);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<?> orderRequest(@RequestPart("orderRequest") OrderRequestDTO orderRequest,
+                                       @RequestPart(value = "file", required = false) MultipartFile file) throws IOException, MessagingException, GeneralSecurityException {
+        orderService.orderRequest(orderRequest, file);
         return ResponseWrapper.success();
+    }
+
+    @Operation(summary = "preview order file", description = "발주 미리보기 파일 다운로드")
+    @GetMapping("/preview")
+    public ResponseEntity<byte[]> previewOrderFile(@RequestParam List<String> draftIds) throws IOException {
+        byte[] fileData = orderService.previewOrderFile(draftIds);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=명함발주.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileData);
     }
 
     @Operation(summary = "get email settings", description = "기본 이메일 설정 조회")
