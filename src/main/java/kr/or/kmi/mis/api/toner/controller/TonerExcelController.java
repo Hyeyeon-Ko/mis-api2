@@ -3,6 +3,7 @@ package kr.or.kmi.mis.api.toner.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.or.kmi.mis.api.toner.model.request.TonerOrderRequestDTO;
 import kr.or.kmi.mis.api.toner.service.TonerExcelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +55,7 @@ public class TonerExcelController {
 
     @Operation(summary = "get Toner Order Excel", description = "발주용 엑셀 파일 다운로드")
     @PostMapping("/order/excel")
-    public void downloadTonerOrderExcel(HttpServletResponse response, @RequestBody List<String> draftIds) throws IOException {
-        tonerExcelService.downloadOrderExcel(response, draftIds);
+        public void downloadTonerOrderExcel(HttpServletResponse response, @RequestBody TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException {
+        tonerExcelService.downloadOrderExcel(response, tonerOrderRequestDTO);
     }
 }

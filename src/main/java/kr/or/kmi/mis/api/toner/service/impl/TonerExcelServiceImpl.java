@@ -1,9 +1,14 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
 import jakarta.servlet.http.HttpServletResponse;
+import kr.or.kmi.mis.api.std.model.entity.StdDetail;
+import kr.or.kmi.mis.api.std.model.entity.StdGroup;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
+import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.toner.model.entity.TonerDetail;
 import kr.or.kmi.mis.api.toner.model.entity.TonerInfo;
 import kr.or.kmi.mis.api.toner.model.entity.TonerPrice;
+import kr.or.kmi.mis.api.toner.model.request.TonerOrderRequestDTO;
 import kr.or.kmi.mis.api.toner.repository.TonerDetailRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerInfoRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerPriceRepository;
@@ -19,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -32,6 +38,8 @@ public class TonerExcelServiceImpl implements TonerExcelService {
     private final TonerPriceRepository tonerPriceRepository;
     private final TonerInfoRepository tonerInfoRepository;
     private final TonerDetailRepository tonerDetailRepository;
+    private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
 //    @Override
 //    @Transactional
@@ -91,15 +99,15 @@ public class TonerExcelServiceImpl implements TonerExcelService {
 //    }
 
     @Override
-    public void downloadOrderExcel(HttpServletResponse response, List<String> draftIds) throws IOException{
-        byte[] excelData = generateOrderExcel(draftIds);
+    public void downloadOrderExcel(HttpServletResponse response, TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException{
+        byte[] excelData = generateOrderExcel(tonerOrderRequestDTO.getDraftIds(), tonerOrderRequestDTO.getInstCd());
         sendFileToResponse(response, excelData, "토너 발주내역.xlsx");
     }
 
     @Override
-    public byte[] generateOrderExcel(List<String> draftIds) throws IOException {
+    public byte[] generateOrderExcel(List<String> draftIds, String instCd) throws IOException {
         List<TonerDetail> tonerDetails = tonerDetailRepository.findAllByDraftIdIn(draftIds);
-        return createOrderExcelData(tonerDetails);
+        return createOrderExcelData(tonerDetails, instCd);
     }
 
     private void sendFileToResponse(HttpServletResponse response, byte[] fileData, String fileName) throws IOException {
@@ -235,7 +243,13 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         return baos.toByteArray();
     }
 
-    private byte[] createOrderExcelData(List<TonerDetail> tonerDetails) throws IOException {
+    private byte[] createOrderExcelData(List<TonerDetail> tonerDetails, String instCd) throws IOException {
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd).get().getFirst();
+
         Workbook wb = new XSSFWorkbook();
         Sheet sheet = wb.createSheet("토너 발주내역");
 
@@ -262,6 +276,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         orderNoRow.setHeight((short) 400);
 
         Cell orderNoCell = orderNoRow.createCell(0);
+        // TODO: 어떡하쥐?
         orderNoCell.setCellValue("    발주NO: 24-29");
         orderNoCell.setCellStyle(subTitleStyle);
         CellRangeAddress orderNoRegion = new CellRangeAddress(3, 3, 0, 2);
@@ -299,7 +314,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         blankCell.setCellStyle(subTitleStyle);
 
         Cell companyCell = receiverRow.createCell(3);
-        companyCell.setCellValue(" KMI (재) 한국의학연구소");
+        companyCell.setCellValue("    KMI (재) 한국의학연구소 " + stdDetail.getDetailNm());
         companyCell.setCellStyle(subTitleStyle);
         CellRangeAddress companyRegion = new CellRangeAddress(5, 5, 3, 6);
         sheet.addMergedRegion(companyRegion);
@@ -320,7 +335,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         blankCell2.setCellStyle(subTitleStyle);
 
         Cell addressCell = faxRow.createCell(3);
-        addressCell.setCellValue(" 서울특별시 중구 남대문로 117 동아빌딩 12층");
+        addressCell.setCellValue("   " + stdDetail.getEtcItem5());
         addressCell.setCellStyle(subTitleStyle);
         CellRangeAddress addressRegion = new CellRangeAddress(6, 6, 3, 6);
         sheet.addMergedRegion(addressRegion);
@@ -337,7 +352,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         applyBorderToMergedCells(sheet, orderTitleRegion, subTitleStyle);
 
         Cell phoneNumCell = orderTitleRow.createCell(3);
-        phoneNumCell.setCellValue("  ☎ 02-3702-9331 / FAX : 02-3702-9100");
+        phoneNumCell.setCellValue("  ☎ " + stdDetail.getEtcItem6() + " / FAX : " + stdDetail.getEtcItem7());
         phoneNumCell.setCellStyle(subTitleStyle);
         CellRangeAddress phoneNumRegion = new CellRangeAddress(7, 7, 3, 6);
         sheet.addMergedRegion(phoneNumRegion);
@@ -358,7 +373,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         orderCell.setCellStyle(subTitleStyle4);
 
         Cell orderNmCell = deliveryRow.createCell(4);
-        orderNmCell.setCellValue("총무팀   이성진");
+        orderNmCell.setCellValue(stdDetail.getEtcItem2() + "   " + stdDetail.getEtcItem4());
         orderNmCell.setCellStyle(subTitleStyle);
         CellRangeAddress orderNmRegion = new CellRangeAddress(8, 8, 4, 5);
         sheet.addMergedRegion(orderNmRegion);
@@ -416,8 +431,11 @@ public class TonerExcelServiceImpl implements TonerExcelService {
                 })
                 .sum();
 
+        DecimalFormat formatter2 = new DecimalFormat("#,###");
+        String formattedTotalPrice = formatter2.format(totalPriceSum);
+
         Cell totalPriceCell = totalRow.createCell(5);
-        totalPriceCell.setCellValue(totalPriceSum);
+        totalPriceCell.setCellValue(formattedTotalPrice);
         totalPriceCell.setCellStyle(centeredStyle);
 
         Cell blankCell4 = totalRow.createCell(6);
@@ -427,9 +445,9 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         sheet.setColumnWidth(0, 3000);
         sheet.setColumnWidth(1, 8000);
         sheet.setColumnWidth(2, 2000);
-        sheet.setColumnWidth(3, 3000);
-        sheet.setColumnWidth(4, 4500);
-        sheet.setColumnWidth(5, 4500);
+        sheet.setColumnWidth(3, 2500);
+        sheet.setColumnWidth(4, 4000);
+        sheet.setColumnWidth(5, 4000);
         sheet.setColumnWidth(6, 5000);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

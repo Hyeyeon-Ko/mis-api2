@@ -83,7 +83,7 @@ public class TonerOrderServiceImpl implements TonerOrderService {
     public void orderToner(OrderRequestDTO orderRequestDTO) throws IOException, MessagingException, GeneralSecurityException {
 
         // 1. 엑셀 데이터 생성
-        byte[] excelData = tonerExcelService.generateOrderExcel(orderRequestDTO.getDraftIds());
+        byte[] excelData = tonerExcelService.generateOrderExcel(orderRequestDTO.getDraftIds(), orderRequestDTO.getInstCd());
 
         // 2. 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
         sendEmailWithDynamicCredentials(

@@ -1,6 +1,7 @@
 package kr.or.kmi.mis.api.toner.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import kr.or.kmi.mis.api.toner.model.request.TonerOrderRequestDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,9 +30,9 @@ public interface TonerExcelService {
 //    byte[] generatePendingExcel(List<String> draftIds) throws IOException;
 
     /* 발주용 엑셀 파일 다운로드 */
-    void downloadOrderExcel(HttpServletResponse response, List<String> draftIds) throws IOException;
+    void downloadOrderExcel(HttpServletResponse response, TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException;
 
     /* 발주용 엑셀 파일 생성 */
-    byte[] generateOrderExcel(List<String> draftIds) throws IOException;
+    byte[] generateOrderExcel(List<String> draftIds, String instCd) throws IOException;
 
 }
