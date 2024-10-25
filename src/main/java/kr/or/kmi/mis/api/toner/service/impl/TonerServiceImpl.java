@@ -207,7 +207,7 @@ public class TonerServiceImpl implements TonerService {
                             .quantity(tonerDetailDTO.getQuantity())
                             .totalPrice(tonerDetailDTO.getTotalPrice());
 
-                    if (itemId.get() > 1) {
+                    if (itemId.get() > 2) {
                         detailBuilder.holding("T");
                     }
 
@@ -285,7 +285,7 @@ public class TonerServiceImpl implements TonerService {
                                 .quantity(tonerDetailDTO.getQuantity())
                                 .totalPrice(tonerDetailDTO.getTotalPrice());
 
-                        if (maxItemId.incrementAndGet() > 1) {
+                        if (maxItemId.incrementAndGet() > 2) {
                             newTonerDetail.holding("T");
                         }
 
