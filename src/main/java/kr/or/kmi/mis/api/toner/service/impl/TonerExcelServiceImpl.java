@@ -150,6 +150,13 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         AtomicInteger no = new AtomicInteger(1);
 
         tonerPrices.forEach(price -> {
+
+            StdGroup stdGroup = stdGroupRepository.findByGroupCd("A009")
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+            StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, price.getDivision())
+                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
             Row row = sheet.createRow(rowNum.getAndIncrement());
             row.setHeight((short) 350);
 
@@ -157,8 +164,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
             createCell(row, 1, price.getCompany(), thinBorderStyle, centeredStyle); // 제조사
             createCell(row, 2, price.getModelNm(), thinBorderStyle, centeredStyle); // 프린터명
             createCell(row, 3, price.getTonerNm(), thinBorderStyle, centeredStyle);   // 토너명
-            // TODO: 구분 매핑 필요
-            createCell(row, 4, price.getDivision(), thinBorderStyle, centeredStyle);    // 구분
+            createCell(row, 4, stdDetail.getDetailNm(), thinBorderStyle, centeredStyle);    // 구분
             createCell(row, 5, price.getPrice(), thinBorderStyle, centeredStyle);   // 단가
             createCell(row, 6, price.getSpecialNote(), thinBorderStyle, centeredStyle);     // 비고
         });
