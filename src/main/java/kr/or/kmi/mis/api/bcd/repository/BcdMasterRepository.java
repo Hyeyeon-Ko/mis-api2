@@ -20,6 +20,8 @@ public interface BcdMasterRepository extends JpaRepository<BcdMaster, String> {
 
     List<BcdMaster> findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc(String status, LocalDateTime from, LocalDateTime to);
 
+    List<BcdMaster> findAllByDraftIdIn(List<String> draftIds);
+
     Optional<BcdMaster> findByDraftIdAndStatusAndDrafterIdNot(String draftId, String status, String drafterId);
 
     Optional<BcdMaster> findTopByOrderByDraftIdDesc();

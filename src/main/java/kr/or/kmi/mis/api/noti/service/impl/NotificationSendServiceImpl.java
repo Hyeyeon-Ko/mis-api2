@@ -1,5 +1,10 @@
 package kr.or.kmi.mis.api.noti.service.impl;
 
+import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
+import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
+import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
+import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
+import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.noti.model.entity.Notification;
 import kr.or.kmi.mis.api.noti.model.response.NotiResponseDTO;
 import kr.or.kmi.mis.api.noti.respository.NotificationRepository;
@@ -12,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -21,6 +27,8 @@ public class NotificationSendServiceImpl implements NotificationSendService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
+    private final BcdMasterRepository bcdMasterRepository;
+    private final BcdDetailRepository bcdDetailRepository;
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -39,13 +47,34 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     @Override
     @Transactional
     public void sendBcdOrder(LocalDateTime draftDate, String userId) {
-        String content = "[수령확인] " + draftDate.format(formatter)
-                + " 신청한 명함이 [발주요청] 되었습니다./수령하신 후, 수령확인 버튼을 눌러주세요.";
+        String content = "[발주완료] " + draftDate.format(formatter)
+                + " 신청한 명함이 [발주요청] 되었습니다.";
 
         Notification notification = this.createNotification(userId, content, "BCD");
         notificationRepository.save(notification);
 
-        this.sendNotification(notification, userId, "명함신청 수령안내");
+        this.sendNotification(notification, userId, "명함신청 발주안내");
+    }
+
+    @Override
+    @Transactional
+    public void sendBcdReceipt(List<String> draftIds) {
+
+        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByDraftIdIn(draftIds);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (BcdMaster bcdMaster : bcdMasters) {
+            String draftDate = bcdMaster.getDraftDate().format(formatter);
+            String content = "[수령확인] " + draftDate + " 신청한 명함이 도착하였습니다. /명함을 수령하신 후, 수령확인 버튼을 눌러주세요.";
+
+            BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
+                    .orElseThrow(() -> new EntityNotFoundException("Not Found"));
+            Notification notification = this.createNotification(bcdDetail.getUserId(), content, "BCD");
+            notificationRepository.save(notification);
+
+            this.sendNotification(notification, bcdDetail.getUserId(), "명함신청 수령안내");
+        }
     }
 
     @Override

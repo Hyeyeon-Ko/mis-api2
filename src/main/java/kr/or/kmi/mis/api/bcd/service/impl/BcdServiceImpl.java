@@ -222,8 +222,8 @@ public class BcdServiceImpl implements BcdService {
     @Transactional(readOnly = true)
     public List<BcdMasterResponseDTO> getBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
 
-        LocalDateTime startDate = convertStringToLocalDateTime(postSearchRequestDTO.getStartDate());
-        LocalDateTime endDate = convertStringToLocalDateTime(postSearchRequestDTO.getEndDate());
+        LocalDateTime startDate = convertStringToLocalDateTime(postSearchRequestDTO.getStartDate(), false);
+        LocalDateTime endDate = convertStringToLocalDateTime(postSearchRequestDTO.getEndDate(), true);
 
         String searchType = postSearchRequestDTO.getSearchType();
         String keyword = postSearchRequestDTO.getKeyword();
@@ -239,12 +239,14 @@ public class BcdServiceImpl implements BcdService {
                 .collect(Collectors.toList());
     }
 
-    public LocalDateTime convertStringToLocalDateTime(String dateString) {
-
+    public LocalDateTime convertStringToLocalDateTime(String dateString, boolean isEndDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         try {
             LocalDate date = LocalDate.parse(dateString, formatter);
+            if (isEndDate) {
+                return date.atTime(23, 59, 59);
+            }
             return date.atStartOfDay();
         } catch (DateTimeParseException e) {
             System.out.println("Date parsing error: " + e.getMessage());
