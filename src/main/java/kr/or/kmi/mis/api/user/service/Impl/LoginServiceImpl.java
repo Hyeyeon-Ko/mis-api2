@@ -16,6 +16,7 @@ import kr.or.kmi.mis.api.user.service.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
@@ -34,6 +35,7 @@ public class LoginServiceImpl implements LoginService {
     private String externalLoginUrl;
 
     @Override
+    @Transactional
     public String login(LoginRequestDTO loginRequestDTO) {
 
         Map responseMap = webClientBuilder.build()
@@ -58,6 +60,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LoginResponseDTO getSessionInfo(SessionInfoRequestDTO sessionInfoRequestDTO) {
 
         // 1. 유저 상세정보 호출
