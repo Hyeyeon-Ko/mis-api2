@@ -34,6 +34,11 @@ public class StdClassServiceImpl implements StdClassService {
     @Transactional
     public void addClassInfo(StdClassRequestDTO stdClassRequestDTO) {
 
+        // 동일한 대분류코드 존재 여부 검사
+        if(stdClassRepository.existsById(stdClassRequestDTO.getClassCd())) {
+            throw new IllegalArgumentException("해당 대분류그룹에 이미 존재하는 DetailCd 입니다: detailCd = " + stdClassRequestDTO.getClassCd());
+        }
+
         StdClass stdClass = stdClassRequestDTO.toEntity();
         stdClass.setRgstDt(LocalDateTime.now());
         stdClass.setRgstrId(stdClassRequestDTO.getUserId());
