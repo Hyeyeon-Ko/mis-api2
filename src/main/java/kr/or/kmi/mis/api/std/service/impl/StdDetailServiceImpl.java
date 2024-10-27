@@ -23,9 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -221,15 +220,27 @@ public class StdDetailServiceImpl implements StdDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StdResponseDTO> getOrgChart(String instCd) {
+    public List<StdResponseDTO> getOrgChart(String instCd, String deptCode) {
 
         StdGroup chatGroup = stdGroupRepository.findByGroupCd("C001")
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdGroup.class.getName()));
-        List<StdDetail> details = stdDetailRepository.findByGroupCdAndEtcItem4(chatGroup, instCd)
+
+        List<StdDetail> allDetails = stdDetailRepository.findByGroupCdAndEtcItem4(chatGroup, instCd)
                 .orElseThrow(() -> new EntityNotFoundException("Not found"));
 
-        return details.stream()
-                .map(StdResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        Map<String, StdDetail> detailMap = allDetails.stream()
+                .collect(Collectors.toMap(StdDetail::getDetailCd, Function.identity()));
+
+        List<StdResponseDTO> path = new ArrayList<>();
+        StdDetail currentDetail = detailMap.get(deptCode);
+
+        while (currentDetail != null) {
+            path.add(StdResponseDTO.fromEntity(currentDetail));
+            currentDetail = detailMap.get(currentDetail.getEtcItem1());
+        }
+
+        Collections.reverse(path);
+        return path;
     }
+
 }
