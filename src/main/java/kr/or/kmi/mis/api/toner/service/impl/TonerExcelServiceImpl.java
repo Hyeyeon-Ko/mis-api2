@@ -81,22 +81,18 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         return createManageExcelData(tonerInfos);
     }
 
-    // TODO: 기안상신용 파일 형식 받은 후 구현
     @Override
-    public void downloadPendingExcel(HttpServletResponse response, List<String> draftIds) throws IOException {
-//        byte[] excelData = generatePendingExcel(draftIds);
-//
-//        sendFileToResponse(response, excelData, "토너 대기내역.xlsx");
+    public void downloadPendingExcel(HttpServletResponse response, TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException {
+        byte[] excelData = generatePendingExcel(tonerOrderRequestDTO.getDraftIds(), tonerOrderRequestDTO.getInstCd());
+
+        sendFileToResponse(response, excelData, "토너 대기내역.xlsx");
     }
 
-//    @Override
-//    public byte[] generateExcel(List<String> draftIds) throws IOException {
-//        List<TonerDetail> tonerDetails = tonerDetailRepository.findAllByDraftIdIn(draftIds);
-//        return createExcelData(tonerDetails);
-//    }
-//
-//    private byte[] createExcelData(List<TonerDetail> tonerDetails) throws IOException {
-//    }
+    @Override
+    public byte[] generatePendingExcel(List<String> draftIds, String instCd) throws IOException {
+        List<TonerDetail> tonerDetails = tonerDetailRepository.findAllByDraftIdIn(draftIds);
+        return createPendingExcelData(tonerDetails, instCd);
+    }
 
     @Override
     public void downloadOrderExcel(HttpServletResponse response, TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException{
@@ -240,6 +236,117 @@ public class TonerExcelServiceImpl implements TonerExcelService {
         sheet.setColumnWidth(10, 3500);  // 제조년월
         sheet.setColumnWidth(11, 7500);  // 토너(잉크)명
         sheet.setColumnWidth(12, 3500);  // 단가
+
+        // 엑셀 파일을 ByteArrayOutputStream에 쓰기
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        wb.write(baos);
+        wb.close();
+
+        return baos.toByteArray();
+    }
+
+    private byte[] createPendingExcelData(List<TonerDetail> tonerDetails, String instCd) throws IOException {
+
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd).get().getFirst();
+
+        String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
+
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet("토너 대기내역");
+
+        // 스타일 설정
+        CellStyle headerStyle = createHeaderStyle(wb);
+        CellStyle thinBorderStyle = createThinBorderStyle(wb);
+        CellStyle titleStyle = createTitleStyle(wb);
+        CellStyle centeredStyle = createCenteredStyle(wb);
+        CellStyle thickBorderStyle = createThickBorderStyle(wb);
+
+        // 제목 생성
+        Row titleRow = sheet.createRow(2);
+        titleRow.setHeight((short) 500);
+        Cell titleCell = titleRow.createCell(2);
+        titleCell.setCellValue(stdDetail.getDetailNm() + " " + month + "월 O차 발주 요청 내역");
+        titleCell.setCellStyle(titleStyle);
+        CellRangeAddress titleRegion = new CellRangeAddress(2, 3, 2, 8);
+        sheet.addMergedRegion(titleRegion);
+        applyBorderToMergedCells(sheet, titleRegion, centeredStyle);
+
+        // 헤더 생성
+        Row headerRow = sheet.createRow(4);
+        headerRow.setHeight((short) 400);
+        String[] headers = {"번호", "관리번호", "토너명", "수량", "단가", "금액", "비고"};
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i+2);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(centeredStyle);
+        }
+
+        AtomicInteger rowNum = new AtomicInteger(5);
+        AtomicInteger no = new AtomicInteger(1);
+
+        // 데이터 채우기
+        tonerDetails.forEach(detail -> {
+            Row row = sheet.createRow(rowNum.getAndIncrement());
+            row.setHeight((short) 400);
+
+            createCell(row, 2, no.getAndIncrement(), thinBorderStyle, centeredStyle); // 번호
+            createCell(row, 3, detail.getMngNum(), thinBorderStyle, centeredStyle); // 관리번호
+            createCell(row, 4, detail.getTonerNm(), thinBorderStyle, centeredStyle); // 토너명
+            createCell(row, 5, detail.getQuantity(), thinBorderStyle, centeredStyle); // 수량
+            createCell(row, 6, detail.getPrice(), thinBorderStyle, centeredStyle); // 단가
+            createCell(row, 7, detail.getTotalPrice(), thinBorderStyle, centeredStyle); // 금액
+            createCell(row, 8, "", thinBorderStyle, centeredStyle); // 비고 (빈값)
+        });
+
+        // 합계 행 생성
+        Row totalRow = sheet.createRow(rowNum.getAndIncrement());
+        totalRow.setHeight((short) 400);
+
+        Cell totalLabelCell = totalRow.createCell(2);
+        totalLabelCell.setCellValue("합계");
+        totalLabelCell.setCellStyle(centeredStyle);
+        CellRangeAddress totalLabelRegion = new CellRangeAddress(totalRow.getRowNum(), totalRow.getRowNum(), 2, 4);
+        sheet.addMergedRegion(totalLabelRegion);
+        applyBorderToMergedCells(sheet, totalLabelRegion, headerStyle);
+
+        int totalQuantity = tonerDetails.stream().mapToInt(TonerDetail::getQuantity).sum();
+        int priceSum = tonerDetails.stream()
+                .mapToInt(detail -> {
+                    String priceStr = detail.getPrice();
+                    priceStr = priceStr.replace(",", "");
+                    return Integer.parseInt(priceStr);
+                })
+                .sum();
+        int totalPriceSum = tonerDetails.stream()
+                .mapToInt(detail -> {
+                    String priceStr = detail.getTotalPrice();
+                    priceStr = priceStr.replace(",", "");
+                    return Integer.parseInt(priceStr);
+                })
+                .sum();
+
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        String formattedTotalQuantity = formatter.format(totalQuantity);
+        String formattedPrice = formatter.format(priceSum);
+        String formattedTotalPrice = formatter.format(totalPriceSum);
+
+        createCell(totalRow, 5, formattedTotalQuantity, thinBorderStyle, centeredStyle); // 총 수량
+        createCell(totalRow, 6, formattedPrice, thinBorderStyle, centeredStyle); // 총 단가
+        createCell(totalRow, 7, formattedTotalPrice, thinBorderStyle, centeredStyle); // 총 금액
+        createCell(totalRow, 8, "", thinBorderStyle, centeredStyle); // 비고 (빈값)
+
+        // 열 너비 조정
+        sheet.setColumnWidth(2, 2500);  // 번호
+        sheet.setColumnWidth(3, 3500);  // 관리번호
+        sheet.setColumnWidth(4, 5000);  // 토너명
+        sheet.setColumnWidth(5, 2500);  // 수량
+        sheet.setColumnWidth(6, 3500);  // 단가
+        sheet.setColumnWidth(7, 3500);  // 금액
+        sheet.setColumnWidth(8, 3000);  // 비고
 
         // 엑셀 파일을 ByteArrayOutputStream에 쓰기
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

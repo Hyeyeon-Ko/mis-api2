@@ -49,8 +49,8 @@ public class TonerExcelController {
 
     @Operation(summary = "get Toner Pending Excel", description = "기안 상신용 엑셀 파일 다운로드")
     @PostMapping("/pending/excel")
-    public void downloadTonerPendingExcel(HttpServletResponse response, @RequestBody List<String> draftIds) throws IOException {
-        tonerExcelService.downloadPendingExcel(response, draftIds);
+    public void downloadTonerPendingExcel(HttpServletResponse response, @RequestBody TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException {
+        tonerExcelService.downloadPendingExcel(response, tonerOrderRequestDTO);
     }
 
     @Operation(summary = "get Toner Order Excel", description = "발주용 엑셀 파일 다운로드")

@@ -24,10 +24,10 @@ public interface TonerExcelService {
     byte[] generateManageExcel(List<String> draftIds) throws IOException;
 
     /* 기안 상신용 엑셀 파일 다운로드 */
-    void downloadPendingExcel(HttpServletResponse response, List<String> draftIds) throws IOException;
+    void downloadPendingExcel(HttpServletResponse response, TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException;
 
-//    /* 기안 상신용 엑셀 파일 생성 */
-//    byte[] generatePendingExcel(List<String> draftIds) throws IOException;
+    /* 기안 상신용 엑셀 파일 생성 */
+    byte[] generatePendingExcel(List<String> draftIds, String instCd) throws IOException;
 
     /* 발주용 엑셀 파일 다운로드 */
     void downloadOrderExcel(HttpServletResponse response, TonerOrderRequestDTO tonerOrderRequestDTO) throws IOException;
