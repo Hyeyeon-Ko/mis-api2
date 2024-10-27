@@ -11,6 +11,7 @@ import kr.or.kmi.mis.api.user.model.request.LoginRequestDTO;
 import kr.or.kmi.mis.api.user.model.request.SessionInfoRequestDTO;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.model.response.LoginResponseDTO;
+import kr.or.kmi.mis.api.user.model.response.OrgChartResponseData;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.api.user.service.LoginService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,9 @@ public class LoginServiceImpl implements LoginService {
     @Value("${external.login.url}")
     private String externalLoginUrl;
 
+    @Value("${external.orgChart.url}")
+    private String externalOrgChartUrl;
+
     @Override
     @Transactional
     public String login(LoginRequestDTO loginRequestDTO) {
@@ -46,7 +50,7 @@ public class LoginServiceImpl implements LoginService {
                 .bodyToMono(Map.class)
                 .block();
 
-        if (responseMap != null && "200".equals(responseMap.get("code").toString())) {  // 2024.10.4 API 배포 후 code==200 으로 변경 요청 및 return 값 확인 필수 !!!
+        if (responseMap != null && "200".equals(responseMap.get("code").toString())) {
             Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
 
             if (dataMap != null) {
@@ -117,6 +121,22 @@ public class LoginServiceImpl implements LoginService {
             );
         }
         responseDTO.setSidebarPermissions(sidebarPermissions);
+
+        // 3. 조직도상 부서코드 가져오기
+        var resultData = infoService.fetchOrgChartInfo().block();
+        if (resultData == null) {
+            throw new IllegalArgumentException("Not Found");
+        }
+
+        String matchedDeptCode = resultData.stream()
+                .filter(orgChartData -> orgChartData.getUserid().equals(sessionInfoRequestDTO.getUserId()))
+                .map(OrgChartResponseData.OrgChartData::getDeptcode)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("User ID not found in org chart data"));
+
+        responseDTO.setDeptCode(matchedDeptCode);
+
+        System.out.println("responseDTO = " + responseDTO);
 
         return responseDTO;
 
