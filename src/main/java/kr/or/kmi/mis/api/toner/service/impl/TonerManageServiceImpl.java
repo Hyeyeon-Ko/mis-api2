@@ -61,7 +61,7 @@ public class TonerManageServiceImpl implements TonerManageService {
         // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
                 .map(tonerInfo -> {
-                    String[] tonerNmParts = tonerInfo.getTonerNm().split("/");
+                    String[] tonerNmParts = tonerInfo.getTonerNm().split(" / ");
 
                     // 각 토너 이름에 맞는 가격을 찾고, 없으면 null로 처리
                     List<String> prices = Arrays.stream(tonerNmParts)
@@ -101,7 +101,7 @@ public class TonerManageServiceImpl implements TonerManageService {
         // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
                 .map(tonerInfo -> {
-                    String[] tonerNmParts = tonerInfo.getTonerNm().split("/");
+                    String[] tonerNmParts = tonerInfo.getTonerNm().split(" / ");
 
                     List<String> prices = Arrays.stream(tonerNmParts)
                             .map(String::trim)
