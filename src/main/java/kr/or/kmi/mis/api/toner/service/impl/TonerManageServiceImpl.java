@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,12 +61,22 @@ public class TonerManageServiceImpl implements TonerManageService {
         // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
                 .map(tonerInfo -> {
-                    String[] tonerNmParts = tonerInfo.getTonerNm().split(",");
-                    String firstTonerNm = tonerNmParts[0].trim();
+                    String[] tonerNmParts = tonerInfo.getTonerNm().split("/");
 
-                    TonerPrice tonerPrice = tonerPriceMap.get(firstTonerNm);
+                    // 각 토너 이름에 맞는 가격을 찾고, 없으면 null로 처리
+                    List<String> prices = Arrays.stream(tonerNmParts)
+                            .map(String::trim)
+                            .map(tonerPriceMap::get)
+                            .map(tonerPrice -> tonerPrice != null ? tonerPrice.getPrice() : null)
+                            .collect(Collectors.toList());
 
-                    return TonerExcelResponseDTO.of(tonerInfo, tonerPrice);
+                    // 가격이 전부 동일한지 확인
+                    boolean allPricesSame = prices.stream().distinct().count() == 1;
+
+                    // 가격이 동일하다면 하나의 가격만 사용, 아니면 콤마로 연결된 가격 반환
+                    String finalPrice = allPricesSame ? prices.getFirst() : String.join(" / ", prices);
+
+                    return TonerExcelResponseDTO.of(tonerInfo, finalPrice);
                 })
                 .collect(Collectors.toList());
     }
@@ -83,18 +94,26 @@ public class TonerManageServiceImpl implements TonerManageService {
         // 2. 모든 TonerPrice 조회
         List<TonerPrice> tonerPriceList = tonerPriceRepository.findAll();
 
+        // TonerPrice 목록을 Map으로 변환
         Map<String, TonerPrice> tonerPriceMap = tonerPriceList.stream()
                 .collect(Collectors.toMap(TonerPrice::getTonerNm, Function.identity()));
 
         // 3. TonerPrice가 없는 경우 null 처리
         return tonerInfoList.stream()
                 .map(tonerInfo -> {
-                    String[] tonerNmParts = tonerInfo.getTonerNm().split(",");
-                    String firstTonerNm = tonerNmParts[0].trim();
+                    String[] tonerNmParts = tonerInfo.getTonerNm().split("/");
 
-                    TonerPrice tonerPrice = tonerPriceMap.get(firstTonerNm);
+                    List<String> prices = Arrays.stream(tonerNmParts)
+                            .map(String::trim)
+                            .map(tonerPriceMap::get)
+                            .map(tonerPrice -> tonerPrice != null ? tonerPrice.getPrice() : null)
+                            .collect(Collectors.toList());
 
-                    return TonerExcelResponseDTO.of(tonerInfo, tonerPrice);
+                    boolean allPricesSame = prices.stream().distinct().count() == 1;
+
+                    String finalPrice = allPricesSame ? prices.getFirst() : String.join(" / ", prices);
+
+                    return TonerExcelResponseDTO.of(tonerInfo, finalPrice);
                 })
                 .collect(Collectors.toList());
     }
