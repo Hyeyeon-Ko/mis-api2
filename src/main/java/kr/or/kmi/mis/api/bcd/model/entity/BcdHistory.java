@@ -29,8 +29,11 @@ public class BcdHistory {
     @Column(length = 20)
     private LocalDateTime updtDate;     // 명함 수정일자
 
-    @Column(length = 1)
-    private String division;  // 명함구분 - A:회사정보, B:영문명함
+    @Column(length = 20)
+    private String userId;
+
+    @Column(length = 20)
+    private String korNm;
 
     @Column(length = 20)
     private String engNm;
@@ -71,6 +74,9 @@ public class BcdHistory {
     @Column(length = 200)
     private String engAddress;
 
+    @Column(length = 1)
+    private String division;
+
     private Integer quantity;
 
     @Builder
@@ -79,7 +85,8 @@ public class BcdHistory {
         this.seqId = seqId;
         this.draftId = bcdDetail.getDraftId();
         this.updtr = bcdDetail.getLastUpdtr();
-        this.division = bcdDetail.getDivision();
+        this.userId = bcdDetail.getUserId();
+        this.korNm = bcdDetail.getKorNm();
         this.engNm = bcdDetail.getEngNm();
         this.instNm = instNm;
         this.deptNm = deptNm;
@@ -93,6 +100,7 @@ public class BcdHistory {
         this.email = bcdDetail.getEmail();
         this.address = bcdDetail.getAddress();
         this.engAddress = bcdDetail.getEngAddress();
+        this.division = bcdDetail.getDivision();
         this.quantity = bcdDetail.getQuantity();
     }
 }
