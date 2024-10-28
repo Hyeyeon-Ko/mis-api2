@@ -1,7 +1,6 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
@@ -145,7 +144,7 @@ public class TonerServiceImpl implements TonerService {
         TonerInfo tonerInfo = tonerInfoRepository.findById(mngNum)
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + mngNum));
 
-        List<TonerPriceDTO> tonerPriceList = Arrays.stream(tonerInfo.getTonerNm().split(","))
+        List<TonerPriceDTO> tonerPriceList = Arrays.stream(tonerInfo.getTonerNm().split(" / "))
                 .map(String::trim)
                 .map(tonerName -> tonerPriceRepository.findByTonerNm(tonerName)
                         .orElseThrow(() -> new EntityNotFoundException("Not found: " + tonerName)))
