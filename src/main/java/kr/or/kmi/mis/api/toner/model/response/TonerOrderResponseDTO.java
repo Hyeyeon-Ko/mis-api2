@@ -10,14 +10,14 @@ public class TonerOrderResponseDTO {
     private String teamNm;
     private String tonerNm;
     private int quantity;
-    private int price;
+    private String price;
     private String totalPrice;
     private String mngNum;
     private String holding;
 
     @Builder
-    public TonerOrderResponseDTO(String draftId, String teamNm, String tonerNm, int quantity, int price,
-                                 String totalPrice, String mngNum, String holding) {
+    public TonerOrderResponseDTO(String draftId, String teamNm, String tonerNm, int quantity,
+                                 String price, String totalPrice, String mngNum, String holding) {
         this.draftId = draftId;
         this.teamNm = teamNm;
         this.tonerNm = tonerNm;

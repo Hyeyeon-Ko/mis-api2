@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -63,10 +66,14 @@ public class TonerDetail {
         this.holding = holding;
     }
 
-    public int getUnitPrice() {
+    public String getUnitPrice() {
         String cleanedTotalPrice = totalPrice.replace(",", "");
         int totalPriceInteger = Integer.parseInt(cleanedTotalPrice);
-        return totalPriceInteger / quantity;
+
+        int unitPrice = totalPriceInteger / quantity;
+
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+        return numberFormat.format(unitPrice);
     }
 
     public void tonerDetailUpdate(TonerDetailDTO tonerDetailDTO) {
