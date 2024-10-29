@@ -114,7 +114,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
         // 2. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(approverId).getInstCd();
-        if (existsInStdDetail(approverId, "C002", instCd)) {
+        if (existsInStdDetail(approverId, "B005", instCd)) {
             return;
         }
 
@@ -157,7 +157,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
         // 3. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(bcdMaster.getCurrentApproverId()).getInstCd();
-        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), "C002", instCd)) {
+        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), "B005", instCd)) {
             return;
         }
 

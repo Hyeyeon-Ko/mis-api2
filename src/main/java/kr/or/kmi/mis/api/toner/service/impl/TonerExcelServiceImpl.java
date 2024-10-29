@@ -147,7 +147,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
 
         tonerPrices.forEach(price -> {
 
-            StdGroup stdGroup = stdGroupRepository.findByGroupCd("A009")
+            StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
                     .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
             StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, price.getDivision())
@@ -247,7 +247,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
 
     private byte[] createPendingExcelData(List<TonerDetail> tonerDetails, String instCd) throws IOException {
 
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C003")
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B006")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd).get().getFirst();
@@ -358,7 +358,7 @@ public class TonerExcelServiceImpl implements TonerExcelService {
 
     private byte[] createOrderExcelData(List<TonerDetail> tonerDetails, String instCd) throws IOException {
 
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C003")
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B006")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd).get().getFirst();

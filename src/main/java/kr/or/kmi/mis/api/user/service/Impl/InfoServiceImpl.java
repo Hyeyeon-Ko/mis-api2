@@ -98,7 +98,7 @@ public class InfoServiceImpl implements InfoService {
     @Transactional(readOnly = true)
     public List<ConfirmResponseDTO> getConfirmInfo(String instCd) {
 
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B005")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)

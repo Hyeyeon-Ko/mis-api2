@@ -99,7 +99,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
 
         // 3. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(docMaster.getCurrentApproverId()).getInstCd();
-        if (existsInStdDetail(docMaster.getCurrentApproverId(), "C002", instCd)) {
+        if (existsInStdDetail(docMaster.getCurrentApproverId(), "B005", instCd)) {
             return;
         }
 

@@ -222,7 +222,7 @@ public class StdDetailServiceImpl implements StdDetailService {
     @Transactional(readOnly = true)
     public List<StdResponseDTO> getOrgChart(String instCd, String deptCode) {
 
-        StdGroup chatGroup = stdGroupRepository.findByGroupCd("C001")
+        StdGroup chatGroup = stdGroupRepository.findByGroupCd("A008")
                 .orElseThrow(() -> new EntityNotFoundException("Not found: " + StdGroup.class.getName()));
 
         List<StdDetail> allDetails = stdDetailRepository.findByGroupCdAndEtcItem4(chatGroup, instCd)

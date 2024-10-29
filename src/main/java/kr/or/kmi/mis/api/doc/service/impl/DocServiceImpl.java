@@ -90,7 +90,7 @@ public class DocServiceImpl implements DocService {
         // 1. DocMaster 저장
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity(draftId, "A");
 
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("C002")
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B005")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<StdDetail> stdDetail = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, receiveDocRequestDTO.getInstCd())
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
@@ -288,10 +288,10 @@ public class DocServiceImpl implements DocService {
             needsUpdate = true;
         }
 
-        StdGroup stdGroupC002 = findStdGroup("C002");
-        List<StdDetail> detailsC002 = findAllActiveDetails(stdGroupC002);
+        StdGroup stdGroupB005 = findStdGroup("B005");
+        List<StdDetail> detailsB005 = findAllActiveDetails(stdGroupB005);
 
-        if (detailsC002.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+        if (detailsB005.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
             needsUpdate = false;
         }
 
