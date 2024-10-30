@@ -20,5 +20,4 @@ import lombok.RequiredArgsConstructor;
         private String userId;
         private String instCd;
         private String documentType;
-        //권한
 }

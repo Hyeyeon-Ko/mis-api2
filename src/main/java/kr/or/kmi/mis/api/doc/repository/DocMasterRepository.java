@@ -23,8 +23,6 @@ public interface DocMasterRepository extends JpaRepository<DocMaster, String> {
 
     Optional<List<DocMaster>> findAllByStatusAndCurrentApproverIndex(String status, Integer approverIndex);
 
-    List<DocMaster> findAllByDeptCd(String deptCd);
-
     List<DocMaster> findAllByStatusNotAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, LocalDateTime from, LocalDateTime to);
 
     List<DocMaster> findAllByStatusAndInstCdAndDraftDateBetweenOrderByDraftDateDesc(String status, String instCd, LocalDateTime from, LocalDateTime to);

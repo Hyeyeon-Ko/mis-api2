@@ -94,8 +94,6 @@ public class DocListServiceImpl implements DocListService {
     @Transactional(readOnly = true)
     public List<DocResponseDTO> getSendApplyList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd) {
 
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
         List<DocDetail> docDetails = docDetailRepository.findAllByDocIdNotNullAndDivision("B");
 
         if (docDetails == null) {

@@ -22,7 +22,6 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +50,6 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     private final StdDetailRepository stdDetailRepository;
     private final DocMasterRepository docMasterRepository;
     private final BcdApplyQueryRepositoryImpl bcdApplyQueryRepositoryImpl;
-    private final TonerMasterRepository tonerMasterRepository;
 
     /**
      * BcdMaster 엔티티를 draftId로 조회하여 반환.

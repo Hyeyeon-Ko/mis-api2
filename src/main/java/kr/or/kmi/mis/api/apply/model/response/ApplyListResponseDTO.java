@@ -2,7 +2,6 @@ package kr.or.kmi.mis.api.apply.model.response;
 
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
-import kr.or.kmi.mis.api.toner.model.response.TonerMasterResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

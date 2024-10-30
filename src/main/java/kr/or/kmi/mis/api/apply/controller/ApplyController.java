@@ -34,6 +34,7 @@ public class ApplyController {
                                                              @Valid PostSearchRequestDTO postSearchRequestDTO) {
         return ResponseWrapper.success(applyService.getAllApplyList(applyRequestDTO, postSearchRequestDTO));
     }
+
     @Operation(summary = "신청 목록 호출", description = "총무팀 > 기준자료를 바탕으로, 전체 신청 목록 호출합니다.")
     @GetMapping(value = "/applyList2")
     public ApiResponse<ApplyResponseDTO> getAllApplyList2(@Valid ApplyRequestDTO applyRequestDTO,
