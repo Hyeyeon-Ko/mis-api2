@@ -228,12 +228,6 @@ public class DocstorageListServiceImpl implements DocstorageListService {
         return responseMap;
     }
 
-    /* 센터별 문서보관 목록에 추가 */
-    private void addToResponseMap(Map<String, List<DocstorageResponseDTO>> responseMap, String detailCd, DocStorageMaster master) {
-        List<DocstorageResponseDTO> docstorageResponses = getDocstorageResponsesForMaster(master);
-        responseMap.getOrDefault(detailCd, new ArrayList<>()).addAll(docstorageResponses);
-    }
-
     /* 센터별 문서보관 목록 DTO 생성 */
     private CenterDocstorageListResponseDTO buildCenterDocstorageResponseDTO(Map<String, List<DocstorageResponseDTO>> responseMap) {
         return CenterDocstorageListResponseDTO.of(
@@ -303,12 +297,6 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                         .status(docStorageDetail.getStatus())
                         .build())
                 .toList();
-    }
-
-    /* Master를 기반으로 문서보관 응답 리스트 생성 */
-    private List<DocstorageResponseDTO> getDocstorageResponsesForMaster(DocStorageMaster docStorageMaster) {
-        List<DocStorageDetail> docStorageDetails = fetchDocStorageDetailsByDraftId(docStorageMaster.getDraftId());
-        return convertToResponseDTOListUsingDetailStatus(docStorageDetails);
     }
 
     /* Draft ID로 문서보관 상세 리스트 조회 */

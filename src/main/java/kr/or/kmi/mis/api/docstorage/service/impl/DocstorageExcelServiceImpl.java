@@ -107,23 +107,6 @@ public class DocstorageExcelServiceImpl implements DocstorageExcelService {
         docStorageDetailRepository.saveAll(entities);
     }
 
-    private String generateDraftId() {
-        Optional<DocStorageMaster> lastDocStorageMasterOpt = docStorageMasterRepository.findTopByOrderByDraftIdDesc();
-
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("A007")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "B")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        if (lastDocStorageMasterOpt.isPresent()) {
-            String lastDraftId = lastDocStorageMasterOpt.get().getDraftId();
-            int lastIdNum = Integer.parseInt(lastDraftId.substring(2));
-            return stdDetail.getEtcItem1() + String.format("%010d", lastIdNum + 1);
-        } else {
-            return stdDetail.getEtcItem1() + "0000000001";
-        }
-    }
-
     @Override
     @Transactional
     public void updateDocstorageDetails(List<DocstorageExcelResponseDTO> details) {

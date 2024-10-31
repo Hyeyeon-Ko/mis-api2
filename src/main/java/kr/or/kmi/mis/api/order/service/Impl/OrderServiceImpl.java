@@ -48,8 +48,6 @@ public class OrderServiceImpl implements OrderService {
     private final StdBcdService stdBcdService;
     private final NotificationSendService notificationSendService;
 
-//    private final OrderQueryRepository orderQueryRepository;
-
     @Override
     @Transactional(readOnly = true)
     public List<OrderListResponseDTO> getOrderList(String instCd) {
@@ -82,11 +80,6 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-//    @Override
-//    public Page<OrderListResponseDTO> getOrderList2(String instCd, Pageable page) {
-//        return orderQueryRepository.getOrderList2(instCd, page);
-
-//    }
     @Override
     @Transactional
     public void orderRequest(OrderRequestDTO orderRequest, MultipartFile previewFile, List<MultipartFile> files) throws IOException, MessagingException, GeneralSecurityException {

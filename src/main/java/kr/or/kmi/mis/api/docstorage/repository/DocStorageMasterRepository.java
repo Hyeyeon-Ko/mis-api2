@@ -10,7 +10,6 @@ public interface DocStorageMasterRepository extends JpaRepository<DocStorageMast
 
     Optional<List<DocStorageMaster>> findAllByInstCdAndStatus(String instCd, String status);
     Optional<List<DocStorageMaster>> findAllByInstCdAndType(String instCd, String type);
-    Optional<List<DocStorageMaster>> findAllByInstCdAndStatusAndType(String instCd, String status, String type);
     Optional<DocStorageMaster> findByDraftId(String draftId);
     Optional<DocStorageMaster> findTopByOrderByDraftIdDesc();
 }

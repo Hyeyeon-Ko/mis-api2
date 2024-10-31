@@ -11,7 +11,6 @@ public interface FileDetailRepository extends JpaRepository<FileDetail, Long> {
 
     Optional<FileDetail> findByDraftId(String draftId);
     Optional<FileDetail> findTopByOrderByAttachIdDesc();
-    Optional<FileDetail> findByAttachId(String attachId);
     List<FileDetail> findAllByDraftIdIn(Collection<String> draftId);
 
 }

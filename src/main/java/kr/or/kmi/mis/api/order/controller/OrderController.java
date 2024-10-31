@@ -37,12 +37,6 @@ public class OrderController {
         return ResponseWrapper.success(orderService.getOrderList(instCd));
     }
 
-//    @Operation(summary = "get order list", description = "발주 목록 조회")
-//    @GetMapping("/get")
-//    public ApiResponse<Page<OrderListResponseDTO>> getOrderList2(String instCd, PostPageRequest pageRequest) {
-//        return ResponseWrapper.success(orderService.getOrderList2(instCd, pageRequest.of()));
-//    }
-
     @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<?> orderRequest(
