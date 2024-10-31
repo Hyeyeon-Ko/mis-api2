@@ -19,6 +19,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -84,20 +85,23 @@ public class OrderServiceImpl implements OrderService {
 //    @Override
 //    public Page<OrderListResponseDTO> getOrderList2(String instCd, Pageable page) {
 //        return orderQueryRepository.getOrderList2(instCd, page);
-//    }
 
+//    }
     @Override
     @Transactional
-    public void orderRequest(OrderRequestDTO orderRequest, MultipartFile file) throws IOException, MessagingException, GeneralSecurityException {
-        byte[] fileData;
+    public void orderRequest(OrderRequestDTO orderRequest, MultipartFile previewFile, List<MultipartFile> files) throws IOException, MessagingException, GeneralSecurityException {
+        byte[] previewFileData = null;
 
-        if (file != null && !file.isEmpty()) {
-            fileData = file.getBytes();
+        if (previewFile != null && !previewFile.isEmpty()) {
+            String extension = FilenameUtils.getExtension(previewFile.getOriginalFilename());
+            if ("xlsx".equalsIgnoreCase(extension)) {
+                previewFileData = excelService.getEncryptedExcelBytes(previewFile.getBytes(), "06960");
+            } else {
+                throw new IllegalArgumentException("미리보기 파일은 엑셀(.xlsx) 형식만 허용됩니다.");
+            }
         } else {
-            fileData = excelService.generateExcel(orderRequest.getDraftIds());
+            previewFileData = excelService.getEncryptedExcelBytes(excelService.generateExcel(orderRequest.getDraftIds()), "06960");
         }
-
-        byte[] encryptedFileData = excelService.getEncryptedExcelBytes(fileData, "06960");
 
         sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
@@ -106,20 +110,19 @@ public class OrderServiceImpl implements OrderService {
                 orderRequest.getPassword(),
                 orderRequest.getFromEmail(),
                 orderRequest.getToEmail(),
-                encryptedFileData,
+                previewFileData,
+                files,
                 orderRequest.getEmailSubject(),
                 orderRequest.getEmailBody(),
                 orderRequest.getFileName()
         );
 
-        // 발주일시 업데이트
         orderRequest.getDraftIds().forEach(draftId -> {
             BcdMaster bcdMaster = bcdMasterRepository.findById(draftId)
                     .orElseThrow(() -> new EntityNotFoundException("Draft not found with id " + draftId));
             bcdMaster.updateOrder(LocalDateTime.now());
             bcdMasterRepository.save(bcdMaster);
 
-            // 알림 전송
             BcdDetail bcdDetail = bcdDetailRepository.findById(draftId)
                     .orElseThrow(() -> new EntityNotFoundException("BcdDetail not found with id " + draftId));
             notificationSendService.sendBcdOrder(bcdMaster.getDraftDate(), bcdDetail.getUserId());
@@ -143,13 +146,25 @@ public class OrderServiceImpl implements OrderService {
         return new EmailSettingsResponseDTO(stdDetail.getEtcItem2());
     }
 
-    private void sendEmailWithDynamicCredentials(String smtpHost, int smtpPort, String username, String password, String fromEmail, String toEmail, byte[] excelData, String subject, String body, String fileName) throws MessagingException {
+    private void sendEmailWithDynamicCredentials(
+            String smtpHost,
+            int smtpPort,
+            String username,
+            String password,
+            String fromEmail,
+            String toEmail,
+            byte[] previewFileData,
+            List<MultipartFile> additionalFiles,
+            String subject,
+            String body,
+            String previewFileName
+    ) throws MessagingException {
 
         JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
         mailSenderImpl.setHost(smtpHost);
         mailSenderImpl.setPort(smtpPort);
-        mailSenderImpl.setUsername(username); // 사용자가 입력한 이메일 ID
-        mailSenderImpl.setPassword(password); // 사용자가 입력한 이메일 비밀번호
+        mailSenderImpl.setUsername(username);
+        mailSenderImpl.setPassword(password);
 
         Properties props = mailSenderImpl.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
@@ -162,17 +177,19 @@ public class OrderServiceImpl implements OrderService {
         MimeMessage message = mailSenderImpl.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        // 이메일 설정
         helper.setFrom(fromEmail);
         helper.setTo(toEmail);
         helper.setSubject(subject);
         helper.setText(body);
 
-        // 엑셀 파일 첨부
-        String fileFullName = fileName + ".xlsx";
-        helper.addAttachment(fileFullName, new ByteArrayResource(excelData));
+        helper.addAttachment(previewFileName + ".xlsx", new ByteArrayResource(previewFileData));
 
-        // 이메일 전송
+        if (additionalFiles != null) {
+            for (MultipartFile file : additionalFiles) {
+                helper.addAttachment(file.getOriginalFilename(), file);
+            }
+        }
+
         mailSenderImpl.send(message);
     }
 }
