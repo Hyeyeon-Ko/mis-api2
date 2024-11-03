@@ -127,8 +127,6 @@ public class ApplyServiceImpl implements ApplyService {
         List<CorpDocMyResponseDTO> myCorpDocApplyList = new ArrayList<>();
         List<SealMyResponseDTO> mySealApplyList = new ArrayList<>();
 
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
         if (documentType != null) {
             switch (documentType) {
                 case "A":
@@ -250,8 +248,6 @@ public class ApplyServiceImpl implements ApplyService {
         List<CorpDocPendingResponseDTO> corpDocApplyLists = new ArrayList<>();
         List<SealPendingResponseDTO> sealApplyLists = new ArrayList<>();
 
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
         switch (documentType) {
             case "A" -> bcdApplyLists = bcdService.getPendingList(startDate, endDate, instCd, userId);
             case "B" -> docApplyLists = docService.getDocPendingList(startDate, endDate, instCd, userId);
@@ -292,8 +288,6 @@ public class ApplyServiceImpl implements ApplyService {
     @Transactional(readOnly = true)
     public PendingCountResponseDTO getPendingCountList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
 
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
         int bcdPendingCount = Math.toIntExact(bcdPendingQueryRepository.getBcdPendingCount(applyRequestDTO, postSearchRequestDTO));
         int docPendingCount = Math.toIntExact(docPendingQueryRepository.getDocPendingCount(applyRequestDTO, postSearchRequestDTO));
         int corpDocPendingCount = Math.toIntExact(corpDocPendingQueryRepository.getCorpDocPendingCount(applyRequestDTO, postSearchRequestDTO));
@@ -306,18 +300,6 @@ public class ApplyServiceImpl implements ApplyService {
 
         return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount,
                 corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount, tonerPendingCount, tonerOrderPendingCount);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PendingResponseDTO getMyPendingList(String userId) {
-
-//        return PendingResponseDTO.of(
-//                bcdService.getMyPendingList(userId),
-//                docService.getMyDocPendingList(userId),
-//                corpDocService.getMyPendingList(userId),
-//                sealListService.getMySealPendingList(userId));
-        return null;
     }
 
     @Override

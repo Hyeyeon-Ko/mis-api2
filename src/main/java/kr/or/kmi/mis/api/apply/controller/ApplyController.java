@@ -88,12 +88,6 @@ public class ApplyController {
     }
 
     @Operation(summary = "나의 신청내역 > 승인대기 목록 호출", description = "나의 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
-    @GetMapping(value = "/myPendingList")
-    public ApiResponse<PendingResponseDTO> getMyPendingApplyList(String userId) {
-        return ResponseWrapper.success(applyService.getMyPendingList(userId));
-    }
-
-    @Operation(summary = "나의 신청내역 > 승인대기 목록 호출", description = "나의 신청목록들 가운데, 승인대기 상태인 목록만 호출합니다.")
     @GetMapping(value = "/myPendingList2")
     public ApiResponse<PendingResponseDTO> getMyPendingApplyList2(@Valid ApplyRequestDTO applyRequestDTO,
                                                                   PostPageRequest page) {
