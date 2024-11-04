@@ -12,8 +12,4 @@ public class ImageUtil {
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 
-    // Base64 문자열을 디코딩하여 이미지로 변환 (필요 시 사용)
-    public static byte[] decodeBase64ToImage(String base64Image) {
-        return Base64.getDecoder().decode(base64Image);
-    }
 }

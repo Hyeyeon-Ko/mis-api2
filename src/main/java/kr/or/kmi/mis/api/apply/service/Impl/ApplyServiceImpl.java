@@ -1,10 +1,7 @@
 package kr.or.kmi.mis.api.apply.service.Impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.apply.model.response.ApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.MyApplyResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingCountResponseDTO;
-import kr.or.kmi.mis.api.apply.model.response.PendingResponseDTO;
+import kr.or.kmi.mis.api.apply.model.response.*;
 import kr.or.kmi.mis.api.apply.service.ApplyService;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.bcd.model.response.BcdMyResponseDTO;
@@ -29,6 +26,12 @@ import kr.or.kmi.mis.api.seal.model.response.SealMyResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealPendingResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealPendingQueryRepository;
 import kr.or.kmi.mis.api.seal.service.SealListService;
+import kr.or.kmi.mis.api.toner.model.response.TonerMasterResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMyResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerPendingListResponseDTO;
+import kr.or.kmi.mis.api.toner.service.TonerOrderService;
+import kr.or.kmi.mis.api.toner.service.TonerPendingService;
+import kr.or.kmi.mis.api.toner.service.TonerService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,6 +59,9 @@ public class ApplyServiceImpl implements ApplyService {
     private final CorpDocListService corpDocListService;
     private final OrderService orderService;
     private final DocstorageListService docstorageListService;
+    private final TonerService tonerService;
+    private final TonerPendingService tonerPendingService;
+    private final TonerOrderService tonerOrderService;
 
     private final BcdPendingQueryRepository bcdPendingQueryRepository;
     private final DocPendingQueryRepository docPendingQueryRepository;
@@ -63,41 +70,25 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApplyResponseDTO getAllApplyList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
+    public ApplyListResponseDTO getAllApplyList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         List<BcdMasterResponseDTO> bcdApplyLists = new ArrayList<>();
         List<DocMasterResponseDTO> docApplyLists = new ArrayList<>();
-        List<CorpDocMasterResponseDTO> corpDocApplyLists = new ArrayList<>();
-        List<SealMasterResponseDTO> sealApplyLists = new ArrayList<>();
 
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
-        switch (documentType) {
-            case "A":
-                bcdApplyLists = bcdService.getBcdApply(startDate, endDate, searchType, keyword, instCd, userId);
-                break;
-            case "B":
-                docApplyLists = docService.getDocApply(startDate, endDate, searchType, keyword, instCd, userId);
-                break;
-            case "C":
-                corpDocApplyLists = corpDocService.getCorpDocApply(startDate, endDate, searchType, keyword);
-                break;
-            case "D":
-                sealApplyLists = sealListService.getSealApply(startDate, endDate, searchType, keyword, instCd);
-                break;
-            default:
-                break;
+        if (applyRequestDTO.getDocumentType().equals("B")) {
+            docApplyLists = docService.getDocApply(applyRequestDTO, postSearchRequestDTO);
+        } else {
+            bcdApplyLists = bcdService.getBcdApply(applyRequestDTO, postSearchRequestDTO);
         }
-        return null;
-//        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
+        return ApplyListResponseDTO.of(bcdApplyLists, docApplyLists);
     }
 
 
     /**
      * 관리자 전체 신청 내역 조회
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
-     * @param pageable
-     * @return
+     * @param applyRequestDTO applyRequestDTO
+     * @param postSearchRequestDTO postSearchRequestDTO
+     * @param pageable pageable
+     * @return ApplyResponseDTO
      */
     @Override
     public ApplyResponseDTO getAllApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
@@ -105,6 +96,7 @@ public class ApplyServiceImpl implements ApplyService {
         Page<DocMasterResponseDTO> docApplyLists = null;
         Page<CorpDocMasterResponseDTO> corpDocApplyLists = null;
         Page<SealMasterResponseDTO> sealApplyLists = null;
+        Page<TonerMasterResponseDTO> tonerApplyLists = null;
 
         switch (applyRequestDTO.getDocumentType()) {
             case "B":
@@ -116,72 +108,33 @@ public class ApplyServiceImpl implements ApplyService {
             case "D":
                 sealApplyLists = sealListService.getSealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
+            case "E":
+                tonerApplyLists = tonerService.getTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                break;
             default:
                 bcdApplyLists = bcdService.getBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                 break;
         }
 
-        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public MyApplyResponseDTO getAllMyApplyList(String documentType, LocalDateTime startDate, LocalDateTime endDate, String userId) {
-
-        List<BcdMyResponseDTO> myBcdApplyList = new ArrayList<>();
-        List<DocMyResponseDTO> myDocApplyList = new ArrayList<>();
-        List<CorpDocMyResponseDTO> myCorpDocApplyList = new ArrayList<>();
-        List<SealMyResponseDTO> mySealApplyList = new ArrayList<>();
-
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
-        if (documentType != null) {
-            switch (documentType) {
-                case "A":
-                    myBcdApplyList = bcdService.getMyBcdApply(startDate, endDate, userId);
-                    break;
-                case "B":
-                    myDocApplyList = docService.getMyDocApply(startDate, endDate, userId);
-                    break;
-                case "C":
-                    myCorpDocApplyList = corpDocService.getMyCorpDocApply(startDate, endDate, userId);
-                    break;
-                case "D":
-                    mySealApplyList = sealListService.getMySealApply(startDate, endDate, userId);
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            // 전체 신청 목록을 조회합니다.
-            myBcdApplyList = bcdService.getMyBcdApply(startDate, endDate, userId);
-            myDocApplyList = docService.getMyDocApply(startDate, endDate, userId);
-            myCorpDocApplyList = corpDocService.getMyCorpDocApply(startDate, endDate, userId);
-            mySealApplyList = sealListService.getMySealApply(startDate, endDate, userId);
-        }
-
-        return null;
-//        return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
+        return ApplyResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists, tonerApplyLists);
     }
 
     /**
      * 내 전체 신청내역
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
-     * @param pageable
-     * @return
+     * @param applyRequestDTO applyRequestDTO
+     * @param postSearchRequestDTO postSearchRequestDTO
+     * @param pageable pageable
+     * @return MyApplyResponseDTO
      */
     @Override
     public MyApplyResponseDTO getAllMyApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
+        System.out.println("documentType = " + applyRequestDTO.getDocumentType());
+
         Page<BcdMyResponseDTO> myBcdApplyList = null;
         Page<DocMyResponseDTO> myDocApplyList = null;
         Page<CorpDocMyResponseDTO> myCorpDocApplyList = null;
         Page<SealMyResponseDTO> mySealApplyList = null;
-
-        List<BcdMyResponseDTO> myBcdApplyList2 = new ArrayList<>();
-        List<DocMyResponseDTO> myDocApplyList2 = new ArrayList<>();
-        List<CorpDocMyResponseDTO> myCorpDocApplyList2 = new ArrayList<>();
-        List<SealMyResponseDTO> mySealApplyList2 = new ArrayList<>();
+        Page<TonerMyResponseDTO> myTonerApplyList = null;
 
         if (applyRequestDTO.getDocumentType() != null) {
             // 각 신청 별 목록 페이징 조회
@@ -195,54 +148,46 @@ public class ApplyServiceImpl implements ApplyService {
                 case "D":
                     mySealApplyList = sealListService.getMySealApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                     break;
+                case "E":
+                    myTonerApplyList = tonerService.getMyTonerApply2(applyRequestDTO, postSearchRequestDTO, pageable);
+                    break;
                 default:
                     myBcdApplyList = bcdService.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, pageable);
                     break;
             }
-            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList);
+            return MyApplyResponseDTO.of(myBcdApplyList, myDocApplyList, myCorpDocApplyList, mySealApplyList, myTonerApplyList);
         } else {
             // 전체 신청 목록 리스트 조회
-            myBcdApplyList2 = bcdService.getMyBcdApply(applyRequestDTO, postSearchRequestDTO);
-            myDocApplyList2 = docService.getMyDocApply(applyRequestDTO, postSearchRequestDTO);
-            myCorpDocApplyList2 = corpDocService.getMyCorpDocApply(applyRequestDTO, postSearchRequestDTO);
-            mySealApplyList2 = sealListService.getMySealApply(applyRequestDTO, postSearchRequestDTO);
+            List<BcdMyResponseDTO> myBcdApplyList2 = bcdService.getMyBcdApply(applyRequestDTO, postSearchRequestDTO);
+            List<DocMyResponseDTO> myDocApplyList2 = docService.getMyDocApply(applyRequestDTO, postSearchRequestDTO);
+            List<CorpDocMyResponseDTO> myCorpDocApplyList2 = corpDocService.getMyCorpDocApply(applyRequestDTO, postSearchRequestDTO);
+            List<SealMyResponseDTO> mySealApplyList2 = sealListService.getMySealApply(applyRequestDTO, postSearchRequestDTO);
+            List<TonerMyResponseDTO> myTonerApplyList2 = tonerService.getMyTonerApply(applyRequestDTO, postSearchRequestDTO);
 
-            List<Object> combinedList = Stream.concat(
-                    Stream.concat(myBcdApplyList2.stream(), myDocApplyList2.stream()),
-                    Stream.concat(myCorpDocApplyList2.stream(), mySealApplyList2.stream())
-            ).collect(Collectors.toList());
+            List<Object> combinedList = Stream.of(myBcdApplyList2, myDocApplyList2, myCorpDocApplyList2, mySealApplyList2, myTonerApplyList2)
+                    .flatMap(List::stream)
+                    .sorted(Comparator.comparing(this::extractDraftDate).reversed())
+                    .collect(Collectors.toList());
 
-            int start = (int) pageable.getOffset();
-            int end = Math.min((start + pageable.getPageSize()), combinedList.size());
-            List<Object> pagedList = combinedList.subList(start, end);
-
-            long totalCount = combinedList.size();
-
-            Page<Object> pagedResult = new PageImpl<>(pagedList, pageable, totalCount);
+            Page<Object> pagedResult = returnPageResult(pageable, combinedList);
 
             return MyApplyResponseDTO.of(pagedResult);
         }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public PendingResponseDTO getPendingListByType(String documentType, LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
-
-        List<BcdPendingResponseDTO> bcdApplyLists = new ArrayList<>();
-        List<DocPendingResponseDTO> docApplyLists = new ArrayList<>();
-        List<CorpDocPendingResponseDTO> corpDocApplyLists = new ArrayList<>();
-        List<SealPendingResponseDTO> sealApplyLists = new ArrayList<>();
-
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
-
-        switch (documentType) {
-            case "A" -> bcdApplyLists = bcdService.getPendingList(startDate, endDate, instCd, userId);
-            case "B" -> docApplyLists = docService.getDocPendingList(startDate, endDate, instCd, userId);
-            case "C" -> corpDocApplyLists = corpDocService.getPendingList(startDate, endDate);
-            case "D" -> sealApplyLists = sealListService.getSealPendingList(startDate, endDate, instCd);
-            default -> throw new IllegalArgumentException("Invalid document type: " + documentType);
-        };
-        return null;
+    private LocalDateTime extractDraftDate(Object obj) {
+        if (obj instanceof BcdMyResponseDTO) {
+            return ((BcdMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof DocMyResponseDTO) {
+            return ((DocMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof CorpDocMyResponseDTO) {
+            return ((CorpDocMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof SealMyResponseDTO) {
+            return ((SealMyResponseDTO) obj).getDraftDate();
+        } else if (obj instanceof TonerMyResponseDTO) {
+            return ((TonerMyResponseDTO) obj).getDraftDate();
+        }
+        return LocalDateTime.now();
     }
 
     @Override
@@ -251,6 +196,7 @@ public class ApplyServiceImpl implements ApplyService {
         Page<DocPendingResponseDTO> docApplyLists = null;
         Page<CorpDocPendingResponseDTO> corpDocApplyLists = null;
         Page<SealPendingResponseDTO> sealApplyLists = null;
+        Page<TonerPendingListResponseDTO> tonerApplyLists = null;
 
         switch (applyRequestDTO.getDocumentType()) {
             case "B":
@@ -267,14 +213,12 @@ public class ApplyServiceImpl implements ApplyService {
                 break;
         }
 
-        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists);
+        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists, tonerApplyLists);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PendingCountResponseDTO getPendingCountList(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
-
-//        Timestamp[] timestamps = getDateIntoTimestamp(startDate, endDate);
 
         int bcdPendingCount = Math.toIntExact(bcdPendingQueryRepository.getBcdPendingCount(applyRequestDTO, postSearchRequestDTO));
         int docPendingCount = Math.toIntExact(docPendingQueryRepository.getDocPendingCount(applyRequestDTO, postSearchRequestDTO));
@@ -282,51 +226,45 @@ public class ApplyServiceImpl implements ApplyService {
         int sealPendingCount = Math.toIntExact(sealPendingQueryRepository.getSealPendingCount(applyRequestDTO, postSearchRequestDTO));
         int corpDocIssuePendingCount = corpDocListService.getCorpDocIssuePendingListCount();
         int orderPendingCount = orderService.getOrderList(applyRequestDTO.getInstCd()).size();
-        int docstoragePendingCount = docstorageListService.getDocstoragePendingList(applyRequestDTO.getInstCd()).size();
+        int docStoragePendingCount = docstorageListService.getDocstoragePendingList(applyRequestDTO.getInstCd()).size();
+        int tonerPendingCount = tonerPendingService.getTonerPendingList(applyRequestDTO.getInstCd()).size();
+        int tonerOrderPendingCount = tonerOrderService.getTonerOrderList(applyRequestDTO.getInstCd()).size();
 
         return PendingCountResponseDTO.of(bcdPendingCount, docPendingCount, corpDocPendingCount, sealPendingCount,
-                                          corpDocIssuePendingCount, orderPendingCount, docstoragePendingCount);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PendingResponseDTO getMyPendingList(String userId) {
-
-//        return PendingResponseDTO.of(
-//                bcdService.getMyPendingList(userId),
-//                docService.getMyDocPendingList(userId),
-//                corpDocService.getMyPendingList(userId),
-//                sealListService.getMySealPendingList(userId));
-        return null;
+                corpDocIssuePendingCount, orderPendingCount, docStoragePendingCount, tonerPendingCount, tonerOrderPendingCount);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PendingResponseDTO getMyPendingList2(ApplyRequestDTO applyRequestDTO, Pageable pageable) {
 
-        List<BcdPendingResponseDTO> myBcdPendingList2 = new ArrayList<>();
-        List<DocPendingResponseDTO> myDocPendingList2 = new ArrayList<>();
-        List<CorpDocPendingResponseDTO> myCorpDocPendingList2 = new ArrayList<>();
-        List<SealPendingResponseDTO> mySealPendingList2 = new ArrayList<>();
-
-        myBcdPendingList2 = bcdService.getMyPendingList(applyRequestDTO);
-        myDocPendingList2 = docService.getMyDocPendingList(applyRequestDTO);
-        myCorpDocPendingList2 = corpDocService.getMyPendingList(applyRequestDTO);
-        mySealPendingList2 = sealListService.getMySealPendingList(applyRequestDTO);
+        List<BcdPendingResponseDTO> myBcdPendingList2 = bcdService.getMyPendingList(applyRequestDTO);
+        List<DocPendingResponseDTO> myDocPendingList2 = docService.getMyDocPendingList(applyRequestDTO);
+        List<CorpDocPendingResponseDTO> myCorpDocPendingList2 = corpDocService.getMyPendingList(applyRequestDTO);
+        List<SealPendingResponseDTO> mySealPendingList2 = sealListService.getMySealPendingList(applyRequestDTO);
+        List<TonerPendingListResponseDTO> myTonerPendingList2 = tonerService.getMyTonerPendingList(applyRequestDTO);
 
         List<Object> combinedList = Stream.concat(
-                Stream.concat(myBcdPendingList2.stream(), myDocPendingList2.stream()),
-                Stream.concat(myCorpDocPendingList2.stream(), mySealPendingList2.stream())
+                Stream.concat(
+                        Stream.concat(myBcdPendingList2.stream(), myDocPendingList2.stream()),
+                        Stream.concat(myCorpDocPendingList2.stream(), mySealPendingList2.stream())
+                ),
+                myTonerPendingList2.stream()
         ).collect(Collectors.toList());
 
+        Page<Object> pagedResult = returnPageResult(pageable, combinedList);
+
+        return PendingResponseDTO.of(pagedResult);
+    }
+
+    private Page<Object> returnPageResult(Pageable pageable, List<Object> combinedList) {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), combinedList.size());
         List<Object> pagedList = combinedList.subList(start, end);
 
         long totalCount = combinedList.size();
 
-        Page<Object> pagedResult = new PageImpl<>(pagedList, pageable, totalCount);
-
-        return PendingResponseDTO.of(pagedResult);
+        return new PageImpl<>(pagedList, pageable, totalCount);
     }
 }
+

@@ -14,7 +14,6 @@ import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.config.SftpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +41,6 @@ import java.util.zip.ZipOutputStream;
 public class FileDownloadController {
 
     private final SftpClient sftpClient;
-    private final InfoService infoService;
     private final FileDownloadHistoryRepository fileDownloadHistoryRepository;
     private final FileDetailRepository fileDetailRepository;
     private final FileHistoryRepository fileHistoryRepository;

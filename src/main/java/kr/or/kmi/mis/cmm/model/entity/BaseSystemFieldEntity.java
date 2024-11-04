@@ -6,7 +6,6 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @EntityListeners(AuditingEntityListener.class)

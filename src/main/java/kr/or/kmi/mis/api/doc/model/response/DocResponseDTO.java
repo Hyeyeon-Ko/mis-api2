@@ -29,8 +29,6 @@ public class DocResponseDTO {
         return filePath != null ? "/api/doc/download/" + fileName : null;
     }
 
-//    static SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     public DocResponseDTO(String draftId, LocalDateTime draftDate, String drafter, String docId, String sender, String receiver, String title, String status, String fileName, String filePath) {
         this.draftId = draftId;
         this.draftDate = draftDate;
@@ -48,7 +46,6 @@ public class DocResponseDTO {
     public static DocResponseDTO sOf(DocDetail docDetail, DocMaster docMaster, FileHistory fileHistory) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
-//                .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
                 .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())
@@ -63,7 +60,6 @@ public class DocResponseDTO {
     public static DocResponseDTO rOf(DocDetail docDetail, DocMaster docMaster, FileHistory fileHistory) {
         return DocResponseDTO.builder()
                 .draftId(docDetail.getDraftId())
-//                .draftDate(simpleDataFormat.format(docMaster.getDraftDate()))
                 .draftDate(docMaster.getDraftDate())
                 .drafter(docMaster.getDrafter())
                 .docId(docDetail.getDocId())

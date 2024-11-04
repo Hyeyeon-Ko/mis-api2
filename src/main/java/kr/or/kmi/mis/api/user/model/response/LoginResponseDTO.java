@@ -10,6 +10,7 @@ public class LoginResponseDTO {
     private String role;
     private String instCd;
     private String deptCd;
+    private String deptCode;
     private String teamCd;
     private String roleNm;
     private List<String> sidebarPermissions;

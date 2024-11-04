@@ -16,4 +16,6 @@ public class OrderRequestDTO {
     private String fromEmail;
     private String toEmail;
     private String password;
+    private String instCd;
+
 }

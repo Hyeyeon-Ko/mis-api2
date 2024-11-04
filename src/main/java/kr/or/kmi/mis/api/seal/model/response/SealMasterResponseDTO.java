@@ -18,8 +18,6 @@ public class SealMasterResponseDTO {
     private LocalDateTime respondDate;
     private String drafter;
     private String applyStatus;
-//    private String lastUpdtId;
-//    private String lastUpdtDate;
     private String docType;
 
     public SealMasterResponseDTO(String draftId, String instCd, String instNm, String title, LocalDateTime draftDate, LocalDateTime respondDate, String drafter, String applyStatus, String docType) {

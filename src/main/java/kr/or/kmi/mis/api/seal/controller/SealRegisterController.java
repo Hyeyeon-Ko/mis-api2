@@ -3,7 +3,6 @@ package kr.or.kmi.mis.api.seal.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
-import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.service.SealRegisterService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
@@ -27,16 +26,6 @@ public class SealRegisterController {
     public ApiResponse<?> createSealRegister(@RequestPart SealRegisterRequestDTO sealRegisterRequestDTO,
                                              @RequestPart(value = "sealImage", required = false) MultipartFile sealImage) throws IOException {
         sealRegisterService.registerSeal(sealRegisterRequestDTO, sealImage);
-        return ResponseWrapper.success();
-    }
-
-    @Operation(summary = "modify seal register", description = "등록한 인장 수정 시 사용")
-    @PostMapping(value = "/update")
-    public ApiResponse<?> updateSealRegister(@RequestParam String draftId,
-                                             @RequestPart SealUpdateRequestDTO sealUpdateRequestDTO,
-                                             @RequestPart(value = "sealImage", required = false) MultipartFile sealImage,
-                                             @RequestParam(value = "isFileDeleted", defaultValue = "false") boolean isFileDeleted) throws IOException {
-        sealRegisterService.updateSeal(draftId, sealUpdateRequestDTO, sealImage, isFileDeleted);
         return ResponseWrapper.success();
     }
 

@@ -11,6 +11,5 @@ import java.util.Optional;
 public interface DocDetailRepository extends JpaRepository<DocDetail, String> {
 
     Optional<DocDetail> findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(String division);
-    Optional<DocDetail> findByDraftIdAndDivision(String draftId, String division);
     List<DocDetail> findAllByDocIdNotNullAndDivision(String division);
 }

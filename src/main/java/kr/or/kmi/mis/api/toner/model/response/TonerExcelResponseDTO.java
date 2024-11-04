@@ -20,12 +20,11 @@ public class TonerExcelResponseDTO {
     private String manuDate;
     private String tonerNm;
     private String price;
-    private String color;
 
     @Builder
     public TonerExcelResponseDTO(String mngNum, String floor, String teamNm, String manager, String subManager,
                                  String location, String productNm, String modelNm, String sn, String company,
-                                 String manuDate, String tonerNm, String price, String color) {
+                                 String manuDate, String tonerNm, String price) {
         this.mngNum = mngNum;
         this.floor = floor;
         this.teamNm = teamNm;
@@ -39,10 +38,9 @@ public class TonerExcelResponseDTO {
         this.manuDate = manuDate;
         this.tonerNm = tonerNm;
         this.price = price;
-        this.color = color;
     }
 
-    public static TonerExcelResponseDTO of(TonerInfo tonerInfo) {
+    public static TonerExcelResponseDTO of(TonerInfo tonerInfo, String finalPrice) {
         return TonerExcelResponseDTO.builder()
                 .mngNum(tonerInfo.getMngNum())
                 .floor(tonerInfo.getFloor())
@@ -56,8 +54,7 @@ public class TonerExcelResponseDTO {
                 .company(tonerInfo.getCompany())
                 .manuDate(tonerInfo.getManuDate())
                 .tonerNm(tonerInfo.getTonerNm())
-                .price(tonerInfo.getPrice())
-                .color(tonerInfo.getColor())
+                .price(finalPrice)
                 .build();
     }
 }

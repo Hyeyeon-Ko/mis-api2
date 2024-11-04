@@ -41,7 +41,6 @@ public class TotalRegistrationListResponseDTO {
                 .manager(sealRegisterDetail.getManager())
                 .subManager(sealRegisterDetail.getSubManager())
                 .draftDate(sealRegisterDetail.getDraftDate())
-
                 .instCd(sealRegisterDetail.getInstCd())
                 .build();
     }

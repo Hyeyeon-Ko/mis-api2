@@ -4,8 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
-import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
 import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
@@ -46,9 +44,6 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
     @Column(length = 20)
     private String draftDate;
 
-    @Column
-    private LocalDateTime lastUpdateDate;
-
     @Column(length = 20)
     private String instCd;
 
@@ -56,7 +51,7 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
 
     @Builder
     public SealRegisterDetail(String draftId, String sealNm, String sealImage, String sealImageNm, String useDept, String purpose,
-                              String manager, String subManager, String draftDate, String instCd, LocalDateTime lastUpdateDate) {
+                              String manager, String subManager, String draftDate, String instCd) {
         this.draftId = draftId;
         this.sealNm = sealNm;
         this.sealImage = sealImage;
@@ -67,29 +62,9 @@ public class SealRegisterDetail extends BaseSystemFieldEntity {
         this.subManager = subManager;
         this.draftDate = draftDate;
         this.instCd = instCd;
-        this.lastUpdateDate = lastUpdateDate;
     }
 
-    public void update(SealRegisterRequestDTO sealRegisterRequestDTO, String newSealImage) {
-        this.sealNm = sealRegisterRequestDTO.getSealNm();
-        this.sealImage = newSealImage;
-        this.useDept = sealRegisterRequestDTO.getUseDept();
-        this.purpose = sealRegisterRequestDTO.getPurpose();
-        this.manager = sealRegisterRequestDTO.getManager();
-        this.subManager = sealRegisterRequestDTO.getSubManager();
-    }
-
-    public void updateFile(SealUpdateRequestDTO sealUpdateRequestDTO, String sealImage, String sealImageNm) {
-        this.sealNm = sealUpdateRequestDTO.getSealNm();
-        this.useDept = sealUpdateRequestDTO.getUseDept();
-        this.purpose = sealUpdateRequestDTO.getPurpose();
-        this.manager = sealUpdateRequestDTO.getManager();
-        this.subManager = sealUpdateRequestDTO.getSubManager();
-        this.sealImage = sealImage;
-        this.sealImageNm = sealImageNm;
-    }
-
-    public void deleteSeal(LocalDateTime deletedt) {
-        this.deletedt = deletedt;
+    public void deleteSeal(LocalDateTime deleteDt) {
+        this.deletedt = deleteDt;
     }
 }

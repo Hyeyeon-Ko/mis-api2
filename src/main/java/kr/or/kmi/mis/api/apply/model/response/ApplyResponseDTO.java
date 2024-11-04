@@ -4,6 +4,7 @@ import kr.or.kmi.mis.api.bcd.model.response.BcdMasterResponseDTO;
 import kr.or.kmi.mis.api.corpdoc.model.response.CorpDocMasterResponseDTO;
 import kr.or.kmi.mis.api.doc.model.response.DocMasterResponseDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealMasterResponseDTO;
+import kr.or.kmi.mis.api.toner.model.response.TonerMasterResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,16 +25,19 @@ public class ApplyResponseDTO {
     private Page<DocMasterResponseDTO> docMasterResponses;
     private Page<CorpDocMasterResponseDTO> corpDocMasterResponses;
     private Page<SealMasterResponseDTO> sealMasterResponses;
+    private Page<TonerMasterResponseDTO> tonerMasterResponses;
 
     public static ApplyResponseDTO of(Page<BcdMasterResponseDTO> bcdMasterResponses,
                                       Page<DocMasterResponseDTO> docMasterResponses,
                                       Page<CorpDocMasterResponseDTO> corpDocMasterResponses,
-                                      Page<SealMasterResponseDTO> sealMasterResponses) {
+                                      Page<SealMasterResponseDTO> sealMasterResponses,
+                                      Page<TonerMasterResponseDTO> tonerMasterResponses) {
         return ApplyResponseDTO.builder()
                 .bcdMasterResponses(bcdMasterResponses != null ? bcdMasterResponses : Page.empty())
                 .docMasterResponses(docMasterResponses != null ? docMasterResponses : Page.empty())
                 .corpDocMasterResponses(corpDocMasterResponses != null ? corpDocMasterResponses : Page.empty())
                 .sealMasterResponses(sealMasterResponses != null ? sealMasterResponses : Page.empty())
+                .tonerMasterResponses(tonerMasterResponses != null ? tonerMasterResponses : Page.empty())
                 .build();
     }
 

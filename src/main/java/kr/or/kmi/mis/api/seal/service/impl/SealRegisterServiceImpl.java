@@ -2,7 +2,6 @@ package kr.or.kmi.mis.api.seal.service.impl;
 
 import kr.or.kmi.mis.api.seal.model.entity.SealRegisterDetail;
 import kr.or.kmi.mis.api.seal.model.request.SealRegisterRequestDTO;
-import kr.or.kmi.mis.api.seal.model.request.SealUpdateRequestDTO;
 import kr.or.kmi.mis.api.seal.model.response.SealDetailResponseDTO;
 import kr.or.kmi.mis.api.seal.repository.SealRegisterDetailRepository;
 import kr.or.kmi.mis.api.seal.service.SealRegisterHistoryService;
@@ -66,30 +65,6 @@ public class SealRegisterServiceImpl implements SealRegisterService {
         } else {
             return stdDetail.getEtcItem1() + "0000000001";
         }
-    }
-
-    @Override
-    @Transactional
-    public void updateSeal(String draftId, SealUpdateRequestDTO sealUpdateRequestDTO, MultipartFile sealImage, boolean isFileDeleted) throws IOException {
-        SealRegisterDetail sealRegisterDetail = sealRegisterDetailRepository.findById(draftId)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        sealRegisterHistoryService.createSealRegisterHistory(sealRegisterDetail);
-
-        String base64EncodedImage;
-        String sealImageNm = sealRegisterDetail.getSealImageNm();
-        if (sealImage != null && !sealImage.isEmpty()) {
-            base64EncodedImage = ImageUtil.encodeImageToBase64(sealImage);
-            sealImageNm = sealImage.getOriginalFilename();
-        } else if (isFileDeleted) {
-            base64EncodedImage = null;
-            sealImageNm = null;
-        } else {
-            base64EncodedImage = sealRegisterDetail.getSealImage();
-        }
-
-        sealRegisterDetail.updateFile(sealUpdateRequestDTO, base64EncodedImage, sealImageNm);
-        sealRegisterDetailRepository.save(sealRegisterDetail);
     }
 
     @Override

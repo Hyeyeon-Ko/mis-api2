@@ -29,17 +29,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public SseEmitter subscribe(String userId) {
-        log.info("Subscribing to user {}", userId);
-        Long id = Long.parseLong(userId);
-        SseEmitter emitter = createEmitter(id);
-
-        sendToClient(id, "EventStream Created. [userId="+ id + "]", "sse 접속 성공");
-        return emitter;
-    }
-
-    @Override
-    @Transactional
     public <T> void customNotify(Long userId, T data, String comment) {
         log.info("Custom notify user {}", userId);
         sendToClient(userId, data, comment);

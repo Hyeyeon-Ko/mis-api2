@@ -34,7 +34,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -115,10 +118,10 @@ public class BcdServiceImpl implements BcdService {
             needsUpdate = true;
         }
 
-        StdGroup stdGroupC002 = findStdGroup("C002");
-        List<StdDetail> detailsC002 = findAllActiveDetails(stdGroupC002);
+        StdGroup stdGroupB005 = findStdGroup("B005");
+        List<StdDetail> detailsB005 = findAllActiveDetails(stdGroupB005);
 
-        if (detailsC002.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+        if (detailsB005.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
             needsUpdate = false;
         }
 
@@ -217,26 +220,41 @@ public class BcdServiceImpl implements BcdService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BcdMasterResponseDTO> getBcdApply(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword, String instCd, String userId) {
+    public List<BcdMasterResponseDTO> getBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
+
+        LocalDateTime startDate = convertStringToLocalDateTime(postSearchRequestDTO.getStartDate(), false);
+        LocalDateTime endDate = convertStringToLocalDateTime(postSearchRequestDTO.getEndDate(), true);
+
+        String searchType = postSearchRequestDTO.getSearchType();
+        String keyword = postSearchRequestDTO.getKeyword();
+
+        String instCd = applyRequestDTO.getInstCd();
+
         List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusNotAndDraftDateBetweenOrderByDraftDateDesc("F", startDate, endDate)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         return bcdMasters.stream()
-                .filter(bcdMaster -> isValidForSearch(bcdMaster, instCd, searchType, keyword, userId))
+                .filter(bcdMaster -> isValidForSearch(bcdMaster, instCd, searchType, keyword))
                 .map(bcdMaster -> BcdMasterResponseDTO.of(bcdMaster, instCd, stdBcdService.getInstNm(instCd)))
                 .collect(Collectors.toList());
     }
 
-    private boolean isValidForSearch(BcdMaster bcdMaster, String instCd, String searchType, String keyword, String userId) {
-        if (bcdMaster.getStatus().equals("A")) {
-            String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
-            int currentIndex = bcdMaster.getCurrentApproverIndex();
+    public LocalDateTime convertStringToLocalDateTime(String dateString, boolean isEndDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            if (currentIndex >= approverChainArray.length || !approverChainArray[currentIndex].equals(userId)) {
-                return false;
+        try {
+            LocalDate date = LocalDate.parse(dateString, formatter);
+            if (isEndDate) {
+                return date.atTime(23, 59, 59);
             }
+            return date.atStartOfDay();
+        } catch (DateTimeParseException e) {
+            System.out.println("Date parsing error: " + e.getMessage());
+            return null;
         }
+    }
 
+    private boolean isValidForSearch(BcdMaster bcdMaster, String instCd, String searchType, String keyword) {
         BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                 .orElseThrow(() -> new IllegalArgumentException("BcdDetail not found: " + bcdMaster.getDraftId()));
 

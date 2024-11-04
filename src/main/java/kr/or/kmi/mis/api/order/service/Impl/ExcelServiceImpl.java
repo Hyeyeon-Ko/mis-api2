@@ -42,33 +42,26 @@ public class ExcelServiceImpl implements ExcelService {
     public void downloadExcel(HttpServletResponse response, List<String> draftIds) throws IOException {
         byte[] excelData = generateExcel(draftIds);
 
-        try {
-            // HTTP 응답에 엑셀 파일 첨부
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-            response.setContentLength(excelData.length);
-            response.getOutputStream().write(excelData);
-            response.getOutputStream().flush();
-            response.getOutputStream().close();
-        } catch (Exception e) {
-            throw new IOException("Failed to send Excel file", e);
-        }
+        sendFileToResponse(response, excelData, "order_details.xlsx");
     }
 
     @Override
     public void downloadOrderExcel(HttpServletResponse response, List<String> draftIds, String instCd) throws IOException {
         byte[] excelData = generateOrderExcel(draftIds, instCd);
 
+        sendFileToResponse(response, excelData, "order_details.xlsx");
+    }
+
+    private void sendFileToResponse(HttpServletResponse response, byte[] fileData, String fileName) throws IOException {
         try {
-            // HTTP 응답에 엑셀 파일 첨부
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=order_details.xlsx");
-            response.setContentLength(excelData.length);
-            response.getOutputStream().write(excelData);
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            response.setContentLength(fileData.length);
+            response.getOutputStream().write(fileData);
             response.getOutputStream().flush();
             response.getOutputStream().close();
         } catch (Exception e) {
-            throw new IOException("Failed to send Excel file", e);
+            throw new IOException("Failed to send file: " + fileName, e);
         }
     }
 
@@ -274,7 +267,7 @@ public class ExcelServiceImpl implements ExcelService {
         CellStyle centeredStyle = createCenteredStyle(wb);
         CellStyle sumCenterStyle = createSumCenterStyle(wb);
 
-        // 첫 번째 테이블: 명함 발주내역
+        // 첫 번째 테이블: 명함 완료내역
         createOrderTitle(sheet, titleStyle);
         createOrderHeader(sheet, headerStyle);
 
@@ -383,7 +376,7 @@ public class ExcelServiceImpl implements ExcelService {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeight((short) 800);
         Cell cell = titleRow.createCell(0);
-        cell.setCellValue("명함 발주내역");
+        cell.setCellValue("명함 완료내역");
         cell.setCellStyle(style);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
     }

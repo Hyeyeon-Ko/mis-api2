@@ -7,16 +7,21 @@ import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
 import kr.or.kmi.mis.api.order.model.response.EmailSettingsResponseDTO;
 import kr.or.kmi.mis.api.order.model.response.OrderListResponseDTO;
 import kr.or.kmi.mis.api.order.service.OrderService;
-import kr.or.kmi.mis.cmm.model.request.PostPageRequest;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,17 +37,33 @@ public class OrderController {
         return ResponseWrapper.success(orderService.getOrderList(instCd));
     }
 
-    @Operation(summary = "get order list", description = "발주 목록 조회")
-    @GetMapping("/get")
-    public ApiResponse<Page<OrderListResponseDTO>> getOrderList2(String instCd, PostPageRequest pageRequest) {
-        return ResponseWrapper.success(orderService.getOrderList2(instCd, pageRequest.of()));
+    @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<?> orderRequest(
+            @RequestPart("orderRequest") OrderRequestDTO orderRequest,
+            @RequestPart(value = "previewFile", required = false) MultipartFile previewFile,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) throws IOException, MessagingException, GeneralSecurityException {
+
+        if (previewFile != null && !Objects.equals(previewFile.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+            throw new IllegalArgumentException("미리보기 파일은 엑셀(.xlsx) 형식이어야 합니다.");
+        }
+
+        orderService.orderRequest(orderRequest, previewFile, files);
+        return ResponseWrapper.success();
     }
 
-    @Operation(summary = "order request", description = "발주 요청 -> 이메일 전송")
-    @PostMapping
-    public ApiResponse<?> orderRequest(@RequestBody OrderRequestDTO orderRequest) throws IOException, MessagingException, GeneralSecurityException {
-        orderService.orderRequest(orderRequest);
-        return ResponseWrapper.success();
+    @Operation(summary = "preview order file", description = "발주 미리보기 파일 다운로드")
+    @GetMapping("/preview")
+    public ResponseEntity<byte[]> previewOrderFile(@RequestParam List<String> draftIds) throws IOException {
+        byte[] fileData = orderService.previewOrderFile(draftIds);
+
+        String encodedFileName = URLEncoder.encode("명함발주.xlsx", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileData);
     }
 
     @Operation(summary = "get email settings", description = "기본 이메일 설정 조회")
