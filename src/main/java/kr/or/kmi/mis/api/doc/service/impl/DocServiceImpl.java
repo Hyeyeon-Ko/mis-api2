@@ -106,30 +106,18 @@ public class DocServiceImpl implements DocService {
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
-        getReceiveCenterNm(receiveDocRequestDTO, file, draftId, docMaster);
+        getCenterNm(receiveDocRequestDTO, file, docMaster);
     }
 
     @Override
     @Transactional
     public void applyReceiveDocByLeader(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file) throws IOException {
-        String draftId = generateDraftId();
 
-        // 1. DocMaster 저장
-        DocMaster docMaster = receiveDocRequestDTO.toMasterEntity(draftId, "E");
-        docMaster.updateRespondDate(LocalDateTime.now());
-        docMaster = docMasterRepository.save(docMaster);
+        // 1. DocMaster, DocDetail 저장
+        DocMaster docMaster = saveDocMasterAndDetail(receiveDocRequestDTO);
 
-        // 2. DocDetail 저장
-        DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId());
-        DocDetail lastDocDetail = docDetailRepository
-                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
-        String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
-
-        docDetail.updateDocId(docId);
-        docDetailRepository.save(docDetail);
-
-        // 3. File 업로드
-        getReceiveCenterNm(receiveDocRequestDTO, file, draftId, docMaster);
+        // 2. File 업로드
+        getCenterNm(receiveDocRequestDTO, file, docMaster);
     }
 
     @Override
@@ -152,21 +140,34 @@ public class DocServiceImpl implements DocService {
         updateSidebarPermissionsIfNeeded(firstApproverId);
 
         // 3. File 업로드
-        getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
+        getCenterNm(sendDocRequestDTO, file, docMaster);
     }
 
     @Override
     @Transactional
     public void applySendDocByLeader(SendDocRequestDTO sendDocRequestDTO, MultipartFile file) throws IOException {
+
+        // 1. DocMaster, DocDetail 저장
+        DocMaster docMaster = saveDocMasterAndDetail(sendDocRequestDTO);
+
+        // 2. File 업로드
+        getCenterNm(sendDocRequestDTO, file, docMaster);
+    }
+
+    private <T> DocMaster saveDocMasterAndDetail(T requestDTO) {
         String draftId = generateDraftId();
 
         // 1. DocMaster 저장
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId,"E");
+        DocMaster docMaster = (requestDTO instanceof ReceiveDocRequestDTO)
+                ? ((ReceiveDocRequestDTO) requestDTO).toMasterEntity(draftId, "E")
+                : ((SendDocRequestDTO) requestDTO).toMasterEntity(draftId, "E");
         docMaster.updateRespondDate(LocalDateTime.now());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
+        DocDetail docDetail = (requestDTO instanceof ReceiveDocRequestDTO)
+                ? ((ReceiveDocRequestDTO) requestDTO).toDetailEntity(docMaster.getDraftId())
+                : ((SendDocRequestDTO) requestDTO).toDetailEntity(docMaster.getDraftId());
         DocDetail lastDocDetail = docDetailRepository
                 .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
         String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
@@ -174,38 +175,28 @@ public class DocServiceImpl implements DocService {
         docDetail.updateDocId(docId);
         docDetailRepository.save(docDetail);
 
-        // 3. File 업로드
-        getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
+        return docMaster;
     }
 
-
-    private void getReceiveCenterNm(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
+    private <T> void getCenterNm(T requestDTO, MultipartFile file, DocMaster docMaster) throws IOException {
         StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, receiveDocRequestDTO.getInstCd())
+
+        String instCd = (requestDTO instanceof ReceiveDocRequestDTO)
+                ? ((ReceiveDocRequestDTO) requestDTO).getInstCd()
+                : ((SendDocRequestDTO) requestDTO).getInstCd();
+
+        String division = (requestDTO instanceof ReceiveDocRequestDTO)
+                ? ((ReceiveDocRequestDTO) requestDTO).getDivision()
+                : ((SendDocRequestDTO) requestDTO).getDivision();
+
+        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, instCd)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), receiveDocRequestDTO.getDivision(), file);
+        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), division, file);
 
         FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
-                .fileName(savedFileInfo[0])
-                .filePath(savedFileInfo[1])
-                .build();
-
-        fileService.uploadFile(fileUploadRequestDTO);
-    }
-
-    private void getSendCenterNm(SendDocRequestDTO sendDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
-        StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail centerDetail = stdDetailRepository.findByGroupCdAndDetailCd(centerGroup, sendDocRequestDTO.getInstCd())
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        String[] savedFileInfo = handleFileUpload(docMaster.getDrafter(), centerDetail.getDetailNm(), sendDocRequestDTO.getDivision(), file);
-
-        FileUploadRequestDTO fileUploadRequestDTO = FileUploadRequestDTO.builder()
-                .draftId(draftId)
+                .draftId(docMaster.getDraftId())
                 .fileName(savedFileInfo[0])
                 .filePath(savedFileInfo[1])
                 .build();
@@ -281,7 +272,7 @@ public class DocServiceImpl implements DocService {
 
     private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
         StdGroup groupB002 = stdGroupRepository.findByGroupCd("B002")
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));;
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));
         StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
@@ -474,9 +465,7 @@ public class DocServiceImpl implements DocService {
         }
 
         return docMasters.stream()
-                .filter(docMaster -> {
-                    return SearchUtils.matchesSearchCriteria(searchType,keyword, docMaster.getTitle(), docMaster.getDrafter());
-                })
+                .filter(docMaster -> SearchUtils.matchesSearchCriteria(searchType,keyword, docMaster.getTitle(), docMaster.getDrafter()))
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
                             .orElseThrow(() -> new IllegalArgumentException("Division Not Found"));
