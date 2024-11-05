@@ -32,6 +32,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -43,6 +44,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import utils.SearchUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -71,6 +73,7 @@ public class DocServiceImpl implements DocService {
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
+    private final StdGroupService stdGroupService;
 
     private final SftpClient sftpClient;
     private final FileDetailRepository fileDetailRepository;
@@ -277,21 +280,21 @@ public class DocServiceImpl implements DocService {
     }
 
     private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
-        StdGroup groupB002 = findStdGroup("B002");
+        StdGroup groupB002 = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));;
         StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
         List<String> allowedValues = Arrays.asList("D", "D-1", "D-2");
 
-        if (!allowedValues.contains(detailB002.getEtcItem1()) && !allowedValues.contains(detailB002.getEtcItem3()) && !allowedValues.contains(detailB002.getEtcItem5())) {
+        if (!allowedValues.contains(detailB002.getEtcItem1()) &&
+                !allowedValues.contains(detailB002.getEtcItem3()) &&
+                !allowedValues.contains(detailB002.getEtcItem5())) {
             detailB002.updateEtcItem3("D-2");
             needsUpdate = true;
         }
 
-        StdGroup stdGroupB005 = findStdGroup("B005");
-        List<StdDetail> detailsB005 = findAllActiveDetails(stdGroupB005);
-
-        if (detailsB005.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+        if (stdGroupService.findStdGroupAndCheckFirstApprover("B005", firstApproverId)) {
             needsUpdate = false;
         }
 
@@ -300,19 +303,9 @@ public class DocServiceImpl implements DocService {
         }
     }
 
-    private StdGroup findStdGroup(String groupCd) {
-        return stdGroupRepository.findByGroupCd(groupCd)
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
-    }
-
     private StdDetail findStdDetail(StdGroup group, String detailCd) {
         return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
-    }
-
-    private List<StdDetail> findAllActiveDetails(StdGroup group) {
-        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
-                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
     }
 
     @Override
@@ -482,16 +475,7 @@ public class DocServiceImpl implements DocService {
 
         return docMasters.stream()
                 .filter(docMaster -> {
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" ->
-                                    docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
-                            case "제목" -> docMaster.getTitle().contains(keyword);
-                            case "신청자" -> docMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
+                    return SearchUtils.matchesSearchCriteria(searchType,keyword, docMaster.getTitle(), docMaster.getDrafter());
                 })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())

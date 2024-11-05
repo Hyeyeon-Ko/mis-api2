@@ -8,9 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface AuthorityService {
 
-    /* 관리자 목록 불러오기 */
-//    List<AuthorityListResponseDTO> getAuthorityList();
-
     /* 해당 사번의 기준자료 권한 불러오기 */
     boolean hasStandardDataManagementAuthority();
 
@@ -26,7 +23,9 @@ public interface AuthorityService {
     /* 권한 취소 */
     void deleteAdmin(Long authId);
 
+    /* 특정 관리자 상세정보 조회 */
     AuthorityResponseDTO getAdmin(Long authId);
 
+    /* 모든 권한 목록 조회 */
     Page<AuthorityResponseDTO2> getAuthorityList2(Pageable page);
 }
