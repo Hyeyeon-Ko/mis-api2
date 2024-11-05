@@ -58,7 +58,7 @@ public class StdGroupServiceImpl implements StdGroupService {
     @Override
     public boolean findStdGroupAndCheckFirstApprover(String groupCd, String firstApproverId) {
         StdGroup group = stdGroupRepository.findByGroupCd(groupCd)
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));;
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
         List<StdDetail> details = findAllActiveDetails(group);
 
         return details.stream()
