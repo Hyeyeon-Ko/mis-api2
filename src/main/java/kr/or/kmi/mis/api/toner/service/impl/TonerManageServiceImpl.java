@@ -40,50 +40,11 @@ public class TonerManageServiceImpl implements TonerManageService {
     private final TonerInfoRepository tonerInfoRepository;
 
     /**
-     * 토너 관리표의 항목들을 TonerExcelResponseDTO 리스트로 반환.
+     * 각 센터의 토너 관리표 항목들을 TonerExcelResponseDTO 리스트로 반환.
      * @return TonerExcelResponseDTO의 리스트
      */
     @Override
     @Transactional(readOnly = true)
-    public List<TonerExcelResponseDTO> getTonerList(String instCd) {
-
-        // 1. tonerInfoList 조회
-        List<TonerInfo> tonerInfoList = tonerInfoRepository.findAllByInstCd(instCd);
-
-        // 2. 모든 TonerPrice 조회
-        List<TonerPrice> tonerPriceList = tonerPriceRepository.findAll();
-
-        // TonerPrice 목록을 Map으로 변환
-        Map<String, TonerPrice> tonerPriceMap = tonerPriceList.stream()
-                .collect(Collectors.toMap(TonerPrice::getTonerNm, Function.identity()));
-
-        // 3. TonerPrice가 없는 경우 null 처리
-        return tonerInfoList.stream()
-                .map(tonerInfo -> {
-                    String[] tonerNmParts = tonerInfo.getTonerNm().split(" / ");
-
-                    // 각 토너 이름에 맞는 가격을 찾고, 없으면 null로 처리
-                    List<String> prices = Arrays.stream(tonerNmParts)
-                            .map(String::trim)
-                            .map(tonerPriceMap::get)
-                            .map(tonerPrice -> tonerPrice != null ? tonerPrice.getPrice() : null)
-                            .collect(Collectors.toList());
-
-                    // 가격이 전부 동일한지 확인
-                    boolean allPricesSame = prices.stream().distinct().count() == 1;
-
-                    // 가격이 동일하다면 하나의 가격만 사용, 아니면 콤마로 연결된 가격 반환
-                    String finalPrice = allPricesSame ? prices.getFirst() : String.join(" / ", prices);
-
-                    return TonerExcelResponseDTO.of(tonerInfo, finalPrice);
-                })
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 각 센터의 토너 관리표 항목들을 TonerExcelResponseDTO 리스트로 반환.
-     * @return TonerExcelResponseDTO의 리스트
-     */
     public List<TonerExcelResponseDTO> getCenterTonerList(String instCd) {
 
         // 1. TonerInfo 리스트 조회
