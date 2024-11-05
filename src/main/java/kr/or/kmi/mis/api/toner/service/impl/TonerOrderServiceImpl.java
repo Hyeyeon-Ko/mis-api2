@@ -1,7 +1,5 @@
 package kr.or.kmi.mis.api.toner.service.impl;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.order.model.request.OrderRequestDTO;
@@ -17,17 +15,13 @@ import kr.or.kmi.mis.api.toner.repository.TonerDetailRepository;
 import kr.or.kmi.mis.api.toner.repository.TonerMasterRepository;
 import kr.or.kmi.mis.api.toner.service.TonerExcelService;
 import kr.or.kmi.mis.api.toner.service.TonerOrderService;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +30,7 @@ import java.util.stream.Collectors;
 public class TonerOrderServiceImpl implements TonerOrderService {
 
     private final TonerExcelService tonerExcelService;
+    private final EmailService emailService;
     private final NotificationSendService notificationSendService;
     private final TonerMasterRepository tonerMasterRepository;
     private final TonerDetailRepository tonerDetailRepository;
@@ -73,29 +68,26 @@ public class TonerOrderServiceImpl implements TonerOrderService {
 
     /**
      * 발주 요청 -> 이메일 전송
-     * @param orderRequestDTO
-     * @throws IOException
-     * @throws MessagingException
-     * @throws GeneralSecurityException
      */
     @Override
     @Transactional
-    public void orderToner(OrderRequestDTO orderRequestDTO) throws IOException, MessagingException, GeneralSecurityException {
+    public void orderToner(OrderRequestDTO orderRequestDTO) throws IOException {
 
         // 1. 엑셀 데이터 생성
         byte[] excelData = tonerExcelService.generateOrderExcel(orderRequestDTO.getDraftIds(), orderRequestDTO.getInstCd());
 
         // 2. 첨부 파일과 함께 이메일 전송 (동적 SMTP 설정 사용)
-        sendEmailWithDynamicCredentials(
+        emailService.sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
                 orderRequestDTO.getFromEmail(),
                 orderRequestDTO.getPassword(),
                 orderRequestDTO.getFromEmail(),
                 orderRequestDTO.getToEmail(),
-                excelData,
                 orderRequestDTO.getEmailSubject(),
                 orderRequestDTO.getEmailBody(),
+                excelData,
+                null,
                 orderRequestDTO.getFileName()
         );
 
@@ -124,38 +116,5 @@ public class TonerOrderServiceImpl implements TonerOrderService {
                 .orElseThrow(() -> new EntityNotFoundException("002"));
 
         return new EmailSettingsResponseDTO(stdDetail.getEtcItem2());
-    }
-
-    private void sendEmailWithDynamicCredentials(String smtpHost, int smtpPort, String username, String password, String fromEmail, String toEmail, byte[] excelData, String subject, String body, String fileName) throws MessagingException {
-
-        JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
-        mailSenderImpl.setHost(smtpHost);
-        mailSenderImpl.setPort(smtpPort);
-        mailSenderImpl.setUsername(username); // 사용자가 입력한 이메일 ID
-        mailSenderImpl.setPassword(password); // 사용자가 입력한 이메일 비밀번호
-
-        Properties props = mailSenderImpl.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
-        props.put("mail.smtp.ssl.trust", smtpHost);
-        props.put("mail.smtp.ssl.enable", "true");
-
-        MimeMessage message = mailSenderImpl.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        // 이메일 설정
-        helper.setFrom(fromEmail);
-        helper.setTo(toEmail);
-        helper.setSubject(subject);
-        helper.setText(body);
-
-        // 엑셀 파일 첨부
-        String fileFullName = fileName + ".xlsx";
-        helper.addAttachment(fileFullName, new ByteArrayResource(excelData));
-
-        // 이메일 전송
-        mailSenderImpl.send(message);
     }
 }

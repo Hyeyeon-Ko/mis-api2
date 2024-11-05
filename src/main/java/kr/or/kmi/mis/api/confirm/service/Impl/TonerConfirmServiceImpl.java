@@ -58,7 +58,6 @@ public class TonerConfirmServiceImpl implements TonerConfirmService {
 
     /**
      * 승인 알림 전송.
-     * @param tonerMasterList
      */
     private void sendApprovalNotifications(List<TonerMaster> tonerMasterList) {
         for (TonerMaster tonerMaster : tonerMasterList) {
@@ -90,7 +89,6 @@ public class TonerConfirmServiceImpl implements TonerConfirmService {
 
     /**
      * 반려 알림 전송.
-     * @param tonerMasterList
      */
     private void sendRejectionNotifications(List<TonerMaster> tonerMasterList) {
         for (TonerMaster tonerMaster : tonerMasterList) {

@@ -213,7 +213,7 @@ public class ApplyServiceImpl implements ApplyService {
                 break;
         }
 
-        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists, tonerApplyLists);
+        return PendingResponseDTO.of(bcdApplyLists, docApplyLists, corpDocApplyLists, sealApplyLists, null);
     }
 
     @Override

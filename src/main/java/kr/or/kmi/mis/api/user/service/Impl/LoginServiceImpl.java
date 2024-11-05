@@ -35,9 +35,6 @@ public class LoginServiceImpl implements LoginService {
     @Value("${external.login.url}")
     private String externalLoginUrl;
 
-    @Value("${external.orgChart.url}")
-    private String externalOrgChartUrl;
-
     @Override
     @Transactional
     public String login(LoginRequestDTO loginRequestDTO) {
@@ -135,8 +132,6 @@ public class LoginServiceImpl implements LoginService {
                 .orElseThrow(() -> new IllegalArgumentException("User ID not found in org chart data"));
 
         responseDTO.setDeptCode(matchedDeptCode);
-
-        System.out.println("responseDTO = " + responseDTO);
 
         return responseDTO;
 

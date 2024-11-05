@@ -41,7 +41,6 @@ public class TonerManageServiceImpl implements TonerManageService {
 
     /**
      * 토너 관리표의 항목들을 TonerExcelResponseDTO 리스트로 반환.
-     * @param instCd
      * @return TonerExcelResponseDTO의 리스트
      */
     @Override
@@ -83,7 +82,6 @@ public class TonerManageServiceImpl implements TonerManageService {
 
     /**
      * 각 센터의 토너 관리표 항목들을 TonerExcelResponseDTO 리스트로 반환.
-     * @param instCd
      * @return TonerExcelResponseDTO의 리스트
      */
     public List<TonerExcelResponseDTO> getCenterTonerList(String instCd) {

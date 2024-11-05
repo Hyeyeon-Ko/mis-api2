@@ -128,11 +128,9 @@ public class RentalServiceImpl implements RentalService {
     @Override
     @Transactional
     public void finishRentalInfo(List<Long> detailIds) {
-        detailIds.forEach(detailId -> {
-            rentalDetailRepository.findById(detailId).ifPresent(rentalDetail -> {
-                rentalDetail.updateStatus("E");
-                rentalDetailRepository.save(rentalDetail);
-            });
-        });
+        detailIds.forEach(detailId -> rentalDetailRepository.findById(detailId).ifPresent(rentalDetail -> {
+            rentalDetail.updateStatus("E");
+            rentalDetailRepository.save(rentalDetail);
+        }));
     }
 }
