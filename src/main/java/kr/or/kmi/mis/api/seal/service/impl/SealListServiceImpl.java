@@ -237,9 +237,7 @@ public class SealListServiceImpl implements SealListService {
         }
 
         return sealMasters.stream()
-                .filter(sealMaster -> {
-                    return SearchUtils.matchesSearchCriteria(searchType,keyword, sealMaster.getTitle(), sealMaster.getDrafter());
-                })
+                .filter(sealMaster -> SearchUtils.matchesSearchCriteria(searchType,keyword, sealMaster.getTitle(), sealMaster.getDrafter()))
                 .map(sealMaster -> {
                     SealMasterResponseDTO sealMasterResponseDTO = SealMasterResponseDTO.of(sealMaster);
                     String instNm = stdBcdService.getInstNm(sealMaster.getInstCd());

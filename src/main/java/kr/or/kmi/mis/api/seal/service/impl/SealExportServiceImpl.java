@@ -161,8 +161,8 @@ public class SealExportServiceImpl implements SealExportService {
         }
 
         if (file != null && !file.isEmpty()) {
+            String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
             if (fileHistory != null && fileHistory.getFilePath() != null) {
-                String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     sftpClient.deleteFile(fileHistory.getFileName(), exportRemoteDirectory);
                     String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
@@ -172,7 +172,6 @@ public class SealExportServiceImpl implements SealExportService {
                     throw new IOException("SFTP 기존 파일 삭제 실패", e);
                 }
             } else {
-                String filename = LocalDateTime.now().toLocalDate() + "_" + sealMaster.getDrafter() + "_" + file.getOriginalFilename();
                 try {
                     String newFileName = sftpClient.uploadFile(file, filename, exportRemoteDirectory);
                     String newFilePath = exportRemoteDirectory + "/" + newFileName;
