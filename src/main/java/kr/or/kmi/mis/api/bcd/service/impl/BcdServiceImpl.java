@@ -279,16 +279,6 @@ public class BcdServiceImpl implements BcdService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
-        List<BcdMyResponseDTO> results = new ArrayList<>();
-
-        results.addAll(this.getMyMasterList(startDate, endDate, userId));
-        results.addAll(this.getAnotherMasterList(startDate, endDate, userId));
-        return results;
-    }
-
-    @Override
     public Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
         return bcdApplyQueryRepository.getMyBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
     }
@@ -301,79 +291,12 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
-    /**
-     * 2-1. 내가 신청한 명함신청 내역
-     * @param userId
-     * @return List<BcdMyResponseDTO>
-     */
-    public List<BcdMyResponseDTO> getMyMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        return bcdMasters.stream()
-                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
-                .toList();
-    }
-
     public List<BcdMyResponseDTO> getMyMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return bcdApplyQueryRepository.getMyBcdList(applyRequestDTO, postSearchRequestDTO);
     }
 
-    /**
-     * 2-2. 타인이 신청한 나의 명함신청 내역
-     * @param userId
-     * @return List<BcdMyResponseDTO>
-     */
-    public List<BcdMyResponseDTO> getAnotherMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
-        // 2-2. 타인이 신청해준 나의 명함신청 내역
-        List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
-
-        return bcdDetails.stream()
-            .flatMap(bcdDetail -> {
-                // startDate, endDate 사이에 있는 BcdMaster 조회
-                List<BcdMaster> newBcdMasters = bcdMasterRepository
-                        .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
-                        .orElse(new ArrayList<>());
-
-                return newBcdMasters.stream()
-                        .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
-            }).toList();
-    }
-
     public List<BcdMyResponseDTO> getAnotherMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return bcdApplyQueryRepository.getAnotherMasterList(applyRequestDTO, postSearchRequestDTO);
-    }
-
-    @Override
-    public List<BcdPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
-
-        // 1. 승인대기 상태인 신청목록 모두 호출
-        //    - 기안일자 기준 내림차순 정렬
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
-
-        // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
-        return bcdMasters.stream()
-                .filter(bcdMaster -> {
-                    String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
-                    int currentIndex = bcdMaster.getCurrentApproverIndex();
-
-                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
-                })
-                .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
-
-                    // 3. instCd가 파라미터 instCd와 같은 경우만 처리
-                    if (bcdDetail.getInstCd().equals(instCd)) {
-                        BcdPendingResponseDTO result = BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
-                        result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
-                        return result;
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .toList();
     }
 
     @Override
@@ -397,7 +320,7 @@ public class BcdServiceImpl implements BcdService {
      * 2-1. 내가 신청한 나의 명함신청 승인대기 내역
      *    - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.
      *    - 기안 일자를 기준으로 내림차순 정렬한다.
-     * @param userId
+     * @param userId userId
      * @return List<BcdPendingResponseDTO>
      */
     public List<BcdPendingResponseDTO> getMyPndMasterList(String userId) {
@@ -415,7 +338,7 @@ public class BcdServiceImpl implements BcdService {
      * 2-2. 타인이 신청해준 나의 명함신청 승인대기 내역
      *    - userId(기안자 사번)로 타인이 신청해준 나의 명함신청 승인대기 내역을 불러온다.
      *    - 기안 일자를 기준으로 내림차순 정렬한다.
-     * @param userId
+     * @param userId userId
      * @return List<BcdPendingResponseDTO>
      */
     public List<BcdPendingResponseDTO> getAnotherPndMasterList(String userId) {

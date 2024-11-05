@@ -59,7 +59,7 @@ public class BcdController {
 
     @Operation(summary = "send Receipt Notification", description = "관리자 > 전체 신청내역 > 명함 수령 요청 알림 전송")
     @PostMapping("/noti")
-    public ApiResponse<?> sendReceiptNoti(@RequestBody BcdNotificationRequestDTO request) {
+    public ApiResponse<?> sendReceiptNotification(@RequestBody BcdNotificationRequestDTO request) {
         notificationSendService.sendBcdReceipt(request.getDraftIds());
         return ResponseWrapper.success();
     }
