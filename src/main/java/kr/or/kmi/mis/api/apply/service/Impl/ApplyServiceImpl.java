@@ -128,7 +128,6 @@ public class ApplyServiceImpl implements ApplyService {
      */
     @Override
     public MyApplyResponseDTO getAllMyApplyList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable pageable) {
-        System.out.println("documentType = " + applyRequestDTO.getDocumentType());
 
         Page<BcdMyResponseDTO> myBcdApplyList = null;
         Page<DocMyResponseDTO> myDocApplyList = null;
