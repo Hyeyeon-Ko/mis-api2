@@ -46,19 +46,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
 
                     return details.stream()
                             .map(detail -> DocstorageResponseDTO.builder()
-                                    .draftId(master.getDraftId())
-                                    .teamNm(detail.getTeamNm())
-                                    .docId(detail.getDocId())
-                                    .location(detail.getLocation())
-                                    .docNm(detail.getDocNm())
-                                    .manager(detail.getManager())
-                                    .subManager(detail.getSubManager())
-                                    .storageYear(detail.getStorageYear())
-                                    .createDate(detail.getCreateDate())
-                                    .transferDate(detail.getTransferDate())
-                                    .tsdNum(detail.getTsdNum())
-                                    .disposalDate(detail.getDisposalDate())
-                                    .dpdraftNum(detail.getDpdNum())
+                                    .docStorageDetail(detail)
                                     .type(master.getType())
                                     .build());
                 })
@@ -109,22 +97,8 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                         .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
                 DocstorageResponseDTO responseDTO = DocstorageResponseDTO.builder()
-                        .detailId(docstorageDetail.getDetailId())
-                        .draftId(docstorageDetail.getDraftId())
-                        .teamNm(docstorageDetail.getTeamNm())
-                        .docId(docstorageDetail.getDocId())
-                        .location(docstorageDetail.getLocation())
-                        .docNm(docstorageDetail.getDocNm())
-                        .manager(docstorageDetail.getManager())
-                        .subManager(docstorageDetail.getSubManager())
-                        .storageYear(docstorageDetail.getStorageYear())
-                        .createDate(docstorageDetail.getCreateDate())
-                        .transferDate(docstorageDetail.getTransferDate())
-                        .tsdNum(docstorageDetail.getTsdNum())
-                        .disposalDate(docstorageDetail.getDisposalDate())
-                        .dpdraftNum(docstorageDetail.getDpdNum())
+                        .docStorageDetail(docstorageDetail)
                         .type(docStorageMaster.getType())
-                        .status(docstorageDetail.getStatus())
                         .build();
 
                 responseList.add(responseDTO);
@@ -255,22 +229,8 @@ public class DocstorageListServiceImpl implements DocstorageListService {
                     }
 
                     return DocstorageResponseDTO.builder()
-                            .detailId(docStorageDetail.getDetailId())
-                            .draftId(docStorageDetail.getDraftId())
-                            .teamNm(docStorageDetail.getTeamNm())
-                            .docId(docStorageDetail.getDocId())
-                            .location(docStorageDetail.getLocation())
-                            .docNm(docStorageDetail.getDocNm())
-                            .manager(docStorageDetail.getManager())
-                            .subManager(docStorageDetail.getSubManager())
-                            .storageYear(docStorageDetail.getStorageYear())
-                            .createDate(docStorageDetail.getCreateDate())
-                            .transferDate(docStorageDetail.getTransferDate())
-                            .tsdNum(docStorageDetail.getTsdNum())
-                            .disposalDate(docStorageDetail.getDisposalDate())
-                            .dpdraftNum(docStorageDetail.getDpdNum())
+                            .docStorageDetail(docStorageDetail)
                             .type(docStorageMaster != null ? docStorageMaster.getType() : null)
-                            .status(docStorageDetail.getStatus())
                             .build();
                 })
                 .toList();
@@ -280,21 +240,7 @@ public class DocstorageListServiceImpl implements DocstorageListService {
     private List<DocstorageResponseDTO> convertToResponseDTOListUsingDetailStatus(List<DocStorageDetail> docStorageDetailList) {
         return docStorageDetailList.stream()
                 .map(docStorageDetail -> DocstorageResponseDTO.builder()
-                        .detailId(docStorageDetail.getDetailId())
-                        .draftId(docStorageDetail.getDraftId())
-                        .teamNm(docStorageDetail.getTeamNm())
-                        .docId(docStorageDetail.getDocId())
-                        .location(docStorageDetail.getLocation())
-                        .docNm(docStorageDetail.getDocNm())
-                        .manager(docStorageDetail.getManager())
-                        .subManager(docStorageDetail.getSubManager())
-                        .storageYear(docStorageDetail.getStorageYear())
-                        .createDate(docStorageDetail.getCreateDate())
-                        .transferDate(docStorageDetail.getTransferDate())
-                        .tsdNum(docStorageDetail.getTsdNum())
-                        .disposalDate(docStorageDetail.getDisposalDate())
-                        .dpdraftNum(docStorageDetail.getDpdNum())
-                        .status(docStorageDetail.getStatus())
+                        .docStorageDetail(docStorageDetail)
                         .build())
                 .toList();
     }

@@ -128,13 +128,11 @@ public class DocStorageServiceImpl implements DocStorageService {
 
         docStorageMasterRepository.save(docStorageApplyRequestDTO.toMasterEntity(draftId, drafter, drafterId));
 
-        docStorageApplyRequestDTO.getDetailIds().forEach(detailId -> {
-            docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
-                docStorageDetail.updateStatus("A");
-                docStorageDetail.updateDraftId(draftId);
-                docStorageDetailRepository.save(docStorageDetail);
-            });
-        });
+        docStorageApplyRequestDTO.getDetailIds().forEach(detailId -> docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
+            docStorageDetail.updateStatus("A");
+            docStorageDetail.updateDraftId(draftId);
+            docStorageDetailRepository.save(docStorageDetail);
+        }));
     }
 
     private String generateDraftId() {
@@ -157,7 +155,7 @@ public class DocStorageServiceImpl implements DocStorageService {
     @Override
     @Transactional
     public void approveStorage(List<String> draftIds) {
-        draftIds.forEach(draftId -> {
+        for (String draftId : draftIds) {
             docStorageMasterRepository.findById(draftId).ifPresent(docStorageMaster -> {
 
                 String currentType = docStorageMaster.getType();
@@ -180,17 +178,15 @@ public class DocStorageServiceImpl implements DocStorageService {
                     docStorageDetailRepository.save(docStorageDetail);
                 });
             });
-        });
+        }
     }
 
     @Override
     @Transactional
     public void finishStorage(List<Long> detailIds) {
-        detailIds.forEach(detailId -> {
-            docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
-                docStorageDetail.updateStatus("E");
-                docStorageDetailRepository.save(docStorageDetail);
-            });
-        });
+        detailIds.forEach(detailId -> docStorageDetailRepository.findById(detailId).ifPresent(docStorageDetail -> {
+            docStorageDetail.updateStatus("E");
+            docStorageDetailRepository.save(docStorageDetail);
+        }));
     }
 }

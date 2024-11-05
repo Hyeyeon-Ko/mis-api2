@@ -1,7 +1,7 @@
 package kr.or.kmi.mis.api.docstorage.domain.response;
 
-import lombok.Builder;
-import lombok.Data;
+import kr.or.kmi.mis.api.docstorage.domain.entity.DocStorageDetail;
+import lombok.*;
 
 @Data
 public class DocstorageResponseDTO {
@@ -24,24 +24,22 @@ public class DocstorageResponseDTO {
     private String status;
 
     @Builder
-    public DocstorageResponseDTO(Long detailId, String draftId, String teamNm, String docId, String location, String docNm, String manager, String subManager,
-                                 String storageYear, String createDate, String transferDate, String tsdNum, String disposalDate, String dpdraftNum,
-                                 String type, String status) {
-        this.detailId = detailId;
-        this.draftId = draftId;
-        this.teamNm = teamNm;
-        this.docId = docId;
-        this.location = location;
-        this.docNm = docNm;
-        this.manager = manager;
-        this.subManager = subManager;
-        this.storageYear = storageYear;
-        this.createDate = createDate;
-        this.transferDate = transferDate;
-        this.tsdNum = tsdNum;
-        this.disposalDate = disposalDate;
-        this.dpdraftNum = dpdraftNum;
+    public DocstorageResponseDTO(DocStorageDetail docStorageDetail, String type) {
+        this.detailId = docStorageDetail.getDetailId();
+        this.draftId = docStorageDetail.getDraftId();
+        this.teamNm = docStorageDetail.getTeamNm();
+        this.docId = docStorageDetail.getDocId();
+        this.location = docStorageDetail.getLocation();
+        this.docNm = docStorageDetail.getDocNm();
+        this.manager = docStorageDetail.getManager();
+        this.subManager = docStorageDetail.getSubManager();
+        this.storageYear = docStorageDetail.getStorageYear();
+        this.createDate = docStorageDetail.getCreateDate();
+        this.transferDate = docStorageDetail.getTransferDate();
+        this.tsdNum = docStorageDetail.getTsdNum();
+        this.disposalDate = docStorageDetail.getDisposalDate();
+        this.dpdraftNum = docStorageDetail.getDpdNum();
         this.type = type;
-        this.status = status;
+        this.status = docStorageDetail.getStatus();
     }
 }
