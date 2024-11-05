@@ -34,17 +34,12 @@ public class RentalListServiceImpl implements RentalListService {
 
     @Override
     public List<RentalResponseDTO> getCenterRentalList(String instCd) {
+
         // instCd에 해당하는 모든 렌탈 내역을 가져옴
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCd(instCd)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        LocalDateTime lastUpdateDate = rentalDetailList.stream()
-                .flatMap(detail -> Stream.of(detail.getUpdtDt(), detail.getRgstDt()))
-                .filter(Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
-
-        String lastUpdtDate = (lastUpdateDate != null) ? lastUpdateDate.toLocalDate().toString() : null;
+        String lastUpdtDate = getLastUpdateDateAsString(rentalDetailList);
 
         return rentalDetailList.stream()
                 .map(detail -> RentalResponseDTO.of(detail, lastUpdtDate))
@@ -56,17 +51,21 @@ public class RentalListServiceImpl implements RentalListService {
         List<RentalDetail> rentalDetailList = rentalDetailRepository.findByInstCdAndStatus(instCd, status)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        String lastUpdtDate = getLastUpdateDateAsString(rentalDetailList);
+
+        return rentalDetailList.stream()
+                .map(detail -> RentalResponseDTO.of(detail, lastUpdtDate))
+                .collect(Collectors.toList());
+    }
+
+    private String getLastUpdateDateAsString(List<RentalDetail> rentalDetailList) {
         LocalDateTime lastUpdateDate = rentalDetailList.stream()
                 .flatMap(detail -> Stream.of(detail.getUpdtDt(), detail.getRgstDt()))
                 .filter(Objects::nonNull)
                 .max(LocalDateTime::compareTo)
                 .orElse(null);
 
-        String lastUpdtDate = (lastUpdateDate != null) ? lastUpdateDate.toLocalDate().toString() : null;
-
-        return rentalDetailList.stream()
-                .map(detail -> RentalResponseDTO.of(detail, lastUpdtDate))
-                .collect(Collectors.toList());
+        return (lastUpdateDate != null) ? lastUpdateDate.toLocalDate().toString() : null;
     }
 
     @Override
