@@ -85,14 +85,22 @@ public class BcdServiceImpl implements BcdService {
         updateSidebarPermissionsIfNeeded(firstApproverId);
 
         // 3. 승인자 메일 전송
-        // TODO: 발신자 이메일 수정하기.
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         emailService.sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
-                "2024060034@kmi.or.kr",
-                "^Gc4j#9J",
-                "2024060034@kmi.or.kr",
-                "2024060034@kmi.or.kr",
+                // TODO: 공용 발신자 이름 수정하기.
+                stdDetail.getEtcItem2(),
+                // TODO: 공용 발신자 비밀번호 수정하기.
+                stdDetail.getEtcItem3(),
+                // TODO: 공용 발신자 이메일 수정하기.
+                stdDetail.getEtcItem2(),
+                // TODO: 수신자 이메일 수정하기. -> infoDetail.getEmail()
+                stdDetail.getEtcItem2(),
                 "승인 요청이 들어왔습니다.",
                 "명함 관련 신청이 들어왔습니다. 승인 또는 반려를 완료해주시기 바랍니다.",
                 null,
@@ -386,18 +394,25 @@ public class BcdServiceImpl implements BcdService {
         notificationSendService.sendBcdReceipt(draftIds);
 
         // 메일 전송
-        // TODO: 발신자 이메일 수정하기.
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         bcdDetails.forEach(bcdDetail -> {
             String recipientEmail = bcdDetail.getEmail();
-            System.out.println("recipientEmail = " + recipientEmail);
             try {
                 emailService.sendEmailWithDynamicCredentials(
                         "smtp.sirteam.net",
                         465,
-                        "2024060034@kmi.or.kr",
-                        "^Gc4j#9J",
-                        "2024060034@kmi.or.kr",
-                        "2024060034@kmi.or.kr",
+                        // TODO: 공용 발신자 이름 수정하기.
+                        stdDetail.getEtcItem2(),
+                        // TODO: 공용 발신자 비밀번호 수정하기.
+                        stdDetail.getEtcItem3(),
+                        // TODO: 공용 발신자 이메일 수정하기.
+                        stdDetail.getEtcItem2(),
+                        // TODO: 수신자 이메일 수정하기. -> recipientEmail
+                        stdDetail.getEtcItem2(),
                         "명함이 도착하였습니다.",
                         "총무팀/경영지원팀으로 명함이 도착하였습니다. 직접 오셔서 수령해주시기 바랍니다.",
                         null,

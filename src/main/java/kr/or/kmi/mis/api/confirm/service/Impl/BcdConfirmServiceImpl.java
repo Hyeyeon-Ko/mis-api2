@@ -110,19 +110,25 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         String[] approverArray = bcdMaster.getApproverChain().split(", ");
 
         // 마지막 결재자에게 메일 전송
-        // TODO: 발신자 이메일 수정하기.
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         if (approverArray.length == 3 && bcdMaster.getCurrentApproverIndex() == 1) {
             String lastApprover = approverArray[approverArray.length - 1];
-
-            System.out.println("lastApprover = " + lastApprover);
 
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
-                    "2024060034@kmi.or.kr",
-                    "^Gc4j#9J",
-                    "2024060034@kmi.or.kr",
-                    "2024060034@kmi.or.kr",
+                    // TODO: 공용 발신자 이름 수정하기.
+                    stdDetail.getEtcItem2(),
+                    // TODO: 공용 발신자 비밀번호 수정하기.
+                    stdDetail.getEtcItem3(),
+                    // TODO: 공용 발신자 이메일 수정하기.
+                    stdDetail.getEtcItem2(),
+                    // TODO: 수신자 이메일 수정하기. -> lastApprover
+                    stdDetail.getEtcItem2(),
                     "승인 요청이 들어왔습니다.",
                     "명함 관련 신청이 들어왔습니다. 승인 또는 반려를 완료해주시기 바랍니다.",
                     null,

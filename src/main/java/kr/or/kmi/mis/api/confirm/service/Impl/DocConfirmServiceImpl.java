@@ -77,8 +77,27 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         String approver = infoService.getUserInfoDetail(userId).getUserName();
         String drafterEmail = infoService.getUserInfoDetail(docMaster.getDrafterId()).getEmail();
 
+        // 2. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
+        String instCd = infoService.getUserInfoDetail(docMaster.getCurrentApproverId()).getInstCd();
+        if (existsInStdDetail(docMaster.getCurrentApproverId(), "B005", instCd)) {
+            return;
+        }
+
+        // 권한 취소 여부 결정
+        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        boolean shouldCancelAdminByBcd = shouldCancelAdmin(bcdMasterList, userId);
+        boolean shouldCancelAdminByDoc = shouldCancelAdmin(docMasterList, userId);
+
+        if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
+            cancelAdminAndSidebarAuthorities(userId);
+        }
+
         docMaster.confirm(isLastApprover ? "E" : "A", approver, userId);
-        docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex());
+        docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex() + 1);
 
         // 문서번호 생성해, 업데이트
         if (isLastApprover) {
@@ -95,54 +114,32 @@ public class DocConfirmServiceImpl implements DocConfirmService {
             docDetail.updateDocId(docId);
         }
 
-        // 2. 알림 및 메일 전송
-        // TODO: 발신자 이메일 수정하기.
-        System.out.println("drafterEmail = " + drafterEmail);
+
+        // 3. 알림 및 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         if(isLastApprover) {
             notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
-                    "2024060034@kmi.or.kr",
-                    "^Gc4j#9J",
-                    "2024060034@kmi.or.kr",
-                    "2024060034@kmi.or.kr",
+                    // TODO: 공용 발신자 이름 수정하기.
+                    stdDetail.getEtcItem2(),
+                    // TODO: 공용 발신자 비밀번호 수정하기.
+                    stdDetail.getEtcItem3(),
+                    // TODO: 공용 발신자 이메일 수정하기.
+                    stdDetail.getEtcItem2(),
+                    // TODO: 수신자 이메일 수정하기. -> drafterEmail
+                    stdDetail.getEtcItem2(),
                     "신청하신 문서수발신 신청이 승인되었습니다.",
                     "문서수발신 관련 신청이 승인되었습니다. 총무팀/경영지원팀으로 와주시기 바랍니다.",
                     null,
                     null,
                     null
             );
-        }
-
-        // 3. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
-        try {
-            String instCd = infoService.getUserInfoDetail(docMaster.getCurrentApproverId()).getInstCd();
-
-            if (existsInStdDetail(docMaster.getCurrentApproverId(), "B005", instCd)) {
-                return;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-            List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
-                    .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-            boolean shouldCancelAdminByBcd = shouldCancelAdmin(bcdMasterList, userId);
-            boolean shouldCancelAdminByDoc = shouldCancelAdmin(docMasterList, userId);
-
-            if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
-                cancelAdminAndSidebarAuthorities(userId);
-            }
-        } catch (Exception e) {
-            System.out.println("Error when checking admin cancellation: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

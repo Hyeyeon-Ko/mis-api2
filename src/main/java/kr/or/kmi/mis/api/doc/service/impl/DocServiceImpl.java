@@ -157,17 +157,23 @@ public class DocServiceImpl implements DocService {
         getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
 
         // 4. 승인자 메일 전송
-        // TODO: 발신자 이메일 수정하기.
-        System.out.println("infoDetailResponseDTO.getEmail() = " + infoDetailResponseDTO.getEmail());
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         if (docMaster.getApproverChain().split(", ").length == 2) {
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
-                    "2024060034@kmi.or.kr",
-                    "^Gc4j#9J",
-                    "2024060034@kmi.or.kr",
-                    "2024060034@kmi.or.kr",
+                    // TODO: 공용 발신자 이름 수정하기.
+                    stdDetail.getEtcItem2(),
+                    // TODO: 공용 발신자 비밀번호 수정하기.
+                    stdDetail.getEtcItem3(),
+                    // TODO: 공용 발신자 이메일 수정하기.
+                    stdDetail.getEtcItem2(),
+                    // TODO: 수신자 이메일 수정하기. -> infoDetailResponseDTO.getEmail()
+                    stdDetail.getEtcItem2(),
                     "승인 요청이 들어왔습니다.",
                     "문서수발신 관련 신청이 들어왔습니다. 승인을 완료해주시기 바랍니다.",
                     null,
