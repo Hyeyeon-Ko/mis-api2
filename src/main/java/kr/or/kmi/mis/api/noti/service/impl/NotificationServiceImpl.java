@@ -25,35 +25,11 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final EmitterRepository emitterRepository;
 
-    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
-
     @Override
     @Transactional
     public <T> void customNotify(Long userId, T data, String comment) {
         log.info("Custom notify user {}", userId);
         sendToClient(userId, data, comment);
-    }
-
-    private SseEmitter createEmitter(Long userId) {
-        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-        emitterRepository.save(userId, emitter);
-
-        emitter.onCompletion(() -> {
-            log.info("SSE connection completed for user {}", userId);
-            emitterRepository.deleteById(userId);
-        });
-        emitter.onTimeout(() -> {
-            log.warn("SSE connection timed out for user {}", userId);
-            emitterRepository.deleteById(userId);
-            emitter.complete();
-        });
-        emitter.onError((e) -> {
-            log.error("Error in SSE connection for user {}", userId, e);
-            emitterRepository.deleteById(userId);
-            emitter.completeWithError(e);
-        });
-
-        return emitter;
     }
 
     private <T> void sendToClient(Long userId, T data, String comment) {

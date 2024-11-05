@@ -190,5 +190,5 @@ public class NotificationSendServiceImpl implements NotificationSendService {
 
         Long receiverId = Long.parseLong(drafterId);
         notificationService.customNotify(receiverId, notiResponseDTO, comment);
-    };
+    }
 }

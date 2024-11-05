@@ -1,6 +1,5 @@
 package kr.or.kmi.mis.api.order.service.Impl;
 
-import jakarta.mail.MessagingException;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.repository.BcdDetailRepository;
@@ -79,8 +78,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void orderRequest(OrderRequestDTO orderRequest, MultipartFile previewFile, List<MultipartFile> files) throws IOException, MessagingException, GeneralSecurityException {
-        byte[] previewFileData = null;
+    public void orderRequest(OrderRequestDTO orderRequest, MultipartFile previewFile, List<MultipartFile> files) throws IOException, GeneralSecurityException {
+        byte[] previewFileData;
 
         if (previewFile != null && !previewFile.isEmpty()) {
             String extension = FilenameUtils.getExtension(previewFile.getOriginalFilename());
