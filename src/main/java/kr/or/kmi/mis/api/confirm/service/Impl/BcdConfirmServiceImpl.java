@@ -183,16 +183,23 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         bcdMasterRepository.save(bcdMaster);
 
         // 2. 반려 알림 및 메일 전송
-        // TODO: 발신자 이메일 수정하기.
-        System.out.println("bcdDetail = " + bcdDetail.getEmail());
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
         sendRejectionNotifications(bcdMaster, bcdDetail);
         emailService.sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
-                "2024060034@kmi.or.kr",
-                "^Gc4j#9J",
-                "2024060034@kmi.or.kr",
-                "2024060034@kmi.or.kr",
+                // TODO: 공용 발신자 이름 수정하기.
+                stdDetail.getEtcItem2(),
+                // TODO: 공용 발신자 비밀번호 수정하기.
+                stdDetail.getEtcItem3(),
+                // TODO: 공용 발신자 이메일 수정하기.
+                stdDetail.getEtcItem2(),
+                // TODO: 수신자 이메일 수정하기. -> bcdDetail.getEmail()
+                stdDetail.getEtcItem2(),
                 "신청하신 명함이 반려되었습니다.",
                 "반려 사유를 확인하신 후, 재신청하시기 바랍니다.",
                 null,
