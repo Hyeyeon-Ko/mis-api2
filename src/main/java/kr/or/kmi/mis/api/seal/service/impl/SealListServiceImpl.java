@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import utils.SearchUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -237,16 +238,7 @@ public class SealListServiceImpl implements SealListService {
 
         return sealMasters.stream()
                 .filter(sealMaster -> {
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" ->
-                                    sealMaster.getTitle().contains(keyword) || sealMaster.getDrafter().contains(keyword);
-                            case "제목" -> sealMaster.getTitle().contains(keyword);
-                            case "신청자" -> sealMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
+                    return SearchUtils.matchesSearchCriteria(searchType,keyword, sealMaster.getTitle(), sealMaster.getDrafter());
                 })
                 .map(sealMaster -> {
                     SealMasterResponseDTO sealMasterResponseDTO = SealMasterResponseDTO.of(sealMaster);

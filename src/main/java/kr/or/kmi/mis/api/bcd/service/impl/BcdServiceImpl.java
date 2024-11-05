@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import utils.SearchUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -262,15 +263,7 @@ public class BcdServiceImpl implements BcdService {
             return false;
         }
 
-        if (searchType != null && keyword != null) {
-            return switch (searchType) {
-                case "전체" -> bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
-                case "제목" -> bcdMaster.getTitle().contains(keyword);
-                case "신청자" -> bcdMaster.getDrafter().contains(keyword);
-                default -> true;
-            };
-        }
-        return true;
+        return SearchUtils.matchesSearchCriteria(searchType,keyword, bcdMaster.getTitle(), bcdMaster.getDrafter());
     }
 
     @Override

@@ -35,6 +35,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import utils.SearchUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -294,15 +295,7 @@ public class CorpDocServiceImpl implements CorpDocService {
 
         return corpDocMasters.stream()
                 .filter(corpDocMaster -> {
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" -> corpDocMaster.getTitle().contains(keyword) || corpDocMaster.getDrafter().contains(keyword);
-                            case "제목" -> corpDocMaster.getTitle().contains(keyword);
-                            case "신청자" -> corpDocMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
+                    return SearchUtils.matchesSearchCriteria(searchType,keyword, corpDocMaster.getTitle(), corpDocMaster.getDrafter());
                 })
                 .map(corpDocMaster -> {
                     CorpDocMasterResponseDTO corpDocMasterResponseDTO = CorpDocMasterResponseDTO.of(corpDocMaster);

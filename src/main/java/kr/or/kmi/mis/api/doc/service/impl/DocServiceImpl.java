@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import utils.SearchUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -482,16 +483,7 @@ public class DocServiceImpl implements DocService {
 
         return docMasters.stream()
                 .filter(docMaster -> {
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" ->
-                                    docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
-                            case "제목" -> docMaster.getTitle().contains(keyword);
-                            case "신청자" -> docMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
+                    return SearchUtils.matchesSearchCriteria(searchType,keyword, docMaster.getTitle(), docMaster.getDrafter());
                 })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())
