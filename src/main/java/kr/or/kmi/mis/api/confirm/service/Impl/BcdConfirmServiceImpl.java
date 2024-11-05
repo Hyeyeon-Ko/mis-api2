@@ -22,6 +22,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     private final NotificationSendService notificationSendService;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
+    private final EmailService emailService;
     private final AuthorityRepository authorityRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
@@ -105,6 +107,30 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         String approverId = confirmRequestDTO.getUserId();
         String approver = infoService.getUserInfoDetail(approverId).getUserName();
 
+        String[] approverArray = bcdMaster.getApproverChain().split(", ");
+
+        // 마지막 결재자에게 메일 전송
+        // TODO: 발신자 이메일 수정하기.
+        if (approverArray.length == 3 && bcdMaster.getCurrentApproverIndex() == 1) {
+            String lastApprover = approverArray[approverArray.length - 1];
+
+            System.out.println("lastApprover = " + lastApprover);
+
+            emailService.sendEmailWithDynamicCredentials(
+                    "smtp.sirteam.net",
+                    465,
+                    "2024060034@kmi.or.kr",
+                    "^Gc4j#9J",
+                    "2024060034@kmi.or.kr",
+                    "2024060034@kmi.or.kr",
+                    "승인 요청이 들어왔습니다.",
+                    "명함 관련 신청이 들어왔습니다. 승인 또는 반려를 완료해주시기 바랍니다.",
+                    null,
+                    null,
+                    null
+            ) ;
+        }
+
         BcdApproveRequestDTO approveRequest = createApproveRequest(approverId, approver, isLastApprover);
         bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
         bcdMaster.updateApprove(approveRequest);
@@ -112,7 +138,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
         // 2. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(approverId).getInstCd();
-        if (existsInStdDetail(approverId, "B005", instCd)) {
+        if (existsInStdDetail(approverId, instCd)) {
             return;
         }
 
@@ -150,12 +176,27 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         bcdMaster.updateDisapprove(disapproveRequest);
         bcdMasterRepository.save(bcdMaster);
 
-        // 2. 반려 알림 전송
+        // 2. 반려 알림 및 메일 전송
+        // TODO: 발신자 이메일 수정하기.
+        System.out.println("bcdDetail = " + bcdDetail.getEmail());
         sendRejectionNotifications(bcdMaster, bcdDetail);
+        emailService.sendEmailWithDynamicCredentials(
+                "smtp.sirteam.net",
+                465,
+                "2024060034@kmi.or.kr",
+                "^Gc4j#9J",
+                "2024060034@kmi.or.kr",
+                "2024060034@kmi.or.kr",
+                "신청하신 명함이 반려되었습니다.",
+                "반려 사유를 확인하신 후, 재신청하시기 바랍니다.",
+                null,
+                null,
+                null
+        );
 
         // 3. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(bcdMaster.getCurrentApproverId()).getInstCd();
-        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), "B005", instCd)) {
+        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), instCd)) {
             return;
         }
 
@@ -211,13 +252,13 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     /**
      * 결재자의 StdDetail 데이터가 존재하는지 확인
+     *
      * @param approverId 결재자 ID
-     * @param groupCd 그룹 코드
-     * @param instCd 기관 코드
+     * @param instCd     기관 코드
      * @return 존재 여부
      */
-    private boolean existsInStdDetail(String approverId, String groupCd, String instCd) {
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd(groupCd)
+    private boolean existsInStdDetail(String approverId, String instCd) {
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B005")
                 .orElseThrow(() -> new IllegalArgumentException("StdGroup not found"));
 
         List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)

@@ -17,6 +17,7 @@ import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdPendingQueryRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
@@ -26,6 +27,7 @@ import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +58,8 @@ public class BcdServiceImpl implements BcdService {
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
+    private final EmailService emailService;
+    private final NotificationSendService notificationSendService;
     private final StdGroupService stdGroupService;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
@@ -67,18 +71,34 @@ public class BcdServiceImpl implements BcdService {
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
 
-        // 명함 신청 로직
+        // 1. 명함 신청 로직
         BcdMaster bcdMaster = saveBcdMaster(bcdRequestDTO);
         saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
 
         String firstApproverId = bcdRequestDTO.getApproverIds().getFirst();
         InfoDetailResponseDTO infoDetail = infoService.getUserInfoDetail(firstApproverId);
 
-        // ADMIN 권한 부여 및 사이드바 권한 부여
+        // 2-1. ADMIN 권한 부여 및 사이드바 권한 부여
         grantAdminAuthorityIfAbsent(firstApproverId, infoDetail);
 
-        // 권한 업데이트 필요 여부 체크 및 업데이트
+        // 2-2. 권한 업데이트 필요 여부 체크 및 업데이트
         updateSidebarPermissionsIfNeeded(firstApproverId);
+
+        // 3. 승인자 메일 전송
+        // TODO: 발신자 이메일 수정하기.
+        emailService.sendEmailWithDynamicCredentials(
+                "smtp.sirteam.net",
+                465,
+                "2024060034@kmi.or.kr",
+                "^Gc4j#9J",
+                "2024060034@kmi.or.kr",
+                "2024060034@kmi.or.kr",
+                "승인 요청이 들어왔습니다.",
+                "명함 관련 신청이 들어왔습니다. 승인 또는 반려를 완료해주시기 바랍니다.",
+                null,
+                null,
+                null
+        );
     }
 
     private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetail) {
@@ -336,6 +356,10 @@ public class BcdServiceImpl implements BcdService {
                         .orElse(null)).filter(Objects::nonNull).toList();
     }
 
+    /**
+     * 수령 완료 후, 처리 완료 상태로
+     * @param draftId draftId
+     */
     @Override
     @Transactional
     public void completeBcdApply(String draftId){
@@ -349,4 +373,40 @@ public class BcdServiceImpl implements BcdService {
         bcdMaster.updateEndDate(LocalDateTime.now());
     }
 
+    /**
+     * 수령 안내 메일 및 알리 전송
+     * @param draftIds draftIds
+     */
+    @Override
+    public void sendReceiptBcd(List<String> draftIds) {
+
+        List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
+
+        // 알림 전송
+        notificationSendService.sendBcdReceipt(draftIds);
+
+        // 메일 전송
+        // TODO: 발신자 이메일 수정하기.
+        bcdDetails.forEach(bcdDetail -> {
+            String recipientEmail = bcdDetail.getEmail();
+            System.out.println("recipientEmail = " + recipientEmail);
+            try {
+                emailService.sendEmailWithDynamicCredentials(
+                        "smtp.sirteam.net",
+                        465,
+                        "2024060034@kmi.or.kr",
+                        "^Gc4j#9J",
+                        "2024060034@kmi.or.kr",
+                        "2024060034@kmi.or.kr",
+                        "명함이 도착하였습니다.",
+                        "총무팀/경영지원팀으로 명함이 도착하였습니다. 직접 오셔서 수령해주시기 바랍니다.",
+                        null,
+                        null,
+                        null
+                );
+            } catch (Exception e) {
+                log.error("Failed to send email to " + recipientEmail, e);
+            }
+        });
+    }
 }

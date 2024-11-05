@@ -42,26 +42,26 @@ public class ExcelServiceImpl implements ExcelService {
     public void downloadExcel(HttpServletResponse response, List<String> draftIds) throws IOException {
         byte[] excelData = generateExcel(draftIds);
 
-        sendFileToResponse(response, excelData, "order_details.xlsx");
+        sendFileToResponse(response, excelData);
     }
 
     @Override
     public void downloadOrderExcel(HttpServletResponse response, List<String> draftIds, String instCd) throws IOException {
         byte[] excelData = generateOrderExcel(draftIds, instCd);
 
-        sendFileToResponse(response, excelData, "order_details.xlsx");
+        sendFileToResponse(response, excelData);
     }
 
-    private void sendFileToResponse(HttpServletResponse response, byte[] fileData, String fileName) throws IOException {
+    private void sendFileToResponse(HttpServletResponse response, byte[] fileData) throws IOException {
         try {
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            response.setHeader("Content-Disposition", "attachment; filename=" + "order_details.xlsx");
             response.setContentLength(fileData.length);
             response.getOutputStream().write(fileData);
             response.getOutputStream().flush();
             response.getOutputStream().close();
         } catch (Exception e) {
-            throw new IOException("Failed to send file: " + fileName, e);
+            throw new IOException("Failed to send file: " + "order_details.xlsx", e);
         }
     }
 

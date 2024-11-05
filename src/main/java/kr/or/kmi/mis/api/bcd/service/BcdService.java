@@ -38,4 +38,5 @@ public interface BcdService {
     Page<BcdPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<BcdPendingResponseDTO> getMyPendingList(ApplyRequestDTO applyRequestDTO);
     void completeBcdApply(String draftId);
+    void sendReceiptBcd(List<String> draftIds);
 }

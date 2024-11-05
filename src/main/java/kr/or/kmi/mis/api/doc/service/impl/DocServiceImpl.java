@@ -34,6 +34,7 @@ import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.config.SftpClient;
@@ -73,6 +74,7 @@ public class DocServiceImpl implements DocService {
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
+    private final EmailService emailService;
     private final StdGroupService stdGroupService;
 
     private final SftpClient sftpClient;
@@ -153,6 +155,26 @@ public class DocServiceImpl implements DocService {
 
         // 3. File 업로드
         getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
+
+        // 4. 승인자 메일 전송
+        // TODO: 발신자 이메일 수정하기.
+        System.out.println("infoDetailResponseDTO.getEmail() = " + infoDetailResponseDTO.getEmail());
+
+        if (docMaster.getApproverChain().split(", ").length == 2) {
+            emailService.sendEmailWithDynamicCredentials(
+                    "smtp.sirteam.net",
+                    465,
+                    "2024060034@kmi.or.kr",
+                    "^Gc4j#9J",
+                    "2024060034@kmi.or.kr",
+                    "2024060034@kmi.or.kr",
+                    "승인 요청이 들어왔습니다.",
+                    "문서수발신 관련 신청이 들어왔습니다. 승인을 완료해주시기 바랍니다.",
+                    null,
+                    null,
+                    null
+            );
+        }
     }
 
     @Override
@@ -177,7 +199,6 @@ public class DocServiceImpl implements DocService {
         // 3. File 업로드
         getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
     }
-
 
     private void getReceiveCenterNm(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
         StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
@@ -228,6 +249,27 @@ public class DocServiceImpl implements DocService {
         } else {
             return stdDetail.getEtcItem1() + "0000000001";
         }
+    }
+
+    private DocMaster saveDocMasterAndDetail(SendDocRequestDTO sendDocRequestDTO, String docMasterStatus) {
+        String draftId = generateDraftId();
+
+        // 1. DocMaster 저장
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId, docMasterStatus);
+        docMaster.updateRespondDate(LocalDateTime.now());
+        docMaster = docMasterRepository.save(docMaster);
+
+        // 2. DocDetail 저장
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
+        DocDetail lastDocDetail = docDetailRepository
+                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision())
+                .orElse(null);
+        String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
+
+        docDetail.updateDocId(docId);
+        docDetailRepository.save(docDetail);
+
+        return docMaster;
     }
 
     private String[] handleFileUpload(String drafter, String centerNm, String division, MultipartFile file) throws IOException {
