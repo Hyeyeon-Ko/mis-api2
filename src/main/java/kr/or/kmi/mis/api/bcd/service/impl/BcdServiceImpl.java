@@ -24,6 +24,7 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -55,6 +56,7 @@ public class BcdServiceImpl implements BcdService {
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
+    private final StdGroupService stdGroupService;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
@@ -107,7 +109,8 @@ public class BcdServiceImpl implements BcdService {
     }
 
     private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
-        StdGroup groupB002 = findStdGroup("B002");
+        StdGroup groupB002 = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));
         StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
@@ -119,10 +122,7 @@ public class BcdServiceImpl implements BcdService {
             needsUpdate = true;
         }
 
-        StdGroup stdGroupB005 = findStdGroup("B005");
-        List<StdDetail> detailsB005 = findAllActiveDetails(stdGroupB005);
-
-        if (detailsB005.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+        if (stdGroupService.findStdGroupAndCheckFirstApprover("B005", firstApproverId)) {
             needsUpdate = false;
         }
 
@@ -160,19 +160,9 @@ public class BcdServiceImpl implements BcdService {
         bcdDetailRepository.save(bcdDetail);
     }
 
-    private StdGroup findStdGroup(String groupCd) {
-        return stdGroupRepository.findByGroupCd(groupCd)
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
-    }
-
     private StdDetail findStdDetail(StdGroup group, String detailCd) {
         return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
-    }
-
-    private List<StdDetail> findAllActiveDetails(StdGroup group) {
-        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
-                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
     }
 
     @Override
@@ -341,11 +331,9 @@ public class BcdServiceImpl implements BcdService {
 
         // 2. 명함상세의 draftId로 BcdMaster와 매핑해 PendingResponseDTO로 반환한다.
         return bcdDetails.stream()
-                .map(bcdDetail -> {
-                    return bcdMasterRepository.findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(bcdDetail.getDraftId(), "A", 0, userId)
-                            .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
-                            .orElse(null);
-                }).filter(Objects::nonNull).toList();
+                .map(bcdDetail -> bcdMasterRepository.findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(bcdDetail.getDraftId(), "A", 0, userId)
+                        .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
+                        .orElse(null)).filter(Objects::nonNull).toList();
     }
 
     @Override

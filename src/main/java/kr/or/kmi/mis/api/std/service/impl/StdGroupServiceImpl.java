@@ -7,6 +7,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdGroupRequestDTO;
 import kr.or.kmi.mis.api.std.model.response.StdGroupResponseDTO;
 import kr.or.kmi.mis.api.std.repository.StdClassRepository;
+import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdGroupService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class StdGroupServiceImpl implements StdGroupService {
 
     private final StdClassRepository stdClassRepository;
     private final StdGroupRepository stdGroupRepository;
+    private final StdDetailRepository stdDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -53,4 +55,18 @@ public class StdGroupServiceImpl implements StdGroupService {
         stdGroupRepository.save(stdGroup);
     }
 
+    @Override
+    public boolean findStdGroupAndCheckFirstApprover(String groupCd, String firstApproverId) {
+        StdGroup group = stdGroupRepository.findByGroupCd(groupCd)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));;
+        List<StdDetail> details = findAllActiveDetails(group);
+
+        return details.stream()
+                .anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()));
+    }
+
+    private List<StdDetail> findAllActiveDetails(StdGroup group) {
+        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
+                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
+    }
 }
