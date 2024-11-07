@@ -98,8 +98,7 @@ public class BcdServiceImpl implements BcdService {
                 "smtp.sirteam.net",
                 465,
                 stdDetail.getEtcItem3(),
-                // TODO: 공용 발신자 비밀번호 수정하기.
-                stdDetail.getEtcItem3(),
+                stdDetail.getEtcItem4(),
                 stdDetail.getEtcItem3(),
                 infoDetail.getEmail(),
                 mailTitle,
@@ -410,8 +409,7 @@ public class BcdServiceImpl implements BcdService {
                         "smtp.sirteam.net",
                         465,
                         stdDetail.getEtcItem3(),
-                        // TODO: 공용 발신자 비밀번호 수정하기.
-                        stdDetail.getEtcItem3(),
+                        stdDetail.getEtcItem4(),
                         stdDetail.getEtcItem3(),
                         recipientEmail,
                         mailTitle,

@@ -126,8 +126,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                     "smtp.sirteam.net",
                     465,
                     stdDetail.getEtcItem3(),
-                    // TODO: 공용 발신자 비밀번호 수정하기.
-                    stdDetail.getEtcItem3(),
+                    stdDetail.getEtcItem4(),
                     stdDetail.getEtcItem3(),
                     lastApprover,
                     mailTitle,
@@ -197,8 +196,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 "smtp.sirteam.net",
                 465,
                 stdDetail.getEtcItem3(),
-                // TODO: 공용 발신자 비밀번호 수정하기.
-                stdDetail.getEtcItem3(),
+                stdDetail.getEtcItem4(),
                 stdDetail.getEtcItem3(),
                 bcdDetail.getEmail(),
                 mailTitle,
