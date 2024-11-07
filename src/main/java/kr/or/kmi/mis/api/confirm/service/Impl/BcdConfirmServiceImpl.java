@@ -115,22 +115,23 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        // TODO: 이메일 제목 및 내용 수정하기.
+        String mailTitle = "";
+        String mailContent = "";
+
         if (approverArray.length == 3 && bcdMaster.getCurrentApproverIndex() == 1) {
             String lastApprover = approverArray[approverArray.length - 1];
 
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
-                    // TODO: 공용 발신자 이름 수정하기.
-                    stdDetail.getEtcItem2(),
+                    stdDetail.getEtcItem3(),
                     // TODO: 공용 발신자 비밀번호 수정하기.
                     stdDetail.getEtcItem3(),
-                    // TODO: 공용 발신자 이메일 수정하기.
-                    stdDetail.getEtcItem2(),
-                    // TODO: 수신자 이메일 수정하기. -> lastApprover
-                    stdDetail.getEtcItem2(),
-                    "승인 요청이 들어왔습니다.",
-                    "명함 관련 신청이 들어왔습니다. 승인 또는 반려를 완료해주시기 바랍니다.",
+                    stdDetail.getEtcItem3(),
+                    lastApprover,
+                    mailTitle,
+                    mailContent,
                     null,
                     null,
                     null
@@ -188,20 +189,20 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        String mailTitle = "[반려] 명함 신청이 반려되었습니다.";
+        String mailContent = "[반려] 명함 신청이 반려되었습니다.\n반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+
         sendRejectionNotifications(bcdMaster, bcdDetail);
         emailService.sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
-                // TODO: 공용 발신자 이름 수정하기.
-                stdDetail.getEtcItem2(),
+                stdDetail.getEtcItem3(),
                 // TODO: 공용 발신자 비밀번호 수정하기.
                 stdDetail.getEtcItem3(),
-                // TODO: 공용 발신자 이메일 수정하기.
-                stdDetail.getEtcItem2(),
-                // TODO: 수신자 이메일 수정하기. -> bcdDetail.getEmail()
-                stdDetail.getEtcItem2(),
-                "신청하신 명함이 반려되었습니다.",
-                "반려 사유를 확인하신 후, 재신청하시기 바랍니다.",
+                stdDetail.getEtcItem3(),
+                bcdDetail.getEmail(),
+                mailTitle,
+                mailContent,
                 null,
                 null,
                 null

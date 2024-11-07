@@ -114,28 +114,29 @@ public class DocConfirmServiceImpl implements DocConfirmService {
             docDetail.updateDocId(docId);
         }
 
-
         // 3. 알림 및 메일 전송
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        String docType = Objects.equals(docDetail.getDivision(), "A") ? "수신문서" : "발신문서";
+
+        String mailTitle = "[승인완료] 신청하신 " + docType + "이 접수되었습니다.";
+        String mailContent = "[승인완료] 신청하신 " + docType + "이 접수되었습니다.\n담당 부서를 방문해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+
         if(isLastApprover) {
             notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
-                    // TODO: 공용 발신자 이름 수정하기.
-                    stdDetail.getEtcItem2(),
+                    stdDetail.getEtcItem3(),
                     // TODO: 공용 발신자 비밀번호 수정하기.
                     stdDetail.getEtcItem3(),
-                    // TODO: 공용 발신자 이메일 수정하기.
-                    stdDetail.getEtcItem2(),
-                    // TODO: 수신자 이메일 수정하기. -> drafterEmail
-                    stdDetail.getEtcItem2(),
-                    "신청하신 문서수발신 신청이 승인되었습니다.",
-                    "문서수발신 관련 신청이 승인되었습니다. 총무팀/경영지원팀으로 와주시기 바랍니다.",
+                    stdDetail.getEtcItem3(),
+                    drafterEmail,
+                    mailTitle,
+                    mailContent,
                     null,
                     null,
                     null

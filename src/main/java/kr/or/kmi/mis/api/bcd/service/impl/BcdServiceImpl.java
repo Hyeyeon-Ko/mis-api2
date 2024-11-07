@@ -90,19 +90,20 @@ public class BcdServiceImpl implements BcdService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        // TODO: 이메일 제목 및 내용 수정하기.
+        String mailTitle = "";
+        String mailContent = "";
+
         emailService.sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
-                // TODO: 공용 발신자 이름 수정하기.
-                stdDetail.getEtcItem2(),
+                stdDetail.getEtcItem3(),
                 // TODO: 공용 발신자 비밀번호 수정하기.
                 stdDetail.getEtcItem3(),
-                // TODO: 공용 발신자 이메일 수정하기.
-                stdDetail.getEtcItem2(),
-                // TODO: 수신자 이메일 수정하기. -> infoDetail.getEmail()
-                stdDetail.getEtcItem2(),
-                "승인 요청이 들어왔습니다.",
-                "명함 관련 신청이 들어왔습니다. 승인 또는 반려를 완료해주시기 바랍니다.",
+                stdDetail.getEtcItem3(),
+                infoDetail.getEmail(),
+                mailTitle,
+                mailContent,
                 null,
                 null,
                 null
@@ -399,22 +400,22 @@ public class BcdServiceImpl implements BcdService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        String mailTitle = "[수령안내] 신청하신 명함이 도착했습니다.";
+        String mailContent = "[수령안내] 신청하신 명함이 도착했습니다.\n담당 부서를 방문하여 명함을 수령하시고, 수령 확인 버튼을 눌러주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+
         bcdDetails.forEach(bcdDetail -> {
             String recipientEmail = bcdDetail.getEmail();
             try {
                 emailService.sendEmailWithDynamicCredentials(
                         "smtp.sirteam.net",
                         465,
-                        // TODO: 공용 발신자 이름 수정하기.
-                        stdDetail.getEtcItem2(),
+                        stdDetail.getEtcItem3(),
                         // TODO: 공용 발신자 비밀번호 수정하기.
                         stdDetail.getEtcItem3(),
-                        // TODO: 공용 발신자 이메일 수정하기.
-                        stdDetail.getEtcItem2(),
-                        // TODO: 수신자 이메일 수정하기. -> recipientEmail
-                        stdDetail.getEtcItem2(),
-                        "명함이 도착하였습니다.",
-                        "총무팀/경영지원팀으로 명함이 도착하였습니다. 직접 오셔서 수령해주시기 바랍니다.",
+                        stdDetail.getEtcItem3(),
+                        recipientEmail,
+                        mailTitle,
+                        mailContent,
                         null,
                         null,
                         null

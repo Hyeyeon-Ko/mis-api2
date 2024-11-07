@@ -11,7 +11,6 @@ import kr.or.kmi.mis.api.noti.respository.NotificationRepository;
 import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.noti.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,6 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class NotificationSendServiceImpl implements NotificationSendService {
 
     private final NotificationRepository notificationRepository;
@@ -48,7 +46,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     @Transactional
     public void sendBcdOrder(LocalDateTime draftDate, String userId) {
         String content = "[발주완료] " + draftDate.format(formatter)
-                + " 신청한 명함이 [발주요청] 되었습니다.";
+                + " 신청하신 명함이 [발주요청] 되었습니다.";
 
         Notification notification = this.createNotification(userId, content, "BCD");
         notificationRepository.save(notification);
@@ -66,7 +64,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
 
         for (BcdMaster bcdMaster : bcdMasters) {
             String draftDate = bcdMaster.getDraftDate().format(formatter);
-            String content = "[수령확인] " + draftDate + " 신청한 명함이 도착하였습니다. /명함을 수령하신 후, 수령확인 버튼을 눌러주세요.";
+            String content = "[수령안내] " + draftDate + " 신청하신 명함이 도착했습니다. /담당 부서를 방문하여 명함을 수령하시고, 수령 확인 버튼을 눌러주시기 바랍니다.";
 
             BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
                     .orElseThrow(() -> new EntityNotFoundException("Not Found"));
@@ -81,7 +79,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     @Transactional
     public void sendCorpDocRejection(LocalDateTime draftDate, String drafterId) {
         String content = "[반려] " + draftDate.format(formatter)
-                + " [법인서류] 신청이 반려되었습니다./반려 사유를 확인하세요.";
+                + " [법인서류] 명함 신청이 반려되었습니다./반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.";
 
         Notification notification = this.createNotification(drafterId, content, "CORPDOC");
         notificationRepository.save(notification);
@@ -93,7 +91,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     @Transactional
     public void sendCorpDocApproval(LocalDateTime draftDate, String drafterId) {
         String content = "[승인완료] " + draftDate.format(formatter)
-                + " 신청한 [법인서류] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
+                + " 신청하신 [법인서류] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
 
         Notification notification = this.createNotification(drafterId, content, "CORPDOC");
         notificationRepository.save(notification);
@@ -107,7 +105,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
         String docType = Objects.equals(division, "A") ? "수신문서" : "발신문서";
 
         String content = "[승인완료] " + draftDate.format(formatter)
-                + " 신청한 ["+ docType + "] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
+                + " 신청하신 ["+ docType + "] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
 
         Notification notification = this.createNotification(drafterId, content, "DOC");
         notificationRepository.save(notification);
@@ -120,7 +118,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     public void sendSealApproval(LocalDateTime draftDate, String drafterId) {
 
         String content = "[승인완료] " + draftDate.format(formatter)
-                + " 신청한 [날인요청] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
+                + " 신청하신 [날인요청] 접수가 완료되었습니다./담당부서 방문 요청드립니다.";
 
         Notification notification = this.createNotification(drafterId, content, "SEAL");
         notificationRepository.save(notification);
@@ -145,7 +143,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     public void sendTonerApproval(LocalDateTime draftDate, String drafterId) {
 
         String content = "[승인완료] " + draftDate.format(formatter)
-                + " 신청한 [토너신청] 접수가 완료되었습니다.";
+                + " 신청하신 [토너신청] 접수가 완료되었습니다.";
 
         Notification notification = this.createNotification(drafterId, content, "TONER");
         notificationRepository.save(notification);
@@ -168,7 +166,7 @@ public class NotificationSendServiceImpl implements NotificationSendService {
     @Override
     public void sendTonerOrder(LocalDateTime draftDate, String drafterId) {
         String content = "[수령확인] " + draftDate.format(formatter)
-                + " 신청한 토너가 [발주요청] 되었습니다./수령하신 후, 수령확인 버튼을 눌러주세요.";
+                + " 신청하신 토너가 [발주요청] 되었습니다./수령하신 후, 수령확인 버튼을 눌러주세요.";
 
         Notification notification = this.createNotification(drafterId, content, "TONER");
         notificationRepository.save(notification);

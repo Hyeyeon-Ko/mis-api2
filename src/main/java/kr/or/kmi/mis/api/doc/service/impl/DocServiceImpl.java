@@ -162,20 +162,21 @@ public class DocServiceImpl implements DocService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
+        // TODO: 이메일 제목 및 내용 수정하기.
+        String mailTitle = "";
+        String mailContent = "";
+
         if (docMaster.getApproverChain().split(", ").length == 2) {
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
-                    // TODO: 공용 발신자 이름 수정하기.
-                    stdDetail.getEtcItem2(),
+                    stdDetail.getEtcItem3(),
                     // TODO: 공용 발신자 비밀번호 수정하기.
                     stdDetail.getEtcItem3(),
-                    // TODO: 공용 발신자 이메일 수정하기.
-                    stdDetail.getEtcItem2(),
-                    // TODO: 수신자 이메일 수정하기. -> infoDetailResponseDTO.getEmail()
-                    stdDetail.getEtcItem2(),
-                    "승인 요청이 들어왔습니다.",
-                    "문서수발신 관련 신청이 들어왔습니다. 승인을 완료해주시기 바랍니다.",
+                    stdDetail.getEtcItem3(),
+                    infoDetailResponseDTO.getEmail(),
+                    mailTitle,
+                    mailContent,
                     null,
                     null,
                     null
