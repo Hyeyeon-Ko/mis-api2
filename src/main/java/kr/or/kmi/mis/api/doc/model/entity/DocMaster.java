@@ -94,7 +94,7 @@ public class DocMaster extends BaseSystemFieldEntity {
     }
 
     public void updateCurrentApproverIndex(Integer currentApproverIndex) {
-        this.currentApproverIndex = currentApproverIndex;
+        this.currentApproverIndex = currentApproverIndex + 1;
     }
 
     public void updateStatus(String status) {

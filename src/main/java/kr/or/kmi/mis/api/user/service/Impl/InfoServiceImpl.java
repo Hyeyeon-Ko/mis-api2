@@ -52,7 +52,6 @@ public class InfoServiceImpl implements InfoService {
     @Override
     @Transactional(readOnly = true)
     public InfoDetailResponseDTO getUserInfoDetail(String userId) {
-
         if (userId == null) {
             userId = (String) request.getSession().getAttribute("userId");
         }

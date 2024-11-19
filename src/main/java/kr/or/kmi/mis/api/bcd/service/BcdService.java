@@ -10,7 +10,6 @@ import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BcdService {
@@ -21,24 +20,23 @@ public interface BcdService {
     void cancelBcdApply(String draftId);
     List<BcdMasterResponseDTO> getBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
     Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
-    List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId);
     /**
      * 전체 조회
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
-     * @param page
-     * @return
+     * @param applyRequestDTO applyRequestDTO
+     * @param postSearchRequestDTO postSearchRequestDTO
+     * @param page page
+     * @return Page<BcdMyResponseDTO>
      */
     Page<BcdMyResponseDTO> getMyBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     /**
      * 전체 조회
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
-     * @return
+     * @param applyRequestDTO applyRequestDTO
+     * @param postSearchRequestDTO postSearchRequestDTO
+     * @return Page<BcdMyResponseDTO>
      */
     List<BcdMyResponseDTO> getMyBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);
-    List<BcdPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId);
     Page<BcdPendingResponseDTO> getPendingList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page);
     List<BcdPendingResponseDTO> getMyPendingList(ApplyRequestDTO applyRequestDTO);
     void completeBcdApply(String draftId);
+    void sendReceiptBcd(List<String> draftIds);
 }

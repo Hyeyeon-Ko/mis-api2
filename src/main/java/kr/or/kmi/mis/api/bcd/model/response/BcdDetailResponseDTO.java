@@ -47,7 +47,6 @@ public class BcdDetailResponseDTO {
             address = address.replaceFirst("층$", "");
         }
 
-        System.out.println("bcdDetail = " + bcdDetail.getEngAddress());
         return BcdDetailResponseDTO.builder()
                 .draftId(bcdDetail.getDraftId())
                 .drafter(drafter)

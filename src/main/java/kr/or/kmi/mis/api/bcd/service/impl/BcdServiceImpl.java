@@ -17,6 +17,7 @@ import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.bcd.repository.BcdPendingQueryRepository;
 import kr.or.kmi.mis.api.bcd.service.BcdHistoryService;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
+import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
@@ -24,7 +25,9 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import utils.SearchUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +58,9 @@ public class BcdServiceImpl implements BcdService {
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
+    private final EmailService emailService;
+    private final NotificationSendService notificationSendService;
+    private final StdGroupService stdGroupService;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
@@ -64,18 +71,42 @@ public class BcdServiceImpl implements BcdService {
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
 
-        // 명함 신청 로직
+        // 1. 명함 신청 로직
         BcdMaster bcdMaster = saveBcdMaster(bcdRequestDTO);
         saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
 
         String firstApproverId = bcdRequestDTO.getApproverIds().getFirst();
         InfoDetailResponseDTO infoDetail = infoService.getUserInfoDetail(firstApproverId);
 
-        // ADMIN 권한 부여 및 사이드바 권한 부여
+        // 2-1. ADMIN 권한 부여 및 사이드바 권한 부여
         grantAdminAuthorityIfAbsent(firstApproverId, infoDetail);
 
-        // 권한 업데이트 필요 여부 체크 및 업데이트
+        // 2-2. 권한 업데이트 필요 여부 체크 및 업데이트
         updateSidebarPermissionsIfNeeded(firstApproverId);
+
+        // 3. 승인자 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        // TODO: 이메일 제목 및 내용 수정하기.
+        String mailTitle = "";
+        String mailContent = "";
+
+        emailService.sendEmailWithDynamicCredentials(
+                "smtp.sirteam.net",
+                465,
+                stdDetail.getEtcItem3(),
+                stdDetail.getEtcItem4(),
+                stdDetail.getEtcItem3(),
+                infoDetail.getEmail(),
+                mailTitle,
+                mailContent,
+                null,
+                null,
+                null
+        );
     }
 
     private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetail) {
@@ -106,7 +137,8 @@ public class BcdServiceImpl implements BcdService {
     }
 
     private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
-        StdGroup groupB002 = findStdGroup("B002");
+        StdGroup groupB002 = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));
         StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
@@ -118,10 +150,7 @@ public class BcdServiceImpl implements BcdService {
             needsUpdate = true;
         }
 
-        StdGroup stdGroupB005 = findStdGroup("B005");
-        List<StdDetail> detailsB005 = findAllActiveDetails(stdGroupB005);
-
-        if (detailsB005.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+        if (stdGroupService.findStdGroupAndCheckFirstApprover("B005", firstApproverId)) {
             needsUpdate = false;
         }
 
@@ -159,19 +188,9 @@ public class BcdServiceImpl implements BcdService {
         bcdDetailRepository.save(bcdDetail);
     }
 
-    private StdGroup findStdGroup(String groupCd) {
-        return stdGroupRepository.findByGroupCd(groupCd)
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
-    }
-
     private StdDetail findStdDetail(StdGroup group, String detailCd) {
         return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
-    }
-
-    private List<StdDetail> findAllActiveDetails(StdGroup group) {
-        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
-                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
     }
 
     @Override
@@ -262,30 +281,12 @@ public class BcdServiceImpl implements BcdService {
             return false;
         }
 
-        if (searchType != null && keyword != null) {
-            return switch (searchType) {
-                case "전체" -> bcdMaster.getTitle().contains(keyword) || bcdMaster.getDrafter().contains(keyword);
-                case "제목" -> bcdMaster.getTitle().contains(keyword);
-                case "신청자" -> bcdMaster.getDrafter().contains(keyword);
-                default -> true;
-            };
-        }
-        return true;
+        return SearchUtils.matchesSearchCriteria(searchType,keyword, bcdMaster.getTitle(), bcdMaster.getDrafter());
     }
 
     @Override
     public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
         return bcdApplyQueryRepository.getBcdApply2(applyRequestDTO, postSearchRequestDTO, page);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<BcdMyResponseDTO> getMyBcdApply(LocalDateTime startDate, LocalDateTime endDate, String userId) {
-        List<BcdMyResponseDTO> results = new ArrayList<>();
-
-        results.addAll(this.getMyMasterList(startDate, endDate, userId));
-        results.addAll(this.getAnotherMasterList(startDate, endDate, userId));
-        return results;
     }
 
     @Override
@@ -301,79 +302,12 @@ public class BcdServiceImpl implements BcdService {
         return results;
     }
 
-    /**
-     * 2-1. 내가 신청한 명함신청 내역
-     * @param userId
-     * @return List<BcdMyResponseDTO>
-     */
-    public List<BcdMyResponseDTO> getMyMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findByDrafterIdAndDraftDateBetween(userId, startDate, endDate)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        return bcdMasters.stream()
-                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
-                .toList();
-    }
-
     public List<BcdMyResponseDTO> getMyMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return bcdApplyQueryRepository.getMyBcdList(applyRequestDTO, postSearchRequestDTO);
     }
 
-    /**
-     * 2-2. 타인이 신청한 나의 명함신청 내역
-     * @param userId
-     * @return List<BcdMyResponseDTO>
-     */
-    public List<BcdMyResponseDTO> getAnotherMasterList(LocalDateTime startDate, LocalDateTime endDate, String userId) {
-        // 2-2. 타인이 신청해준 나의 명함신청 내역
-        List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByUserId(userId);
-
-        return bcdDetails.stream()
-            .flatMap(bcdDetail -> {
-                // startDate, endDate 사이에 있는 BcdMaster 조회
-                List<BcdMaster> newBcdMasters = bcdMasterRepository
-                        .findByDraftIdAndDraftDateBetweenAndDrafterIdNot(bcdDetail.getDraftId(), startDate, endDate, userId)
-                        .orElse(new ArrayList<>());
-
-                return newBcdMasters.stream()
-                        .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService));
-            }).toList();
-    }
-
     public List<BcdMyResponseDTO> getAnotherMasterList2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO) {
         return bcdApplyQueryRepository.getAnotherMasterList(applyRequestDTO, postSearchRequestDTO);
-    }
-
-    @Override
-    public List<BcdPendingResponseDTO> getPendingList(LocalDateTime startDate, LocalDateTime endDate, String instCd, String userId) {
-
-        // 1. 승인대기 상태인 신청목록 모두 호출
-        //    - 기안일자 기준 내림차순 정렬
-        List<BcdMaster> bcdMasters = bcdMasterRepository.findAllByStatusAndDraftDateBetweenOrderByDraftDateDesc("A", startDate, endDate);
-
-        // 2. Detail 테이블 정보와 매핑해, ResponseDto로 반환
-        return bcdMasters.stream()
-                .filter(bcdMaster -> {
-                    String[] approverChainArray = bcdMaster.getApproverChain().split(", ");
-                    int currentIndex = bcdMaster.getCurrentApproverIndex();
-
-                    return currentIndex < approverChainArray.length && approverChainArray[currentIndex].equals(userId);
-                })
-                .map(bcdMaster -> {
-                    BcdDetail bcdDetail = bcdDetailRepository.findById(bcdMaster.getDraftId())
-                            .orElseThrow(() -> new IllegalArgumentException("Not Found : " + bcdMaster.getDraftId()));
-
-                    // 3. instCd가 파라미터 instCd와 같은 경우만 처리
-                    if (bcdDetail.getInstCd().equals(instCd)) {
-                        BcdPendingResponseDTO result = BcdPendingResponseDTO.of(bcdMaster, bcdDetail);
-                        result.setInstNm(stdBcdService.getInstNm(result.getInstCd()));
-                        return result;
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .toList();
     }
 
     @Override
@@ -397,7 +331,7 @@ public class BcdServiceImpl implements BcdService {
      * 2-1. 내가 신청한 나의 명함신청 승인대기 내역
      *    - DrafterId(기안자 사번)로 나의 명함신청 승인대기 내역을 불러온다.
      *    - 기안 일자를 기준으로 내림차순 정렬한다.
-     * @param userId
+     * @param userId userId
      * @return List<BcdPendingResponseDTO>
      */
     public List<BcdPendingResponseDTO> getMyPndMasterList(String userId) {
@@ -415,7 +349,7 @@ public class BcdServiceImpl implements BcdService {
      * 2-2. 타인이 신청해준 나의 명함신청 승인대기 내역
      *    - userId(기안자 사번)로 타인이 신청해준 나의 명함신청 승인대기 내역을 불러온다.
      *    - 기안 일자를 기준으로 내림차순 정렬한다.
-     * @param userId
+     * @param userId userId
      * @return List<BcdPendingResponseDTO>
      */
     public List<BcdPendingResponseDTO> getAnotherPndMasterList(String userId) {
@@ -425,13 +359,15 @@ public class BcdServiceImpl implements BcdService {
 
         // 2. 명함상세의 draftId로 BcdMaster와 매핑해 PendingResponseDTO로 반환한다.
         return bcdDetails.stream()
-                .map(bcdDetail -> {
-                    return bcdMasterRepository.findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(bcdDetail.getDraftId(), "A", 0, userId)
-                            .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
-                            .orElse(null);
-                }).filter(Objects::nonNull).toList();
+                .map(bcdDetail -> bcdMasterRepository.findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(bcdDetail.getDraftId(), "A", 0, userId)
+                        .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
+                        .orElse(null)).filter(Objects::nonNull).toList();
     }
 
+    /**
+     * 수령 완료 후, 처리 완료 상태로
+     * @param draftId draftId
+     */
     @Override
     @Transactional
     public void completeBcdApply(String draftId){
@@ -445,4 +381,46 @@ public class BcdServiceImpl implements BcdService {
         bcdMaster.updateEndDate(LocalDateTime.now());
     }
 
+    /**
+     * 수령 안내 메일 및 알리 전송
+     * @param draftIds draftIds
+     */
+    @Override
+    public void sendReceiptBcd(List<String> draftIds) {
+
+        List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
+
+        // 알림 전송
+        notificationSendService.sendBcdReceipt(draftIds);
+
+        // 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String mailTitle = "[수령안내] 신청하신 명함이 도착했습니다.";
+        String mailContent = "[수령안내] 신청하신 명함이 도착했습니다.\n담당 부서를 방문하여 명함을 수령하시고, 수령 확인 버튼을 눌러주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+
+        bcdDetails.forEach(bcdDetail -> {
+            String recipientEmail = bcdDetail.getEmail();
+            try {
+                emailService.sendEmailWithDynamicCredentials(
+                        "smtp.sirteam.net",
+                        465,
+                        stdDetail.getEtcItem3(),
+                        stdDetail.getEtcItem4(),
+                        stdDetail.getEtcItem3(),
+                        recipientEmail,
+                        mailTitle,
+                        mailContent,
+                        null,
+                        null,
+                        null
+                );
+            } catch (Exception e) {
+                log.error("Failed to send email to " + recipientEmail, e);
+            }
+        });
+    }
 }

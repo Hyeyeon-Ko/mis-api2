@@ -10,7 +10,7 @@ import java.util.List;
 public interface TonerManageService {
 
     /* 센터별 토너 관리표 정보 */
-    List<TonerExcelResponseDTO> getTonerList(String instCd);
+    List<TonerExcelResponseDTO> getCenterTonerList(String instCd);
 
     /* 전국 토너 관리표 정보 */
     TonerTotalListResponseDTO getTotalTonerList();

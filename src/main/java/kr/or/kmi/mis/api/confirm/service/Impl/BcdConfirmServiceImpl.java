@@ -22,6 +22,7 @@ import kr.or.kmi.mis.api.std.model.entity.StdGroup;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
     private final NotificationSendService notificationSendService;
     private final StdBcdService stdBcdService;
     private final InfoService infoService;
+    private final EmailService emailService;
     private final AuthorityRepository authorityRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
@@ -105,6 +107,36 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         String approverId = confirmRequestDTO.getUserId();
         String approver = infoService.getUserInfoDetail(approverId).getUserName();
 
+        String[] approverArray = bcdMaster.getApproverChain().split(", ");
+
+        // 마지막 결재자에게 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        // TODO: 이메일 제목 및 내용 수정하기.
+        String mailTitle = "";
+        String mailContent = "";
+
+        if (approverArray.length == 3 && bcdMaster.getCurrentApproverIndex() == 1) {
+            String lastApprover = approverArray[approverArray.length - 1];
+
+            emailService.sendEmailWithDynamicCredentials(
+                    "smtp.sirteam.net",
+                    465,
+                    stdDetail.getEtcItem3(),
+                    stdDetail.getEtcItem4(),
+                    stdDetail.getEtcItem3(),
+                    lastApprover,
+                    mailTitle,
+                    mailContent,
+                    null,
+                    null,
+                    null
+            ) ;
+        }
+
         BcdApproveRequestDTO approveRequest = createApproveRequest(approverId, approver, isLastApprover);
         bcdMaster.updateCurrentApproverIndex(bcdMaster.getCurrentApproverIndex() + 1);
         bcdMaster.updateApprove(approveRequest);
@@ -112,7 +144,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
         // 2. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(approverId).getInstCd();
-        if (existsInStdDetail(approverId, "B005", instCd)) {
+        if (existsInStdDetail(approverId, instCd)) {
             return;
         }
 
@@ -150,12 +182,33 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         bcdMaster.updateDisapprove(disapproveRequest);
         bcdMasterRepository.save(bcdMaster);
 
-        // 2. 반려 알림 전송
+        // 2. 반려 알림 및 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String mailTitle = "[반려] 명함 신청이 반려되었습니다.";
+        String mailContent = "[반려] 명함 신청이 반려되었습니다.\n반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+
         sendRejectionNotifications(bcdMaster, bcdDetail);
+        emailService.sendEmailWithDynamicCredentials(
+                "smtp.sirteam.net",
+                465,
+                stdDetail.getEtcItem3(),
+                stdDetail.getEtcItem4(),
+                stdDetail.getEtcItem3(),
+                bcdDetail.getEmail(),
+                mailTitle,
+                mailContent,
+                null,
+                null,
+                null
+        );
 
         // 3. 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(bcdMaster.getCurrentApproverId()).getInstCd();
-        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), "B005", instCd)) {
+        if (existsInStdDetail(bcdMaster.getCurrentApproverId(), instCd)) {
             return;
         }
 
@@ -211,13 +264,13 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
 
     /**
      * 결재자의 StdDetail 데이터가 존재하는지 확인
+     *
      * @param approverId 결재자 ID
-     * @param groupCd 그룹 코드
-     * @param instCd 기관 코드
+     * @param instCd     기관 코드
      * @return 존재 여부
      */
-    private boolean existsInStdDetail(String approverId, String groupCd, String instCd) {
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd(groupCd)
+    private boolean existsInStdDetail(String approverId, String instCd) {
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B005")
                 .orElseThrow(() -> new IllegalArgumentException("StdGroup not found"));
 
         List<StdDetail> stdDetails = stdDetailRepository.findByGroupCdAndEtcItem1(stdGroup, instCd)

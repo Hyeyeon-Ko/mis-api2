@@ -32,7 +32,9 @@ import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
 import kr.or.kmi.mis.api.std.service.StdDetailService;
+import kr.or.kmi.mis.api.std.service.StdGroupService;
 import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
+import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import kr.or.kmi.mis.config.SftpClient;
@@ -43,6 +45,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import utils.SearchUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -71,6 +74,8 @@ public class DocServiceImpl implements DocService {
     private final StdBcdService stdBcdService;
     private final AuthorityService authorityService;
     private final StdDetailService stdDetailService;
+    private final EmailService emailService;
+    private final StdGroupService stdGroupService;
 
     private final SftpClient sftpClient;
     private final FileDetailRepository fileDetailRepository;
@@ -150,6 +155,32 @@ public class DocServiceImpl implements DocService {
 
         // 3. File 업로드
         getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
+
+        // 4. 승인자 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        // TODO: 이메일 제목 및 내용 수정하기.
+        String mailTitle = "";
+        String mailContent = "";
+
+        if (docMaster.getApproverChain().split(", ").length == 2) {
+            emailService.sendEmailWithDynamicCredentials(
+                    "smtp.sirteam.net",
+                    465,
+                    stdDetail.getEtcItem3(),
+                    stdDetail.getEtcItem4(),
+                    stdDetail.getEtcItem3(),
+                    infoDetailResponseDTO.getEmail(),
+                    mailTitle,
+                    mailContent,
+                    null,
+                    null,
+                    null
+            );
+        }
     }
 
     @Override
@@ -174,7 +205,6 @@ public class DocServiceImpl implements DocService {
         // 3. File 업로드
         getSendCenterNm(sendDocRequestDTO, file, draftId, docMaster);
     }
-
 
     private void getReceiveCenterNm(ReceiveDocRequestDTO receiveDocRequestDTO, MultipartFile file, String draftId, DocMaster docMaster) throws IOException {
         StdGroup centerGroup = stdGroupRepository.findByGroupCd("A001")
@@ -227,6 +257,27 @@ public class DocServiceImpl implements DocService {
         }
     }
 
+    private DocMaster saveDocMasterAndDetail(SendDocRequestDTO sendDocRequestDTO, String docMasterStatus) {
+        String draftId = generateDraftId();
+
+        // 1. DocMaster 저장
+        DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId, docMasterStatus);
+        docMaster.updateRespondDate(LocalDateTime.now());
+        docMaster = docMasterRepository.save(docMaster);
+
+        // 2. DocDetail 저장
+        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
+        DocDetail lastDocDetail = docDetailRepository
+                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision())
+                .orElse(null);
+        String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
+
+        docDetail.updateDocId(docId);
+        docDetailRepository.save(docDetail);
+
+        return docMaster;
+    }
+
     private String[] handleFileUpload(String drafter, String centerNm, String division, MultipartFile file) throws IOException {
 
         String[] fileInfo = new String[2];
@@ -277,21 +328,21 @@ public class DocServiceImpl implements DocService {
     }
 
     private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
-        StdGroup groupB002 = findStdGroup("B002");
+        StdGroup groupB002 = stdGroupRepository.findByGroupCd("B002")
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));;
         StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
 
         boolean needsUpdate = false;
         List<String> allowedValues = Arrays.asList("D", "D-1", "D-2");
 
-        if (!allowedValues.contains(detailB002.getEtcItem1()) && !allowedValues.contains(detailB002.getEtcItem3()) && !allowedValues.contains(detailB002.getEtcItem5())) {
+        if (!allowedValues.contains(detailB002.getEtcItem1()) &&
+                !allowedValues.contains(detailB002.getEtcItem3()) &&
+                !allowedValues.contains(detailB002.getEtcItem5())) {
             detailB002.updateEtcItem3("D-2");
             needsUpdate = true;
         }
 
-        StdGroup stdGroupB005 = findStdGroup("B005");
-        List<StdDetail> detailsB005 = findAllActiveDetails(stdGroupB005);
-
-        if (detailsB005.stream().anyMatch(detail -> firstApproverId.equals(detail.getEtcItem2()) || firstApproverId.equals(detail.getEtcItem3()))) {
+        if (stdGroupService.findStdGroupAndCheckFirstApprover("B005", firstApproverId)) {
             needsUpdate = false;
         }
 
@@ -300,19 +351,9 @@ public class DocServiceImpl implements DocService {
         }
     }
 
-    private StdGroup findStdGroup(String groupCd) {
-        return stdGroupRepository.findByGroupCd(groupCd)
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupCd));
-    }
-
     private StdDetail findStdDetail(StdGroup group, String detailCd) {
         return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
                 .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
-    }
-
-    private List<StdDetail> findAllActiveDetails(StdGroup group) {
-        return stdDetailRepository.findAllByUseAtAndGroupCd("Y", group)
-                .orElseThrow(() -> new IllegalArgumentException("No active details found for group: " + group.getGroupCd()));
     }
 
     @Override
@@ -482,16 +523,7 @@ public class DocServiceImpl implements DocService {
 
         return docMasters.stream()
                 .filter(docMaster -> {
-                    if (searchType != null && keyword != null) {
-                        return switch (searchType) {
-                            case "전체" ->
-                                    docMaster.getTitle().contains(keyword) || docMaster.getDrafter().contains(keyword);
-                            case "제목" -> docMaster.getTitle().contains(keyword);
-                            case "신청자" -> docMaster.getDrafter().contains(keyword);
-                            default -> true;
-                        };
-                    }
-                    return true;
+                    return SearchUtils.matchesSearchCriteria(searchType,keyword, docMaster.getTitle(), docMaster.getDrafter());
                 })
                 .map(docMaster -> {
                     DocDetail docDetail = docDetailRepository.findById(docMaster.getDraftId())

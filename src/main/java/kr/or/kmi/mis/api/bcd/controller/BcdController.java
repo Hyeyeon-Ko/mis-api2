@@ -6,7 +6,6 @@ import kr.or.kmi.mis.api.bcd.model.request.BcdNotificationRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
 import kr.or.kmi.mis.api.bcd.service.BcdService;
-import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.cmm.model.response.ApiResponse;
 import kr.or.kmi.mis.cmm.model.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 public class BcdController {
 
     private final BcdService bcdService;
-    private final NotificationSendService notificationSendService;
 
     @Operation(summary = "create bcd apply", description = "유저 > 명함신청 시 사용")
     @PostMapping
@@ -34,7 +32,6 @@ public class BcdController {
         bcdService.applyBcdByLeader(bcdRequestDTO);
         return ResponseWrapper.success();
     }
-
 
     @Operation(summary = "modify bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 수정 시 사용")
     @PostMapping(value = "/update")
@@ -60,7 +57,7 @@ public class BcdController {
     @Operation(summary = "send Receipt Notification", description = "관리자 > 전체 신청내역 > 명함 수령 요청 알림 전송")
     @PostMapping("/noti")
     public ApiResponse<?> sendReceiptNoti(@RequestBody BcdNotificationRequestDTO request) {
-        notificationSendService.sendBcdReceipt(request.getDraftIds());
+        bcdService.sendReceiptBcd(request.getDraftIds());
         return ResponseWrapper.success();
     }
 }

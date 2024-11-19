@@ -24,7 +24,7 @@ public class TonerManageController {
     @Operation(summary = "get TonerManage List by Center", description = "센터별 토너 관리표 조회")
     @GetMapping("/list")
     public ApiResponse<List<TonerExcelResponseDTO>> getTonerList(String instCd) {
-        return ResponseWrapper.success(tonerManageService.getTonerList(instCd));
+        return ResponseWrapper.success(tonerManageService.getCenterTonerList(instCd));
     }
 
     @Operation(summary = "get TonerManage List", description = "전국 토너 관리표 조회")

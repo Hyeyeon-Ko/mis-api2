@@ -54,14 +54,10 @@ public class RentalExcelServiceImpl implements RentalExcelService {
     public byte[] generateExcel(List<Long> detailIds) throws IOException {
         List<RentalDetail> rentalDetails = rentalDetailRepository.findAllByDetailIdIn(detailIds);
 
-        Workbook wb = new XSSFWorkbook();
-        try {
-            byte[] excelData = createExcelData(rentalDetails);
-            return excelData;
+        try (Workbook _ = new XSSFWorkbook()) {
+            return createExcelData(rentalDetails);
         } catch (Exception e) {
             throw new IOException("Error generating Excel file", e);
-        } finally {
-            wb.close();
         }
     }
 
@@ -244,8 +240,7 @@ public class RentalExcelServiceImpl implements RentalExcelService {
 
     @Override
     public byte[] generateTotalExcel() throws IOException {
-        Workbook wb = new XSSFWorkbook();
-        try {
+        try (Workbook wb = new XSSFWorkbook()) {
             // 1. 전국센터 시트 생성
             createSummarySheet(wb);
 
@@ -258,8 +253,6 @@ public class RentalExcelServiceImpl implements RentalExcelService {
             return baos.toByteArray();
         } catch (Exception e) {
             throw new IOException("Error generating Excel file", e);
-        } finally {
-            wb.close();
         }
     }
 
@@ -413,30 +406,19 @@ public class RentalExcelServiceImpl implements RentalExcelService {
     }
 
     private String convertCenterNameToInstCd(String centerName) {
-        switch (centerName) {
-            case "재단본부":
-                return "100";
-            case "본원센터":
-                return "111";
-            case "광화문":
-                return "119";
-            case "강남센터":
-                return "113";
-            case "여의도센터":
-                return "112";
-            case "수원센터":
-                return "211";
-            case "대구센터":
-                return "611";
-            case "부산센터":
-                return "612";
-            case "광주센터":
-                return "711";
-            case "제주센터":
-                return "811";
-            default:
-                throw new IllegalArgumentException("Unknown center name: " + centerName);
-        }
+        return switch (centerName) {
+            case "재단본부" -> "100";
+            case "본원센터" -> "111";
+            case "광화문" -> "119";
+            case "강남센터" -> "113";
+            case "여의도센터" -> "112";
+            case "수원센터" -> "211";
+            case "대구센터" -> "611";
+            case "부산센터" -> "612";
+            case "광주센터" -> "711";
+            case "제주센터" -> "811";
+            default -> throw new IllegalArgumentException("Unknown center name: " + centerName);
+        };
     }
 
     private void createSummaryHeader(Sheet sheet, CellStyle headerStyle) {
@@ -461,20 +443,14 @@ public class RentalExcelServiceImpl implements RentalExcelService {
     private void createCell(Row row, int column, Object value, CellStyle borderStyle, CellStyle centeredStyle) {
         Cell cell = row.createCell(column);
 
-        if (value == null) {
-            cell.setCellValue("");
-        } else if (value instanceof String) {
-            cell.setCellValue((String) value);
-        } else if (value instanceof Integer) {
-            cell.setCellValue((Integer) value);
-        } else if (value instanceof Long) {
-            cell.setCellValue((Long) value);
-        } else if (value instanceof Boolean) {
-            cell.setCellValue((Boolean) value);
-        } else if (value instanceof Double) {
-            cell.setCellValue((Double) value);
-        } else {
-            cell.setCellValue(value.toString());
+        switch (value) {
+            case null -> cell.setCellValue("");
+            case String s -> cell.setCellValue(s);
+            case Integer i -> cell.setCellValue(i);
+            case Long l -> cell.setCellValue(l);
+            case Boolean b -> cell.setCellValue(b);
+            case Double v -> cell.setCellValue(v);
+            default -> cell.setCellValue(value.toString());
         }
 
         cell.setCellStyle(centeredStyle);

@@ -24,8 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -63,8 +61,6 @@ public class TonerServiceImpl implements TonerService {
 
     /**
      * 나의 토너 신청내역 TonerMyResponseDTO 리스트로 반환.
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
      * @return TonerMyResponseDTO 리스트
      */
     @Override
@@ -75,9 +71,6 @@ public class TonerServiceImpl implements TonerService {
 
     /**
      * 나의 토너 신청내역 TonerMyResponseDTO 페이지로 반환.
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
-     * @param pageable
      * @return TonerMyResponseDTO 페이지
      */
     @Override
@@ -88,24 +81,11 @@ public class TonerServiceImpl implements TonerService {
 
     /**
      * 나의 토너 승인대기내역 TonerPendingListResponseDTO 리스트로 반환.
-     * @param applyRequestDTO
-     * @return
      */
     @Override
     @Transactional(readOnly = true)
     public List<TonerPendingListResponseDTO> getMyTonerPendingList(ApplyRequestDTO applyRequestDTO) {
         return new ArrayList<>(this.getMyTonerPendingMasterList(applyRequestDTO.getUserId()));
-    }
-
-    public LocalDateTime convertStringToLocalDateTime(String dateString) {
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        try {
-            return LocalDateTime.parse(dateString, formatter);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
     }
 
     public List<TonerPendingListResponseDTO> getMyTonerPendingMasterList(String userId) {
@@ -122,9 +102,6 @@ public class TonerServiceImpl implements TonerService {
 
     /**
      * 토너 전체 신청내역 TonerMasterResponseDTO 페이지로 반환.
-     * @param applyRequestDTO
-     * @param postSearchRequestDTO
-     * @param page
      * @return TonerMasterResponseDTO 페이지
      */
     @Override
