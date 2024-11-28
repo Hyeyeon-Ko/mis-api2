@@ -77,7 +77,52 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         String approver = infoService.getUserInfoDetail(userId).getUserName();
         String drafterEmail = infoService.getUserInfoDetail(docMaster.getDrafterId()).getEmail();
 
-        // 2. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
+        docMaster.confirm(isLastApprover ? "E" : "A", approver, userId);
+
+        // 문서번호 생성해, 업데이트
+        if (isLastApprover) {
+            DocDetail lastDocDetail = docDetailRepository
+                    .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
+
+            String docId = "";
+            if (lastDocDetail != null) {
+                docId = createDocId(lastDocDetail.getDocId());
+            } else {
+                docId = createDocId("");
+            }
+
+            docDetail.updateDocId(docId);
+        }
+
+        // 2. 알림 및 메일 전송
+        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
+                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
+
+        String docType = Objects.equals(docDetail.getDivision(), "A") ? "수신문서" : "발신문서";
+
+        String mailTitle = "[승인완료] 신청하신 " + docType + "가 접수되었습니다.";
+        String mailContent = "[승인완료] 신청하신 " + docType + "가 접수되었습니다.\n담당 부서를 방문해 주시기 바랍니다.\n\n승인 내역은 아래 링크에서 확인하실 수 있습니다:\nhttp://172.16.250.87/login\n\n감사합니다.";
+
+        if(isLastApprover) {
+            notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
+            emailService.sendEmailWithDynamicCredentials(
+                    "smtp.sirteam.net",
+                    465,
+                    stdDetail.getEtcItem3(),
+                    stdDetail.getEtcItem4(),
+                    stdDetail.getEtcItem3(),
+                    drafterEmail,
+                    mailTitle,
+                    mailContent,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        // 3. 팀장, 파트장, 본부장 -> ADMIN 권한 및 사이드바 권한 취소 여부 결정
         String instCd = infoService.getUserInfoDetail(docMaster.getCurrentApproverId()).getInstCd();
         if (existsInStdDetail(docMaster.getCurrentApproverId(), "B005", instCd)) {
             return;
@@ -96,51 +141,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
             cancelAdminAndSidebarAuthorities(userId);
         }
 
-        docMaster.confirm(isLastApprover ? "E" : "A", approver, userId);
-        docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex() + 1);
-
-        // 문서번호 생성해, 업데이트
-        if (isLastApprover) {
-            DocDetail lastDocDetail = docDetailRepository
-                    .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision()).orElse(null);
-
-            String docId = "";
-            if (lastDocDetail != null) {
-                docId = createDocId(lastDocDetail.getDocId());
-            } else {
-                docId = createDocId("");
-            }
-
-            docDetail.updateDocId(docId);
-        }
-
-        // 3. 알림 및 메일 전송
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        String docType = Objects.equals(docDetail.getDivision(), "A") ? "수신문서" : "발신문서";
-
-        String mailTitle = "[승인완료] 신청하신 " + docType + "이 접수되었습니다.";
-        String mailContent = "[승인완료] 신청하신 " + docType + "이 접수되었습니다.\n담당 부서를 방문해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
-
-        if(isLastApprover) {
-            notificationSendService.sendDocApproval(docMaster.getDraftDate(), docMaster.getDrafterId(), docDetail.getDivision());
-            emailService.sendEmailWithDynamicCredentials(
-                    "smtp.sirteam.net",
-                    465,
-                    stdDetail.getEtcItem3(),
-                    stdDetail.getEtcItem4(),
-                    stdDetail.getEtcItem3(),
-                    drafterEmail,
-                    mailTitle,
-                    mailContent,
-                    null,
-                    null,
-                    null
-            );
-        }
+        docMaster.updateCurrentApproverIndex(docMaster.getCurrentApproverIndex());
     }
 
     /**

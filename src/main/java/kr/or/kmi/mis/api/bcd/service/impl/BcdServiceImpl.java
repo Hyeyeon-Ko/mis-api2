@@ -90,17 +90,19 @@ public class BcdServiceImpl implements BcdService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        // TODO: 이메일 제목 및 내용 수정하기.
-        String mailTitle = "";
-        String mailContent = "";
+        String mailTitle = "[승인요청] 명함 신청 건 승인 요청드립니다.";
+        String mailContent = "[승인요청] 아래와 같이 명함 신청 건이 접수되었습니다.\n승인 절차를 위해 확인 및 승인을 요청드립니다.\n\n▪ 신청자: " + bcdRequestDTO.getDrafter()
+                + "\n▪ 신청분류: 명함 신청\n▪ 접수 일자: " + LocalDate.now() + "\n\n신청 내역은 아래 링크에서 확인하실 수 있습니다:\nhttp://172.16.250.87/login"
+                + "\n\n확인 후 승인 부탁드립니다.\n감사합니다.";
 
+        // infoDetail.getEmail()
         emailService.sendEmailWithDynamicCredentials(
                 "smtp.sirteam.net",
                 465,
                 stdDetail.getEtcItem3(),
                 stdDetail.getEtcItem4(),
                 stdDetail.getEtcItem3(),
-                infoDetail.getEmail(),
+                "2024060034@kmi.or.kr",
                 mailTitle,
                 mailContent,
                 null,
@@ -400,7 +402,7 @@ public class BcdServiceImpl implements BcdService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         String mailTitle = "[수령안내] 신청하신 명함이 도착했습니다.";
-        String mailContent = "[수령안내] 신청하신 명함이 도착했습니다.\n담당 부서를 방문하여 명함을 수령하시고, 수령 확인 버튼을 눌러주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+        String mailContent = "[수령안내] 신청하신 명함이 도착했습니다.\n담당 부서를 방문하여 명함을 수령하시고, 수령 확인 버튼을 눌러주시기 바랍니다.\n\n신청 내역은 아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login\n\n감사합니다.";
 
         bcdDetails.forEach(bcdDetail -> {
             String recipientEmail = bcdDetail.getEmail();
