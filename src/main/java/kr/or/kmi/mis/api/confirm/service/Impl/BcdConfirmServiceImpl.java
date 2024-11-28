@@ -123,14 +123,13 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         if (approverArray.length == 3 && bcdMaster.getCurrentApproverIndex() == 1) {
             String lastApprover = approverArray[approverArray.length - 1];
 
-            // lastApprover
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
                     stdDetail.getEtcItem3(),
                     stdDetail.getEtcItem4(),
                     stdDetail.getEtcItem3(),
-                    "2024060034@kmi.or.kr",
+                    lastApprover,
                     mailTitle,
                     mailContent,
                     null,
@@ -191,7 +190,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         String mailTitle = "[반려] 명함 신청이 반려되었습니다.";
-        String mailContent = "[반려] 명함 신청이 반려되었습니다.\n반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+        String mailContent = "[반려] 명함 신청이 반려되었습니다.\n반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다:\nhttp://172.16.250.87/login";
 
         sendRejectionNotifications(bcdMaster, bcdDetail);
         emailService.sendEmailWithDynamicCredentials(

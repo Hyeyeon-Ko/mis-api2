@@ -169,14 +169,13 @@ public class DocServiceImpl implements DocService {
 
         if (docMaster.getApproverChain().split(", ").length == 2) {
 
-            // infoDetailResponseDTO.getEmail()
             emailService.sendEmailWithDynamicCredentials(
                     "smtp.sirteam.net",
                     465,
                     stdDetail.getEtcItem3(),
                     stdDetail.getEtcItem4(),
                     stdDetail.getEtcItem3(),
-                    "2024060034@kmi.or.kr",
+                    infoDetailResponseDTO.getEmail(),
                     mailTitle,
                     mailContent,
                     null,
