@@ -115,9 +115,10 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        // TODO: 이메일 제목 및 내용 수정하기.
-        String mailTitle = "";
-        String mailContent = "";
+        String mailTitle = "[승인요청] 명함 신청 건 승인 요청드립니다.";
+        String mailContent = "[승인요청] 아래와 같이 명함 신청 건이 접수되었습니다.\n승인 절차를 위해 확인 및 승인을 요청드립니다.\n\n▪ 신청자: " + bcdMaster.getDrafter()
+                + "\n▪ 신청분류: 명함 신청\n▪ 접수 일자: " + bcdMaster.getDraftDate().toLocalDate() + "\n\n신청 내역은 아래 링크에서 확인하실 수 있습니다:\nhttp://172.16.250.87/login"
+                + "\n\n확인 후 승인 부탁드립니다.\n감사합니다.";
 
         if (approverArray.length == 3 && bcdMaster.getCurrentApproverIndex() == 1) {
             String lastApprover = approverArray[approverArray.length - 1];
@@ -189,7 +190,7 @@ public class BcdConfirmServiceImpl implements BcdConfirmService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         String mailTitle = "[반려] 명함 신청이 반려되었습니다.";
-        String mailContent = "[반려] 명함 신청이 반려되었습니다.\n반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다.\nhttp://172.16.250.87/login";
+        String mailContent = "[반려] 명함 신청이 반려되었습니다.\n반려 사유를 확인하신 후, 재신청해 주시기 바랍니다.\n\n아래 링크에서 확인하실 수 있습니다:\nhttp://172.16.250.87/login";
 
         sendRejectionNotifications(bcdMaster, bcdDetail);
         emailService.sendEmailWithDynamicCredentials(
