@@ -3,8 +3,6 @@ package kr.or.kmi.mis.api.bcd.repository.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
 import kr.or.kmi.mis.api.bcd.model.entity.QBcdDetail;
@@ -53,9 +51,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                                 bcdDetail.lastupdtDate,
                                 bcdDetail.lastUpdtr,
                                 bcdMaster.status,
-                                Expressions.constant(docType),
-                                bcdMaster.approverChain,
-                                bcdMaster.currentApproverIndex
+                                Expressions.constant(docType)
                         )
                 )
                 .from(bcdMaster)
@@ -66,8 +62,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
-                        approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .orderBy(bcdMaster.rgstDt.asc())
                 .offset(page.getOffset())
@@ -83,8 +78,7 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),    // 검색 - 등록일자(시작)
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),   // 검색 - 등록일자(끝)
-                        approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)   // 검색 - 등록일자(끝)
                 )
                 .fetchOne();
 
@@ -110,21 +104,15 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                         bcdDetail.lastupdtDate,
                         bcdDetail.lastUpdtr,
                         bcdMaster.status,
-                        Expressions.constant(docType),
-                        bcdMaster.approverChain,
-                        bcdMaster.currentApproverIndex
+                        Expressions.constant(docType)
                         )
                 )
                 .from(bcdMaster)
                 .join(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-                        (bcdMaster.drafterId.eq(applyRequestDTO.getUserId()).and(bcdMaster.status.eq("A")).and(bcdMaster.currentApproverIndex.eq(0)))
-                                .or(
-                                        bcdDetail.userId.eq(applyRequestDTO.getUserId())
-                                                .and(bcdMaster.status.eq("A"))
-                                                .and(bcdMaster.currentApproverIndex.eq(0))
-                                                .and(bcdMaster.drafterId.ne(applyRequestDTO.getUserId()))
-                                )
+                        bcdDetail.userId.eq(applyRequestDTO.getUserId())
+                                .and(bcdMaster.status.eq("A"))
+                                .and(bcdMaster.drafterId.ne(applyRequestDTO.getUserId()))
                 )
                 .orderBy(bcdMaster.rgstDt.desc())
                 .offset(page.getOffset())
@@ -136,13 +124,9 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                 .from(bcdMaster)
                 .join(bcdDetail).on(bcdMaster.draftId.eq(bcdDetail.draftId))
                 .where(
-                        (bcdMaster.drafterId.eq(applyRequestDTO.getUserId()).and(bcdMaster.status.eq("A")).and(bcdMaster.currentApproverIndex.eq(0)))
-                                .or(
-                                        bcdDetail.userId.eq(applyRequestDTO.getUserId())
-                                                .and(bcdMaster.status.eq("A"))
-                                                .and(bcdMaster.currentApproverIndex.eq(0))
-                                                .and(bcdMaster.drafterId.ne(applyRequestDTO.getUserId()))
-                                )
+                        bcdDetail.userId.eq(applyRequestDTO.getUserId())
+                                .and(bcdMaster.status.eq("A"))
+                                .and(bcdMaster.drafterId.ne(applyRequestDTO.getUserId()))
                 )
                 .fetchOne();
 
@@ -160,19 +144,9 @@ public class BcdPendingQueryRepositoryImpl implements BcdPendingQueryRepository 
                         this.afterStartDate(StringUtils.hasLength(postSearchRequestDTO.getStartDate()) ?
                                 LocalDate.parse(postSearchRequestDTO.getStartDate()) : null),
                         this.beforeEndDate(StringUtils.hasLength(postSearchRequestDTO.getEndDate()) ?
-                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null),
-                        approverMatchCondition(applyRequestDTO.getUserId(), bcdMaster.approverChain, bcdMaster.currentApproverIndex)
+                                LocalDate.parse(postSearchRequestDTO.getEndDate()) : null)
                 )
                 .fetchOne();
-    }
-
-    private BooleanExpression approverMatchCondition(String userId, StringPath approverChain, NumberPath<Integer> currentApproverIndex) {
-        return Expressions.booleanTemplate(
-                "json_unquote(json_extract(concat('[\"', replace({0}, ', ', '\",\"'), '\"]'), concat('$[', {1}, ']'))) = {2}",
-                approverChain,
-                currentApproverIndex,
-                userId
-        );
     }
 
     private BooleanExpression afterStartDate(LocalDate startDate) {

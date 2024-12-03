@@ -1,9 +1,6 @@
 package kr.or.kmi.mis.api.bcd.service.impl;
 
 import kr.or.kmi.mis.api.apply.model.request.ApplyRequestDTO;
-import kr.or.kmi.mis.api.authority.model.request.AuthorityRequestDTO;
-import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
-import kr.or.kmi.mis.api.authority.service.AuthorityService;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdDetail;
 import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
 import kr.or.kmi.mis.api.bcd.model.request.BcdRequestDTO;
@@ -20,13 +17,9 @@ import kr.or.kmi.mis.api.bcd.service.BcdService;
 import kr.or.kmi.mis.api.noti.service.NotificationSendService;
 import kr.or.kmi.mis.api.std.model.entity.StdDetail;
 import kr.or.kmi.mis.api.std.model.entity.StdGroup;
-import kr.or.kmi.mis.api.std.model.request.StdDetailRequestDTO;
 import kr.or.kmi.mis.api.std.repository.StdDetailRepository;
 import kr.or.kmi.mis.api.std.repository.StdGroupRepository;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.std.service.StdDetailService;
-import kr.or.kmi.mis.api.std.service.StdGroupService;
-import kr.or.kmi.mis.api.user.model.response.InfoDetailResponseDTO;
 import kr.or.kmi.mis.api.user.service.EmailService;
 import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
@@ -52,15 +45,11 @@ public class BcdServiceImpl implements BcdService {
 
     private final BcdMasterRepository bcdMasterRepository;
     private final BcdDetailRepository bcdDetailRepository;
-    private final AuthorityRepository authorityRepository;
     private final BcdHistoryService bcdHistoryService;
     private final InfoService infoService;
     private final StdBcdService stdBcdService;
-    private final AuthorityService authorityService;
-    private final StdDetailService stdDetailService;
     private final EmailService emailService;
     private final NotificationSendService notificationSendService;
-    private final StdGroupService stdGroupService;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
 
@@ -70,94 +59,8 @@ public class BcdServiceImpl implements BcdService {
     @Override
     @Transactional
     public void applyBcd(BcdRequestDTO bcdRequestDTO) {
-
-        // 1. 명함 신청 로직
         BcdMaster bcdMaster = saveBcdMaster(bcdRequestDTO);
         saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
-
-        String firstApproverId = bcdRequestDTO.getApproverIds().getFirst();
-        InfoDetailResponseDTO infoDetail = infoService.getUserInfoDetail(firstApproverId);
-
-        // 2-1. ADMIN 권한 부여 및 사이드바 권한 부여
-        grantAdminAuthorityIfAbsent(firstApproverId, infoDetail);
-
-        // 2-2. 권한 업데이트 필요 여부 체크 및 업데이트
-        updateSidebarPermissionsIfNeeded(firstApproverId);
-
-        // 3. 승인자 메일 전송
-        StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-        StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
-
-        String mailTitle = "[승인요청] 명함 신청 건 승인 요청드립니다.";
-        String mailContent = "[승인요청] 아래와 같이 명함 신청 건이 접수되었습니다.\n승인 절차를 위해 확인 및 승인을 요청드립니다.\n\n▪ 신청자: " + bcdRequestDTO.getDrafter()
-                + "\n▪ 신청분류: 명함 신청\n▪ 접수 일자: " + LocalDate.now() + "\n\n신청 내역은 아래 링크에서 확인하실 수 있습니다:\nhttp://172.16.250.87/login"
-                + "\n\n확인 후 승인 부탁드립니다.\n감사합니다.";
-
-        emailService.sendEmailWithDynamicCredentials(
-                "smtp.sirteam.net",
-                465,
-                stdDetail.getEtcItem3(),
-                stdDetail.getEtcItem4(),
-                stdDetail.getEtcItem3(),
-                infoDetail.getEmail(),
-                mailTitle,
-                mailContent,
-                null,
-                null,
-                null
-        );
-    }
-
-    private void grantAdminAuthorityIfAbsent(String firstApproverId, InfoDetailResponseDTO infoDetail) {
-        boolean authorityExists = authorityRepository.findAll()
-                .stream()
-                .anyMatch(authority -> authority.getUserId().equals(firstApproverId));
-
-        if (!authorityExists) {
-            AuthorityRequestDTO authorityRequest = AuthorityRequestDTO.builder()
-                    .userId(firstApproverId)
-                    .userNm(infoDetail.getUserName())
-                    .userRole("ADMIN")
-                    .build();
-
-            authorityService.addAdmin(authorityRequest);
-
-            // 사이드바 권한 추가
-            stdDetailService.addInfo(
-                    StdDetailRequestDTO.builder()
-                            .detailCd(firstApproverId)
-                            .groupCd("B002")
-                            .detailNm(infoDetail.getInstNm() + " " + infoDetail.getDeptNm())
-                            .etcItem1(infoDetail.getUserName())
-                            .etcItem2("A-2")
-                            .build()
-            );
-        }
-    }
-
-    private void updateSidebarPermissionsIfNeeded(String firstApproverId) {
-        StdGroup groupB002 = stdGroupRepository.findByGroupCd("B002")
-                .orElseThrow(() -> new IllegalArgumentException("Group not found: B002"));
-        StdDetail detailB002 = findStdDetail(groupB002, firstApproverId);
-
-        boolean needsUpdate = false;
-
-        List<String> allowedValues = Arrays.asList("A", "A-1", "A-2");
-
-        if (!allowedValues.contains(detailB002.getEtcItem2()) && !allowedValues.contains(detailB002.getEtcItem3())) {
-            detailB002.updateEtcItem3("A-2");
-            needsUpdate = true;
-        }
-
-        if (stdGroupService.findStdGroupAndCheckFirstApprover("B005", firstApproverId)) {
-            needsUpdate = false;
-        }
-
-        if (needsUpdate) {
-            stdDetailRepository.save(detailB002);
-        }
     }
 
     private String generateDraftId() {
@@ -181,29 +84,16 @@ public class BcdServiceImpl implements BcdService {
         String draftId = generateDraftId();
 
         BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity(draftId, "A");
+        bcdMaster.setRgstDt(LocalDateTime.now());
+        bcdMaster.setRgstrId(bcdRequestDTO.getDrafter());
         return bcdMasterRepository.save(bcdMaster);
     }
 
     private void saveBcdDetail(BcdRequestDTO bcdRequestDTO, String draftId) {
         BcdDetail bcdDetail = bcdRequestDTO.toDetailEntity(draftId);
+        bcdDetail.setRgstDt(LocalDateTime.now());
+        bcdDetail.setRgstrId(bcdRequestDTO.getDrafter());
         bcdDetailRepository.save(bcdDetail);
-    }
-
-    private StdDetail findStdDetail(StdGroup group, String detailCd) {
-        return stdDetailRepository.findByGroupCdAndDetailCd(group, detailCd)
-                .orElseThrow(() -> new IllegalArgumentException("Detail not found for group: " + group.getGroupCd()));
-    }
-
-    @Override
-    @Transactional
-    public void applyBcdByLeader(BcdRequestDTO bcdRequestDTO) {
-        String draftId = generateDraftId();
-
-        BcdMaster bcdMaster = bcdRequestDTO.toMasterEntity(draftId, "B");
-        bcdMaster.updateRespondDate(LocalDateTime.now());
-        bcdMasterRepository.save(bcdMaster);
-
-        saveBcdDetail(bcdRequestDTO, bcdMaster.getDraftId());
     }
 
     @Override
@@ -218,6 +108,8 @@ public class BcdServiceImpl implements BcdService {
         existingDetail.update(updateBcdRequestDTO, updtr);
         existingMaster.updateTitle(updateBcdRequestDTO);
 
+        existingDetail.setUpdtDt(LocalDateTime.now());
+        existingDetail.setUpdtrId(existingMaster.getDrafter());
         bcdDetailRepository.save(existingDetail);
     }
 
@@ -336,7 +228,7 @@ public class BcdServiceImpl implements BcdService {
      * @return List<BcdPendingResponseDTO>
      */
     public List<BcdPendingResponseDTO> getMyPndMasterList(String userId) {
-        List<BcdMaster> myBcdMasters = bcdMasterRepository.findByDrafterIdAndStatusAndCurrentApproverIndex(userId, "A", 0)
+        List<BcdMaster> myBcdMasters = bcdMasterRepository.findByDrafterIdAndStatus(userId, "A")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         return myBcdMasters.stream()
                 .map(bcdMaster -> {
@@ -360,7 +252,7 @@ public class BcdServiceImpl implements BcdService {
 
         // 2. 명함상세의 draftId로 BcdMaster와 매핑해 PendingResponseDTO로 반환한다.
         return bcdDetails.stream()
-                .map(bcdDetail -> bcdMasterRepository.findByDraftIdAndStatusAndCurrentApproverIndexAndDrafterIdNot(bcdDetail.getDraftId(), "A", 0, userId)
+                .map(bcdDetail -> bcdMasterRepository.findByDraftIdAndStatusAndDrafterIdNot(bcdDetail.getDraftId(), "A", userId)
                         .map(newBcdMaster -> BcdPendingResponseDTO.of(newBcdMaster, bcdDetail))
                         .orElse(null)).filter(Objects::nonNull).toList();
     }

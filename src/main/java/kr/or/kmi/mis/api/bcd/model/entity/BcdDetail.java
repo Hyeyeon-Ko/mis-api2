@@ -2,6 +2,7 @@ package kr.or.kmi.mis.api.bcd.model.entity;
 
 import jakarta.persistence.*;
 import kr.or.kmi.mis.api.bcd.model.request.BcdUpdateRequestDTO;
+import kr.or.kmi.mis.cmm.model.entity.BaseSystemFieldEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @ToString
 @Entity
 @Table(name = "hrmtbcdd")
-public class BcdDetail {
+public class BcdDetail extends BaseSystemFieldEntity {
 
     @Id
     @Column(name = "draft_id", length = 12)

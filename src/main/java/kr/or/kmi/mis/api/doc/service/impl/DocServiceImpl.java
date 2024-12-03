@@ -101,10 +101,14 @@ public class DocServiceImpl implements DocService {
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
         docMaster.updateApproverChain(stdDetail.getFirst().getEtcItem3());
+        docMaster.setRgstDt(LocalDateTime.now());
+        docMaster.setRgstrId(receiveDocRequestDTO.getDrafter());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
         DocDetail docDetail = receiveDocRequestDTO.toDetailEntity(docMaster.getDraftId());
+        docDetail.setRgstDt(LocalDateTime.now());
+        docDetail.setRgstrId(receiveDocRequestDTO.getDrafter());
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
@@ -119,6 +123,8 @@ public class DocServiceImpl implements DocService {
         // 1. DocMaster 저장
         DocMaster docMaster = receiveDocRequestDTO.toMasterEntity(draftId, "E");
         docMaster.updateRespondDate(LocalDateTime.now());
+        docMaster.setRgstDt(LocalDateTime.now());
+        docMaster.setRgstrId(receiveDocRequestDTO.getDrafter());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -128,6 +134,8 @@ public class DocServiceImpl implements DocService {
         String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
 
         docDetail.updateDocId(docId);
+        docDetail.setRgstDt(LocalDateTime.now());
+        docDetail.setRgstrId(receiveDocRequestDTO.getDrafter());
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
@@ -141,10 +149,14 @@ public class DocServiceImpl implements DocService {
 
         // 1. DocMaster 저장
         DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId, "A");
+        docMaster.setRgstDt(LocalDateTime.now());
+        docMaster.setRgstrId(sendDocRequestDTO.getDrafter());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
         DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
+        docDetail.setRgstDt(LocalDateTime.now());
+        docDetail.setRgstrId(sendDocRequestDTO.getDrafter());
         docDetailRepository.save(docDetail);
 
         String firstApproverId = sendDocRequestDTO.getApproverIds().getFirst();
@@ -175,7 +187,7 @@ public class DocServiceImpl implements DocService {
                     stdDetail.getEtcItem3(),
                     stdDetail.getEtcItem4(),
                     stdDetail.getEtcItem3(),
-                    infoDetailResponseDTO.getEmail(),
+                    "khy33355@kmi.or.kr",
                     mailTitle,
                     mailContent,
                     null,
@@ -193,6 +205,8 @@ public class DocServiceImpl implements DocService {
         // 1. DocMaster 저장
         DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId,"E");
         docMaster.updateRespondDate(LocalDateTime.now());
+        docMaster.setRgstDt(LocalDateTime.now());
+        docMaster.setRgstrId(sendDocRequestDTO.getDrafter());
         docMaster = docMasterRepository.save(docMaster);
 
         // 2. DocDetail 저장
@@ -202,6 +216,8 @@ public class DocServiceImpl implements DocService {
         String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
 
         docDetail.updateDocId(docId);
+        docDetail.setRgstDt(LocalDateTime.now());
+        docDetail.setRgstrId(sendDocRequestDTO.getDrafter());
         docDetailRepository.save(docDetail);
 
         // 3. File 업로드
@@ -257,27 +273,6 @@ public class DocServiceImpl implements DocService {
         } else {
             return stdDetail.getEtcItem1() + "0000000001";
         }
-    }
-
-    private DocMaster saveDocMasterAndDetail(SendDocRequestDTO sendDocRequestDTO, String docMasterStatus) {
-        String draftId = generateDraftId();
-
-        // 1. DocMaster 저장
-        DocMaster docMaster = sendDocRequestDTO.toMasterEntity(draftId, docMasterStatus);
-        docMaster.updateRespondDate(LocalDateTime.now());
-        docMaster = docMasterRepository.save(docMaster);
-
-        // 2. DocDetail 저장
-        DocDetail docDetail = sendDocRequestDTO.toDetailEntity(docMaster.getDraftId());
-        DocDetail lastDocDetail = docDetailRepository
-                .findFirstByDocIdNotNullAndDivisionOrderByDocIdDesc(docDetail.getDivision())
-                .orElse(null);
-        String docId = (lastDocDetail != null) ? createDocId(lastDocDetail.getDocId()) : createDocId("");
-
-        docDetail.updateDocId(docId);
-        docDetailRepository.save(docDetail);
-
-        return docMaster;
     }
 
     private String[] handleFileUpload(String drafter, String centerNm, String division, MultipartFile file) throws IOException {

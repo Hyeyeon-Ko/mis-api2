@@ -58,27 +58,15 @@ public class BcdMaster extends BaseSystemFieldEntity {
     @Column(length = 1000)
     private String rejectReason;
 
-    @Column(length = 1000)
-    private String approverChain;
-
-    @Column(nullable = false)
-    private Integer currentApproverIndex;
-
     private String status;
 
     @Builder
-    public BcdMaster(String draftId, String drafterId, String drafter, String teamNm, String korNm, String approverChain, String status) {
+    public BcdMaster(String draftId, String drafterId, String drafter, String teamNm, String korNm, String status) {
         this.draftId = draftId;
         this.title = String.format("[%s]명함신청서(%s)", teamNm, korNm);
         this.drafterId = drafterId;
         this.drafter = drafter;
-        this.approverChain = approverChain;
-        this.currentApproverIndex = 0;
         this.status = status;
-    }
-
-    public String getCurrentApproverId() {
-        return this.approverChain.split(", ")[this.currentApproverIndex];
     }
 
     public void updateEndDate(LocalDateTime endDate) {
@@ -104,10 +92,6 @@ public class BcdMaster extends BaseSystemFieldEntity {
         this.rejectReason = bcdDisapproveRequestDTO.getRejectReason();
         this.respondDate = bcdDisapproveRequestDTO.getRespondDate();
         this.status = bcdDisapproveRequestDTO.getStatus();
-    }
-
-    public void updateCurrentApproverIndex(Integer currentApproverIndex) {
-        this.currentApproverIndex = currentApproverIndex;
     }
 
     // 발주 -> 발주일시 업데이트

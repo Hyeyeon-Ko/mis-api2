@@ -20,10 +20,8 @@ public class BcdPendingResponseDTO {
     private String lastUpdater;        // 최종 수정자
     private String applyStatus;
     private String docType;
-    private String approverChain;
-    private int currentApproverIndex;
 
-    public BcdPendingResponseDTO(String draftId, String title, String instCd, String instNm, LocalDateTime draftDate, String drafter, LocalDateTime lastUpdateDate, String lastUpdater, String applyStatus, String docType, String approverChain, int currentApproverIndex) {
+    public BcdPendingResponseDTO(String draftId, String title, String instCd, String instNm, LocalDateTime draftDate, String drafter, LocalDateTime lastUpdateDate, String lastUpdater, String applyStatus, String docType) {
         this.draftId = draftId;
         this.title = title;
         this.instCd = instCd;
@@ -34,8 +32,6 @@ public class BcdPendingResponseDTO {
         this.lastUpdater = lastUpdater;
         this.applyStatus = applyStatus;
         this.docType = docType;
-        this.approverChain = approverChain;
-        this.currentApproverIndex = currentApproverIndex;
     }
 
     // BcdMaster Entity -> BcdPending response Dto
