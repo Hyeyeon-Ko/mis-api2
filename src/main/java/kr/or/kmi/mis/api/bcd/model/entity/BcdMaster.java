@@ -104,6 +104,10 @@ public class BcdMaster extends BaseSystemFieldEntity {
         this.title = String.format("[%s]명함신청서(%s)", updateBcdRequestDTO.getTeamNm(), updateBcdRequestDTO.getKorNm());
     }
 
+    public void updateStatus() {
+        this.status = "E";
+    }
+
     public void updateRespondDate(LocalDateTime ResponseDate) {
         this.respondDate = ResponseDate;
     }

@@ -275,7 +275,7 @@ public class BcdServiceImpl implements BcdService {
     }
 
     /**
-     * 수령 안내 메일 및 알리 전송
+     * 수령 안내 메일 및 알림 전송
      * @param draftIds draftIds
      */
     @Override
@@ -283,10 +283,17 @@ public class BcdServiceImpl implements BcdService {
 
         List<BcdDetail> bcdDetails = bcdDetailRepository.findAllByDraftIdIn(draftIds);
 
-        // 알림 전송
+        // 1. 처리완료 상태
+        bcdDetails.forEach(bcdDetail -> {
+            BcdMaster bcdMaster = bcdMasterRepository.findById(bcdDetail.getDraftId())
+                    .orElseThrow(() -> new  IllegalArgumentException("Not Found"));
+            bcdMaster.updateStatus();
+        });
+
+        // 2. 알림 전송
         notificationSendService.sendBcdReceipt(draftIds);
 
-        // 메일 전송
+        // 3. 메일 전송
         StdGroup stdGroup = stdGroupRepository.findByGroupCd("B003")
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         StdDetail stdDetail = stdDetailRepository.findByGroupCdAndDetailCd(stdGroup, "003")
