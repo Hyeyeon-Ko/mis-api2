@@ -2,8 +2,6 @@ package kr.or.kmi.mis.api.confirm.service.Impl;
 
 import kr.or.kmi.mis.api.authority.model.entity.Authority;
 import kr.or.kmi.mis.api.authority.repository.AuthorityRepository;
-import kr.or.kmi.mis.api.bcd.model.entity.BcdMaster;
-import kr.or.kmi.mis.api.bcd.repository.BcdMasterRepository;
 import kr.or.kmi.mis.api.confirm.service.DocConfirmService;
 import kr.or.kmi.mis.api.doc.model.entity.DocDetail;
 import kr.or.kmi.mis.api.doc.model.entity.DocMaster;
@@ -37,7 +35,6 @@ public class DocConfirmServiceImpl implements DocConfirmService {
     private final AuthorityRepository authorityRepository;
     private final StdGroupRepository stdGroupRepository;
     private final StdDetailRepository stdDetailRepository;
-    private final BcdMasterRepository bcdMasterRepository;
 
     /**
      * DocMaster 엔티티를 draftId로 조회하여 반환.
@@ -129,15 +126,12 @@ public class DocConfirmServiceImpl implements DocConfirmService {
         }
 
         // 권한 취소 여부 결정
-        List<BcdMaster> bcdMasterList = bcdMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found"));
         List<DocMaster> docMasterList = docMasterRepository.findAllByStatusAndCurrentApproverIndex("A", 0)
                 .orElseThrow(() -> new IllegalArgumentException("Not Found"));
 
-        boolean shouldCancelAdminByBcd = shouldCancelAdmin(bcdMasterList, userId);
         boolean shouldCancelAdminByDoc = shouldCancelAdmin(docMasterList, userId);
 
-        if (shouldCancelAdminByBcd && shouldCancelAdminByDoc) {
+        if (shouldCancelAdminByDoc) {
             cancelAdminAndSidebarAuthorities(userId);
         }
 
@@ -230,9 +224,7 @@ public class DocConfirmServiceImpl implements DocConfirmService {
      */
     private boolean shouldCancelAdmin(List<?> masterList, String approverId) {
         return masterList.stream().noneMatch(master -> {
-            if (master instanceof BcdMaster) {
-                return ((BcdMaster) master).getCurrentApproverId().equals(approverId);
-            } else if (master instanceof DocMaster) {
+            if (master instanceof DocMaster) {
                 return ((DocMaster) master).getCurrentApproverId().equals(approverId);
             }
             return false;

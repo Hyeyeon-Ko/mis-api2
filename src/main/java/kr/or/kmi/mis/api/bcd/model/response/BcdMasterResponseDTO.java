@@ -23,8 +23,6 @@ public class BcdMasterResponseDTO {
     private String lastUpdtId;
     private LocalDateTime lastUpdtDate;
     private String docType;
-    private String approverChain;
-    private int currentApproverIndex;
 
     // BcdMaster Entity -> BcdMaster response Dto
     public static BcdMasterResponseDTO of(BcdMaster bcdMaster, String instCd, String instNm) {

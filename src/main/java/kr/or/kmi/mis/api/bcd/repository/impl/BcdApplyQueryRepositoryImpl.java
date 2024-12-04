@@ -15,7 +15,6 @@ import kr.or.kmi.mis.api.bcd.repository.BcdApplyQueryRepository;
 import kr.or.kmi.mis.api.confirm.model.response.BcdHistoryResponseDTO;
 import kr.or.kmi.mis.api.exception.EntityNotFoundException;
 import kr.or.kmi.mis.api.std.service.StdBcdService;
-import kr.or.kmi.mis.api.user.service.InfoService;
 import kr.or.kmi.mis.cmm.model.request.PostSearchRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -49,7 +48,6 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
     private final QBcdMaster bcdMaster = QBcdMaster.bcdMaster;
     private final QBcdDetail bcdDetail = QBcdDetail.bcdDetail;
     private final StdBcdService stdBcdService;
-    private final InfoService infoService;
 
     @Override
     public Page<BcdMasterResponseDTO> getBcdApply2(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO, Pageable page) {
@@ -71,9 +69,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                             bcdMaster.status,
                             bcdDetail.lastUpdtr,
                             bcdDetail.lastupdtDate,
-                            Expressions.constant(docType),
-                            bcdMaster.approverChain,
-                            bcdMaster.currentApproverIndex
+                            Expressions.constant(docType)
                             )
                 )
                 .from(bcdMaster)
@@ -137,7 +133,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .fetch();
 
         List<BcdMyResponseDTO> resultSet = bcdMasters.stream()
-                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
+                .map(BcdMyResponseDTO::of)
                 .collect(Collectors.toList());
 
         Long count = queryFactory.select(bcdMaster.count())
@@ -175,7 +171,7 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
 
         List<BcdMyResponseDTO> resultSet;
         resultSet = bcdMasters.stream()
-                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService))
+                .map(BcdMyResponseDTO::of)
                 .collect(Collectors.toList());
 
         return resultSet;
@@ -199,11 +195,9 @@ public class BcdApplyQueryRepositoryImpl implements BcdApplyQueryRepository {
                 .orderBy(bcdMaster.rgstDt.desc())
                 .fetch();
 
-        List<BcdMyResponseDTO> resultSet = bcdMasters.stream()
-                .map(bcdMaster -> BcdMyResponseDTO.of(bcdMaster, infoService)) // infoService를 활용하여 BcdMyResponseDTO 변환
+        return bcdMasters.stream()
+                .map(BcdMyResponseDTO::of) // infoService를 활용하여 BcdMyResponseDTO 변환
                 .collect(Collectors.toList());
-
-        return resultSet;
 
     }
 

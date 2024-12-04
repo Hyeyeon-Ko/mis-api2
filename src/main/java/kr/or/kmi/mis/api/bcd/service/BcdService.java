@@ -15,7 +15,6 @@ import java.util.List;
 public interface BcdService {
 
     void applyBcd(BcdRequestDTO bcdRequestDTO);
-    void applyBcdByLeader(BcdRequestDTO bcdRequestDTO);
     void updateBcd(String draftId, BcdUpdateRequestDTO updateBcdRequestDTO);
     void cancelBcdApply(String draftId);
     List<BcdMasterResponseDTO> getBcdApply(ApplyRequestDTO applyRequestDTO, PostSearchRequestDTO postSearchRequestDTO);

@@ -26,13 +26,6 @@ public class BcdController {
         return ResponseWrapper.success();
     }
 
-    @Operation(summary = "create bcd apply by teamLeader", description = "팀원 제외 유저 > 명함신청 시 사용")
-    @PostMapping(value = "/leader")
-    public ApiResponse<?> createBcdApplyByLeader(@RequestBody BcdRequestDTO bcdRequestDTO) {
-        bcdService.applyBcdByLeader(bcdRequestDTO);
-        return ResponseWrapper.success();
-    }
-
     @Operation(summary = "modify bcd apply", description = "유저 > 나의 신청내역 > 승인 대기 중인 명함신청 수정 시 사용")
     @PostMapping(value = "/update")
     public ApiResponse<?> updateBcdApply(@RequestParam("draftId") String draftId, @RequestBody BcdUpdateRequestDTO bcdUpdateRequestDTO) {
